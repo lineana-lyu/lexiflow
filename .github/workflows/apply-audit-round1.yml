@@ -1,0 +1,59 @@
+name: Apply MVP audit round 1
+
+on:
+  push:
+    branches:
+      - fix/mvp-audit-round1
+    paths:
+      - scripts/apply-audit-round1.js
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/mvp-audit-round1
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Apply audited fixes
+        run: node scripts/apply-audit-round1.js
+
+      - name: Static validation
+        run: |
+          node --check server.js
+          node --check public/app.js
+          git diff --check
+
+      - name: Ensure no test artifacts were added
+        shell: bash
+        run: |
+          if find . -type f \( -name '*.test.*' -o -name '*.spec.*' -o -iname '*fixture*' -o -iname '*mock*' \) -not -path './.git/*' | grep -q .; then
+            echo 'Unexpected test/mock artifact found'
+            find . -type f \( -name '*.test.*' -o -name '*.spec.*' -o -iname '*fixture*' -o -iname '*mock*' \) -not -path './.git/*'
+            exit 1
+          fi
+
+      - name: Remove temporary patch runner
+        run: |
+          rm -f scripts/apply-audit-round1.js
+          rm -f .github/workflows/apply-audit-round1.yml
+          rmdir scripts 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+      - name: Commit audited fixes
+        run: |
+          git config user.name 'LexiFlow Audit Bot'
+          git config user.email 'actions@users.noreply.github.com'
+          git add -A
+          git diff --cached --check
+          git commit -m 'fix: close MVP audit round 1 issues'
+          git push origin HEAD:fix/mvp-audit-round1
