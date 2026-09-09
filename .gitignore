@@ -1,0 +1,21 @@
+# Runtime/local data
+data/*
+!data/.gitkeep
+generated/*
+!generated/.gitkeep
+startup.log
+*.log
+
+# Local secrets / credentials
+.env
+.env.*
+*.key
+*.pem
+auth.json
+settings.json
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
