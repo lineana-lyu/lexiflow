@@ -17,7 +17,7 @@ const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 
 const LOOKUP_CACHE_FILE = path.join(DATA_DIR, "dictionary-cache.json");
 const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const LOOKUP_CACHE_SCHEMA = "v4.1";
+const LOOKUP_CACHE_SCHEMA = "v4.2-audit1";
 let lookupCache = null;
 
 async function loadLookupCache() {
@@ -271,23 +271,31 @@ function codexModelOptions(cfg, selectedModel = "") {
   ].filter(Boolean)));
 }
 
-function codexStatus() {
+let codexStatusCache = { at: 0, value: null };
+const CODEX_STATUS_CACHE_MS = 45 * 1000;
+
+function codexStatus(force = false) {
+  if (!force && codexStatusCache.value && Date.now() - codexStatusCache.at < CODEX_STATUS_CACHE_MS) {
+    return codexStatusCache.value;
+  }
+
   const resolved = resolveCodexExecutable();
   const executable = resolved.command;
   const probe = runSync(executable, ["--version"]);
   const cfg = parseCodexConfig();
-
-  // Important security boundary:
-  // We only check whether auth.json exists. We never read, parse, copy,
-  // log, expose, or export its contents. Codex CLI owns authentication.
   const authFound = fs.existsSync(CODEX_AUTH);
 
-  return {
+  if (probe.status !== 0) {
+    const detail = String(probe.stderr || probe.error?.message || probe.stdout || "").trim();
+    if (detail) console.warn("Codex probe failed:", detail.slice(0, 800));
+  }
+
+  const value = {
     executable: path.isAbsolute(executable) ? executable : "codex (PATH)",
     executableSource: resolved.source,
     cliAvailable: probe.status === 0,
     version: probe.status === 0 ? String(probe.stdout || probe.stderr || "").trim() : "",
-    probeError: probe.status === 0 ? "" : String(probe.stderr || probe.error?.message || probe.stdout || "").trim().slice(0, 800),
+    probeError: probe.status === 0 ? "" : "Codex CLI 启动检测未通过",
     authPath: CODEX_AUTH,
     authFound,
     configPath: CODEX_CONFIG,
@@ -296,6 +304,9 @@ function codexStatus() {
     provider: cfg.provider,
     profileModels: cfg.profileModels || [],
   };
+
+  codexStatusCache = { at: Date.now(), value };
+  return value;
 }
 
 function spawnCodex(args, options = {}) {
@@ -933,7 +944,6 @@ ${JSON.stringify(compact)}`;
     );
     normalized.aiEnriched = false;
     normalized.aiWarning = err.code || "CODEX_FAILED";
-    normalized.aiError = String(err.message || "").slice(0, 600);
   }
 
   delete normalized.entries;
@@ -982,6 +992,49 @@ async function localChineseCandidates(query) {
     }
   }
   return hits.slice(0, 5);
+}
+
+async function findCachedChineseLookup(query) {
+  const q = String(query || "").trim();
+  if (!q) return null;
+
+  const compact = value => String(value || "").replace(/[；;、，,\s]/g, "");
+  const qCompact = compact(q);
+  const cache = await loadLookupCache();
+  let best = null;
+
+  for (const [cacheKey, entry] of Object.entries(cache || {})) {
+    if (!cacheKey.startsWith(LOOKUP_CACHE_SCHEMA + "|")) continue;
+    const result = entry?.result;
+    if (!result?.word || !Array.isArray(result?.senses)) continue;
+
+    for (const sense of result.senses) {
+      const meaning = String(sense?.meaningZh || "").trim();
+      if (!meaning) continue;
+      const parts = meaning.split(/[；;、，,/]/).map(x => compact(x)).filter(Boolean);
+      const meaningCompact = compact(meaning);
+      const distance = levenshteinDistance(meaningCompact, qCompact);
+
+      let score = 0;
+      if (meaningCompact === qCompact) score = 100;
+      else if (parts.includes(qCompact)) score = 96;
+      else if (meaning.includes(q) || q.includes(meaning)) score = 82;
+      else if (distance <= (qCompact.length <= 3 ? 1 : 2)) score = 60;
+
+      if (score && (!best || score > best.score)) {
+        best = { score, result, meaning };
+      }
+    }
+  }
+
+  if (!best) return null;
+  return {
+    ...best.result,
+    sourceQuery: q,
+    normalizedQuery: best.meaning,
+    autoResolved: true,
+    cacheHit: true,
+  };
 }
 
 async function resolveChineseSearch(query) {
@@ -1065,7 +1118,7 @@ async function merriamWebsterPronunciation(word) {
     throw err;
   }
   const url = `https://www.dictionaryapi.com/api/v3/references/learners/json/${encodeURIComponent(word)}?key=${encodeURIComponent(key)}`;
-  const response = await fetch(url, { headers: { "Accept":"application/json", "User-Agent":"LexiFlow-Standalone-MVP/3.9" } });
+  const response = await fetch(url, { headers: { "Accept":"application/json", "User-Agent":"LexiFlow/4.2-audit1" } });
   if (!response.ok) {
     const err = new Error(`Merriam-Webster 发音查询失败：HTTP ${response.status}`);
     err.code = "DICTIONARY_HTTP_ERROR";
@@ -1160,6 +1213,9 @@ async function smartLookup(query) {
 
   const hasChinese = /[\u3400-\u9fff]/.test(q);
   if (hasChinese) {
+    const cachedChinese = await findCachedChineseLookup(q);
+    if (cachedChinese) return cachedChinese;
+
     const resolved = await resolveChineseSearch(q);
     let result = await merriamWebsterLookup(resolved.primary.word, "primary", {
       intentEn: resolved.primary.intentEn,
@@ -1308,6 +1364,28 @@ ${absolutePath}
   };
 }
 
+async function saveLocalImage(body) {
+  const dataUrl = String(body?.dataUrl || "");
+  const match = dataUrl.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);
+  if (!match) {
+    const err = new Error("不支持的图片格式");
+    err.code = "INVALID_IMAGE";
+    throw err;
+  }
+
+  const ext = match[1] === "jpeg" ? "jpg" : match[1];
+  const buffer = Buffer.from(match[2], "base64");
+  if (!buffer.length || buffer.length > 1024 * 1024) {
+    const err = new Error("图片大小不符合要求");
+    err.code = "IMAGE_TOO_LARGE";
+    throw err;
+  }
+
+  const fileName = "upload-" + Date.now() + "-" + Math.random().toString(16).slice(2, 10) + "." + ext;
+  await fsp.writeFile(path.join(GENERATED_DIR, fileName), buffer);
+  return { url: "/generated/" + encodeURIComponent(fileName) };
+}
+
 async function dictionaryTest() {
   const settings = await loadSettings();
   const key = String(settings.merriamWebsterLearnersKey || "").trim();
@@ -1357,7 +1435,25 @@ async function serveFile(res, baseDir, relativePath) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  const origin = String(req.headers.origin || "");
+  const allowedOrigins = new Set([
+    "http://" + HOST + ":" + PORT,
+    "http://localhost:" + PORT,
+  ]);
+  const allowFileHealth = origin === "null" && req.method === "GET" && url.pathname === "/api/health";
+
+  if (origin && !allowedOrigins.has(origin) && !allowFileHealth) {
+    return sendJson(res, 403, {
+      ok: false,
+      code: "LOCAL_ORIGIN_REQUIRED",
+      error: "请从 LexiFlow 本地页面使用此服务",
+    });
+  }
+
+  if (origin) {
+    res.setHeader("Access-Control-Allow-Origin", allowFileHealth ? "null" : origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
   if (req.method === "OPTIONS") {
@@ -1499,7 +1595,12 @@ const server = http.createServer(async (req, res) => {
         const result = await merriamWebsterPronunciation(word);
         return sendJson(res, 200, { ok:true, result });
       } catch (err) {
-        return sendJson(res, err.code === "DICTIONARY_KEY_MISSING" ? 400 : 502, { ok:false, code:err.code || "PRONUNCIATION_LOOKUP_FAILED", error:err.message });
+        const friendly = err.code === "DICTIONARY_KEY_MISSING"
+          ? { code: "DICTIONARY_KEY_MISSING", title: "需要配置词典", message: "请先在设置中填写 Merriam-Webster Learner's Dictionary Key。" }
+          : friendlyError(err, "dictionary");
+        return sendJson(res, err.code === "DICTIONARY_KEY_MISSING" ? 400 : 502, {
+          ok:false, code:friendly.code, error:friendly.message, userError:friendly
+        });
       }
     }
 
@@ -1548,18 +1649,20 @@ const server = http.createServer(async (req, res) => {
         });
       } catch (err) {
         const runtime = await loadSettings();
+        const friendly = friendlyError(err, "text");
         lastCodexRuntimeTest = {
           status: "failed",
           at: new Date().toISOString(),
-          message: String(err.message || "AI 连接检查失败").slice(0, 1200),
+          message: friendly.message,
           model: runtime.codexModel || codexStatus().model || "",
           reasoningEffort: runtime.codexReasoningEffort || "",
         };
 
         return sendJson(res, 502, {
           ok: false,
-          code: err.code || "CODEX_TEST_FAILED",
-          error: lastCodexRuntimeTest.message,
+          code: friendly.code,
+          error: friendly.message,
+          userError: friendly,
           test: lastCodexRuntimeTest,
         });
       }
@@ -1574,6 +1677,23 @@ const server = http.createServer(async (req, res) => {
         console.error("text AI failed:", err?.message || err);
         const friendly = friendlyError(err, "text");
         return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/images/local") {
+      const body = await readJsonBody(req);
+      try {
+        const image = await saveLocalImage(body);
+        return sendJson(res, 200, { ok: true, image });
+      } catch (err) {
+        const friendly = {
+          code: err.code || "LOCAL_IMAGE_SAVE_FAILED",
+          title: err.code === "IMAGE_TOO_LARGE" ? "图片太大" : "图片没有保存成功",
+          message: err.code === "IMAGE_TOO_LARGE"
+            ? "请选择 1MB 以内的 PNG、JPG 或 WebP 图片。"
+            : "请选择 PNG、JPG 或 WebP 图片后重试。",
+        };
+        return sendJson(res, 400, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
       }
     }
 
@@ -1601,7 +1721,7 @@ const server = http.createServer(async (req, res) => {
     sendJson(res, 404, { ok: false, error: "Not found" });
   } catch (err) {
     console.error(err);
-    sendJson(res, 500, { ok: false, error: "本地服务发生错误", detail: err.message });
+    sendJson(res, 500, { ok: false, error: "本地服务暂时无法完成这个操作" });
   }
 });
 
