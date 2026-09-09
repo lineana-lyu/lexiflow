@@ -603,3 +603,13 @@ Visualize 页面会持久保存并展示：
 - 普通界面不再展示 Codex 底层错误字符串、认证文件路径等开发者信息。
 - 词典缓存 schema 升级，旧版错误/缺字段缓存不会继续命中。
 - 无可用 IPA 时明确显示“暂无音标”，不再永久显示“音标加载中”。
+
+
+## UI Polish Round 2
+
+- Normal product surfaces now use Chinese-first labels; internal English workflow labels were removed from navigation and learning stages.
+- The add-word page no longer renders an empty result panel before search. The default result is a single learning-card preview; multiple senses only appear after the user asks for other common meanings.
+- The lookup result hierarchy is now word + pronunciation + core Chinese meaning + labeled example, with secondary actions visually de-emphasized.
+- Visual association makes the zero-input generation path explicit; custom scene description remains optional.
+- Settings show user-facing service status by default and move Codex implementation details into collapsed advanced diagnostics.
+- Visual styling was reduced from glass/dashboard effects to calmer solid surfaces, fewer hover motions, and a stronger study-first hierarchy.

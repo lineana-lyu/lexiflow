@@ -337,7 +337,7 @@
 
   function header(eyebrow,title,subtitle,actions=""){
     return `<div class="page-head">
-      <div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1><p>${subtitle}</p></div>
+      <div>${eyebrow?`<div class="eyebrow">${eyebrow}</div>`:""}<h1>${title}</h1><p>${subtitle}</p></div>
       <div class="head-actions">${actions}</div>
     </div>`;
   }
@@ -385,7 +385,7 @@
       : due ? `<button class="btn primary" data-action="start-review">开始复习</button>`
       : `<button class="btn primary" data-route="add">添加第一个单词</button>`;
     return shell(
-      header("LEXIFLOW · TODAY","今日学习","先学少量高质量单词，再用主动回忆和复习巩固。",`<button class="btn" data-route="add">＋ 添加单词</button>`)
+      header("","今日学习","先学少量高质量单词，再用主动回忆和复习巩固。",`<button class="btn" data-route="add">＋ 添加单词</button>`)
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">目标词数</div></div>
         <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${due}</div><div class="stat-hint">到期卡片</div></div>
@@ -394,7 +394,7 @@
       </div>
       <div class="section card today-card">
         <div>
-          <div class="eyebrow">DAILY FLOW</div>
+          <div class="eyebrow">今日进度</div>
           <h2>${cards===0?"从一个单词开始":active?"继续今天的学习":"今天的学习已准备好"}</h2>
           <p>${cards===0?"先添加一个真正想记住的词，再通过主动回忆、视觉联想、造句和复习逐步巩固。":active?`还有 ${active} 个单词处于首次学习流程中。`:(due?`有 ${due} 个单词已经到期，建议现在复习。`:"当前没有到期任务，可以继续添加新词。")}</p>
           <div style="margin-top:16px"><div class="progress-track"><div class="progress-bar" style="width:${progressPercent()}%"></div></div><div class="stat-hint" style="margin-top:7px">今日进度 ${today}/${goal}</div></div>
@@ -427,22 +427,20 @@
   function addPage(){
     const dict=state.providerStatus?.dictionary;
     const badge=dict?.configured
-      ? `<span class="pill green">● Merriam-Webster 已配置</span>`
-      : `<button class="btn small" data-route="settings">先配置词典 Key</button>`;
+      ? `<span class="pill green">● 词典已连接</span>`
+      : `<button class="btn small" data-route="settings">配置词典</button>`;
+    const shouldShowResult=state.lookupStatus==="loading"||Boolean(state.lookup?.result);
     return shell(
-      header("LEXIFLOW · SELECT","选词制卡","输入英文或中文，系统会自动纠错、匹配词义并整理成可学习的单词卡。",badge)
-      + `<div class="card pad search-hero-card">
-        <div class="section-title"><div><h2>搜索一个想记住的词</h2><p>支持英文、中文、英文拼写错误和少量中文错别字，无需先选择候选词。</p></div></div>
-        <form id="lookup-form" class="form-grid search-form-premium">
-          <div class="field"><label>英文 / 中文</label><div class="search-input-wrap"><span class="search-input-icon">⌕</span><input class="input" id="word-input" placeholder="例如：keyboard、键盘、wrok、工做" value="${escapeHtml(state.lookup?.query||"")}" autocomplete="off" /></div></div>
-          <button class="btn primary" type="submit" ${state.lookupStatus==="loading"?"disabled":""}>${state.lookupStatus==="loading"?"查询中…":"查询"}</button>
-          <button class="btn" type="button" data-action="clear-lookup">清空</button>
+      header("","选词制卡","输入英文或中文，LexiFlow 会自动识别、纠错并整理成适合学习的单词卡。",badge)
+      + `<div class="card search-hero-card">
+        <form id="lookup-form" class="search-command-bar">
+          <div class="search-input-wrap"><span class="search-input-icon">⌕</span><input class="input" id="word-input" placeholder="输入英文或中文，例如 keyboard、键盘、wrok" value="${escapeHtml(state.lookup?.query||"")}" autocomplete="off" /></div>
+          <button class="btn primary" type="submit" ${state.lookupStatus==="loading"?"disabled":""}>${state.lookupStatus==="loading"?"正在查询…":"查询"}</button>
+          ${state.lookup?.query?`<button class="btn ghost" type="button" data-action="clear-lookup">清空</button>`:""}
         </form>
+        <div class="search-helper"><span>支持中文</span><span>支持英文</span><span>支持拼写纠错</span><span>默认只生成一个核心学习词义</span></div>
       </div>
-      <div class="card pad word-result">
-        <div class="section-title"><div><h2>2 · 查询结果</h2><p>默认只显示最常用的核心词义，避免把完整词典塞进学习卡片。</p></div></div>
-        ${renderLookupResult()}
-      </div>`
+      ${shouldShowResult?`<div class="card pad word-result lookup-surface">${renderLookupResult()}</div>`:""}`
     );
   }
 
@@ -450,45 +448,60 @@
     if(state.lookupStatus==="loading"){
       return `<div class="lookup-loader">
         <div class="lookup-loader-orb"><span></span></div>
-        <strong>正在整理单词卡</strong>
-        <p>自动识别输入 · 匹配词义 · 准备例句与发音</p>
+        <strong>正在整理学习卡</strong>
+        <p>识别输入 · 匹配词义 · 准备例句与发音</p>
         <div class="lookup-loader-track"><i></i></div>
       </div>`;
     }
     if(state.lookup?.result?.suggestions?.length){
-      return `<div class="search-suggestions-panel"><div class="empty-icon">⌕</div><strong>${escapeHtml(state.lookup.result.suggestionTitle||"你可能想找")}</strong><span>${escapeHtml(state.lookup.result.suggestionHint||"请选择一个候选词继续查词。")}</span><div class="search-candidate-list">${state.lookup.result.suggestions.map(item=>{const word=typeof item==="string"?item:item.word;const reason=typeof item==="string"?"":item.reason;return `<button class="search-candidate" data-suggestion="${escapeHtml(word)}"><b>${escapeHtml(word)}</b>${reason?`<small>${escapeHtml(reason)}</small>`:""}</button>`}).join("")}</div></div>`;
+      return `<div class="search-suggestions-panel"><div class="empty-icon">⌕</div><strong>${escapeHtml(state.lookup.result.suggestionTitle||"你可能想找")}</strong><span>${escapeHtml(state.lookup.result.suggestionHint||"选择一个候选词继续。")}</span><div class="search-candidate-list">${state.lookup.result.suggestions.map(item=>{const word=typeof item==="string"?item:item.word;const reason=typeof item==="string"?"":item.reason;return `<button class="search-candidate" data-suggestion="${escapeHtml(word)}"><b>${escapeHtml(word)}</b>${reason?`<small>${escapeHtml(reason)}</small>`:""}</button>`}).join("")}</div></div>`;
     }
-    if(!state.lookup?.result){
-      return `<div class="empty"><div class="empty-icon">⌕</div><strong>还没有查询结果</strong><span>查询后这里会显示词性、中文释义和中英文例句。</span></div>`;
-    }
+    if(!state.lookup?.result) return "";
+
     const r=state.lookup.result;
+    const senses=Array.isArray(r.senses)?r.senses:[];
+    const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || r.normalizedQuery)
-      ? `<div class="auto-resolved-note"><span>智能匹配</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>已识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
+      ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
       : "";
-    return `${resolvedNote}<div class="word-top">
-      <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" title="美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
-      <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
-        ${r.cacheHit?`<span class="pill green">⚡ 已缓存</span>`:""}
-        <span class="pill">${r.mode==="expanded"?`${r.senses.length} 个核心词义`:"常用词义"}</span>
+
+    const primaryView=primarySense?`
+      <div class="primary-sense-card">
+        <div class="primary-sense-meta"><span class="pill blue">${escapeHtml(primarySense.pos||"word")}</span><span>核心学习词义</span></div>
+        <div class="primary-meaning">${escapeHtml(primarySense.meaningZh||"请手动编辑")}</div>
+        <div class="example-pair">
+          <div class="example-label">例句</div>
+          <div class="example-en">${escapeHtml(primarySense.exampleEn||"暂无例句，请手动编辑")}</div>
+          <div class="example-zh">${escapeHtml(primarySense.exampleZh||"暂无翻译，请手动编辑")}</div>
+        </div>
+      </div>`:"";
+
+    const expandedView=r.mode==="expanded"?`
+      <div class="expanded-senses-head"><strong>其它常用词义</strong><span>一个中文学习词义对应一张卡片</span></div>
+      <div class="sense-list">${senses.map(s=>`<button class="sense ${s.id===state.selectedSenseId?"selected":""}" data-sense-id="${s.id}">
+        <div class="sense-head"><span class="pill blue">${escapeHtml(s.pos)}</span>${s.id===state.selectedSenseId?`<span class="sense-selected-mark">✓</span>`:""}</div>
+        <div class="sense-meaning">${escapeHtml(s.meaningZh||"请手动编辑")}</div>
+        <div class="sense-example">${escapeHtml(s.exampleEn||"暂无例句")}</div>
+        <div class="sense-example-zh">${escapeHtml(s.exampleZh||"")}</div>
+      </button>`).join("")}</div>`:"";
+
+    return `${resolvedNote}
+      <div class="word-top learning-card-wordtop">
+        <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
+        <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
-    </div>
-    ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
-    ${r.translationNeedsReview?`<div class="feedback warn"><h4>中文释义置信度较低</h4><ul><li>词典原始数据已获取，但 AI 对部分中文释义的把握较低。建议在保存前检查或手动编辑。</li></ul></div>`:""}
-    <div class="sense-list">${r.senses.map(s=>`<button class="sense ${s.id===state.selectedSenseId?"selected":""}" data-sense-id="${s.id}">
-      <div class="sense-head"><span class="pill blue">${escapeHtml(s.pos)}</span>${s.id===state.selectedSenseId?`<span class="pill green">✓ 已选择</span>`:""}</div>
-      <div class="detail"><span class="detail-label">中文释义</span><strong>${escapeHtml(s.meaningZh||"请手动编辑")}</strong></div>
-      <div class="detail"><span class="detail-label">英文例句</span><span>${escapeHtml(s.exampleEn||"暂无例句，请手动编辑")}</span></div>
-      <div class="detail"><span class="detail-label">中文例句</span><span>${escapeHtml(s.exampleZh||"暂无翻译，请手动编辑")}</span></div>
-    </button>`).join("")}</div>
-    ${state.addDraft?renderSenseEditor(state.addDraft):""}
-    <div class="action-row">
-      <div class="left-actions">
-        <button class="btn" data-action="lookup-again">重新查询</button>
-        ${r.hasMore && r.mode!=="expanded"?`<button class="btn" data-action="load-more-senses" ${state.loadingMoreSenses?"disabled":""}>${state.loadingMoreSenses?"加载中…":"查看其它常用词义"}</button>`:""}
-        <button class="btn" data-action="edit-sense">✎ 手动编辑</button>
-      </div>
-      <button class="btn primary" data-action="save-card">确认并保存卡片</button>
-    </div>`;
+      ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
+      ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
+      ${r.mode==="expanded"?expandedView:primaryView}
+      ${state.addDraft?renderSenseEditor(state.addDraft):""}
+      <div class="action-row learning-card-actions">
+        <div class="left-actions">
+          ${r.hasMore && r.mode!=="expanded"?`<button class="btn" data-action="load-more-senses" ${state.loadingMoreSenses?"disabled":""}>${state.loadingMoreSenses?"加载中…":"查看其它常用词义"}</button>`:""}
+          <button class="btn ghost" data-action="edit-sense">手动编辑</button>
+          <button class="btn ghost" data-action="lookup-again">重新查询</button>
+        </div>
+        <button class="btn primary save-learning-card" data-action="save-card">保存并开始学习</button>
+      </div>`;
   }
 
   function renderSenseEditor(s){
@@ -535,10 +548,10 @@
   function studyPage(){
     const s=state.study, card=s&&getCard(s.cardId);
     if(card && !card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
-    if(!card) return shell(header("LEXIFLOW · LEARNING","学习会话","当前没有可执行学习任务。")+`<div class="card empty"><div class="empty-icon">✓</div><strong>暂无学习任务</strong><span>返回今日学习或添加新词。</span></div>`);
+    if(!card) return shell(header("","学习会话","当前没有可执行学习任务。")+`<div class="card empty"><div class="empty-icon">✓</div><strong>暂无学习任务</strong><span>返回今日学习或添加新词。</span></div>`);
     return shell(
       header(
-        "LEXIFLOW · LEARNING",
+        "",
         "学习会话",
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
@@ -605,7 +618,7 @@
   }
 
   function stageSelect(card){
-    return `${stageTop(card,"SELECT · 选词确认")}
+    return `${stageTop(card,"选词确认")}
       <div class="study-center" style="align-items:stretch;text-align:left">
         <div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong><p>${escapeHtml(card.exampleEn)}</p><p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn primary" data-action="complete-stage" data-next="memorize1">确认卡片，开始记忆</button></div>
@@ -613,7 +626,7 @@
   }
 
   function stageMem1(card){
-    return `${stageKicker("MEMORIZE · 英 → 中")}
+    return `${stageKicker("英 → 中")}
       <div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}
         <div class="prompt-small">先在脑中回忆中文释义，再查看答案。</div>
@@ -637,7 +650,7 @@
   }
 
   function stageMem2(card){
-    return `${stageKicker("MEMORIZE · 中 → 英")}
+    return `${stageKicker("中 → 英")}
       <div class="study-center">
         <div class="prompt-big chinese-memory-prompt">${escapeHtml(card.meaningZh)}</div>
         <div class="prompt-small">根据中文释义主动回忆英文单词。</div>
@@ -666,7 +679,7 @@
     const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:""};
     const customOpen=Boolean(state.visualSceneExpanded||currentScene);
 
-    return `${stageKicker("VISUALIZE · 视觉联想")}
+    return `${stageKicker("视觉联想")}
       <div class="study-center visualize-stage" style="align-items:stretch;text-align:left">
         <div class="visual-context-line">
           <span>当前词义</span>
@@ -676,11 +689,11 @@
         <div class="auto-visual-card ${customOpen?"compact":""}">
           <div class="auto-visual-icon">✦</div>
           <div class="auto-visual-copy">
-            <strong>让 AI 自动设计记忆画面</strong>
-            <p>无需填写场景。系统会结合当前词义、例句和具体语义自动构图，并主动避开容易混淆的其它含义。</p>
+            <strong>直接生成记忆画面</strong>
+            <p>不需要填写任何场景。系统会根据当前词义和例句自动设计一张容易记住的画面；只有你想指定人物、地点或动作时，才需要展开自定义场景。</p>
           </div>
           <button class="btn primary" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>
-            ${state.study.imageGenerating?"正在生成…":"智能生成"}
+            ${state.study.imageGenerating?"正在生成…":"直接生成"}
           </button>
         </div>
 
@@ -758,7 +771,7 @@
     const applied=Boolean(state.study.aiSuggestionApplied);
     const canRestore=Boolean(state.study.originalApplyText && state.study.originalApplyText!==state.study.applyText);
 
-    return `${stageKicker("APPLY · 造句应用")}
+    return `${stageKicker("造句应用")}
       <div class="study-center" style="align-items:stretch;text-align:left">
         <div class="apply-target-word">
           ${wordIdentity(card,{size:"medium",showPos:true,center:true})}
@@ -847,7 +860,7 @@
       header("LEXIFLOW · REVIEW","复习中心","只显示已经到期的卡片；复习结果会决定下一次到期时间。",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
       + `<div class="grid cols-3">
         <div class="card stat"><div class="stat-label">今日到期</div><div class="stat-value">${due.length}</div><div class="stat-hint">现在可以复习</div></div>
-        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有 Review 记录</div></div>
+        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有复习记录</div></div>
         <div class="card stat"><div class="stat-label">已进入复习</div><div class="stat-value">${state.data.cards.filter(c=>c.stage==="review").length}</div><div class="stat-hint">首次学习已完成</div></div>
       </div>
       <div class="section card pad">${due.length?`<div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>中文释义</th><th>复习次数</th><th>到期时间</th></tr></thead><tbody>${due.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic))}</div></td><td>${escapeHtml(c.meaningZh)}</td><td>${c.reviewCount||0}</td><td>${new Date(c.nextReviewAt).toLocaleString()}</td></tr>`).join("")}</tbody></table></div>`
@@ -866,8 +879,8 @@
     if(!card){state.route="review";return render();}
     if(!card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
     return shell(
-      header("LEXIFLOW · REVIEW","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
-      + `<div class="card study-card"><div class="study-kicker">ACTIVE RECALL · 主动回忆</div><div class="study-center">
+      header("","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
+      + `<div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}<div class="prompt-small">先回忆中文释义，再查看答案。</div>
         ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong><p>${escapeHtml(card.exampleEn)}</p><p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn" data-action="review-rate" data-quality="again">没记住 · 明天再复习</button><button class="btn primary" data-action="review-rate" data-quality="good">记住了 · 3 天后复习</button></div>`
@@ -894,7 +907,7 @@
     const q=state.librarySearch.trim().toLowerCase();
     const list=state.data.cards.filter(c=>!q||c.word.toLowerCase().includes(q)||c.meaningZh.includes(q));
     return shell(
-      header("LEXIFLOW · LIBRARY","单词库","查看、搜索和管理已经保存的学习卡片。",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
+      header("","单词库","查看、搜索和管理已经保存的学习卡片。",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
       + `<div class="search-row"><input class="input" id="library-search" placeholder="搜索单词或中文释义" value="${escapeHtml(state.librarySearch)}" /><span class="pill">${list.length} 张卡片</span></div>
       <div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>词性</th><th>中文释义</th><th>阶段</th><th>下次复习</th><th></th></tr></thead>
       <tbody>${list.length?list.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td><td><span class="pill blue">${escapeHtml(c.pos)}</span></td><td>${escapeHtml(c.meaningZh)}</td><td>${stageLabelOf(c.stage)}</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td><td><button class="btn small danger" data-delete-card="${c.id}">删除</button></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
@@ -908,12 +921,12 @@
     const reviews=state.data.activities.filter(a=>a.type==="review").length;
     const remembered=state.data.activities.filter(a=>a.type==="review"&&a.quality==="good").length;
     return shell(
-      header("LEXIFLOW · STATS","学习统计","只统计本地浏览器里的真实操作记录。")
+      header("","学习统计","只统计本地浏览器里的真实操作记录。")
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">总词数</div><div class="stat-value">${state.data.cards.length}</div><div class="stat-hint">已保存卡片</div></div>
-        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${reviews}</div><div class="stat-hint">Review 次数</div></div>
+        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${reviews}</div><div class="stat-hint">复习次数</div></div>
         <div class="card stat"><div class="stat-label">复习记住率</div><div class="stat-value">${reviews?Math.round(remembered/reviews*100):0}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-hint">按自评结果计算</div></div>
-        <div class="card stat"><div class="stat-label">连续学习</div><div class="stat-value">${streak()}<span style="font-size:14px;color:var(--muted)"> 天</span></div><div class="stat-hint">当前 streak</div></div>
+        <div class="card stat"><div class="stat-label">连续学习</div><div class="stat-value">${streak()}<span style="font-size:14px;color:var(--muted)"> 天</span></div><div class="stat-hint">按连续学习天数计算</div></div>
       </div>
       <div class="section card pad"><div class="section-title"><div><h2>最近 7 天学习量</h2><p>按发生过学习或复习的不同单词数统计。</p></div></div><div class="chart">${last7.map(x=>`<div class="bar-wrap"><div class="bar-value">${x.count}</div><div class="bar" style="height:${Math.round(x.count/max*120)+4}px"></div><div class="bar-label">${x.label}</div></div>`).join("")}</div></div>`
     );
@@ -929,14 +942,14 @@
 
     const runtimePill =
       runtime.status==="passed"
-        ? `<span class="pill green">✓ 实际调用通过</span>`
+        ? `<span class="pill green">✓ 连接正常</span>`
         : runtime.status==="failed"
-          ? `<span class="pill red">× 实际调用失败</span>`
-          : `<span class="pill amber">尚未验证</span>`;
+          ? `<span class="pill red">× 连接异常</span>`
+          : `<span class="pill amber">未检查</span>`;
 
     return shell(
       header(
-        "设置",
+        "",
         "设置",
         "配置词典与 AI 服务。认证仍由本机 Codex 安全管理，LexiFlow 不读取你的登录凭据。",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
@@ -944,30 +957,31 @@
       + `<div class="settings-list">
         <div class="setting-row">
           <div>
-            <h3>Merriam-Webster Learner's Dictionary</h3>
-            <p>用于英文词条、词性、定义、例句和美式发音。当前：${dict?.configured?`已配置 ${escapeHtml(dict.maskedKey||"")}`:"未配置"}</p>
+            <h3>英语词典</h3>
+            <p>提供英文词条、词性、例句、音标和美式发音。由 Merriam-Webster Learner's Dictionary 提供数据。当前：${dict?.configured?`已连接 ${escapeHtml(dict.maskedKey||"")}`:"未连接"}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="粘贴 Learner's Dictionary API Key" />
-            <button class="btn primary" data-action="save-dictionary-key">保存 Key</button>
-            <button class="btn" data-action="test-dictionary">验证</button>
+            <button class="btn primary" data-action="save-dictionary-key">保存</button>
+            <button class="btn" data-action="test-dictionary">检查连接</button>
           </div>
         </div>
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:310px;flex:1">
             <h3>AI 服务</h3>
-            ${status?.serviceUnavailable?`
-              <p><strong>尚未连接到 LexiFlow 本地服务。</strong></p>
-              <p>请通过“启动LexiFlow.bat”打开应用；连接成功后这里会自动显示 Codex CLI、auth.json 和模型状态。</p>
-            `:`
-              <p>${codex?.cliAvailable?"已检测到 Codex CLI":"未检测到 Codex CLI"}；版本：${escapeHtml(codex?.version||"未知")}</p>
-              <p>认证：${codex?.authFound?"已检测到 auth.json":"未检测到 auth.json"}；LexiFlow 不读取其中的 token。</p>
-              <p>默认模型：${escapeHtml(codex?.model||"跟随 Codex 默认配置")}</p>
-            `}
-            ${runtime.message?`<p>最近检查：${escapeHtml(runtime.message)}</p>`:""}
+            <p>${status?.serviceUnavailable?"本地 AI 服务尚未连接，请通过启动脚本打开 LexiFlow。":codex?.cliAvailable?`已连接${codex?.effectiveModel?` · ${escapeHtml(codex.effectiveModel)}`:""}`:"当前未连接到可用的 AI 服务。"}</p>
+            ${runtime.message?`<p>最近状态：${escapeHtml(runtime.message)}</p>`:""}
+            <details class="advanced-diagnostics">
+              <summary>高级诊断</summary>
+              <div class="advanced-diagnostics-body">
+                <p>本机 Codex：${codex?.cliAvailable?"可用":"不可用"}${codex?.version?` · ${escapeHtml(codex.version)}`:""}</p>
+                <p>本机认证：${codex?.authFound?"已检测":"未检测"}</p>
+                <p>默认模型：${escapeHtml(codex?.model||"跟随 Codex 配置")}</p>
+              </div>
+            </details>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <div class="setting-actions-inline">
             <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"AI 已连接":"AI 未连接"}</span>
             ${runtimePill}
             <button class="btn" data-action="test-codex-text">检查连接</button>
@@ -977,8 +991,8 @@
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
             <h3>模型与思考强度</h3>
-            <p>这是 LexiFlow 自己的运行覆盖项，不会改写你的 auth.json，也不会修改全局 Codex 登录状态。</p>
-            <p>“跟随默认”使用 Codex 当前模型。列表始终保留常用模型，并合并 config.toml 中检测到的模型。</p><p>为提高响应速度：查词整理、中文搜索纠错和图片任务使用快速推理；造句反馈使用你选择的思考强度。</p>
+            <p>这是 LexiFlow 自己的运行覆盖项，只影响 LexiFlow 的 AI 调用，不会修改你本机 Codex 的全局配置。</p>
+            <p>“跟随默认”使用当前 Codex 默认模型。查词、中文纠错和图片任务会自动优先使用快速推理，造句反馈使用你选择的思考强度。</p>
           </div>
           <div class="codex-runtime-grid">
             <div class="field">
@@ -994,11 +1008,11 @@
               <label>思考强度</label>
               <select class="select" id="codex-effort">
                 <option value="" ${selectedEffort===""?"selected":""}>跟随模型 / Codex 默认</option>
-                <option value="low" ${selectedEffort==="low"?"selected":""}>Low · 低</option>
-                <option value="medium" ${selectedEffort==="medium"?"selected":""}>Medium · 中</option>
-                <option value="high" ${selectedEffort==="high"?"selected":""}>High · 高</option>
-                <option value="xhigh" ${selectedEffort==="xhigh"?"selected":""}>Extra High · 超高</option>
-                <option value="max" ${selectedEffort==="max"?"selected":""}>Max · 最高</option>
+                <option value="low" ${selectedEffort==="low"?"selected":""}>低</option>
+                <option value="medium" ${selectedEffort==="medium"?"selected":""}>中</option>
+                <option value="high" ${selectedEffort==="high"?"selected":""}>高</option>
+                <option value="xhigh" ${selectedEffort==="xhigh"?"selected":""}>超高</option>
+                <option value="max" ${selectedEffort==="max"?"selected":""}>最高</option>
               </select>
             </div>
             <button class="btn primary" data-action="save-codex-runtime">保存 AI 配置</button>
@@ -1008,9 +1022,9 @@
         <div class="setting-row">
           <div>
             <h3>图片生成</h3>
-            <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力仍取决于当前 Codex 环境和所选模型；失败时可以上传本地图或跳过。</p>
+            <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力取决于当前 AI 环境和所选模型；生成失败时可以上传本地图或直接跳过。</p>
           </div>
-          <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"按需使用":"Codex 不可用"}</span>
+          <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"可用":"当前不可用"}</span>
         </div>
 
         <div class="setting-row">
