@@ -942,14 +942,14 @@
 
     const runtimePill =
       runtime.status==="passed"
-        ? `<span class="pill green">✓ 实际调用通过</span>`
+        ? `<span class="pill green">✓ 连接正常</span>`
         : runtime.status==="failed"
-          ? `<span class="pill red">× 实际调用失败</span>`
-          : `<span class="pill amber">尚未验证</span>`;
+          ? `<span class="pill red">× 连接异常</span>`
+          : `<span class="pill amber">未检查</span>`;
 
     return shell(
       header(
-        "设置",
+        "",
         "设置",
         "配置词典与 AI 服务。认证仍由本机 Codex 安全管理，LexiFlow 不读取你的登录凭据。",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
@@ -1022,9 +1022,9 @@
         <div class="setting-row">
           <div>
             <h3>图片生成</h3>
-            <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力仍取决于当前 Codex 环境和所选模型；失败时可以上传本地图或跳过。</p>
+            <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力取决于当前 AI 环境和所选模型；生成失败时可以上传本地图或直接跳过。</p>
           </div>
-          <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"按需使用":"Codex 不可用"}</span>
+          <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"可用":"当前不可用"}</span>
         </div>
 
         <div class="setting-row">
