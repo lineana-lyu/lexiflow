@@ -6,6 +6,7 @@ on:
       - feat/ui-polish-round2
     paths:
       - scripts/apply-ui-round2.py
+      - .github/workflows/apply-ui-round2.yml
 
 permissions:
   contents: write
