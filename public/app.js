@@ -178,16 +178,54 @@
     return payload;
   }
 
+  function captureProviderDraft(){
+    const ids=["word-input","mw-api-key","codex-model-select","codex-model-custom","codex-effort"];
+    const values={};
+    for(const id of ids){
+      const el=document.getElementById(id);
+      if(el) values[id]=el.value;
+    }
+    const active=document.activeElement;
+    return {
+      values,
+      activeId:active?.id||"",
+      selectionStart:typeof active?.selectionStart==="number"?active.selectionStart:null,
+      selectionEnd:typeof active?.selectionEnd==="number"?active.selectionEnd:null
+    };
+  }
+
+  function restoreProviderDraft(draft){
+    if(!draft)return;
+    for(const [id,value] of Object.entries(draft.values||{})){
+      const el=document.getElementById(id);
+      if(el) el.value=value;
+    }
+    const modelSelect=document.getElementById("codex-model-select");
+    const custom=document.getElementById("codex-model-custom");
+    if(modelSelect&&custom) custom.style.display=modelSelect.value==="__custom__"?"block":"none";
+    const active=draft.activeId&&document.getElementById(draft.activeId);
+    if(active){
+      active.focus();
+      if(draft.selectionStart!==null&&typeof active.setSelectionRange==="function"){
+        active.setSelectionRange(draft.selectionStart,draft.selectionEnd??draft.selectionStart);
+      }
+    }
+  }
+
   async function refreshProviderStatus(silent=true){
     try{
       const payload=await api("/api/status");
+      const draft=captureProviderDraft();
       state.providerStatus=payload;
+      render();
+      restoreProviderDraft(draft);
       if(!silent) toast("服务状态已刷新");
-      render();
     }catch(err){
-      state.providerStatus={ok:false,error:err.message,serviceUnavailable:true};
-      if(!silent) showErrorNotice(err,"本地服务没有启动");
+      const draft=captureProviderDraft();
+      state.providerStatus={ok:false,serviceUnavailable:true};
       render();
+      restoreProviderDraft(draft);
+      if(!silent) showErrorNotice(err,"本地服务没有启动");
     }
   }
 
@@ -312,7 +350,7 @@
   }
 
   function activeLearningCards(){
-    return state.data.cards.filter(c=>c.stage!=="review" && c.stage!=="mastered");
+    return state.data.cards.filter(c=>c.initialReviewPending || (c.stage!=="review" && c.stage!=="mastered"));
   }
 
   function todayActivities(){
@@ -434,7 +472,7 @@
         <span class="pill">${r.mode==="expanded"?`${r.senses.length} 个核心词义`:"常用词义"}</span>
       </div>
     </div>
-    ${r.aiEnriched===false?`<div class="feedback warn"><h4>Codex 文本处理没有成功</h4><ul><li>词典查询已成功，但中文释义/翻译需要你手动补充。</li>${r.aiError?`<li>运行信息：${escapeHtml(r.aiError)}</li>`:""}</ul></div>`:""}
+    ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
     ${r.translationNeedsReview?`<div class="feedback warn"><h4>中文释义置信度较低</h4><ul><li>词典原始数据已获取，但 AI 对部分中文释义的把握较低。建议在保存前检查或手动编辑。</li></ul></div>`:""}
     <div class="sense-list">${r.senses.map(s=>`<button class="sense ${s.id===state.selectedSenseId?"selected":""}" data-sense-id="${s.id}">
       <div class="sense-head"><span class="pill blue">${escapeHtml(s.pos)}</span>${s.id===state.selectedSenseId?`<span class="pill green">✓ 已选择</span>`:""}</div>
@@ -512,7 +550,7 @@
 
   function formatPhonetic(value){
     const raw=String(value||"").trim();
-    if(!raw)return "音标加载中…";
+    if(!raw)return "暂无音标";
     if(
       (raw.startsWith("/")&&raw.endsWith("/")) ||
       (raw.startsWith("[")&&raw.endsWith("]"))
@@ -558,6 +596,7 @@
     if(stage==="memorize2") return stageMem2(card);
     if(stage==="visualize") return stageVisual(card);
     if(stage==="apply") return stageApply(card);
+    if(stage==="review" && card.initialReviewPending) return stageInitialReview(card);
     return `<div class="study-center"><strong class="prompt-big">首次学习已完成</strong><p class="prompt-small">这张卡片已经进入复习队列。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
   }
 
@@ -679,6 +718,28 @@
       </div>`;
   }
 
+  function stageInitialReview(card){
+    return `${stageKicker("首次复习 · 主动回忆")}
+      <div class="study-center">
+        ${wordIdentity(card,{size:"hero",showPos:true,center:true})}
+        <div class="prompt-small">先回忆中文释义，再查看答案。完成这一步后才会真正进入后续复习计划。</div>
+        ${state.study?.revealed?`
+          <div class="memory-answer-card">
+            <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
+            <div class="memory-example-section compact-example">
+              <div class="memory-example-label">例句</div>
+              <div class="memory-example-en">${escapeHtml(card.exampleEn)}</div>
+              <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
+            </div>
+          </div>
+          <div class="rating-row">
+            <button class="btn" data-action="initial-review-rate" data-quality="again">没记住 · 明天再复习</button>
+            <button class="btn primary" data-action="initial-review-rate" data-quality="good">记住了 · 3 天后复习</button>
+          </div>
+        `:`<button class="btn primary" style="margin-top:22px" data-action="initial-review-reveal">查看答案</button>`}
+      </div>`;
+  }
+
   function localFeedback(text,word){
     const t=text.trim();
     const tips=[];
@@ -719,7 +780,7 @@
         `:`
           <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:11px">
             ${canRestore?`<button class="btn" data-action="restore-original-apply">恢复原句</button>`:""}
-            <button class="btn primary" data-action="submit-apply">获取 AI 建议</button>
+            <button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting?"disabled":""}>${state.study.applySubmitting?"正在获取建议…":"获取 AI 建议"}</button>
           </div>
         `}
 
@@ -754,16 +815,29 @@
     render();
   }
 
+  function enterInitialReview(card){
+    card.stage="review";
+    card.initialReviewPending=true;
+    card.nextReviewAt=null;
+    card.updatedAt=new Date().toISOString();
+    recordActivity("stage-complete",card.id,{stage:"initial-review-ready"});
+    saveData();
+    state.study.revealed=false;
+    state.study.feedback=null;
+    render();
+  }
+
   function finishInitialReview(card, quality){
     const now=new Date();
     card.stage="review";
+    card.initialReviewPending=false;
     card.reviewCount=(card.reviewCount||0)+1;
     card.lastReviewedAt=now.toISOString();
     card.nextReviewAt=addDays(now, quality==="good"?3:1).toISOString();
     card.updatedAt=now.toISOString();
     recordActivity("review",card.id,{quality,kind:"initial"});
     saveData();
-    toast("首次学习完成，已加入复习队列");
+    toast("首次复习完成，已加入后续复习计划");
     state.study=null;state.route="home";render();
   }
 
@@ -862,9 +936,9 @@
 
     return shell(
       header(
-        "LEXIFLOW · SETTINGS",
         "设置",
-        "词典 Key 在这里配置；Codex 认证继续使用本机 auth.json，模型和思考强度只作为 LexiFlow 每次调用时的运行参数。",
+        "设置",
+        "配置词典与 AI 服务。认证仍由本机 Codex 安全管理，LexiFlow 不读取你的登录凭据。",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
       )
       + `<div class="settings-list">
@@ -882,21 +956,19 @@
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:310px;flex:1">
-            <h3>本地 Codex · 运行状态</h3>
+            <h3>AI 服务</h3>
             ${status?.serviceUnavailable?`
               <p><strong>尚未连接到 LexiFlow 本地服务。</strong></p>
               <p>请通过“启动LexiFlow.bat”打开应用；连接成功后这里会自动显示 Codex CLI、auth.json 和模型状态。</p>
             `:`
               <p>${codex?.cliAvailable?"已检测到 Codex CLI":"未检测到 Codex CLI"}；版本：${escapeHtml(codex?.version||"未知")}</p>
               <p>认证：${codex?.authFound?"已检测到 auth.json":"未检测到 auth.json"}；LexiFlow 不读取其中的 token。</p>
-              <p>认证文件：${escapeHtml(codex?.authPath||"等待本地服务返回")}</p>
-              <p>Codex 默认模型：${escapeHtml(codex?.model||"未从 config.toml 读取到")}</p>
-              ${codex?.probeError?`<p>Codex 检测提示：${escapeHtml(codex.probeError)}</p>`:""}
+              <p>默认模型：${escapeHtml(codex?.model||"跟随 Codex 默认配置")}</p>
             `}
             ${runtime.message?`<p>最近检查：${escapeHtml(runtime.message)}</p>`:""}
           </div>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"CLI 已检测":"CLI 不可用"}</span>
+            <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"AI 已连接":"AI 未连接"}</span>
             ${runtimePill}
             <button class="btn" data-action="test-codex-text">检查连接</button>
           </div>
@@ -904,7 +976,7 @@
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
-            <h3>Codex 模型与思考强度</h3>
+            <h3>模型与思考强度</h3>
             <p>这是 LexiFlow 自己的运行覆盖项，不会改写你的 auth.json，也不会修改全局 Codex 登录状态。</p>
             <p>“跟随默认”使用 Codex 当前模型。列表始终保留常用模型，并合并 config.toml 中检测到的模型。</p><p>为提高响应速度：查词整理、中文搜索纠错和图片任务使用快速推理；造句反馈使用你选择的思考强度。</p>
           </div>
@@ -935,7 +1007,7 @@
 
         <div class="setting-row">
           <div>
-            <h3>本地 Codex · 图片 AI</h3>
+            <h3>图片生成</h3>
             <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力仍取决于当前 Codex 环境和所选模型；失败时可以上传本地图或跳过。</p>
           </div>
           <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"按需使用":"Codex 不可用"}</span>
@@ -1000,8 +1072,15 @@
       try{
         // 已经学过的词优先本地直接返回，不再让用户二次选择。
         const local=localSearchCandidates(q);
-        if(local.length){
-          const saved=state.data.cards.find(c=>c.word.toLowerCase()===String(local[0].word).toLowerCase());
+        const qNormalized=normalizeSearchText(q);
+        const saved=local.length
+          ? state.data.cards.find(c=>c.word.toLowerCase()===String(local[0].word).toLowerCase())
+          : null;
+        const exactLocal=Boolean(saved&&(
+          normalizeSearchText(saved.word)===qNormalized ||
+          String(saved.meaningZh||"").split(/[；;、，,/]/).some(part=>normalizeSearchText(part)===qNormalized)
+        ));
+        if(exactLocal){
           if(saved){
             state.lookup={query:q,result:{
               word:saved.word,
@@ -1062,7 +1141,19 @@
     document.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>void handleAction(el.dataset.action,el)));
 
     const search=document.getElementById("library-search");
-    if(search) search.addEventListener("input",e=>{state.librarySearch=e.target.value;render();});
+    if(search) search.addEventListener("input",e=>{
+      const start=e.target.selectionStart;
+      const end=e.target.selectionEnd;
+      state.librarySearch=e.target.value;
+      render();
+      requestAnimationFrame(()=>{
+        const next=document.getElementById("library-search");
+        if(next){
+          next.focus();
+          if(typeof start==="number") next.setSelectionRange(start,end??start);
+        }
+      });
+    });
 
     const modelSelect=document.getElementById("codex-model-select");
     if(modelSelect) modelSelect.addEventListener("change",e=>{
@@ -1087,22 +1178,25 @@
     const visualFile=document.getElementById("visual-file");
     if(visualFile) visualFile.addEventListener("change",e=>{
       const file=e.target.files?.[0];if(!file)return;
-      if(file.size>900*1024){toast("图片较大，请选择小于 900KB 的图片");return;}
+      if(file.size>900*1024){showNotice("图片太大","请选择小于 900KB 的 PNG、JPG 或 WebP 图片。","warn");return;}
+      const cardId=state.study?.cardId;
+      if(!cardId)return;
       const reader=new FileReader();
-      reader.onload=()=>{
-        const c=getCard(state.study.cardId);
-        c.imageData=reader.result;
-        c.imageUrl="";
-        c.generatedVisualScene="";
-        c.imageGeneration={
-          status:"success",
-          message:"已使用本地上传图片。",
-          code:"LOCAL_UPLOAD",
-          finishedAt:new Date().toISOString()
-        };
-        c.updatedAt=new Date().toISOString();
-        saveData();
-        render();
+      reader.onload=async()=>{
+        try{
+          const payload=await api("/api/images/local",{method:"POST",body:{dataUrl:String(reader.result||"")}});
+          const c=getCard(cardId);
+          if(!c)return;
+          c.imageData="";
+          c.imageUrl=payload.image.url;
+          c.generatedVisualScene="";
+          c.imageGeneration={status:"success",message:"已使用本地上传图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()};
+          c.updatedAt=new Date().toISOString();
+          saveData();
+          if(state.study?.cardId===cardId) render();
+        }catch(err){
+          if(state.study?.cardId===cardId) showErrorNotice(err,"图片没有保存成功");
+        }
       };
       reader.readAsDataURL(file);
     });
@@ -1119,7 +1213,7 @@
     if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="speak"){speak(el.dataset.word,el.dataset.audio||"");return;}
     if(action==="load-more-senses"){
-      const q=state.lookup?.query?.trim()||state.lookup?.result?.word||"";
+      const q=state.lookup?.result?.word||state.lookup?.query?.trim()||"";
       if(!q || state.loadingMoreSenses)return;
 
       state.loadingMoreSenses=true;
@@ -1182,20 +1276,16 @@
     }
 
     if(action==="generate-visual"){
-      const c=getCard(state.study.cardId);
-      if(state.study.imageGenerating)return;
+      if(!state.study||state.study.imageGenerating)return;
+      const cardId=state.study.cardId;
+      const c=getCard(cardId);
+      if(!c)return;
 
       const note=document.getElementById("visual-note")?.value.trim()??String(state.study.visualNote||"").trim();
       state.study.visualNote=note;
       state.study.imageGenerating=true;
-
       c.visualNote=note;
-      c.imageGeneration={
-        status:"generating",
-        message:"正在调用本机 Codex 生成图片。图片生成本身可能需要几十秒。",
-        code:"",
-        startedAt:new Date().toISOString()
-      };
+      c.imageGeneration={status:"generating",message:"正在生成联想图，这一步可能需要一些时间。",code:"",startedAt:new Date().toISOString()};
       c.updatedAt=new Date().toISOString();
       saveData();
       render();
@@ -1203,48 +1293,26 @@
       try{
         const payload=await api("/api/ai/image",{
           method:"POST",
-          body:{
-            word:c.word,
-            meaningZh:c.meaningZh,
-            exampleEn:c.exampleEn,
-            visualNote:note,
-            sourceQuery:c.sourceQuery||c.word,
-            senseIntentEn:c.senseIntentEn||"",
-            avoidVisualEn:c.avoidVisualEn||[]
-          }
+          body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}
         });
-
         c.imageUrl=payload.image.url;
         c.imageData="";
         c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();
-        c.imageGeneration={
-          status:"success",
-          message:note
-            ?"已按你提供的场景描述生成图片。"
-            :"已根据当前词义生成图片。",
-          code:"",
-          startedAt:c.imageGeneration?.startedAt||"",
-          finishedAt:new Date().toISOString()
-        };
+        c.imageGeneration={status:"success",message:note?"已按你提供的场景描述生成图片。":"已根据当前词义生成图片。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
         c.updatedAt=new Date().toISOString();
         saveData();
-        toast("联想图生成成功");
+        if(state.study?.cardId===cardId) toast("联想图生成成功");
       }catch(err){
-        c.imageGeneration={
-          status:"error",
-          message:err.message||"图片生成失败。请重试、修改场景描述、上传本地图或跳过。",
-          code:err.code||"IMAGE_GENERATION_FAILED",
-          startedAt:c.imageGeneration?.startedAt||"",
-          finishedAt:new Date().toISOString()
-        };
+        const user=err?.userError||err?.payload?.userError;
+        c.imageGeneration={status:"error",message:user?.message||"这次没有生成成功。你可以重试、上传本地图或暂时跳过。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
         c.updatedAt=new Date().toISOString();
         saveData();
-
-        // Keep a short notification, but the detailed error remains visible on the page.
-        toast(err.code==="TIMEOUT"?"图片生成时间较长，处理建议已保留在页面":"图片没有生成成功，处理建议已保留在页面");
+        if(state.study?.cardId===cardId) toast("图片没有生成成功，处理建议已保留在页面");
       }finally{
-        state.study.imageGenerating=false;
-        render();
+        if(state.study?.cardId===cardId){
+          state.study.imageGenerating=false;
+          render();
+        }
       }
       return;
     }
@@ -1257,17 +1325,15 @@
       advanceStage(c,"apply");return;
     }
     if(action==="submit-apply"){
+      if(!state.study||state.study.applySubmitting)return;
+      const cardId=state.study.cardId;
       const sentence=document.getElementById("apply-text")?.value||"";
-      const c=getCard(state.study.cardId);
+      const c=getCard(cardId);
+      if(!c)return;
 
       state.study.applyText=sentence;
       state.study.aiSuggestionApplied=false;
-
-      // Keep the first user-authored version so "恢复原句" remains meaningful
-      // even after applying and editing an AI suggestion.
-      if(sentence.trim() && !state.study.originalApplyText){
-        state.study.originalApplyText=sentence;
-      }
+      if(sentence.trim() && !state.study.originalApplyText) state.study.originalApplyText=sentence;
 
       if(!sentence.trim()){
         state.study.feedback=localFeedback(sentence,c.word);
@@ -1275,19 +1341,13 @@
         return;
       }
 
-      state.study.feedback={
-        level:"warn",
-        title:"AI 正在分析…",
-        tips:["正在读取本机 Codex 配置并生成反馈。"],
-        suggestedSentence:""
-      };
+      state.study.applySubmitting=true;
+      state.study.feedback={level:"warn",title:"AI 正在分析…",tips:["正在整理这句话的用法建议。"],suggestedSentence:""};
       render();
 
       try{
-        const payload=await api("/api/ai/text",{
-          method:"POST",
-          body:{word:c.word,meaningZh:c.meaningZh,sentence}
-        });
+        const payload=await api("/api/ai/text",{method:"POST",body:{word:c.word,meaningZh:c.meaningZh,sentence}});
+        if(state.study?.cardId!==cardId)return;
         const fb=payload.feedback||{};
         state.study.feedback={
           level:fb.level||"warn",
@@ -1296,15 +1356,15 @@
           suggestedSentence:String(fb.suggestion||"").trim()
         };
       }catch(err){
+        if(state.study?.cardId!==cardId)return;
         const fallback=localFeedback(sentence,c.word);
-        state.study.feedback={
-          ...fallback,
-          title:"Codex 暂不可用，已使用本地基础检查",
-          suggestedSentence:""
-        };
+        state.study.feedback={...fallback,title:"AI 暂时没有返回，已完成基础检查",suggestedSentence:""};
+      }finally{
+        if(state.study?.cardId===cardId){
+          state.study.applySubmitting=false;
+          render();
+        }
       }
-
-      render();
       return;
     }
     if(action==="apply-ai-suggestion"){
@@ -1391,7 +1451,17 @@
       c.updatedAt=new Date().toISOString();
       saveData();
 
-      finishInitialReview(c,"good");
+      enterInitialReview(c);
+      return;
+    }
+    if(action==="initial-review-reveal"){
+      if(state.study) state.study.revealed=true;
+      render();
+      return;
+    }
+    if(action==="initial-review-rate"){
+      const c=state.study?.cardId?getCard(state.study.cardId):null;
+      if(c&&c.initialReviewPending) finishInitialReview(c,el.dataset.quality);
       return;
     }
     if(action==="start-review"){startReview();return;}

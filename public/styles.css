@@ -446,3 +446,9 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;back
 .toast{border-radius:14px!important;box-shadow:0 18px 45px rgba(24,37,57,.18)!important}
 @media(max-width:920px){.auto-visual-card{grid-template-columns:auto 1fr}.auto-visual-card .btn{grid-column:1/-1;width:100%}.page-head h1{font-size:32px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+
+/* audit round 1 */
+/* Avoid replaying a full-page entrance animation on every state-driven render. */
+.content{animation:none}
+.btn:disabled{transform:none!important;box-shadow:none!important}
