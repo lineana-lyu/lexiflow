@@ -5,7 +5,7 @@ on:
     branches:
       - fix/mvp-audit-round1
     paths:
-      - scripts/apply-audit-round1.js
+      - scripts/apply_audit_round1.py
 
 permissions:
   contents: write
@@ -19,12 +19,8 @@ jobs:
           ref: fix/mvp-audit-round1
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
       - name: Apply audited fixes
-        run: node scripts/apply-audit-round1.js
+        run: python3 scripts/apply_audit_round1.py
 
       - name: Static validation
         run: |
@@ -44,6 +40,7 @@ jobs:
       - name: Remove temporary patch runner
         run: |
           rm -f scripts/apply-audit-round1.js
+          rm -f scripts/apply_audit_round1.py
           rm -f .github/workflows/apply-audit-round1.yml
           rmdir scripts 2>/dev/null || true
           rmdir .github/workflows 2>/dev/null || true
