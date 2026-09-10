@@ -1,0 +1,88 @@
+/* Transport/runtime UX refinements. Keeps the study flow intact. */
+
+.visual-workspace{align-items:start!important}
+.scene-panel{
+  align-self:start!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:18px!important;
+  gap:10px!important;
+}
+.scene-panel.is-loading .scene-loading{display:none!important}
+.scene-panel .scene-panel-label{min-height:22px}
+.scene-panel .scene-editor{
+  min-height:112px!important;
+  max-height:190px!important;
+  padding:13px 14px!important;
+}
+.scene-generation-state{
+  margin:2px 0 6px!important;
+  padding:9px 10px!important;
+  border-radius:12px!important;
+}
+.scene-generation-warning{
+  margin:2px 0 8px!important;
+  padding:9px 10px!important;
+  border-radius:12px!important;
+}
+.scene-cue{
+  margin:0!important;
+  padding:8px 10px!important;
+  white-space:normal;
+}
+.scene-refresh-action{align-self:flex-start;margin-top:0!important}
+
+.runtime-image-job-pill{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  z-index:120;
+  transform:translateX(-50%);
+  min-width:270px;
+  max-width:min(430px,calc(100vw - 32px));
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:11px 14px;
+  border:1px solid rgba(113,139,124,.13);
+  border-radius:15px;
+  background:rgba(255,255,255,.86);
+  backdrop-filter:blur(18px) saturate(118%);
+  box-shadow:0 18px 48px rgba(40,54,45,.12),inset 0 1px 0 rgba(255,255,255,.9);
+  color:#526158;
+  animation:runtime-job-enter .24s cubic-bezier(.22,.8,.28,1) both;
+}
+.runtime-image-job-pill div{display:grid;gap:2px;min-width:0}
+.runtime-image-job-pill strong{font-size:12.5px;line-height:1.3;font-weight:720;color:#344139}
+.runtime-image-job-pill span:not(.runtime-job-spinner):not(.runtime-job-check):not(.runtime-job-mark){
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.8px;color:#7a887f
+}
+.runtime-job-spinner{
+  width:16px;height:16px;flex:0 0 auto;border-radius:50%;
+  border:2px solid rgba(117,151,131,.18);border-top-color:#7c9b87;
+  animation:runtime-job-spin .9s linear infinite
+}
+.runtime-job-check,.runtime-job-mark{
+  width:22px;height:22px;flex:0 0 auto;border-radius:8px;display:grid;place-items:center;font-size:12px;font-weight:800
+}
+.runtime-job-check{background:#edf6f0;color:#63836e}
+.runtime-job-mark{background:#fff1ef;color:#a4625c}
+.runtime-image-job-pill.success{border-color:rgba(104,144,116,.14);background:rgba(249,253,250,.92)}
+.runtime-image-job-pill.error{border-color:rgba(173,103,94,.14);background:rgba(255,250,249,.94)}
+
+@keyframes runtime-job-spin{to{transform:rotate(360deg)}}
+@keyframes runtime-job-enter{
+  from{opacity:0;transform:translate(-50%,8px) scale(.985)}
+  to{opacity:1;transform:translate(-50%,0) scale(1)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .runtime-image-job-pill{animation:none}
+  .runtime-job-spinner{animation:none}
+}
+
+@media(max-width:760px){
+  .scene-panel{padding:14px!important}
+  .scene-panel .scene-editor{min-height:104px!important;max-height:170px!important}
+  .runtime-image-job-pill{bottom:14px;min-width:0;width:calc(100vw - 28px)}
+}
