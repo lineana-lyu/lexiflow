@@ -1,0 +1,51 @@
+name: Refine verified lookup consistency
+
+on:
+  push:
+    branches:
+      - 'fix/verified-chinese-lookup-phrases'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/verified-chinese-lookup-phrases
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Apply refinement
+        run: python scripts/refine_lookup_083.py
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate JavaScript
+        run: npm run check
+      - name: Validate consistency guards
+        shell: pwsh
+        run: |
+          $server = Get-Content server.js -Raw
+          if ($server -notmatch 'content-mismatch') { throw 'example/target guard missing' }
+          if ($server -notmatch 'exact alternative') { throw 'alternative example contract missing' }
+          if ($server -notmatch 'pr && pr.ipa') { throw 'strict Learners IPA source missing' }
+      - name: Build Windows application
+        run: npm run build:win
+      - name: Verify no tracked test artifacts
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Select-String -Pattern '(^|/)(test|tests|__tests__|fixtures?|mocks?)(/|$)|\.(test|spec)\.'
+          if ($bad) { $bad; throw 'tracked test/spec/fixture/mock artifacts found' }
+      - name: Commit refinement and remove temporary helpers
+        shell: pwsh
+        run: |
+          Remove-Item scripts/refine_lookup_083.py -ErrorAction SilentlyContinue
+          Remove-Item .github/workflows/refine-lookup-083.yml -ErrorAction SilentlyContinue
+          git config user.name "LexiFlow Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add server.js scripts/refine_lookup_083.py .github/workflows/refine-lookup-083.yml
+          git commit -m "refine: enforce lookup target and pronunciation consistency"
+          git push origin HEAD:fix/verified-chinese-lookup-phrases
