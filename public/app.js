@@ -668,7 +668,7 @@
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
       )
-      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="card study-card study-card-focus">${renderStage(card)}</div></div>`
+      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card study-card-focus">${renderStage(card)}</div></div></div>`
     );
   }
 
@@ -1068,12 +1068,12 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(!card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
     return shell(
       header("","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
-      + `<div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
+      + `<div class="review-depth-stage"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}<div class="prompt-small">先回忆中文释义，再查看答案。</div>
         ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn" data-action="review-rate" data-quality="again">没记住 · 明天再复习</button><button class="btn primary" data-action="review-rate" data-quality="good">记住了 · 3 天后复习</button></div>`
         :`<button class="btn primary" style="margin-top:22px" data-action="review-reveal">查看答案</button>`}
-      </div></div>`
+      </div></div></div></div>`
     );
   }
 
@@ -1239,6 +1239,49 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     return "";
   }
 
+  let lastStudyMotionSnapshot=null;
+  let studyMotionCleanupTimer=null;
+
+  function studyMotionSnapshot(){
+    if(state.route==="study"&&state.study?.cardId){
+      const card=getCard(state.study.cardId);
+      if(!card)return null;
+      return {
+        key:`study:${card.id}:${card.stage}`,
+        cardId:card.id,
+        order:stageIndex(card.stage)
+      };
+    }
+    if(state.route==="review-session"){
+      const cardId=state.reviewQueue[state.reviewIndex];
+      const card=cardId&&getCard(cardId);
+      if(!card)return null;
+      return {
+        key:`review:${state.reviewIndex}:${card.id}`,
+        cardId:card.id,
+        order:state.reviewIndex
+      };
+    }
+    return null;
+  }
+
+  function animateStudySurface(previous,current){
+    const shell=document.querySelector(".study-depth-shell");
+    if(!shell||!current||previous?.key===current.key)return;
+    if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
+
+    const direction=previous&&previous.cardId===current.cardId&&current.order<previous.order?-1:1;
+    shell.classList.add("study-depth-motion",direction<0?"study-depth-backward":"study-depth-forward");
+    const stepper=document.querySelector(".study-stepper");
+    if(stepper)stepper.classList.add("study-stepper-motion");
+
+    if(studyMotionCleanupTimer)clearTimeout(studyMotionCleanupTimer);
+    studyMotionCleanupTimer=setTimeout(()=>{
+      shell.classList.remove("study-depth-motion","study-depth-forward","study-depth-backward");
+      stepper?.classList.remove("study-stepper-motion");
+    },720);
+  }
+
   function render(){
     const app=document.getElementById("app");
     let html;
@@ -1251,8 +1294,24 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     else if(state.route==="stats") html=statsPage();
     else if(state.route==="settings") html=settingsPage();
     else html=homePage();
-    app.innerHTML=html;
-    bind();
+    const nextStudyMotionSnapshot=studyMotionSnapshot();
+    const previousStudyMotionSnapshot=lastStudyMotionSnapshot;
+    const motionChanged=nextStudyMotionSnapshot?.key!==previousStudyMotionSnapshot?.key;
+    const reducedMotion=Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+    const motionDirection=previousStudyMotionSnapshot&&nextStudyMotionSnapshot&&previousStudyMotionSnapshot.cardId===nextStudyMotionSnapshot.cardId&&nextStudyMotionSnapshot.order<previousStudyMotionSnapshot.order?-1:1;
+    const commitDom=()=>{app.innerHTML=html;bind();};
+
+    if(motionChanged&&!reducedMotion&&nextStudyMotionSnapshot&&typeof document.startViewTransition==="function"){
+      document.documentElement.dataset.studyMotion=motionDirection<0?"backward":"forward";
+      const transition=document.startViewTransition(commitDom);
+      transition.finished.finally(()=>{delete document.documentElement.dataset.studyMotion;});
+    }else{
+      commitDom();
+      if(motionChanged&&nextStudyMotionSnapshot){
+        requestAnimationFrame(()=>animateStudySurface(previousStudyMotionSnapshot,nextStudyMotionSnapshot));
+      }
+    }
+    lastStudyMotionSnapshot=nextStudyMotionSnapshot;
   }
 
   function bind(){

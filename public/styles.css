@@ -681,3 +681,181 @@ body:before{display:none}
 .visual-progress-strip span.active{background:#eaf1ff;color:#3468df}
 .learning-stage-footer.single-action{justify-content:flex-end}
 @media(max-width:900px){.ai-scene-editor{min-height:140px}}
+
+
+/* v0.8 — learning card depth/stack transitions inspired by React Bits */
+.study-depth-shell{
+  position:relative;
+  width:100%;
+  perspective:1400px;
+  perspective-origin:50% 44%;
+  transform-style:preserve-3d;
+  isolation:isolate;
+}
+.study-stack-layer{
+  position:absolute;
+  left:18px;
+  right:18px;
+  top:10px;
+  bottom:-10px;
+  border:1px solid #e4eaf2;
+  border-radius:18px;
+  background:#fbfcfe;
+  box-shadow:0 12px 28px rgba(43,61,91,.035);
+  pointer-events:none;
+  transform-origin:88% 88%;
+  z-index:0;
+}
+.study-stack-layer-far{
+  opacity:.34;
+  transform:translate3d(18px,10px,-150px) rotateZ(1.15deg) scale(.972);
+}
+.study-stack-layer-near{
+  opacity:.62;
+  transform:translate3d(9px,6px,-72px) rotateZ(.48deg) scale(.986);
+}
+.study-depth-shell>.study-card{
+  position:relative;
+  z-index:2;
+  transform-style:preserve-3d;
+  backface-visibility:hidden;
+  transform-origin:50% 50%;
+  will-change:transform,opacity,filter;
+}
+.study-depth-motion.study-depth-forward>.study-card{
+  animation:lexiDepthForward .62s cubic-bezier(.2,.78,.2,1) both;
+}
+.study-depth-motion.study-depth-backward>.study-card{
+  animation:lexiDepthBackward .62s cubic-bezier(.2,.78,.2,1) both;
+}
+.study-depth-motion.study-depth-forward .study-stack-layer-near{
+  animation:lexiStackNearForward .62s cubic-bezier(.2,.78,.2,1) both;
+}
+.study-depth-motion.study-depth-forward .study-stack-layer-far{
+  animation:lexiStackFarForward .62s cubic-bezier(.2,.78,.2,1) both;
+}
+.study-depth-motion.study-depth-backward .study-stack-layer-near{
+  animation:lexiStackNearBackward .62s cubic-bezier(.2,.78,.2,1) both;
+}
+.study-depth-motion .study-kicker,
+.study-depth-motion .study-center,
+.study-depth-motion .visual-learning-stage,
+.study-depth-motion .apply-learning-stage{
+  animation:lexiStageContentIn .46s .08s cubic-bezier(.2,.72,.2,1) both;
+}
+.study-stepper-motion .study-stepper-item.active .study-stepper-dot{
+  animation:lexiStepPop .44s cubic-bezier(.2,.8,.2,1) both;
+}
+.study-stepper-motion .study-stepper-item.active>span:last-child{
+  animation:lexiStepLabel .42s .05s ease both;
+}
+@keyframes lexiDepthForward{
+  0%{opacity:0;transform:translate3d(58px,12px,-220px) rotateY(-8deg) scale(.968);filter:brightness(.95) blur(5px)}
+  58%{opacity:1;transform:translate3d(-5px,0,16px) rotateY(.8deg) scale(1.004);filter:brightness(1) blur(0)}
+  100%{opacity:1;transform:translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+}
+@keyframes lexiDepthBackward{
+  0%{opacity:0;transform:translate3d(-52px,10px,-190px) rotateY(7deg) scale(.972);filter:brightness(.95) blur(5px)}
+  58%{opacity:1;transform:translate3d(4px,0,12px) rotateY(-.7deg) scale(1.003);filter:brightness(1) blur(0)}
+  100%{opacity:1;transform:translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+}
+@keyframes lexiStackNearForward{
+  0%{opacity:.22;transform:translate3d(24px,13px,-125px) rotateZ(1.15deg) scale(.972)}
+  100%{opacity:.62;transform:translate3d(9px,6px,-72px) rotateZ(.48deg) scale(.986)}
+}
+@keyframes lexiStackFarForward{
+  0%{opacity:.12;transform:translate3d(31px,17px,-220px) rotateZ(1.8deg) scale(.954)}
+  100%{opacity:.34;transform:translate3d(18px,10px,-150px) rotateZ(1.15deg) scale(.972)}
+}
+@keyframes lexiStackNearBackward{
+  0%{opacity:.24;transform:translate3d(-16px,12px,-120px) rotateZ(-.9deg) scale(.974)}
+  100%{opacity:.62;transform:translate3d(9px,6px,-72px) rotateZ(.48deg) scale(.986)}
+}
+@keyframes lexiStageContentIn{
+  0%{opacity:0;transform:translateY(8px);filter:blur(3px)}
+  100%{opacity:1;transform:translateY(0);filter:none}
+}
+@keyframes lexiStepPop{
+  0%{transform:scale(.72);box-shadow:0 0 0 0 rgba(52,104,223,.22)}
+  60%{transform:scale(1.08);box-shadow:0 0 0 8px rgba(52,104,223,0)}
+  100%{transform:scale(1);box-shadow:0 6px 16px rgba(52,104,223,.18)}
+}
+@keyframes lexiStepLabel{
+  0%{opacity:.25;transform:translateX(-4px)}
+  100%{opacity:1;transform:translateX(0)}
+}
+@media(max-width:900px){
+  .study-stack-layer{left:12px;right:12px;bottom:-7px}
+  .study-stack-layer-far{transform:translate3d(10px,8px,-120px) rotateZ(.7deg) scale(.978)}
+  .study-stack-layer-near{transform:translate3d(5px,4px,-60px) rotateZ(.25deg) scale(.989)}
+}
+@media(prefers-reduced-motion:reduce){
+  .study-depth-shell>.study-card,
+  .study-depth-motion .study-kicker,
+  .study-depth-motion .study-center,
+  .study-depth-motion .visual-learning-stage,
+  .study-depth-motion .apply-learning-stage,
+  .study-stepper-motion .study-stepper-dot,
+  .study-stepper-motion .study-stepper-item.active>span:last-child{
+    animation:none!important;
+    filter:none!important;
+    transform:none!important;
+  }
+}
+
+
+/* Native View Transitions: preserves the outgoing card while the next stage rises from depth. */
+.study-depth-shell{view-transition-name:lexi-study-card}
+.study-progress-wrap{view-transition-name:lexi-study-progress}
+::view-transition-group(lexi-study-card){
+  animation-duration:.62s;
+  animation-timing-function:cubic-bezier(.2,.78,.2,1);
+  overflow:visible;
+}
+::view-transition-image-pair(lexi-study-card){
+  isolation:auto;
+  overflow:visible;
+}
+::view-transition-old(lexi-study-card),
+::view-transition-new(lexi-study-card){
+  mix-blend-mode:normal;
+  transform-origin:50% 50%;
+  backface-visibility:hidden;
+}
+html[data-study-motion="forward"]::view-transition-old(lexi-study-card){animation:lexiViewOldForward .56s cubic-bezier(.4,0,.25,1) both}
+html[data-study-motion="forward"]::view-transition-new(lexi-study-card){animation:lexiViewNewForward .62s cubic-bezier(.2,.78,.2,1) both}
+html[data-study-motion="backward"]::view-transition-old(lexi-study-card){animation:lexiViewOldBackward .56s cubic-bezier(.4,0,.25,1) both}
+html[data-study-motion="backward"]::view-transition-new(lexi-study-card){animation:lexiViewNewBackward .62s cubic-bezier(.2,.78,.2,1) both}
+::view-transition-group(lexi-study-progress){animation-duration:.42s}
+html[data-study-motion]::view-transition-old(lexi-study-progress){animation:lexiProgressOut .24s ease both}
+html[data-study-motion]::view-transition-new(lexi-study-progress){animation:lexiProgressIn .42s .04s ease both}
+@keyframes lexiViewOldForward{
+  from{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+  to{opacity:0;transform:perspective(1400px) translate3d(-42px,8px,-180px) rotateY(6deg) scale(.962);filter:brightness(.95) blur(4px)}
+}
+@keyframes lexiViewNewForward{
+  from{opacity:0;transform:perspective(1400px) translate3d(64px,10px,-230px) rotateY(-8deg) scale(.966);filter:brightness(.95) blur(5px)}
+  62%{opacity:1;transform:perspective(1400px) translate3d(-4px,0,14px) rotateY(.7deg) scale(1.003);filter:none}
+  to{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+}
+@keyframes lexiViewOldBackward{
+  from{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+  to{opacity:0;transform:perspective(1400px) translate3d(40px,8px,-170px) rotateY(-6deg) scale(.966);filter:brightness(.95) blur(4px)}
+}
+@keyframes lexiViewNewBackward{
+  from{opacity:0;transform:perspective(1400px) translate3d(-58px,10px,-210px) rotateY(7deg) scale(.969);filter:brightness(.95) blur(5px)}
+  62%{opacity:1;transform:perspective(1400px) translate3d(4px,0,12px) rotateY(-.7deg) scale(1.003);filter:none}
+  to{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}
+}
+@keyframes lexiProgressOut{from{opacity:1;transform:translateY(0)}to{opacity:.15;transform:translateY(-3px)}}
+@keyframes lexiProgressIn{from{opacity:.15;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+  .study-depth-shell,.study-progress-wrap{view-transition-name:none}
+}
+
+
+/* Keep non-card chrome stable during native card snapshots; review cards share the same depth language. */
+.review-depth-stage{max-width:1080px;margin:0 auto;padding:2px 0 12px}
+::view-transition-old(root){animation:none!important;opacity:0}
+::view-transition-new(root){animation:none!important;opacity:1}
+@media(max-width:760px){.review-depth-stage{padding-bottom:8px}}
