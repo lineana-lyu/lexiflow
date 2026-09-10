@@ -6,6 +6,12 @@ generated/*
 startup.log
 *.log
 
+# Desktop dependencies / build output
+node_modules/
+dist/
+release/
+*.blockmap
+
 # Local secrets / credentials
 .env
 .env.*

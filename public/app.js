@@ -74,7 +74,7 @@
 
   const state = {
     route: "home",
-    data: loadData(),
+    data: defaultData(),
     toast: "",
     modal: null,
     lookup: null,
@@ -103,19 +103,46 @@
     };
   }
 
-  function loadData(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return defaultData();
-      const parsed = JSON.parse(raw);
-      return { ...defaultData(), ...parsed, settings:{dailyGoal:5,...(parsed.settings||{})} };
-    }catch{
-      return defaultData();
-    }
+  function normalizeLearningData(parsed){
+    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:5,...(parsed?.settings||{})} };
   }
 
+  function loadLegacyBrowserData(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw)return null;
+      return normalizeLearningData(JSON.parse(raw));
+    }catch{return null;}
+  }
+
+  let persistenceReady=false;
+  let persistenceQueue=Promise.resolve();
+
   function saveData(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    if(!persistenceReady)return;
+    const snapshot=JSON.parse(JSON.stringify(state.data));
+    persistenceQueue=persistenceQueue
+      .catch(()=>{})
+      .then(()=>api("/api/learning-data",{method:"POST",body:{data:snapshot}}))
+      .catch(err=>{
+        console.error("learning data save failed",err);
+        if(!state.notice) showNotice("学习进度暂未保存","本机存储暂时不可用，请稍后重试。","error");
+      });
+  }
+
+  async function hydrateLearningData(){
+    const legacy=loadLegacyBrowserData();
+    const payload=await api("/api/learning-data");
+    if(payload.hasStoredData){
+      state.data=normalizeLearningData(payload.data);
+    }else if(legacy && (legacy.cards.length||legacy.activities.length)){
+      state.data=legacy;
+      await api("/api/learning-data",{method:"POST",body:{data:state.data}});
+      try{localStorage.removeItem(STORAGE_KEY);}catch{}
+    }else{
+      state.data=normalizeLearningData(payload.data);
+    }
+    persistenceReady=true;
   }
 
   function uid(){
@@ -385,7 +412,7 @@
       : due ? `<button class="btn primary" data-action="start-review">开始复习</button>`
       : `<button class="btn primary" data-route="add">添加第一个单词</button>`;
     return shell(
-      header("","今日学习","先学少量高质量单词，再用主动回忆和复习巩固。",`<button class="btn" data-route="add">＋ 添加单词</button>`)
+      header("","今日学习","",`<button class="btn" data-route="add">＋ 添加单词</button>`)
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">目标词数</div></div>
         <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${due}</div><div class="stat-hint">到期卡片</div></div>
@@ -431,7 +458,7 @@
       : `<button class="btn small" data-route="settings">配置词典</button>`;
     const shouldShowResult=state.lookupStatus==="loading"||Boolean(state.lookup?.result);
     return shell(
-      header("","选词制卡","输入英文或中文，LexiFlow 会自动识别、纠错并整理成适合学习的单词卡。",badge)
+      header("","选词制卡","",badge)
       + `<div class="card search-hero-card">
         <form id="lookup-form" class="search-command-bar">
           <div class="search-input-wrap"><span class="search-input-icon">⌕</span><input class="input" id="word-input" placeholder="输入英文或中文，例如 keyboard、键盘、wrok" value="${escapeHtml(state.lookup?.query||"")}" autocomplete="off" /></div>
@@ -556,7 +583,7 @@
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
       )
-      + `<div class="study-shell"><div class="card study-card">${renderStage(card)}</div><aside class="card stage-rail"><div class="section-title"><div><h2>首次学习流程</h2><p>每一步都由你显式完成。</p></div></div><div class="stages">${renderStageRail(card)}</div></aside></div>`
+      + `<div class="study-shell"><div class="card study-card">${renderStage(card)}</div><aside class="card stage-rail"><div class="section-title"><div><h2>首次学习流程</h2><p></p></div></div><div class="stages">${renderStageRail(card)}</div></aside></div>`
     );
   }
 
@@ -690,7 +717,7 @@
           <div class="auto-visual-icon">✦</div>
           <div class="auto-visual-copy">
             <strong>直接生成记忆画面</strong>
-            <p>不需要填写任何场景。系统会根据当前词义和例句自动设计一张容易记住的画面；只有你想指定人物、地点或动作时，才需要展开自定义场景。</p>
+            <p>根据当前词义和例句自动构图。</p>
           </div>
           <button class="btn primary" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>
             ${state.study.imageGenerating?"正在生成…":"直接生成"}
@@ -705,7 +732,7 @@
           <div class="field">
             <label>描述你希望看到的画面（可选）</label>
             <textarea class="textarea visual-scene-input" id="visual-note" placeholder="例如：一双手正在电脑桌前使用机械键盘，屏幕在背景中">${escapeHtml(state.study.visualNote||"")}</textarea>
-            <div class="visual-scene-help">填写后会优先按照你的场景生成；留空则继续使用系统自动构图。</div>
+            <div class="visual-scene-help"></div>
           </div>
           <button class="btn" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>按我的描述生成</button>
         </div>`:""}
@@ -720,9 +747,12 @@
             ${generation.status==="error"?`<div class="image-generation-actions"><button class="btn primary" data-action="generate-visual">再试一次</button><span>也可以上传本地图或直接跳过。</span></div>`:""}
           </div>`:""}
 
-        <div class="upload-zone visual-upload-zone"><div>使用自己的图片</div><span>支持本地上传，适合已经有明确记忆画面的情况</span><input id="visual-file" type="file" accept="image/*" /></div>
+        <div class="upload-zone visual-upload-zone">
+          <div class="visual-upload-copy"><strong>已有记忆图片？</strong></div>
+          <label class="file-picker-button">选择图片<input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+        </div>
 
-        ${(card.imageData||card.imageUrl)?`<div class="visual-preview"><img src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的视觉联想图片" /></div>`:""}
+        ${(card.imageData||card.imageUrl)?`<div class="visual-preview"><img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的视觉联想图片" /></div>`:""}
 
         <div class="rating-row visual-actions">
           <button class="btn" data-action="skip-visual">暂时跳过</button>
@@ -735,7 +765,7 @@
     return `${stageKicker("首次复习 · 主动回忆")}
       <div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}
-        <div class="prompt-small">先回忆中文释义，再查看答案。完成这一步后才会真正进入后续复习计划。</div>
+        <div class="prompt-small">先回忆中文释义，再查看答案。</div>
         ${state.study?.revealed?`
           <div class="memory-answer-card">
             <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
@@ -857,7 +887,7 @@
   function reviewPage(){
     const due=dueCards();
     return shell(
-      header("LEXIFLOW · REVIEW","复习中心","只显示已经到期的卡片；复习结果会决定下一次到期时间。",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
+      header("LEXIFLOW · REVIEW","复习中心","",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
       + `<div class="grid cols-3">
         <div class="card stat"><div class="stat-label">今日到期</div><div class="stat-value">${due.length}</div><div class="stat-hint">现在可以复习</div></div>
         <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有复习记录</div></div>
@@ -907,7 +937,7 @@
     const q=state.librarySearch.trim().toLowerCase();
     const list=state.data.cards.filter(c=>!q||c.word.toLowerCase().includes(q)||c.meaningZh.includes(q));
     return shell(
-      header("","单词库","查看、搜索和管理已经保存的学习卡片。",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
+      header("","单词库","",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
       + `<div class="search-row"><input class="input" id="library-search" placeholder="搜索单词或中文释义" value="${escapeHtml(state.librarySearch)}" /><span class="pill">${list.length} 张卡片</span></div>
       <div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>词性</th><th>中文释义</th><th>阶段</th><th>下次复习</th><th></th></tr></thead>
       <tbody>${list.length?list.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td><td><span class="pill blue">${escapeHtml(c.pos)}</span></td><td>${escapeHtml(c.meaningZh)}</td><td>${stageLabelOf(c.stage)}</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td><td><button class="btn small danger" data-delete-card="${c.id}">删除</button></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
@@ -921,7 +951,7 @@
     const reviews=state.data.activities.filter(a=>a.type==="review").length;
     const remembered=state.data.activities.filter(a=>a.type==="review"&&a.quality==="good").length;
     return shell(
-      header("","学习统计","只统计本地浏览器里的真实操作记录。")
+      header("","学习统计","")
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">总词数</div><div class="stat-value">${state.data.cards.length}</div><div class="stat-hint">已保存卡片</div></div>
         <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${reviews}</div><div class="stat-hint">复习次数</div></div>
@@ -951,14 +981,14 @@
       header(
         "",
         "设置",
-        "配置词典与 AI 服务。认证仍由本机 Codex 安全管理，LexiFlow 不读取你的登录凭据。",
+        "",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
       )
       + `<div class="settings-list">
         <div class="setting-row">
           <div>
             <h3>英语词典</h3>
-            <p>提供英文词条、词性、例句、音标和美式发音。由 Merriam-Webster Learner's Dictionary 提供数据。当前：${dict?.configured?`已连接 ${escapeHtml(dict.maskedKey||"")}`:"未连接"}</p>
+            <p>Merriam-Webster Learner's Dictionary · ${dict?.configured?`已连接 ${escapeHtml(dict.maskedKey||"")}`:"未连接"}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="粘贴 Learner's Dictionary API Key" />
@@ -991,14 +1021,14 @@
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
             <h3>模型与思考强度</h3>
-            <p>这是 LexiFlow 自己的运行覆盖项，只影响 LexiFlow 的 AI 调用，不会修改你本机 Codex 的全局配置。</p>
-            <p>“跟随默认”使用当前 Codex 默认模型。查词、中文纠错和图片任务会自动优先使用快速推理，造句反馈使用你选择的思考强度。</p>
+            <p>默认：GPT-5.6 Luna · 中</p>
+            <p></p>
           </div>
           <div class="codex-runtime-grid">
             <div class="field">
               <label>模型</label>
               <select class="select" id="codex-model-select">
-                <option value="" ${selectedModel===""?"selected":""}>跟随 Codex 默认${codex?.model?` · ${escapeHtml(codex.model)}`:""}</option>
+                <option value="" ${selectedModel===""?"selected":""}>应用默认 · gpt-5.6-luna</option>
                 ${(codex?.modelOptions||[]).map(model=>`<option value="${escapeHtml(model)}" ${selectedModel===model?"selected":""}>${escapeHtml(model)}</option>`).join("")}
                 <option value="__custom__">自定义模型 ID…</option>
               </select>
@@ -1007,7 +1037,7 @@
             <div class="field">
               <label>思考强度</label>
               <select class="select" id="codex-effort">
-                <option value="" ${selectedEffort===""?"selected":""}>跟随模型 / Codex 默认</option>
+                <option value="" ${selectedEffort===""?"selected":""}>应用默认 · 中</option>
                 <option value="low" ${selectedEffort==="low"?"selected":""}>低</option>
                 <option value="medium" ${selectedEffort==="medium"?"selected":""}>中</option>
                 <option value="high" ${selectedEffort==="high"?"selected":""}>高</option>
@@ -1028,13 +1058,13 @@
         </div>
 
         <div class="setting-row">
-          <div><h3>每日学习目标</h3><p>用于首页进度展示，不强制限制学习。</p></div>
+          <div><h3>每日学习目标</h3><p></p></div>
           <select class="select" id="daily-goal" style="width:130px">${[3,5,8,10,15].map(n=>`<option value="${n}" ${state.data.settings.dailyGoal===n?"selected":""}>${n} 个词</option>`).join("")}</select>
         </div>
 
-        <div class="setting-row"><div><h3>导出学习数据</h3><p>不会导出词典 Key 或 Codex 凭据。</p></div><button class="btn" data-action="export-data">导出 JSON</button></div>
-        <div class="setting-row"><div><h3>导入学习数据</h3><p>从 LexiFlow 导出的 JSON 恢复学习数据。</p></div><label class="btn">选择 JSON<input id="import-file" type="file" accept="application/json" style="display:none"></label></div>
-        <div class="setting-row"><div><h3>清空学习数据</h3><p>删除浏览器里的学习数据；不会删除 Codex 配置。</p></div><button class="btn danger" data-action="confirm-reset">清空数据</button></div>
+        <div class="setting-row"><div><h3>导出学习数据</h3><p></p></div><button class="btn" data-action="export-data">导出 JSON</button></div>
+        <div class="setting-row"><div><h3>导入学习数据</h3><p></p></div><label class="btn">选择 JSON<input id="import-file" type="file" accept="application/json" style="display:none"></label></div>
+        <div class="setting-row"><div><h3>清空学习数据</h3><p>删除全部单词与学习记录。</p></div><button class="btn danger" data-action="confirm-reset">清空数据</button></div>
       </div>`
     );
   }
@@ -1188,6 +1218,23 @@
         saveData();toast("数据已导入");state.route="home";render();
       }catch{toast("导入失败：文件格式不正确");}
     });
+
+    document.querySelectorAll(".visual-memory-image").forEach(img=>img.addEventListener("error",()=>{
+      const cardId=img.dataset.cardId;
+      const c=getCard(cardId);
+      if(!c)return;
+      c.imageData="";
+      c.imageUrl="";
+      c.imageGeneration={
+        status:"error",
+        message:"原图片文件已不在本机，请重新生成或选择一张图片。",
+        code:"IMAGE_MISSING",
+        finishedAt:new Date().toISOString()
+      };
+      c.updatedAt=new Date().toISOString();
+      saveData();
+      if(state.study?.cardId===cardId) render();
+    }));
 
     const visualFile=document.getElementById("visual-file");
     if(visualFile) visualFile.addEventListener("change",e=>{
@@ -1538,17 +1585,30 @@
     if(action==="reset-data"){state.data=defaultData();saveData();state.modal=null;state.route="home";toast("本地数据已清空");render();return;}
   }
 
-  render();
+  window.addEventListener("beforeunload",()=>{
+    if(!persistenceReady)return;
+    try{
+      const body=JSON.stringify({data:state.data});
+      navigator.sendBeacon("/api/learning-data",new Blob([body],{type:"application/json"}));
+    }catch{}
+  });
 
-  if(location.protocol === "file:"){
-    api("/api/health")
-      .then(()=>{ location.replace("http://127.0.0.1:4177/"); })
-      .catch(err=>{
-        showErrorNotice(err,"本地服务没有启动");
-        state.providerStatus={ok:false,serviceUnavailable:true,error:err.message};
-        render();
-      });
-  }else{
-    refreshProviderStatus(true);
+  async function initializeApp(){
+    try{
+      if(location.protocol === "file:"){
+        await api("/api/health");
+        location.replace("http://127.0.0.1:4177/");
+        return;
+      }
+      await hydrateLearningData();
+      render();
+      await refreshProviderStatus(true);
+    }catch(err){
+      state.providerStatus={ok:false,serviceUnavailable:true,error:err.message};
+      showErrorNotice(err,"LexiFlow 暂时无法启动");
+      render();
+    }
   }
+
+  initializeApp();
 })();

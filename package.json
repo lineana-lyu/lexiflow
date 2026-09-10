@@ -1,0 +1,58 @@
+{
+  "name": "lexiflow",
+  "version": "0.5.0",
+  "description": "LexiFlow 本地优先英语单词学习桌面应用",
+  "productName": "LexiFlow",
+  "main": "electron-main.js",
+  "author": "lineana-lyu",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "app": "electron .",
+    "start": "electron .",
+    "web": "node server.js",
+    "check": "node --check electron-main.js && node --check server.js && node --check public/app.js",
+    "build:win": "electron-builder --win nsis portable --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.3.0",
+    "electron-builder": "26.16.1"
+  },
+  "build": {
+    "appId": "com.lexiflow.desktop",
+    "productName": "LexiFlow",
+    "asar": true,
+    "files": [
+      "electron-main.js",
+      "server.js",
+      "public/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "LexiFlow"
+    }
+  }
+}
