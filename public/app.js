@@ -91,6 +91,7 @@
     pronunciationHydration: {},
     notice: null,
     searchResolution: null,
+    lookupAlternativesOpen: false,
     visualSceneExpanded: false
   };
 
@@ -316,9 +317,12 @@
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:card.word}});
       const phonetic=String(payload.result?.phonetic||"").trim();
       const audioUrl=String(payload.result?.audioUrl||"").trim();
+      const audioUrls=Array.isArray(payload.result?.audioUrls)?payload.result.audioUrls.map(String).filter(Boolean):[];
       if(phonetic) card.phonetic=phonetic;
       if(audioUrl && !card.audioUrl) card.audioUrl=audioUrl;
-      if(phonetic || audioUrl){card.updatedAt=new Date().toISOString();saveData();}
+      if(audioUrls.length) card.audioUrls=audioUrls;
+      if(payload.result?.pronunciationSource) card.pronunciationSource=String(payload.result.pronunciationSource);
+      if(phonetic || audioUrl || audioUrls.length){card.updatedAt=new Date().toISOString();saveData();}
       state.pronunciationHydration[card.id]="done";
       render();
     }catch{
@@ -545,6 +549,13 @@
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || r.normalizedQuery)
       ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
       : "";
+    const alternativeWords=Array.isArray(r.alternatives)?r.alternatives.filter(item=>item?.word&&String(item.word).toLowerCase()!==String(r.word).toLowerCase()):[];
+    const alternativePanel=(r.sourceQuery&&/[\u3400-\u9fff]/.test(r.sourceQuery)&&(alternativeWords.length||r.autoResolved))?`
+      <div class="lookup-recovery-row">
+        <button class="text-action" data-action="toggle-lookup-alternatives">${state.lookupAlternativesOpen?"收起其它结果":"不是这个词？换个结果"}</button>
+        <button class="text-action" data-action="refresh-lookup">重新识别</button>
+      </div>
+      ${state.lookupAlternativesOpen&&alternativeWords.length?`<div class="lookup-alternatives">${alternativeWords.map(item=>`<button class="lookup-alternative" data-search-alternative="${escapeHtml(item.word)}"><strong>${escapeHtml(item.word)}</strong><span>${escapeHtml(item.meaningZh||r.normalizedQuery||r.sourceQuery)}</span></button>`).join("")}</div>`:""}`:"";
 
     const primaryView=primarySense?`
       <div class="primary-sense-card">
@@ -566,9 +577,9 @@
         <div class="sense-example-zh">${escapeHtml(s.exampleZh||"")}</div>
       </div>`).join("")}</div>`:"";
 
-    return `${resolvedNote}
+    return `${resolvedNote}${alternativePanel}
       <div class="word-top learning-card-wordtop">
-        <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
+        <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" data-audios="${escapeHtml(JSON.stringify(r.audioUrls||[]))}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
       ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
@@ -595,11 +606,18 @@
     </div></div>`;
   }
 
-  function speak(word,audioUrl=""){
-    if(audioUrl){
-      const audio=new Audio(audioUrl);
-      audio.play().catch(()=>speak(word,""));
-      return;
+  async function speak(word,audioUrl="",audioUrls=[]){
+    const segments=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
+    if(audioUrl) segments.unshift(audioUrl);
+    if(segments.length){
+      try{
+        for(const src of Array.from(new Set(segments))){
+          await new Promise((resolve,reject)=>{
+            const audio=new Audio(src);audio.onended=resolve;audio.onerror=reject;audio.play().catch(reject);
+          });
+        }
+        return;
+      }catch{}
     }
     if(!("speechSynthesis" in window)){ toast("当前设备无法播放发音"); return; }
     const u=new SpeechSynthesisUtterance(word); u.lang="en-US";u.rate=.88;
@@ -745,6 +763,7 @@
           data-action="speak"
           data-word="${escapeHtml(card.word)}"
           data-audio="${escapeHtml(card.audioUrl||"")}"
+          data-audios="${escapeHtml(JSON.stringify(card.audioUrls||[]))}"
           title="播放美式发音"
           aria-label="播放 ${escapeHtml(card.word)} 的美式发音"
         >🔊</button>
@@ -1514,6 +1533,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
       state.notice=null;
       state.lookup={query:q,result:null};
+      state.lookupAlternativesOpen=false;
       state.lookupStatus="loading";
       state.selectedSenseId=null;
       state.addDraft=null;
@@ -1592,6 +1612,17 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const payload=await api("/api/dictionary/lookup",{method:"POST",body:{word:q,mode:"primary"}});
         state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
       }catch(err){state.lookupStatus="idle";showErrorNotice(err,"暂时没有查到这个词");render();}
+    }));
+
+    document.querySelectorAll("[data-search-alternative]").forEach(el=>el.addEventListener("click",async ()=>{
+      const preferredWord=String(el.dataset.searchAlternative||"").trim();
+      const sourceQuery=String(state.lookup?.result?.sourceQuery||state.lookup?.query||"").trim();
+      if(!preferredWord||!sourceQuery)return;
+      state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
+      try{
+        const payload=await api("/api/search/smart",{method:"POST",body:{query:sourceQuery,preferredWord}});
+        state.lookup={query:sourceQuery,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+      }catch(err){state.lookupStatus="idle";showErrorNotice(err,"这个表达暂时没有可靠结果");render();}
     }));
 
     document.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>void handleAction(el.dataset.action,el)));
@@ -1722,6 +1753,17 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
   async function handleAction(action,el){
     if(action==="dismiss-notice"){state.notice=null;render();return;}
+    if(action==="toggle-lookup-alternatives"){state.lookupAlternativesOpen=!state.lookupAlternativesOpen;render();return;}
+    if(action==="refresh-lookup"){
+      const q=String(state.lookup?.result?.sourceQuery||state.lookup?.query||"").trim();
+      if(!q||state.lookupStatus==="loading")return;
+      state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
+      try{
+        const payload=await api("/api/search/smart",{method:"POST",body:{query:q,forceRefresh:true}});
+        state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+      }catch(err){state.lookupStatus="idle";showErrorNotice(err,"重新识别没有完成");render();}
+      return;
+    }
     if(action==="open-library-editor"){openLibraryEditor(el.dataset.cardId);return;}
     if(action==="library-edit-back"){state.libraryEditor=null;state.route="library";render();return;}
     if(action==="clear-library-image"){
@@ -1794,9 +1836,9 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       }
       return;
     }
-    if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
+    if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.lookupAlternativesOpen=false;state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
-    if(action==="speak"){speak(el.dataset.word,el.dataset.audio||"");return;}
+    if(action==="speak"){let segments=[];try{segments=JSON.parse(el.dataset.audios||"[]");}catch{}speak(el.dataset.word,el.dataset.audio||"",segments);return;}
     if(action==="speak-sentence"){speakSentence(el.dataset.sentence||"");return;}
     if(action==="load-more-senses"){
       const q=state.lookup?.result?.word||state.lookup?.query?.trim()||"";
@@ -1839,7 +1881,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh,senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh,senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       state.data.cards.unshift(card);recordActivity("card-created",card.id);saveData();toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
     if(action==="continue-learning"){startStudy();return;}

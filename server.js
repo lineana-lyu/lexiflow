@@ -21,7 +21,7 @@ const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 
 const LOOKUP_CACHE_FILE = path.join(DATA_DIR, "dictionary-cache.json");
 const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const LOOKUP_CACHE_SCHEMA = "v4.3-desktop";
+const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
 let lookupCache = null;
@@ -1187,9 +1187,19 @@ function normalizeMerriamWebster(payload, query, mode = "primary", intentEn = ""
 
   // If Merriam-Webster returned only a close lexical entry, keep the first object
   // rather than mixing in compounds/phrases such as "deck chair".
-  const sourceEntries = exactEntries.length
-    ? exactEntries
-    : payload.filter(entry => entry && typeof entry === "object").slice(0, 1);
+  // Only exact headword/stem matches are allowed to become a learning card.
+  // A nearby dictionary object or spelling suggestion must never silently replace
+  // a Chinese concept with an unrelated English word.
+  const sourceEntries = exactEntries;
+  if (!sourceEntries.length) {
+    const suggestions = payload
+      .filter(entry => entry && typeof entry === "object")
+      .map(entry => normalizeHeadword(entry?.meta?.id || entry?.hwi?.hw || ""))
+      .filter(Boolean)
+      .filter((word, index, list) => word !== String(query || "").trim().toLowerCase() && list.indexOf(word) === index)
+      .slice(0, 8);
+    return { word: query, suggestions, mode, exactMatch: false, hasMore: false };
+  }
 
   const candidates = [];
   const usedPos = new Set();
@@ -1280,9 +1290,13 @@ function normalizeMerriamWebster(payload, query, mode = "primary", intentEn = ""
     word: candidates[0]?.word || query,
     phonetic: candidates[0]?.pronunciation || "",
     audioUrl: candidates[0]?.audioUrl || "",
+    audioUrls: candidates[0]?.audioUrl ? [candidates[0].audioUrl] : [],
+    pronunciationSource: candidates[0]?.audioUrl || candidates[0]?.pronunciation ? "merriam-webster-entry" : "",
     entries: candidates,
     suggestions: [],
     mode,
+    exactMatch: true,
+    intentMatched: !intentEn || Boolean(intentMatch),
     hasMore: totalExactEntries > candidates.length,
   };
 }
@@ -1565,21 +1579,24 @@ async function resolveChineseSearch(query) {
 5. intentEn 用英文准确描述本次具体词义，便于与词典定义对齐。
 6. avoidVisualEn 写最容易被图片模型误画成的其它含义；没有则空数组。
 7. 直接生成一组自然、简单、明确体现该词义的中英文例句。
-8. alternatives 只用于后台容错，最多 3 个；用户不需要先选择。
+8. primary 可以是一个自然的现代英语短语；不要为了迎合单词词典而强行改成不自然的单个词。
+9. exampleEn 必须包含 primary.word 原样（忽略大小写），避免词条与例句错位。
+10. alternatives 最多 3 个，必须是同一中文概念的自然替代表达；每项也给出 intentEn，便于词典校验。
 
 只输出 JSON：
 {
   "normalizedChinese":"纠正后的中文",
   "primary":{
-    "word":"english",
+    "word":"english word or phrase",
+    "pos":"noun|verb|adjective|adverb|phrase",
     "meaningZh":"简短中文",
     "intentEn":"precise sense in English",
     "avoidVisualEn":["confusing visual sense"],
-    "exampleEn":"natural example",
+    "exampleEn":"natural example that contains the exact primary.word",
     "exampleZh":"自然中文翻译",
     "confidence":0.95
   },
-  "alternatives":[{"word":"english","meaningZh":"中文"}]
+  "alternatives":[{"word":"alternative","pos":"noun|verb|adjective|adverb|phrase","meaningZh":"中文","intentEn":"precise sense in English"}]
 }`;
 
   const result = await runCodexFastText(prompt, {
@@ -1599,6 +1616,7 @@ async function resolveChineseSearch(query) {
     normalizedChinese: String(parsed.normalizedChinese || q),
     primary: {
       word,
+      pos: String(primary.pos || (word.includes(" ") ? "phrase" : "word")).trim(),
       meaningZh: String(primary.meaningZh || local?.[0]?.reason || q).trim(),
       intentEn: String(primary.intentEn || "").trim(),
       avoidVisualEn: Array.isArray(primary.avoidVisualEn)
@@ -1611,11 +1629,32 @@ async function resolveChineseSearch(query) {
     alternatives: Array.isArray(parsed.alternatives)
       ? parsed.alternatives.slice(0, 3).map(item => ({
           word: String(item.word || "").trim().toLowerCase(),
+          pos: String(item.pos || "").trim(),
           meaningZh: String(item.meaningZh || "").trim(),
+          intentEn: String(item.intentEn || "").trim(),
         })).filter(item => /^[a-z][a-z '-]*$/i.test(item.word))
       : [],
     source: local.length ? "local-assisted" : "codex-resolver",
   };
+}
+
+async function fetchLearnersPayload(word, key, userAgent = "LexiFlow/0.8.3") {
+  const url = `https://www.dictionaryapi.com/api/v3/references/learners/json/${encodeURIComponent(word)}?key=${encodeURIComponent(key)}`;
+  const response = await fetch(url, { headers: { "Accept":"application/json", "User-Agent":userAgent } });
+  if (!response.ok) {
+    const err = new Error(`Merriam-Webster 请求失败：HTTP ${response.status}`);
+    err.code = "DICTIONARY_HTTP_ERROR";
+    throw err;
+  }
+  return response.json();
+}
+
+function exactPronunciationFromPayload(payload, word) {
+  if (!Array.isArray(payload)) return { phonetic:"", audioUrl:"", exactMatch:false };
+  const exactEntries = payload.filter(entry => entry && typeof entry === "object" && entryMatchesQuery(entry, word));
+  const source = exactEntries[0];
+  if (!source) return { phonetic:"", audioUrl:"", exactMatch:false };
+  return { phonetic: pronunciationFromEntry(source), audioUrl: audioUrlFromEntry(source), exactMatch:true };
 }
 
 async function merriamWebsterPronunciation(word) {
@@ -1626,19 +1665,41 @@ async function merriamWebsterPronunciation(word) {
     err.code = "DICTIONARY_KEY_MISSING";
     throw err;
   }
-  const url = `https://www.dictionaryapi.com/api/v3/references/learners/json/${encodeURIComponent(word)}?key=${encodeURIComponent(key)}`;
-  const response = await fetch(url, { headers: { "Accept":"application/json", "User-Agent":"LexiFlow/4.2-audit1" } });
-  if (!response.ok) {
-    const err = new Error(`Merriam-Webster 发音查询失败：HTTP ${response.status}`);
-    err.code = "DICTIONARY_HTTP_ERROR";
-    throw err;
+  const normalizedWord = String(word || "").trim().toLowerCase();
+  const payload = await fetchLearnersPayload(normalizedWord, key, "LexiFlow/0.8.3-pronunciation");
+  const exact = exactPronunciationFromPayload(payload, normalizedWord);
+  if (exact.exactMatch) {
+    return {
+      phonetic: exact.phonetic,
+      audioUrl: exact.audioUrl,
+      audioUrls: exact.audioUrl ? [exact.audioUrl] : [],
+      pronunciationSource: "merriam-webster-entry",
+      exactMatch:true,
+    };
   }
-  const payload = await response.json();
-  if (!Array.isArray(payload)) return { phonetic:"", audioUrl:"" };
-  const exactEntries = payload.filter(entry => entry && typeof entry === "object" && entryMatchesQuery(entry, word));
-  const source = exactEntries[0] || payload.find(entry => entry && typeof entry === "object");
-  if (!source) return { phonetic:"", audioUrl:"" };
-  return { phonetic: pronunciationFromEntry(source), audioUrl: audioUrlFromEntry(source) };
+
+  // Multi-word phrases may not have their own Learner's Dictionary headword.
+  // In that case only exact Merriam-Webster component pronunciations are used.
+  const parts = normalizedWord.split(/\s+/).filter(part => /^[a-z][a-z'-]*$/i.test(part));
+  if (parts.length > 1 && parts.length <= 5) {
+    const componentResults = [];
+    for (const part of parts) {
+      const componentPayload = await fetchLearnersPayload(part, key, "LexiFlow/0.8.3-phrase-pronunciation");
+      const component = exactPronunciationFromPayload(componentPayload, part);
+      if (!component.exactMatch || !component.phonetic) {
+        return { phonetic:"", audioUrl:"", audioUrls:[], pronunciationSource:"", exactMatch:false };
+      }
+      componentResults.push(component);
+    }
+    return {
+      phonetic: componentResults.map(item => item.phonetic).join(" "),
+      audioUrl: "",
+      audioUrls: componentResults.map(item => item.audioUrl).filter(Boolean),
+      pronunciationSource: "merriam-webster-components",
+      exactMatch:false,
+    };
+  }
+  return { phonetic:"", audioUrl:"", audioUrls:[], pronunciationSource:"", exactMatch:false };
 }
 
 async function merriamWebsterLookup(word, mode = "primary", options = {}) {
@@ -1658,20 +1719,13 @@ async function merriamWebsterLookup(word, mode = "primary", options = {}) {
   const cached = await getCachedLookup(cacheKey);
   if (cached) return { ...cached, cacheHit: true };
 
-  const url = `https://www.dictionaryapi.com/api/v3/references/learners/json/${encodeURIComponent(word)}?key=${encodeURIComponent(key)}`;
-  const response = await fetch(url, {
-    headers: { "Accept": "application/json", "User-Agent": "LexiFlow/4.2" },
-  });
-
-  if (!response.ok) {
-    const err = new Error(`Merriam-Webster 请求失败：HTTP ${response.status}`);
-    err.code = "DICTIONARY_HTTP_ERROR";
-    throw err;
-  }
-
-  const payload = await response.json();
+  const payload = await fetchLearnersPayload(word, key, "LexiFlow/0.8.3-lookup");
   const normalized = normalizeMerriamWebster(payload, word, safeMode, intentEn);
   if (normalized.suggestions?.length) return normalized;
+
+  if (provided && normalized.entries?.length && intentEn && normalized.intentMatched === false) {
+    return { word, mode:safeMode, exactMatch:true, semanticMismatch:true, suggestions:[], senses:[] };
+  }
 
   let result;
   if (provided && normalized.entries?.length) {
@@ -1680,6 +1734,9 @@ async function merriamWebsterLookup(word, mode = "primary", options = {}) {
       word: normalized.word,
       phonetic: normalized.phonetic,
       audioUrl: normalized.audioUrl,
+      audioUrls: normalized.audioUrls || (normalized.audioUrl ? [normalized.audioUrl] : []),
+      pronunciationSource: normalized.pronunciationSource || "merriam-webster-entry",
+      dictionaryExact:true,
       mode: safeMode,
       hasMore: normalized.hasMore,
       suggestions: [],
@@ -1712,7 +1769,76 @@ async function merriamWebsterLookup(word, mode = "primary", options = {}) {
   return result;
 }
 
-async function smartLookup(query) {
+async function buildResolvedPhraseCard(candidate, resolved, sourceQuery) {
+  const pronunciation = await merriamWebsterPronunciation(candidate.word);
+  const exampleEn = String(candidate.exampleEn || resolved.primary.exampleEn || "").trim();
+  const exampleZh = String(candidate.exampleZh || resolved.primary.exampleZh || "").trim();
+  const exactPhrase = String(candidate.word || "").trim();
+  if (!exampleEn || !exampleZh || !exampleEn.toLowerCase().includes(exactPhrase.toLowerCase())) {
+    const err = new Error("AI 返回的短语例句与目标短语不一致");
+    err.code = "SEARCH_RESOLUTION_INCONSISTENT";
+    throw err;
+  }
+  const alternatives = [resolved.primary, ...(resolved.alternatives || [])]
+    .filter(item => item?.word && item.word.toLowerCase() !== exactPhrase.toLowerCase())
+    .map(item => ({ word:item.word, meaningZh:item.meaningZh || resolved.normalizedChinese || sourceQuery }));
+  return {
+    word: exactPhrase,
+    phonetic: pronunciation.phonetic || "",
+    audioUrl: pronunciation.audioUrl || "",
+    audioUrls: pronunciation.audioUrls || [],
+    pronunciationSource: pronunciation.pronunciationSource || "",
+    dictionaryExact:false,
+    phraseCard:true,
+    mode:"primary",
+    hasMore:false,
+    suggestions:[],
+    aiEnriched:true,
+    sourceQuery,
+    normalizedQuery:resolved.normalizedChinese,
+    autoResolved:true,
+    alternatives,
+    senses:[{
+      id:`phrase-${exactPhrase.replace(/[^a-z0-9]+/gi,"-")}`,
+      pos:String(candidate.pos || resolved.primary.pos || "phrase").trim() || "phrase",
+      meaningZh:String(candidate.meaningZh || resolved.primary.meaningZh || resolved.normalizedChinese || sourceQuery).trim(),
+      exampleEn,
+      exampleZh,
+      commonForLearner:true,
+      translationConfidence:Number.isFinite(Number(candidate.confidence ?? resolved.primary.confidence)) ? Number(candidate.confidence ?? resolved.primary.confidence) : null,
+      senseIntentEn:String(candidate.intentEn || resolved.primary.intentEn || "").trim(),
+      avoidVisualEn:Array.isArray(candidate.avoidVisualEn || resolved.primary.avoidVisualEn) ? (candidate.avoidVisualEn || resolved.primary.avoidVisualEn) : [],
+    }],
+  };
+}
+
+async function lookupResolvedChineseCandidate(candidate, resolved, sourceQuery) {
+  const word = String(candidate?.word || "").trim().toLowerCase();
+  if (!word) return null;
+  const learningContent = {
+    ...resolved.primary,
+    ...candidate,
+    word,
+    meaningZh:String(candidate.meaningZh || resolved.primary.meaningZh || resolved.normalizedChinese || sourceQuery).trim(),
+    exampleEn:String(candidate.exampleEn || resolved.primary.exampleEn || "").trim(),
+    exampleZh:String(candidate.exampleZh || resolved.primary.exampleZh || "").trim(),
+  };
+  const intentEn = String(candidate.intentEn || resolved.primary.intentEn || "").trim();
+  const result = await merriamWebsterLookup(word, "primary", {
+    intentEn,
+    learningContent,
+    avoidVisualEn: learningContent.avoidVisualEn,
+    sourceQuery,
+    normalizedQuery: resolved.normalizedChinese,
+    alternatives: [resolved.primary, ...(resolved.alternatives || [])]
+      .filter(item => item?.word && item.word.toLowerCase() !== word)
+      .map(item => ({ word:item.word, meaningZh:item.meaningZh || resolved.normalizedChinese || sourceQuery })),
+  });
+  if (result?.senses?.length && !result.semanticMismatch) return result;
+  return null;
+}
+
+async function smartLookup(query, options = {}) {
   const q = String(query || "").trim();
   if (!q) {
     const err = new Error("请输入要查找的内容");
@@ -1722,32 +1848,40 @@ async function smartLookup(query) {
 
   const hasChinese = /[\u3400-\u9fff]/.test(q);
   if (hasChinese) {
-    const cachedChinese = await findCachedChineseLookup(q);
-    if (cachedChinese) return cachedChinese;
+    if (!options.forceRefresh && !options.preferredWord) {
+      const cachedChinese = await findCachedChineseLookup(q);
+      if (cachedChinese) return cachedChinese;
+    }
 
     const resolved = await resolveChineseSearch(q);
-    let result = await merriamWebsterLookup(resolved.primary.word, "primary", {
-      intentEn: resolved.primary.intentEn,
-      learningContent: resolved.primary,
-      avoidVisualEn: resolved.primary.avoidVisualEn,
-      sourceQuery: q,
-      normalizedQuery: resolved.normalizedChinese,
-      alternatives: resolved.alternatives,
-    });
-    if (result.suggestions?.length) {
-      const corrected = String(result.suggestions[0] || "").trim().toLowerCase();
-      if (corrected) {
-        result = await merriamWebsterLookup(corrected, "primary", {
-          intentEn: resolved.primary.intentEn,
-          learningContent: { ...resolved.primary, word: corrected },
-          avoidVisualEn: resolved.primary.avoidVisualEn,
-          sourceQuery: q,
-          normalizedQuery: resolved.normalizedChinese,
-          alternatives: resolved.alternatives,
-        });
-      }
+    const allCandidates = [resolved.primary, ...(resolved.alternatives || [])]
+      .filter(item => item?.word)
+      .filter((item, index, list) => list.findIndex(other => other.word.toLowerCase() === item.word.toLowerCase()) === index);
+    const preferredWord = String(options.preferredWord || "").trim().toLowerCase();
+    if (preferredWord) allCandidates.sort((a, b) => (a.word.toLowerCase() === preferredWord ? -1 : b.word.toLowerCase() === preferredWord ? 1 : 0));
+
+    for (const candidate of allCandidates) {
+      if (preferredWord && candidate.word.toLowerCase() !== preferredWord) continue;
+      const verified = await lookupResolvedChineseCandidate(candidate, resolved, q);
+      if (verified) return verified;
+      if (candidate.word.includes(" ")) return buildResolvedPhraseCard(candidate, resolved, q);
     }
-    return result;
+
+    for (const candidate of allCandidates) {
+      if (candidate.word.includes(" ")) return buildResolvedPhraseCard(candidate, resolved, q);
+      const verified = await lookupResolvedChineseCandidate(candidate, resolved, q);
+      if (verified) return verified;
+    }
+
+    return {
+      word:q,
+      sourceQuery:q,
+      normalizedQuery:resolved.normalizedChinese,
+      autoResolved:true,
+      suggestions:allCandidates.map(item => ({ word:item.word, reason:item.meaningZh || resolved.normalizedChinese || q })),
+      suggestionTitle:"没有找到可靠的完全匹配",
+      suggestionHint:"下面是可能的英文表达。选择一个后再由词典确认，不会自动替换成无关的拼写建议。",
+    };
   }
 
   if (!/^[A-Za-z][A-Za-z\s'-]*$/.test(q)) {
@@ -1758,6 +1892,7 @@ async function smartLookup(query) {
 
   let result = await merriamWebsterLookup(q.toLowerCase(), "primary", { sourceQuery: q });
   if (result.suggestions?.length) {
+    if (q.includes(" ")) return result;
     const corrected = String(result.suggestions[0] || "").trim().toLowerCase();
     if (corrected) {
       result = await merriamWebsterLookup(corrected, "primary", { sourceQuery: q });
@@ -2166,7 +2301,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readJsonBody(req);
       const query = String(body.query || "").trim();
       try {
-        const result = await smartLookup(query);
+        const result = await smartLookup(query, { forceRefresh:Boolean(body.forceRefresh), preferredWord:String(body.preferredWord || "").trim() });
         return sendJson(res, 200, { ok: true, result });
       } catch (err) {
         console.error("smart lookup failed:", err?.message || err);
