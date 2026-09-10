@@ -1,0 +1,74 @@
+name: Apply library card editor and calm swipe
+
+on:
+  push:
+    branches:
+      - feat/library-card-editor-soft-swipe
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Apply product patch
+        shell: pwsh
+        run: python tools/patch_v081.py
+
+      - name: Refresh lockfile
+        shell: pwsh
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Install dependencies
+        shell: pwsh
+        run: npm ci
+
+      - name: Validate JavaScript
+        shell: pwsh
+        run: npm run check
+
+      - name: Validate library editor anchors
+        shell: pwsh
+        run: |
+          $app = Get-Content public/app.js -Raw
+          $css = Get-Content public/styles.css -Raw
+          @('library-edit','open-library-editor','save-library-card','regenerate-library-image','library-image-file') | ForEach-Object {
+            if (-not $app.Contains($_)) { throw "missing app anchor: $_" }
+          }
+          @('.library-row','.library-editor-grid','lexiViewNewForward','translate3d(52px,0,-34px)') | ForEach-Object {
+            if (-not $css.Contains($_)) { throw "missing css anchor: $_" }
+          }
+
+      - name: Build Windows application
+        shell: pwsh
+        run: npm run build:win
+
+      - name: Verify no tracked test artifacts
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Select-String -Pattern '(^|/)(tests?|__tests__|fixtures?|mocks?)(/|$)|\.(test|spec)\.'
+          if ($bad) {
+            $bad | ForEach-Object { Write-Host $_ }
+            throw 'Tracked test/spec/fixture/mock artifacts found'
+          }
+
+      - name: Commit product changes and remove temporary helpers
+        shell: pwsh
+        run: |
+          Remove-Item tools/patch_v081.py -Force
+          Remove-Item .github/workflows/apply-library-editor-soft-swipe.yml -Force
+          git config user.name "lineana"
+          git config user.email "17570875940@163.com"
+          git add -A
+          git commit -m "refine: make library cards editable and calm card swipes"
+          git push origin HEAD:feat/library-card-editor-soft-swipe
