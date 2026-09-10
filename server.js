@@ -175,7 +175,16 @@ async function migrateLegacyRuntimeData() {
     const from = path.join(LEGACY_DATA_DIR, name);
     const to = path.join(DATA_DIR, name);
     try {
-      if (!fs.existsSync(to) && fs.existsSync(from)) await fsp.copyFile(from, to);
+      if (!fs.existsSync(to) && fs.existsSync(from)) {
+      await fsp.copyFile(from, to);
+      if (name === "settings.json") {
+        try {
+          await fsp.unlink(from);
+        } catch (err) {
+          console.warn("legacy settings cleanup skipped:", err.message);
+        }
+      }
+    }
     } catch (err) {
       console.warn(`legacy ${name} migration skipped:`, err.message);
     }
