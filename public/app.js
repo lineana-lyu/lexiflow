@@ -2042,7 +2042,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       state.study.applyText=suggestion;
       state.study.applyApproved=keywordOk;
       state.study.applyLastCheckedText=keywordOk?suggestion:"";
-      state.study.feedback={...fb,title:"已采用 修改建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
+      state.study.feedback={...fb,title:"已采用修改建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
       render();
       setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
       return;
