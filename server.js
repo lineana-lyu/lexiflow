@@ -26,6 +26,8 @@ const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
+const visualSceneCache = new Map();
+const practicePromptCache = new Map();
 
 async function loadLookupCache() {
   if (lookupCache) return lookupCache;
@@ -1765,6 +1767,49 @@ async function smartLookup(query) {
   return result;
 }
 
+
+function putSmallCache(cache,key,value,limit=100){
+  cache.set(key,value);
+  if(cache.size>limit){const first=cache.keys().next().value;cache.delete(first);}
+}
+
+async function visualSceneAssist(body){
+  const word=String(body.word||"").trim();
+  const meaningZh=String(body.meaningZh||"").trim();
+  const exampleEn=String(body.exampleEn||"").trim();
+  const senseIntentEn=String(body.senseIntentEn||"").trim();
+  const previousScene=String(body.previousScene||"").trim();
+  if(!word)throw new Error("INVALID_INPUT");
+  const settings=await loadSettings();
+  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn].join("|");
+  if(!previousScene&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
+  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：场景必须具体、生活化、可直接画成图片，严格对应当前词义；问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
+  const result=await runCodexFastText(prompt,{timeoutMs:10000,reasoningEffortOverride:"low"});
+  const parsed=extractJson(result.stdout);
+  const assist={scene:String(parsed.scene||"").trim(),cue:String(parsed.cue||"").trim(),practiceQuestion:String(parsed.practiceQuestion||"").trim()};
+  if(!assist.scene)throw new Error("EMPTY_VISUAL_SCENE");
+  if(!previousScene)putSmallCache(visualSceneCache,cacheKey,assist);
+  return assist;
+}
+
+async function practicePromptAssist(body){
+  const word=String(body.word||"").trim();
+  const meaningZh=String(body.meaningZh||"").trim();
+  const exampleEn=String(body.exampleEn||"").trim();
+  const previousQuestion=String(body.previousQuestion||"").trim();
+  if(!word)throw new Error("INVALID_INPUT");
+  const settings=await loadSettings();
+  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn].join("|");
+  if(!previousQuestion&&practicePromptCache.has(cacheKey))return practicePromptCache.get(cacheKey);
+  const prompt=`给英语学习者一个非常简短的中文问题，引导他用目标词说一句与自己真实生活有关的话。\n目标词：${word}\n词义：${meaningZh}\n参考例句：${exampleEn}\n${previousQuestion?`不要重复这个旧问题：${previousQuestion}`:""}\n不要给英文答案，不要讲解。只输出 JSON：{"question":"一句中文问题"}`;
+  const result=await runCodexFastText(prompt,{timeoutMs:8000,reasoningEffortOverride:"low"});
+  const parsed=extractJson(result.stdout);
+  const value={question:String(parsed.question||"").trim()};
+  if(!value.question)throw new Error("EMPTY_PRACTICE_PROMPT");
+  if(!previousQuestion)putSmallCache(practicePromptCache,cacheKey,value);
+  return value;
+}
+
 async function sentenceFeedback(body) {
   const word = String(body.word || "").trim();
   const meaningZh = String(body.meaningZh || "").trim();
@@ -1834,6 +1879,7 @@ async function generateVisual(body) {
   const meaningZh = String(body.meaningZh || "").trim();
   const exampleEn = String(body.exampleEn || "").trim();
   const visualNote = String(body.visualNote || "").trim();
+  const suggestedScene = String(body.suggestedScene || "").trim();
   const sourceQuery = String(body.sourceQuery || "").trim();
   const senseIntentEn = String(body.senseIntentEn || "").trim();
   const avoidVisualEn = Array.isArray(body.avoidVisualEn)
@@ -1847,7 +1893,9 @@ async function generateVisual(body) {
 
   const scene = visualNote
     ? `用户指定场景（最高优先级，必须严格实现）：${visualNote}`
-    : `用户未指定场景：请根据当前词义设计一个自然、具体、生活化的记忆场景。`;
+    : suggestedScene
+      ? `AI 已设计的记忆场景（优先实现）：${suggestedScene}`
+      : `用户未指定场景：请根据当前词义设计一个自然、具体、生活化的记忆场景。`;
 
   const prompt = `$imagegen
 请立即生成图片，不要先解释或讨论。
@@ -1893,8 +1941,8 @@ ${absolutePath}
 
   return {
     url: `/generated/${encodeURIComponent(fileName)}`,
-    sceneMode: visualNote ? "user-directed" : "auto",
-    visualNote,
+    sceneMode: visualNote ? "user-directed" : suggestedScene ? "ai-scene" : "auto",
+    visualNote: visualNote || suggestedScene,
   };
 }
 
@@ -2001,7 +2049,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, {
         ok: true,
         service: "lexiflow-local",
-        version: "0.5.0-desktop",
+        version: "0.7.0-desktop",
         address: `http://${HOST}:${PORT}`,
       });
     }
@@ -2230,6 +2278,31 @@ const server = http.createServer(async (req, res) => {
           userError: friendly,
           test: lastCodexRuntimeTest,
         });
+      }
+    }
+
+
+    if (req.method === "POST" && url.pathname === "/api/ai/visual-scene") {
+      const body = await readJsonBody(req);
+      try {
+        const assist = await visualSceneAssist(body);
+        return sendJson(res, 200, { ok: true, assist });
+      } catch (err) {
+        console.error("visual scene assist failed:", err?.message || err);
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/ai/practice-prompt") {
+      const body = await readJsonBody(req);
+      try {
+        const prompt = await practicePromptAssist(body);
+        return sendJson(res, 200, { ok: true, prompt });
+      } catch (err) {
+        console.error("practice prompt failed:", err?.message || err);
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
       }
     }
 
