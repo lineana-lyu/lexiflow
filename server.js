@@ -9,15 +9,20 @@ const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, "public");
-const DATA_DIR = path.join(ROOT, "data");
-const GENERATED_DIR = path.join(ROOT, "generated");
+const LEGACY_DATA_DIR = path.join(ROOT, "data");
+const LEGACY_GENERATED_DIR = path.join(ROOT, "generated");
+const DATA_DIR = process.env.LEXIFLOW_DATA_DIR || LEGACY_DATA_DIR;
+const GENERATED_DIR = process.env.LEXIFLOW_GENERATED_DIR || (process.env.LEXIFLOW_DATA_DIR ? path.join(DATA_DIR, "generated") : LEGACY_GENERATED_DIR);
 const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
+const LEARNING_FILE = path.join(DATA_DIR, "learning-data.json");
 const CODEX_CONFIG = path.join(os.homedir(), ".codex", "config.toml");
 const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 
 const LOOKUP_CACHE_FILE = path.join(DATA_DIR, "dictionary-cache.json");
 const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const LOOKUP_CACHE_SCHEMA = "v4.2-audit1";
+const LOOKUP_CACHE_SCHEMA = "v4.3-desktop";
+const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
+const DEFAULT_CODEX_REASONING_EFFORT = "medium";
 let lookupCache = null;
 
 async function loadLookupCache() {
@@ -102,15 +107,113 @@ async function readJsonBody(req, maxBytes = 2 * 1024 * 1024) {
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 
+async function writeJsonAtomic(filePath, value) {
+  await fsp.mkdir(path.dirname(filePath), { recursive: true });
+  const tempFile = `${filePath}.${process.pid}.tmp`;
+  await fsp.writeFile(tempFile, JSON.stringify(value, null, 2), "utf8");
+  await fsp.rename(tempFile, filePath);
+}
+
+function defaultLearningData() {
+  return {
+    version: 1,
+    cards: [],
+    activities: [],
+    settings: { dailyGoal: 5 },
+    createdAt: new Date().toISOString(),
+  };
+}
+
+async function loadLearningData() {
+  try {
+    const parsed = JSON.parse(await fsp.readFile(LEARNING_FILE, "utf8"));
+    if (!parsed || !Array.isArray(parsed.cards) || !Array.isArray(parsed.activities)) throw new Error("INVALID_DATA");
+    return {
+      ...defaultLearningData(),
+      ...parsed,
+      settings: { dailyGoal: 5, ...(parsed.settings || {}) },
+    };
+  } catch {
+    return defaultLearningData();
+  }
+}
+
+async function saveLearningData(value) {
+  if (!value || !Array.isArray(value.cards) || !Array.isArray(value.activities)) {
+    const err = new Error("学习数据格式不正确");
+    err.code = "LEARNING_DATA_INVALID";
+    throw err;
+  }
+  const clean = {
+    ...defaultLearningData(),
+    ...value,
+    settings: { dailyGoal: 5, ...(value.settings || {}) },
+  };
+  await writeJsonAtomic(LEARNING_FILE, clean);
+  return clean;
+}
+
+function getElectronSafeStorage() {
+  if (process.env.LEXIFLOW_DESKTOP !== "1") return null;
+  try {
+    const electron = require("electron");
+    const safeStorage = electron && electron.safeStorage;
+    return safeStorage && safeStorage.isEncryptionAvailable() ? safeStorage : null;
+  } catch {
+    return null;
+  }
+}
+
+async function migrateLegacyRuntimeData() {
+  if (path.resolve(DATA_DIR) === path.resolve(LEGACY_DATA_DIR)) return;
+  await fsp.mkdir(DATA_DIR, { recursive: true });
+  await fsp.mkdir(GENERATED_DIR, { recursive: true });
+
+  for (const name of ["settings.json", "dictionary-cache.json"]) {
+    const from = path.join(LEGACY_DATA_DIR, name);
+    const to = path.join(DATA_DIR, name);
+    try {
+      if (!fs.existsSync(to) && fs.existsSync(from)) await fsp.copyFile(from, to);
+    } catch (err) {
+      console.warn(`legacy ${name} migration skipped:`, err.message);
+    }
+  }
+
+  try {
+    if (fs.existsSync(LEGACY_GENERATED_DIR)) {
+      const names = await fsp.readdir(LEGACY_GENERATED_DIR);
+      for (const name of names) {
+        if (!/\.(png|jpe?g|webp)$/i.test(name)) continue;
+        const from = path.join(LEGACY_GENERATED_DIR, name);
+        const to = path.join(GENERATED_DIR, name);
+        if (!fs.existsSync(to)) await fsp.copyFile(from, to);
+      }
+    }
+  } catch (err) {
+    console.warn("legacy generated image migration skipped:", err.message);
+  }
+}
+
 async function loadSettings() {
   const defaults = {
     merriamWebsterLearnersKey: "",
-    codexModel: "",
-    codexReasoningEffort: ""
+    codexModel: DEFAULT_CODEX_MODEL,
+    codexReasoningEffort: DEFAULT_CODEX_REASONING_EFFORT,
   };
   try {
     const parsed = JSON.parse(await fsp.readFile(SETTINGS_FILE, "utf8"));
-    return { ...defaults, ...parsed };
+    let key = String(parsed.merriamWebsterLearnersKey || "");
+    if (!key && parsed.merriamWebsterLearnersKeyEncrypted) {
+      const safeStorage = getElectronSafeStorage();
+      if (safeStorage) {
+        try {
+          key = safeStorage.decryptString(Buffer.from(String(parsed.merriamWebsterLearnersKeyEncrypted), "base64"));
+        } catch (err) {
+          console.warn("dictionary key decrypt failed:", err.message);
+        }
+      }
+    }
+    return { ...defaults, ...parsed, merriamWebsterLearnersKey: key };
   } catch {
     return defaults;
   }
@@ -126,13 +229,15 @@ async function saveSettings(next) {
     codexReasoningEffort: allowedEfforts.has(requestedEffort) ? requestedEffort : "",
   };
 
-  await fsp.mkdir(DATA_DIR, { recursive: true });
-  const tempFile = `${SETTINGS_FILE}.tmp`;
   try {
-    await fsp.writeFile(tempFile, JSON.stringify(clean, null, 2), "utf8");
-    await fsp.rename(tempFile, SETTINGS_FILE);
+    const diskValue = { ...clean };
+    const safeStorage = getElectronSafeStorage();
+    if (safeStorage && clean.merriamWebsterLearnersKey) {
+      diskValue.merriamWebsterLearnersKeyEncrypted = safeStorage.encryptString(clean.merriamWebsterLearnersKey).toString("base64");
+      delete diskValue.merriamWebsterLearnersKey;
+    }
+    await writeJsonAtomic(SETTINGS_FILE, diskValue);
   } catch (err) {
-    try { await fsp.unlink(tempFile); } catch {}
     const wrapped = new Error("本地设置文件无法写入");
     wrapped.code = "SETTINGS_WRITE_FAILED";
     wrapped.cause = err;
@@ -1472,11 +1577,40 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    if (req.method === "GET" && url.pathname === "/api/learning-data") {
+      const data = await loadLearningData();
+      return sendJson(res, 200, {
+        ok: true,
+        data,
+        hasStoredData: fs.existsSync(LEARNING_FILE),
+        storage: process.env.LEXIFLOW_DESKTOP === "1" ? "desktop" : "local-file",
+      });
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/learning-data") {
+      const body = await readJsonBody(req, 8 * 1024 * 1024);
+      try {
+        const data = await saveLearningData(body.data);
+        return sendJson(res, 200, { ok: true, data });
+      } catch (err) {
+        return sendJson(res, 400, {
+          ok: false,
+          code: err.code || "LEARNING_DATA_SAVE_FAILED",
+          error: "学习数据没有保存成功",
+          userError: { code: err.code || "LEARNING_DATA_SAVE_FAILED", title: "学习进度没有保存", message: "请稍后重试。当前页面内容仍然保留。" },
+        });
+      }
+    }
+
     if (req.method === "GET" && url.pathname === "/api/status") {
       const settings = await loadSettings();
       const codex = codexStatus();
       return sendJson(res, 200, {
         ok: true,
+        storage: {
+          mode: process.env.LEXIFLOW_DESKTOP === "1" ? "desktop" : "local-file",
+          persistent: true,
+        },
         dictionary: {
           provider: "Merriam-Webster's Learner's Dictionary",
           configured: Boolean(settings.merriamWebsterLearnersKey),
@@ -1725,17 +1859,46 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, HOST, () => {
-  const address = `http://${HOST}:${PORT}`;
-  console.log("");
-  console.log("LexiFlow 本地服务 v4.2 已启动");
-  console.log(`地址: ${address}`);
-  console.log(`Codex 认证: ${CODEX_AUTH}`);
-  console.log(`Codex 可选配置: ${CODEX_CONFIG}`);
-  console.log("关闭此窗口即可停止本地服务。");
-  console.log("");
+async function startServer() {
+  await migrateLegacyRuntimeData();
+  await fsp.mkdir(DATA_DIR, { recursive: true });
+  await fsp.mkdir(GENERATED_DIR, { recursive: true });
 
-  if (process.platform === "win32" && process.env.LEXIFLOW_NO_OPEN !== "1") {
-    exec(`start "" "${address}"`);
-  }
-});
+  return await new Promise((resolve, reject) => {
+    const onError = err => {
+      server.off("listening", onListening);
+      reject(err);
+    };
+    const onListening = () => {
+      server.off("error", onError);
+      const address = `http://${HOST}:${PORT}`;
+      console.log("");
+      console.log("LexiFlow 本地服务已启动");
+      console.log(`地址: ${address}`);
+      console.log("");
+
+      if (process.platform === "win32" && process.env.LEXIFLOW_NO_OPEN !== "1") {
+        exec(`start "" "${address}"`);
+      }
+      resolve({ server, address });
+    };
+    server.once("error", onError);
+    server.once("listening", onListening);
+    server.listen(PORT, HOST);
+  });
+}
+
+function stopServer() {
+  try {
+    if (server.listening) server.close();
+  } catch {}
+}
+
+if (require.main === module) {
+  startServer().catch(err => {
+    console.error("LexiFlow startup failed:", err);
+    process.exitCode = 1;
+  });
+}
+
+module.exports = { startServer, stopServer };

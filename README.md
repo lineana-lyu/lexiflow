@@ -1,3 +1,30 @@
+# LexiFlow Desktop
+
+LexiFlow 现在以 **Windows 桌面应用** 为主运行形态。学习数据、设置和生成图片不再依赖浏览器 localStorage。
+
+- 学习数据：保存到 Electron `userData/app-data/learning-data.json`
+- 词典/AI 设置：保存到 Electron `userData/app-data/settings.json`
+- Merriam-Webster Key：在 Electron 环境下使用系统安全存储加密后落盘
+- 生成图片：保存到 Electron `userData/app-data/generated/`
+- 默认 Codex：`gpt-5.6-luna`
+- 默认思考强度：`medium`
+- 首次启动会尝试迁移旧项目目录里的设置、缓存和生成图片；浏览器 localStorage 中已有的学习卡也会在第一次打开新版本时自动迁移到本地文件。
+
+开发运行：
+
+```powershell
+npm install
+npm run app
+```
+
+构建 Windows 安装包 / 便携版：
+
+```powershell
+npm run build:win
+```
+
+---
+
 # LexiFlow Standalone MVP v3
 
 这是一个**全新的独立 MVP**，不连接旧 LexiFlow 项目。

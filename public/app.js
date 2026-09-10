@@ -74,7 +74,7 @@
 
   const state = {
     route: "home",
-    data: loadData(),
+    data: defaultData(),
     toast: "",
     modal: null,
     lookup: null,
@@ -103,19 +103,46 @@
     };
   }
 
-  function loadData(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return defaultData();
-      const parsed = JSON.parse(raw);
-      return { ...defaultData(), ...parsed, settings:{dailyGoal:5,...(parsed.settings||{})} };
-    }catch{
-      return defaultData();
-    }
+  function normalizeLearningData(parsed){
+    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:5,...(parsed?.settings||{})} };
   }
 
+  function loadLegacyBrowserData(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw)return null;
+      return normalizeLearningData(JSON.parse(raw));
+    }catch{return null;}
+  }
+
+  let persistenceReady=false;
+  let persistenceQueue=Promise.resolve();
+
   function saveData(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    if(!persistenceReady)return;
+    const snapshot=JSON.parse(JSON.stringify(state.data));
+    persistenceQueue=persistenceQueue
+      .catch(()=>{})
+      .then(()=>api("/api/learning-data",{method:"POST",body:{data:snapshot}}))
+      .catch(err=>{
+        console.error("learning data save failed",err);
+        if(!state.notice) showNotice("学习进度暂未保存","本机存储暂时不可用，请稍后重试。","error");
+      });
+  }
+
+  async function hydrateLearningData(){
+    const legacy=loadLegacyBrowserData();
+    const payload=await api("/api/learning-data");
+    if(payload.hasStoredData){
+      state.data=normalizeLearningData(payload.data);
+    }else if(legacy && (legacy.cards.length||legacy.activities.length)){
+      state.data=legacy;
+      await api("/api/learning-data",{method:"POST",body:{data:state.data}});
+      try{localStorage.removeItem(STORAGE_KEY);}catch{}
+    }else{
+      state.data=normalizeLearningData(payload.data);
+    }
+    persistenceReady=true;
   }
 
   function uid(){
@@ -556,7 +583,7 @@
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
       )
-      + `<div class="study-shell"><div class="card study-card">${renderStage(card)}</div><aside class="card stage-rail"><div class="section-title"><div><h2>首次学习流程</h2><p>每一步都由你显式完成。</p></div></div><div class="stages">${renderStageRail(card)}</div></aside></div>`
+      + `<div class="study-shell"><div class="card study-card">${renderStage(card)}</div><aside class="card stage-rail"><div class="section-title"><div><h2>首次学习流程</h2><p></p></div></div><div class="stages">${renderStageRail(card)}</div></aside></div>`
     );
   }
 
@@ -705,7 +732,7 @@
           <div class="field">
             <label>描述你希望看到的画面（可选）</label>
             <textarea class="textarea visual-scene-input" id="visual-note" placeholder="例如：一双手正在电脑桌前使用机械键盘，屏幕在背景中">${escapeHtml(state.study.visualNote||"")}</textarea>
-            <div class="visual-scene-help">填写后会优先按照你的场景生成；留空则继续使用系统自动构图。</div>
+            <div class="visual-scene-help"></div>
           </div>
           <button class="btn" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>按我的描述生成</button>
         </div>`:""}
@@ -720,7 +747,10 @@
             ${generation.status==="error"?`<div class="image-generation-actions"><button class="btn primary" data-action="generate-visual">再试一次</button><span>也可以上传本地图或直接跳过。</span></div>`:""}
           </div>`:""}
 
-        <div class="upload-zone visual-upload-zone"><div>使用自己的图片</div><span>支持本地上传，适合已经有明确记忆画面的情况</span><input id="visual-file" type="file" accept="image/*" /></div>
+        <div class="upload-zone visual-upload-zone">
+          <div class="visual-upload-copy"><strong>已有记忆图片？</strong></div>
+          <label class="file-picker-button">选择图片<input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
+        </div>
 
         ${(card.imageData||card.imageUrl)?`<div class="visual-preview"><img src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的视觉联想图片" /></div>`:""}
 
@@ -951,7 +981,7 @@
       header(
         "",
         "设置",
-        "配置词典与 AI 服务。认证仍由本机 Codex 安全管理，LexiFlow 不读取你的登录凭据。",
+        "词典与 AI 服务只需配置一次。",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
       )
       + `<div class="settings-list">
@@ -991,8 +1021,8 @@
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
             <h3>模型与思考强度</h3>
-            <p>这是 LexiFlow 自己的运行覆盖项，只影响 LexiFlow 的 AI 调用，不会修改你本机 Codex 的全局配置。</p>
-            <p>“跟随默认”使用当前 Codex 默认模型。查词、中文纠错和图片任务会自动优先使用快速推理，造句反馈使用你选择的思考强度。</p>
+            <p>默认使用 GPT-5.6 Luna，中等思考强度。</p>
+            <p></p>
           </div>
           <div class="codex-runtime-grid">
             <div class="field">
@@ -1028,7 +1058,7 @@
         </div>
 
         <div class="setting-row">
-          <div><h3>每日学习目标</h3><p>用于首页进度展示，不强制限制学习。</p></div>
+          <div><h3>每日学习目标</h3><p></p></div>
           <select class="select" id="daily-goal" style="width:130px">${[3,5,8,10,15].map(n=>`<option value="${n}" ${state.data.settings.dailyGoal===n?"selected":""}>${n} 个词</option>`).join("")}</select>
         </div>
 
@@ -1538,17 +1568,22 @@
     if(action==="reset-data"){state.data=defaultData();saveData();state.modal=null;state.route="home";toast("本地数据已清空");render();return;}
   }
 
-  render();
-
-  if(location.protocol === "file:"){
-    api("/api/health")
-      .then(()=>{ location.replace("http://127.0.0.1:4177/"); })
-      .catch(err=>{
-        showErrorNotice(err,"本地服务没有启动");
-        state.providerStatus={ok:false,serviceUnavailable:true,error:err.message};
-        render();
-      });
-  }else{
-    refreshProviderStatus(true);
+  async function initializeApp(){
+    try{
+      if(location.protocol === "file:"){
+        await api("/api/health");
+        location.replace("http://127.0.0.1:4177/");
+        return;
+      }
+      await hydrateLearningData();
+      render();
+      await refreshProviderStatus(true);
+    }catch(err){
+      state.providerStatus={ok:false,serviceUnavailable:true,error:err.message};
+      showErrorNotice(err,"LexiFlow 暂时无法启动");
+      render();
+    }
   }
+
+  initializeApp();
 })();

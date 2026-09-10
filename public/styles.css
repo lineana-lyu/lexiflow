@@ -509,3 +509,39 @@ body:before{display:none}
 .advanced-diagnostics{margin-top:10px}.advanced-diagnostics summary{cursor:pointer;color:#75849a;font-size:11px;font-weight:750}.advanced-diagnostics-body{margin-top:8px;padding:10px 12px;border-radius:10px;background:#f7f9fc}.advanced-diagnostics-body p{margin:3px 0!important}
 .progress-bar,.bar{background:#4a73d4}
 @media(max-width:760px){.search-command-bar{grid-template-columns:1fr}.search-command-bar .btn{width:100%}.lookup-surface{padding:18px!important}.primary-meaning{font-size:24px}.expanded-senses-head{align-items:flex-start;flex-direction:column}.setting-actions-inline{justify-content:flex-start}}
+
+
+/* Desktop app persistence / refined upload control */
+.visual-upload-zone{
+  min-height:68px;
+  padding:14px 16px!important;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border-style:solid;
+  background:#f8fafc;
+}
+.visual-upload-copy strong{font-size:13px;color:#43516a}
+.file-picker-button{
+  min-height:40px;
+  padding:0 16px;
+  border:1px solid #d1dbea;
+  border-radius:11px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:#fff;
+  color:#354258;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+.file-picker-button:hover{border-color:#aebfda;background:#f4f7fb;transform:translateY(-1px)}
+.file-picker-button input{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.visual-scene-help:empty,.section-title p:empty,.setting-row p:empty{display:none}
+.study-shell .stage-rail .section-title{margin-bottom:8px}
+.settings-list .setting-row{padding:18px 20px}
+.settings-list .setting-row p{max-width:720px;line-height:1.45}
+@media(max-width:760px){.visual-upload-zone{align-items:stretch;flex-direction:column}.file-picker-button{width:100%}}
