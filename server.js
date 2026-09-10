@@ -1941,7 +1941,7 @@ async function visualSceneAssist(body){
   const settings=await loadSettings();
   const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn].join("|");
   if(!previousScene&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
-  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：场景必须具体、生活化、可直接画成图片，严格对应当前词义；问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
+  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：\n1. 场景必须具体、生活化、可直接画成图片，严格对应当前词义。\n2. 场景只能依靠人物、动作、环境和物体表达含义，绝不能依靠画面中的文字来提示答案。\n3. scene 中不要出现“写着/标着/印着/标签/招牌/logo/屏幕文字”等设计，也不要出现目标英文单词、中文释义、字母、数字或引号中的文案。\n4. 如果涉及瓶子、包装、书本、屏幕、菜单、路牌等容易带字的物体，明确写成“无标签、无品牌、无可读文字”的版本。\n5. 优先一个清晰动作和一个视觉焦点，避免堆砌物件。\n6. 问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面，不含任何画面文字要求","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
   const result=await runCodexFastText(prompt,{timeoutMs:10000,reasoningEffortOverride:"low"});
   const parsed=extractJson(result.stdout);
   const assist={scene:String(parsed.scene||"").trim(),cue:String(parsed.cue||"").trim(),practiceQuestion:String(parsed.practiceQuestion||"").trim()};
@@ -2056,9 +2056,9 @@ async function generateVisual(body) {
       : `用户未指定场景：请根据当前词义设计一个自然、具体、生活化的记忆场景。`;
 
   const prompt = `$imagegen
-请立即生成图片，不要先解释或讨论。
+请直接生成最终图片，不要先解释、不要展示设计稿、不要输出文字说明。
 
-为英语学习软件 LexiFlow 生成一张视觉联想记忆图。
+为英语学习软件 LexiFlow 生成一张用于“看图回忆词义”的视觉联想图。图片本身不能泄露答案，也不能出现任何文字。
 
 目标单词：${word}
 用户最初搜索：${sourceQuery || "未提供"}
@@ -2069,13 +2069,15 @@ ${avoidVisualEn.length ? `明确不要画成：${avoidVisualEn.join("；")}` : "
 ${scene}
 
 硬规则：
-1. 用户场景优先级最高。人物、地点、动作、物体和关系都必须保留。
+1. 人物、地点、动作、物体和关系要忠实保留，但“场景中的文字要求”不是要真的画出来。若描述里出现“写着/标着/印着/标签为 XX”，只把 XX 当作语义提示，最终必须改成无文字的视觉表现。
 1.1 如果没有精确英文语义元数据，则把“当前中文词义”视为最重要的消歧信息，并优先现代日常最常见含义。例如“键盘”默认是电脑输入设备，除非词义、例句或用户描述明确指向钢琴/乐器键盘。
-2. 当前词义只用于防止画错义项。
-3. 不要把具体名词默认做成孤立商品图；除非用户明确要求。
-4. 不要文字、字幕、单词、中文释义、logo、水印。
-5. 如果场景说“女生在图书馆看书”，必须同时有女生、图书馆和看书动作，不能只画一本书。
-6. 画面自然、明确、适合记忆。
+2. 当前词义只用于防止画错义项，绝不能把目标词本身写到图里。
+3. 不要把具体名词默认做成孤立商品图；优先自然生活场景和清晰动作。
+4. 画面中零文字：禁止目标单词“${word}”、中文释义、任何可读或伪造的字母/数字、包装标签、品牌、logo、水印、价格签、菜单、招牌、路牌、屏幕 UI、书页文字。包装和瓶身必须是干净的无标签版本。
+5. 人物手指、四肢和物体结构必须自然正确；不要重复手指、畸形手掌、融合物体、错误瓶盖或漂浮物件。
+6. 风格采用自然的生活方式编辑摄影：真实肤质、正常比例、自然光线、不过度磨皮、不夸张景深、不高饱和、不做“AI 概念海报”效果。
+7. 构图只保留一个主要动作和一个视觉焦点，背景简洁，不用文字来解释画面。
+8. 保存最终 PNG 前自检：如果出现任何文字/标签/品牌、明显手部或物体结构错误，先修正或重新生成，再保存最终图。
 
 请使用当前环境可用的图片生成能力，并把最终 PNG 直接保存到：
 ${absolutePath}

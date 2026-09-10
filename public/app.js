@@ -902,6 +902,15 @@ function startVisualProgress(cardId){
   visualProgressTimers.set(cardId,timers);
 }
 
+function visualSceneNeedsRefresh(scene,word){
+  const value=String(scene||"").trim();
+  if(!value)return false;
+  const target=String(word||"").trim();
+  if(target&&value.toLowerCase().includes(target.toLowerCase()))return true;
+  if(/[A-Za-z0-9]{2,}/.test(value))return true;
+  return /(写着|标着|印着|标签|招牌|logo|LOGO|屏幕文字|文字为|字样)/.test(value);
+}
+
 async function ensureVisualSceneSuggestion(card,refresh=false){
   if(!card||!state.study||state.study.cardId!==card.id)return;
   if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
@@ -974,11 +983,12 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   const sceneDraft=String(currentScene||scene||"").trim();
   const progress=visualProgressMeta(generation.phase||"waiting");
 
-  if((!scene||!card.practicePrompt?.question)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,false),0);}
+  const riskyStoredScene=visualSceneNeedsRefresh(scene,card.word);
+  if((!scene||!card.practicePrompt?.question||riskyStoredScene)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,riskyStoredScene),0);}
 
   const imageArea=hasImage
     ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
-    : `<div class="visual-canvas-empty"><span>✦</span><strong>${generating?progress.title:"你的联想图会出现在这里"}</strong></div>`;
+    : `<div class="visual-canvas-empty"><strong>${generating?progress.title:"联想图会显示在这里"}</strong><span>${generating?"生成完成后会自动更新":"先确认右侧场景，再生成图片"}</span></div>`;
 
   const progressSteps=["准备","提交","等待","持续生成"];
   const progressStrip=generating?`<div class="visual-progress-strip">${progressSteps.map((label,index)=>`<span class="${index<progress.index?"done":index===progress.index?"active":""}">${index<progress.index?"✓":index+1}<em>${label}</em></span>`).join("")}</div>`:"";
@@ -986,7 +996,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   return `${stageKicker("视觉联想")}
     <div class="visual-learning-stage">
       <div class="learning-stage-heading">
-        <div><span class="learning-stage-index">04</span><h2>用一个画面记住 ${escapeHtml(card.word)}</h2></div>
+        <div><span class="learning-stage-index">04 / 06</span><h2>用画面记住 ${escapeHtml(card.word)}</h2></div>
         <div class="learning-stage-meta">${escapeHtml(card.meaningZh)} · ${escapeHtml(card.pos||"")}</div>
       </div>
 
@@ -995,24 +1005,24 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
           ${imageArea}
           ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>${escapeHtml(progress.title)}</strong><small>${escapeHtml(progress.detail)}</small>${progressStrip}</div>`:""}
         </div>
-        <aside class="ai-scene-panel ${sceneLoading?"is-loading":""}">
-          <div class="ai-panel-label"><span class="ai-spark">✦</span><span>AI 联想场景</span><small>可直接修改</small></div>
-          ${sceneLoading&&!sceneDraft?`<div class="ai-scene-loading"><span class="mini-spinner"></span><span>正在构思一个好记的画面…</span></div>`:`<textarea class="ai-scene-editor" id="visual-note" placeholder="直接修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
-          ${cue?`<div class="ai-scene-cue">记忆钩子 · ${escapeHtml(cue)}</div>`:""}
-          <button class="text-action scene-refresh-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>${sceneLoading?`<span class="mini-spinner"></span>${sceneRefreshing?"正在换一个…":"正在准备…"}`:"换一个"}</button>
+        <aside class="scene-panel ${sceneLoading?"is-loading":""}">
+          <div class="scene-panel-label"><span>联想场景</span><small>可编辑</small></div>
+          ${sceneLoading&&!sceneDraft?`<div class="scene-loading"><span class="mini-spinner"></span><span>正在准备场景…</span></div>`:`<textarea class="scene-editor" id="visual-note" placeholder="修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
+          ${cue?`<div class="scene-cue">记忆提示 · ${escapeHtml(cue)}</div>`:""}
+          <button class="text-action scene-refresh-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>${sceneLoading?`<span class="mini-spinner"></span>${sceneRefreshing?"正在更换…":"正在准备…"}`:"换一个场景"}</button>
         </aside>
       </div>
 
       ${generation.status==="error"?`<div class="visual-status-inline error"><span>这次没有生成成功，可以重试或上传自己的图片。</span></div>`:""}
 
       <div class="visual-command-bar">
-        <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating||!sceneDraft?"disabled":""}>${generating?"生成中…":hasImage?"✦ 重新生成":"✦ AI 生成联想图"}</button>
-        <label class="text-action upload-text-action" for="visual-file">上传自己的图片</label>
+        <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating||!sceneDraft?"disabled":""}>${generating?"生成中…":hasImage?"重新生成":"生成联想图"}</button>
+        <label class="text-action upload-text-action" for="visual-file">上传图片</label>
       </div>
       <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
 
       <div class="learning-stage-footer single-action">
-        <button class="btn primary" data-action="finish-visual">进入下一步 →</button>
+        <button class="btn primary" data-action="finish-visual">下一步</button>
       </div>
     </div>`;
 }
@@ -1080,7 +1090,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       <div class="apply-learning-stage">
         <div class="apply-word-hero">${wordIdentity(card,{size:"large",showPos:true,center:true})}<span>${escapeHtml(card.meaningZh)}</span></div>
         <div class="ai-practice-prompt"><span class="ai-spark">✦</span><div><small>AI 给你一个话题</small><strong>${escapeHtml(question||(promptLoading?"正在想一个更具体的问题…":`你在什么情况下会用到“${card.meaningZh}”？`))}</strong></div><button class="text-action scene-refresh-action" data-action="refresh-practice-prompt" ${promptLoading||state.study.applySubmitting?"disabled":""}>${promptLoading?`<span class="mini-spinner"></span>正在换一个…`:"换一个"}</button></div>
-        <div class="apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，写你真正想表达的话…">${escapeHtml(state.study.applyText||"")}</textarea><div class="apply-composer-bottom"><span>Enter 发送 · Shift + Enter 换行</span><button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting||!current?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"✦ AI 帮我看看"}</button></div></div>
+        <div class="apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，写你真正想表达的话…">${escapeHtml(state.study.applyText||"")}</textarea><div class="apply-composer-bottom"><span>Enter 发送 · Shift + Enter 换行</span><button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting||!current?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"检查句子"}</button></div></div>
         <div id="apply-keyword-warning" class="apply-keyword-warning" ${missingKeyword?"":"hidden"}>还没有用到目标词 “${escapeHtml(card.word)}”，AI 会尝试帮你自然地放进句子里。</div>
         ${corrected?`<button class="text-action apply-undo" data-action="restore-original-apply">↶ 撤销 AI 修改</button>`:""}
         ${feedbackPanel}
@@ -1704,7 +1714,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const pass=document.querySelector('[data-action="pass-apply"]');
         if(pass) pass.disabled=true;
         const submit=document.querySelector('[data-action="submit-apply"]');
-        if(submit&&!state.study.applySubmitting) submit.textContent="✦ AI 帮我看看";
+        if(submit&&!state.study.applySubmitting) submit.textContent="检查句子";
         if(submit) submit.disabled=!value.trim()||Boolean(state.study.applySubmitting);
         state.study.feedback=null;
         document.querySelector('.ai-feedback-panel')?.remove();
