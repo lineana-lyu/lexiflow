@@ -1596,7 +1596,7 @@ async function resolveChineseSearch(query) {
     "exampleZh":"自然中文翻译",
     "confidence":0.95
   },
-  "alternatives":[{"word":"alternative","pos":"noun|verb|adjective|adverb|phrase","meaningZh":"中文","intentEn":"precise sense in English"}]
+  "alternatives":[{"word":"alternative","pos":"noun|verb|adjective|adverb|phrase","meaningZh":"中文","intentEn":"precise sense in English","exampleEn":"natural example containing this exact alternative","exampleZh":"自然中文翻译","confidence":0.9}]
 }`;
 
   const result = await runCodexFastText(prompt, {
@@ -1632,6 +1632,9 @@ async function resolveChineseSearch(query) {
           pos: String(item.pos || "").trim(),
           meaningZh: String(item.meaningZh || "").trim(),
           intentEn: String(item.intentEn || "").trim(),
+          exampleEn: String(item.exampleEn || "").trim(),
+          exampleZh: String(item.exampleZh || "").trim(),
+          confidence: Number.isFinite(Number(item.confidence)) ? Number(item.confidence) : null,
         })).filter(item => /^[a-z][a-z '-]*$/i.test(item.word))
       : [],
     source: local.length ? "local-assisted" : "codex-resolver",
@@ -1654,7 +1657,11 @@ function exactPronunciationFromPayload(payload, word) {
   const exactEntries = payload.filter(entry => entry && typeof entry === "object" && entryMatchesQuery(entry, word));
   const source = exactEntries[0];
   if (!source) return { phonetic:"", audioUrl:"", exactMatch:false };
-  return { phonetic: pronunciationFromEntry(source), audioUrl: audioUrlFromEntry(source), exactMatch:true };
+  // Learner's Dictionary exposes IPA directly. Do not convert a different
+  // Merriam-Webster pronunciation notation into an approximate IPA here.
+  const pronunciations = Array.isArray(source?.hwi?.prs) ? source.hwi.prs : [];
+  const ipa = pronunciations.find(pr => pr && pr.ipa)?.ipa || "";
+  return { phonetic: normalizeIpa(ipa), audioUrl: audioUrlFromEntry(source), exactMatch:true };
 }
 
 async function merriamWebsterPronunciation(word) {
@@ -1834,8 +1841,18 @@ async function lookupResolvedChineseCandidate(candidate, resolved, sourceQuery) 
       .filter(item => item?.word && item.word.toLowerCase() !== word)
       .map(item => ({ word:item.word, meaningZh:item.meaningZh || resolved.normalizedChinese || sourceQuery })),
   });
-  if (result?.senses?.length && !result.semanticMismatch) return result;
-  return null;
+  if (result?.semanticMismatch) return { kind:"semantic-mismatch", result };
+  if (result?.senses?.length) {
+    const example = String(result.senses[0]?.exampleEn || "").trim();
+    // Never display a target word/phrase next to an example that does not
+    // actually contain that target. This is the exact inconsistency that made
+    // 笔筒 show as "behold" beside a "pen holder" sentence.
+    if (!example || !example.toLowerCase().includes(word.toLowerCase())) {
+      return { kind:"content-mismatch", result };
+    }
+    return { kind:"verified", result };
+  }
+  return { kind:"not-exact", result };
 }
 
 async function smartLookup(query, options = {}) {
@@ -1862,15 +1879,21 @@ async function smartLookup(query, options = {}) {
 
     for (const candidate of allCandidates) {
       if (preferredWord && candidate.word.toLowerCase() !== preferredWord) continue;
-      const verified = await lookupResolvedChineseCandidate(candidate, resolved, q);
-      if (verified) return verified;
-      if (candidate.word.includes(" ")) return buildResolvedPhraseCard(candidate, resolved, q);
+      const checked = await lookupResolvedChineseCandidate(candidate, resolved, q);
+      if (checked?.kind === "verified") return checked.result;
+      // Only use the phrase fallback when Merriam-Webster has no exact phrase
+      // entry. A real dictionary entry with the wrong sense must be rejected.
+      if (checked?.kind === "not-exact" && candidate.word.includes(" ")) {
+        return buildResolvedPhraseCard(candidate, resolved, q);
+      }
     }
 
     for (const candidate of allCandidates) {
-      if (candidate.word.includes(" ")) return buildResolvedPhraseCard(candidate, resolved, q);
-      const verified = await lookupResolvedChineseCandidate(candidate, resolved, q);
-      if (verified) return verified;
+      const checked = await lookupResolvedChineseCandidate(candidate, resolved, q);
+      if (checked?.kind === "verified") return checked.result;
+      if (checked?.kind === "not-exact" && candidate.word.includes(" ")) {
+        return buildResolvedPhraseCard(candidate, resolved, q);
+      }
     }
 
     return {
