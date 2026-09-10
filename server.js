@@ -25,6 +25,7 @@ const LOOKUP_CACHE_SCHEMA = "v4.3-desktop";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
 let lookupCache = null;
+const sentenceFeedbackCache = new Map();
 
 async function loadLookupCache() {
   if (lookupCache) return lookupCache;
@@ -174,7 +175,16 @@ async function migrateLegacyRuntimeData() {
     const from = path.join(LEGACY_DATA_DIR, name);
     const to = path.join(DATA_DIR, name);
     try {
-      if (!fs.existsSync(to) && fs.existsSync(from)) await fsp.copyFile(from, to);
+      if (!fs.existsSync(to) && fs.existsSync(from)) {
+      await fsp.copyFile(from, to);
+      if (name === "settings.json") {
+        try {
+          await fsp.unlink(from);
+        } catch (err) {
+          console.warn("legacy settings cleanup skipped:", err.message);
+        }
+      }
+    }
     } catch (err) {
       console.warn(`legacy ${name} migration skipped:`, err.message);
     }
@@ -203,17 +213,32 @@ async function loadSettings() {
   };
   try {
     const parsed = JSON.parse(await fsp.readFile(SETTINGS_FILE, "utf8"));
+    const safeStorage = getElectronSafeStorage();
     let key = String(parsed.merriamWebsterLearnersKey || "");
-    if (!key && parsed.merriamWebsterLearnersKeyEncrypted) {
-      const safeStorage = getElectronSafeStorage();
-      if (safeStorage) {
-        try {
-          key = safeStorage.decryptString(Buffer.from(String(parsed.merriamWebsterLearnersKeyEncrypted), "base64"));
-        } catch (err) {
-          console.warn("dictionary key decrypt failed:", err.message);
-        }
+
+    if (!key && parsed.merriamWebsterLearnersKeyEncrypted && safeStorage) {
+      try {
+        key = safeStorage.decryptString(Buffer.from(String(parsed.merriamWebsterLearnersKeyEncrypted), "base64"));
+      } catch (err) {
+        console.warn("dictionary key decrypt failed:", err.message);
       }
     }
+
+    // One-way migration: old desktop settings that still contain a plaintext
+    // dictionary key are rewritten with Electron safeStorage encryption.
+    if (key && parsed.merriamWebsterLearnersKey && safeStorage) {
+      try {
+        const migrated = {
+          ...parsed,
+          merriamWebsterLearnersKeyEncrypted: safeStorage.encryptString(key).toString("base64"),
+        };
+        delete migrated.merriamWebsterLearnersKey;
+        await writeJsonAtomic(SETTINGS_FILE, migrated);
+      } catch (err) {
+        console.warn("dictionary key encryption migration skipped:", err.message);
+      }
+    }
+
     return {
       ...defaults,
       ...parsed,
@@ -237,11 +262,18 @@ async function saveSettings(next) {
   };
 
   try {
-    const diskValue = { ...clean };
+    const diskValue = {
+      codexModel: clean.codexModel,
+      codexReasoningEffort: clean.codexReasoningEffort,
+    };
     const safeStorage = getElectronSafeStorage();
-    if (safeStorage && clean.merriamWebsterLearnersKey) {
-      diskValue.merriamWebsterLearnersKeyEncrypted = safeStorage.encryptString(clean.merriamWebsterLearnersKey).toString("base64");
-      delete diskValue.merriamWebsterLearnersKey;
+    if (clean.merriamWebsterLearnersKey) {
+      if (safeStorage) {
+        diskValue.merriamWebsterLearnersKeyEncrypted = safeStorage.encryptString(clean.merriamWebsterLearnersKey).toString("base64");
+      } else {
+        // Browser/dev fallback only. The runtime settings path is gitignored.
+        diskValue.merriamWebsterLearnersKey = clean.merriamWebsterLearnersKey;
+      }
     }
     await writeJsonAtomic(SETTINGS_FILE, diskValue);
   } catch (err) {
@@ -1376,50 +1408,59 @@ async function sentenceFeedback(body) {
   const sentence = String(body.sentence || "").trim();
   if (!word || !sentence) throw new Error("INVALID_INPUT");
 
-  const prompt = `你是面向中国英语学习者的“造句转换与反馈助手”。
+  const inputLanguage = /[\u3400-\u9fff]/.test(sentence) ? "zh" : "en";
+  const settings = await loadSettings();
+  const cacheKey = [
+    settings.codexModel || DEFAULT_CODEX_MODEL,
+    word.toLowerCase(),
+    meaningZh,
+    sentence,
+  ].join("|");
+  const cached = sentenceFeedbackCache.get(cacheKey);
+  if (cached) return { ...cached, cacheHit: true };
 
+  const prompt = `你是英语学习应用的快速造句审核器。只做必要检查，不扩写，不讲解过程。
 目标词：${word}
-本次中文词义：${meaningZh}
+当前词义：${meaningZh}
 用户输入：${sentence}
 
-用户输入可能是中文，也可能是英文。请先判断语言，再按下面规则处理。
-
-如果输入是中文：
-- 把用户真正想表达的意思转换成自然、简单的英文。
-- 最终英文 suggestion 必须使用目标词，并且必须表达“本次中文词义”。
-- 语法需要时可以使用目标词的常见词形变化。
-- keyword 返回 suggestion 中实际出现的目标词或词形，供界面高亮。
-- 不要额外扩写用户没有表达的新信息。
-- level 返回 good，title 简短写“已转换为英文”。
-- tips 只在存在歧义或值得提醒的问题时返回，通常可以为空。
-
-如果输入是英文：
-- 判断目标词是否正确表达了“本次中文词义”、语法是否基本正确、搭配是否自然。
-- 已经正确自然时 suggestion 返回空字符串，不要为了显得有建议而改写。
-- 有必要修改时，只做最小修改；suggestion 中保留并正确使用目标词。
-- keyword 返回最终句子中实际使用的目标词或词形；如果原句没使用目标词，keyword 返回目标词。
-- 不要用苛刻的母语者标准。
+规则：
+1. 中文输入：翻译成自然、简洁英文；必须自然使用目标词或常见词形，并保持当前词义。不要新增用户没表达的信息。如果无法在不编造信息的前提下加入目标词，approved=false。
+2. 英文输入：检查是否自然、语法是否基本正确、是否使用目标词/词形且符合当前词义。正确时 suggestion 为空；需要修改时只做最小修改。
+3. 如果英文完全没包含目标词，只有在不改变原意时才补入；否则 approved=false，并在 tips 中提醒用户重写。
+4. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
+5. suggestion 如果非空，应当是可直接保存的最终英文；如果 suggestion 已经修正完成，则 level=good、approved=true。
 
 只输出 JSON：
-{"inputLanguage":"zh|en","level":"good|warn","title":"一句简短中文结论","tips":["最多2条中文建议"],"suggestion":"中文输入时必须返回英文句子；英文需要修改时返回修改句，否则空字符串","keyword":"最终英文中实际出现的目标词或词形"}
-
-不要输出 JSON 之外的内容。`;
+{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"suggestion":"最终英文或空字符串","keyword":"最终英文中实际目标词/词形"}`;
 
   const result = await runCodex(prompt, {
-    timeoutMs: 30000,
+    timeoutMs: 15000,
     workspaceWrite: false,
     reasoningEffortOverride: "low",
   });
   const parsed = extractJson(result.stdout);
-  return {
-    inputLanguage: parsed.inputLanguage === "zh" ? "zh" : "en",
+  const feedback = {
+    inputLanguage: parsed.inputLanguage === "zh" ? "zh" : inputLanguage,
+    approved: parsed.approved !== false,
     level: parsed.level === "good" ? "good" : "warn",
-    title: String(parsed.title || "AI 已完成反馈"),
+    title: String(parsed.title || "审核完成"),
     tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(String) : [],
     suggestion: String(parsed.suggestion || "").trim(),
     keyword: String(parsed.keyword || word).trim() || word,
     provider: "codex-local",
+    cacheHit: false,
   };
+
+  if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
+  if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
+
+  sentenceFeedbackCache.set(cacheKey, feedback);
+  if (sentenceFeedbackCache.size > 100) {
+    const first = sentenceFeedbackCache.keys().next().value;
+    sentenceFeedbackCache.delete(first);
+  }
+  return feedback;
 }
 
 function safeFileStem(input) {
