@@ -171,6 +171,15 @@
     return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
+  function sceneNeedsSafetyCleanup(scene, word) {
+    const value = String(scene || "").trim();
+    const target = String(word || "").trim();
+    if (!value) return false;
+    if (target && value.toLowerCase().includes(target.toLowerCase())) return true;
+    if (/[A-Za-z0-9]{2,}/.test(value)) return true;
+    return /(写着|标着|印着|标签|招牌|logo|LOGO|屏幕文字|文字为|字样)/.test(value);
+  }
+
   function sanitizeAutomaticScene(scene, body) {
     let text = String(scene || "").trim();
     const target = String(body?.word || "").trim();
@@ -192,7 +201,11 @@
     if (!response.ok) return response;
     try {
       const data = await response.clone().json();
-      const scene = String(data?.assist?.scene || "").trim();
+      const rawScene = String(data?.assist?.scene || "").trim();
+      const scene = sceneNeedsSafetyCleanup(rawScene, body?.word)
+        ? sanitizeAutomaticScene(rawScene, body)
+        : rawScene;
+      if (data?.assist && scene !== rawScene) data.assist = { ...data.assist, scene };
       if (scene) remember(sceneHistory, SCENE_HISTORY_KEY, historyKey(body), scene);
       return responseWithJson(response, data);
     } catch {
@@ -218,10 +231,14 @@
 
       let data;
       try { data = await response.clone().json(); } catch { return response; }
-      const scene = String(data?.assist?.scene || "").trim();
+      const rawScene = String(data?.assist?.scene || "").trim();
+      const scene = sceneNeedsSafetyCleanup(rawScene, body?.word)
+        ? sanitizeAutomaticScene(rawScene, body)
+        : rawScene;
       const compareAgainst = known.filter(Boolean);
       const valid = sceneIsConcrete(scene) && !tooSimilar(scene, compareAgainst, 0.72);
       if (valid) {
+        if (data?.assist && scene !== rawScene) data.assist = { ...data.assist, scene };
         remember(sceneHistory, SCENE_HISTORY_KEY, key, scene);
         return responseWithJson(response, data);
       }
