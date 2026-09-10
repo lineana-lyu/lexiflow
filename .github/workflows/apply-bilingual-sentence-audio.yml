@@ -1,0 +1,70 @@
+name: Apply bilingual sentence and audio update
+
+on:
+  push:
+    branches:
+      - feat/bilingual-sentence-audio
+    paths:
+      - scripts/apply-bilingual-sentence-audio.py
+      - .github/workflows/apply-bilingual-sentence-audio.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: feat/bilingual-sentence-audio
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Apply feature update
+        run: python scripts/apply-bilingual-sentence-audio.py
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate JavaScript
+        run: npm run check
+
+      - name: Build Windows application
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run build:win
+
+      - name: Ensure no tracked test artifacts were added
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Where-Object { $_ -match '(^|/)(tests?|fixtures?|mocks?)(/|$)|\.(test|spec)\.' }
+          if ($bad) { $bad; exit 1 }
+
+      - name: Upload Windows application
+        uses: actions/upload-artifact@v4
+        with:
+          name: LexiFlow-Windows-bilingual-audio
+          path: dist/*.exe
+          if-no-files-found: error
+
+      - name: Remove temporary feature runner
+        shell: pwsh
+        run: |
+          Remove-Item scripts/apply-bilingual-sentence-audio.py -Force
+          Remove-Item .github/workflows/apply-bilingual-sentence-audio.yml -Force
+          if (Test-Path scripts) { if (-not (Get-ChildItem scripts -Force)) { Remove-Item scripts -Force } }
+
+      - name: Commit feature update
+        shell: pwsh
+        run: |
+          git config user.name "LexiFlow Feature Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "feat: support bilingual sentence practice and example audio"
+          git push origin HEAD:feat/bilingual-sentence-audio
