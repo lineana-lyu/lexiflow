@@ -1,0 +1,66 @@
+name: Upgrade depth view transition
+
+on:
+  push:
+    branches:
+      - feat/depth-study-transitions
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22.12.0
+
+      - name: Apply native view-transition upgrade
+        shell: pwsh
+        run: python tools/upgrade_view_transition.py
+
+      - name: Install dependencies
+        shell: pwsh
+        run: npm ci
+
+      - name: Validate JavaScript
+        shell: pwsh
+        run: npm run check
+
+      - name: Validate transition integration
+        shell: pwsh
+        run: |
+          $app = Get-Content public/app.js -Raw
+          $css = Get-Content public/styles.css -Raw
+          if ($app -notmatch 'document\.startViewTransition') { throw 'View Transition API hook missing' }
+          if ($app -notmatch 'motionChanged') { throw 'logical-stage transition guard missing' }
+          if ($css -notmatch 'view-transition-name:lexi-study-card') { throw 'study card view-transition name missing' }
+          if ($css -notmatch 'lexiViewNewForward') { throw 'forward View Transition keyframes missing' }
+          if ($css -notmatch 'lexiViewNewBackward') { throw 'backward View Transition keyframes missing' }
+          if ($css -notmatch 'prefers-reduced-motion') { throw 'reduced-motion fallback missing' }
+
+      - name: Build Windows application
+        shell: pwsh
+        run: npm run build:win
+
+      - name: Verify no tracked test artifacts
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Select-String -Pattern '(^|/)(test|tests|__tests__|fixtures?|mocks?)(/|$)|\.(test|spec)\.'
+          if ($bad) { $bad | Write-Host; throw 'tracked test/spec/fixture/mock files found' }
+
+      - name: Commit product changes and remove temporary helpers
+        shell: pwsh
+        run: |
+          git rm tools/upgrade_view_transition.py
+          git rm .github/workflows/upgrade-depth-view-transition.yml
+          git config user.name "lineana"
+          git config user.email "17570875940@163.com"
+          git add public/app.js public/styles.css package.json package-lock.json
+          git commit -m "refine: preserve outgoing study cards during depth transitions"
+          git push origin HEAD:feat/depth-study-transitions
