@@ -1203,10 +1203,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const read=(id,fallback)=>document.getElementById(id)?.value??fallback;
     editor.draft={
       ...current,
-      word:String(read("library-edit-word",current.word)||"").trim(),
-      phonetic:String(read("library-edit-phonetic",current.phonetic)||"").trim(),
-      pos:String(read("library-edit-pos",current.pos)||"").trim(),
-      meaningZh:String(read("library-edit-meaning",current.meaningZh)||"").trim(),
+      // Lexical identity is intentionally read-only in the library editor.
+      word:card.word||"",
+      phonetic:card.phonetic||"",
+      pos:card.pos||"",
+      meaningZh:card.meaningZh||"",
       exampleEn:String(read("library-edit-example-en",current.exampleEn)||"").trim(),
       exampleZh:String(read("library-edit-example-zh",current.exampleZh)||"").trim(),
       visualNote:String(read("library-edit-visual-note",current.visualNote)||"").trim()
@@ -1221,40 +1222,70 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const d=editor.draft||libraryEditorBaseDraft(card);
     const image=d.imageData||d.imageUrl||"";
     const generating=Boolean(editor.imageGenerating);
+    const phonetic=formatPhonetic(d.phonetic||"")||"暂无音标";
     return shell(
-      header("","编辑单词卡","修改会保留原来的学习阶段、复习次数和下次复习时间。",`<button class="btn" data-action="library-edit-back">← 返回单词库</button>`)
-      + `<div class="library-editor-grid">
-        <section class="card pad library-editor-form">
-          <div class="library-editor-section-head"><div><h2>单词内容</h2><p>这些内容会直接用于后续记忆和复习。</p></div></div>
-          <div class="library-editor-form-grid compact-two">
-            <div class="field"><label>单词</label><input class="input" id="library-edit-word" value="${escapeHtml(d.word)}" /></div>
-            <div class="field"><label>音标</label><input class="input" id="library-edit-phonetic" value="${escapeHtml(d.phonetic)}" placeholder="留空可重新获取" /></div>
+      header("","编辑单词卡","只调整例句和视觉联想；词条信息保持原样，复习进度不会改变。",`<button class="btn" data-action="library-edit-back">← 返回单词库</button>`)
+      + `<div class="library-editor-grid library-editor-grid-refined">
+        <section class="card library-editor-identity" aria-label="固定词条信息">
+          <div class="library-editor-word-block">
+            <div class="library-editor-word-line">
+              <strong class="library-editor-word">${escapeHtml(d.word)}</strong>
+              <button class="speaker library-editor-speaker" data-action="speak" data-word="${escapeHtml(d.word)}" data-audio="${escapeHtml(card.audioUrl||"")}" aria-label="播放 ${escapeHtml(d.word)} 的发音">🔊</button>
+              <span class="pill blue library-editor-pos">${escapeHtml(d.pos||"word")}</span>
+            </div>
+            <div class="library-editor-phonetic">${escapeHtml(phonetic)}</div>
           </div>
-          <div class="library-editor-form-grid compact-two">
-            <div class="field"><label>词性</label><input class="input" id="library-edit-pos" value="${escapeHtml(d.pos)}" placeholder="noun / verb / adjective" /></div>
-            <div class="field"><label>中文释义</label><input class="input" id="library-edit-meaning" value="${escapeHtml(d.meaningZh)}" /></div>
+          <div class="library-editor-meaning-block">
+            <span>中文释义</span>
+            <strong>${escapeHtml(d.meaningZh)}</strong>
           </div>
-          <div class="field"><label>英文例句</label><textarea class="textarea library-editor-textarea" id="library-edit-example-en">${escapeHtml(d.exampleEn)}</textarea></div>
-          <div class="field"><label>中文例句</label><textarea class="textarea library-editor-textarea" id="library-edit-example-zh">${escapeHtml(d.exampleZh)}</textarea></div>
-          <div class="library-editor-divider"></div>
-          <div class="field"><label>联想场景 <span>可选</span></label><textarea class="textarea library-editor-scene" id="library-edit-visual-note" placeholder="例如：我把钥匙留在玄关柜上。留空也可以直接重新生成图片。">${escapeHtml(d.visualNote)}</textarea></div>
-          <div class="library-editor-savebar"><button class="btn" data-action="library-edit-back">取消</button><button class="btn primary" data-action="save-library-card">保存修改</button></div>
+        </section>
+
+        <section class="card pad library-editor-copy-card">
+          <div class="library-editor-section-head">
+            <div><span class="library-editor-section-kicker">可编辑</span><h2>例句</h2><p>只在表达不自然或不够贴合词义时修改。</p></div>
+          </div>
+          <div class="field library-editor-editable-field">
+            <label>英文例句</label>
+            <textarea class="textarea library-editor-textarea" id="library-edit-example-en" placeholder="写一句自然、明确体现当前词义的英文例句">${escapeHtml(d.exampleEn)}</textarea>
+          </div>
+          <div class="field library-editor-editable-field">
+            <label>中文例句</label>
+            <textarea class="textarea library-editor-textarea" id="library-edit-example-zh" placeholder="填写对应的自然中文翻译">${escapeHtml(d.exampleZh)}</textarea>
+          </div>
+          <div class="library-editor-copy-note">例句会直接用于后续记忆与复习。</div>
         </section>
 
         <aside class="card pad library-editor-image-panel">
-          <div class="library-editor-section-head"><div><h2>联想图</h2><p>重新生成或上传图片，保存卡片后一起生效。</p></div></div>
+          <div class="library-editor-section-head">
+            <div><span class="library-editor-section-kicker">视觉记忆</span><h2>联想图</h2><p>可以重新生成，也可以换成你自己的图片。</p></div>
+          </div>
           <div class="library-editor-image-frame ${image?"has-image":""}">
-            ${image?`<img class="library-editor-image" src="${image}" alt="${escapeHtml(d.word)} 联想图" />`:`<div class="library-editor-image-empty"><span>✦</span><strong>暂无联想图</strong></div>`}
-            ${generating?`<div class="library-editor-image-loading"><span class="mini-spinner"></span><strong>正在生成新图片</strong><small>可以稍等片刻，不会修改当前已保存内容。</small></div>`:""}
+            ${image?`<img class="library-editor-image" src="${image}" alt="${escapeHtml(d.word)} 联想图" />`:`<div class="library-editor-image-empty"><span>✦</span><strong>暂无联想图</strong><small>AI 可根据词义和例句自动设计</small></div>`}
+            ${generating?`<div class="library-editor-image-loading"><span class="mini-spinner"></span><strong>正在生成新图片</strong><small>可以继续修改例句或场景，当前已保存内容不会被覆盖。</small></div>`:""}
           </div>
           <div class="library-editor-image-actions">
             <button class="btn primary" data-action="regenerate-library-image" ${generating?"disabled":""}>${generating?"生成中…":image?"✦ 重新生成":"✦ AI 生成图片"}</button>
             <label class="btn" for="library-image-file">上传图片</label>
-            ${image?`<button class="btn ghost" data-action="clear-library-image" ${generating?"disabled":""}>移除图片</button>`:""}
+            ${image?`<button class="btn ghost" data-action="clear-library-image" ${generating?"disabled":""}>移除</button>`:""}
           </div>
           <input id="library-image-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
-          <div class="library-editor-tip">图片只是记忆辅助，不会改变复习进度。</div>
+
+          <div class="field library-editor-scene-field">
+            <label>联想场景 <span>可选</span></label>
+            <textarea class="textarea library-editor-scene" id="library-edit-visual-note" placeholder="例如：傍晚的书房里，台灯照亮摊开的英语课本。留空也可以直接生成。">${escapeHtml(d.visualNote)}</textarea>
+            <small>填写后优先按你的描述生成；留空时 AI 会自动设计画面。</small>
+          </div>
+          <div class="library-editor-tip">图片和场景只用于记忆辅助，不会改变学习阶段或复习时间。</div>
         </aside>
+
+        <div class="library-editor-footer">
+          <span>保存后只更新例句、联想场景和图片。</span>
+          <div class="library-editor-footer-actions">
+            <button class="btn" data-action="library-edit-back">取消</button>
+            <button class="btn primary" data-action="save-library-card">保存修改</button>
+          </div>
+        </div>
       </div>`
     );
   }
@@ -1428,7 +1459,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     studyMotionCleanupTimer=setTimeout(()=>{
       shell.classList.remove("study-depth-motion","study-depth-forward","study-depth-backward");
       stepper?.classList.remove("study-stepper-motion");
-    },720);
+    },360);
   }
 
   function render(){
@@ -1706,27 +1737,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const card=editor&&getCard(editor.cardId);
       const draft=card&&captureLibraryEditorDraft();
       if(!editor||!card||!draft)return;
-      if(!/^[A-Za-z][A-Za-z\s'-]*$/.test(draft.word)){
-        showNotice("单词格式不正确","请输入英文单词或常见英文短语。","warn");
+      if(!draft.exampleEn||!draft.exampleZh){
+        showNotice("例句还没有填写完整","请保留一组对应的中英文例句。","warn");
         return;
       }
-      if(!draft.pos||!draft.meaningZh||!draft.exampleEn||!draft.exampleZh){
-        showNotice("还有内容没有填写","词性、中文释义和中英文例句都需要保留。","warn");
-        return;
-      }
-      const duplicate=state.data.cards.find(c=>c.id!==card.id&&c.word.toLowerCase()===draft.word.toLowerCase()&&normalizeSearchText(c.meaningZh)===normalizeSearchText(draft.meaningZh));
-      if(duplicate){
-        showNotice("已经有相同卡片","这个单词和中文释义已经存在，不需要再保存一张重复卡片。","warn");
-        return;
-      }
-      const oldWord=String(card.word||"");
-      const oldPhonetic=String(card.phonetic||"");
-      const oldMeaning=String(card.meaningZh||"");
-      const wordChanged=normalizeSearchText(oldWord)!==normalizeSearchText(draft.word);
-      const meaningChanged=normalizeSearchText(oldMeaning)!==normalizeSearchText(draft.meaningZh);
-      card.word=draft.word;
-      card.pos=draft.pos;
-      card.meaningZh=draft.meaningZh;
+      // Fixed lexical identity: word / phonetic / POS / Chinese meaning are never changed here.
       card.exampleEn=draft.exampleEn;
       card.exampleZh=draft.exampleZh;
       card.visualNote=draft.visualNote;
@@ -1734,21 +1749,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       card.imageUrl=draft.imageUrl||"";
       card.generatedVisualScene=draft.generatedVisualScene||"";
       card.imageGeneration=draft.imageGeneration||null;
-      card.phonetic=wordChanged&&draft.phonetic===oldPhonetic?"":draft.phonetic;
-      if(wordChanged){
-        card.audioUrl="";
-        card.sourceQuery=draft.word;
-      }
-      if(meaningChanged){
-        card.senseIntentEn="";
-        card.avoidVisualEn=[];
-      }
       card.updatedAt=new Date().toISOString();
       saveData();
       state.libraryEditor=null;
       state.route="library";
       toast("单词卡已更新");
-      if(wordChanged&&!card.phonetic)setTimeout(()=>void ensureCardPronunciation(card),0);
       return;
     }
     if(action==="regenerate-library-image"){
