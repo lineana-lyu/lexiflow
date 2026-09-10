@@ -859,3 +859,52 @@ html[data-study-motion]::view-transition-new(lexi-study-progress){animation:lexi
 ::view-transition-old(root){animation:none!important;opacity:0}
 ::view-transition-new(root){animation:none!important;opacity:1}
 @media(max-width:760px){.review-depth-stage{padding-bottom:8px}}
+
+
+/* v0.8.1 — editable library cards */
+.library-row{cursor:pointer;transition:background .14s ease,box-shadow .14s ease}
+.library-row:hover{background:#f8faff}
+.library-row:focus-visible{outline:2px solid #b9cdf5;outline-offset:-2px}
+.library-actions{display:flex;justify-content:flex-end;gap:7px;white-space:nowrap}
+.library-editor-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(300px,.65fr);gap:18px;align-items:start}
+.library-editor-form,.library-editor-image-panel{box-shadow:var(--shadow)}
+.library-editor-section-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:18px}
+.library-editor-section-head h2{margin:0;color:#17243a;font-size:18px;letter-spacing:-.02em}
+.library-editor-section-head p{margin:5px 0 0;color:#8390a3;font-size:11px;line-height:1.55}
+.library-editor-form-grid{display:grid;gap:14px;margin-bottom:14px}.library-editor-form-grid.compact-two{grid-template-columns:1fr 1fr}
+.library-editor-form>.field{margin-bottom:14px}.library-editor-form .field label{display:flex;gap:6px;align-items:center;margin-bottom:7px;color:#516078;font-size:12px;font-weight:800}.library-editor-form .field label span{color:#9aa5b5;font-size:10px;font-weight:650}
+.library-editor-textarea{min-height:86px;resize:vertical}.library-editor-scene{min-height:108px;resize:vertical}
+.library-editor-divider{height:1px;margin:4px 0 18px;background:#edf1f5}
+.library-editor-savebar{display:flex;justify-content:flex-end;gap:9px;margin-top:6px;padding-top:16px;border-top:1px solid #edf1f5}
+.library-editor-image-panel{position:sticky;top:24px}
+.library-editor-image-frame{position:relative;overflow:hidden;width:100%;aspect-ratio:4/3;border:1px solid #e4e9f0;border-radius:15px;background:#f7f9fc;display:grid;place-items:center}
+.library-editor-image-frame.has-image{background:#eef2f6}.library-editor-image{width:100%;height:100%;object-fit:cover;display:block}
+.library-editor-image-empty{display:grid;place-items:center;gap:8px;color:#8996a8}.library-editor-image-empty span{font-size:25px;color:#6f8fd8}.library-editor-image-empty strong{font-size:12px}
+.library-editor-image-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:18px;text-align:center;background:rgba(248,250,253,.92);backdrop-filter:blur(3px)}.library-editor-image-loading strong{font-size:13px;color:#34445d}.library-editor-image-loading small{max-width:220px;color:#8190a4;font-size:10px;line-height:1.55}
+.library-editor-image-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}.library-editor-image-actions .btn{flex:1 1 auto}
+.library-editor-tip{margin-top:12px;color:#94a0b0;font-size:10px;line-height:1.5}
+@media(max-width:900px){.library-editor-grid{grid-template-columns:1fr}.library-editor-image-panel{position:static}.library-editor-form-grid.compact-two{grid-template-columns:1fr}}
+
+/* v0.8.1 — calmer right-to-left card switching */
+.study-depth-motion.study-depth-forward>.study-card{animation:lexiDepthForward .40s cubic-bezier(.22,.78,.22,1) both}
+.study-depth-motion.study-depth-backward>.study-card{animation:lexiDepthBackward .40s cubic-bezier(.22,.78,.22,1) both}
+.study-depth-motion .study-stack-layer{animation:none!important}
+.study-depth-motion .study-kicker,.study-depth-motion .study-center,.study-depth-motion .visual-learning-stage,.study-depth-motion .apply-learning-stage{animation:lexiStageContentIn .28s .04s ease-out both}
+.study-stepper-motion .study-stepper-item.active .study-stepper-dot{animation:lexiStepPop .28s ease-out both}
+@keyframes lexiDepthForward{0%{opacity:.28;transform:translate3d(48px,0,-38px) rotateY(-1deg) scale(.994);filter:none}100%{opacity:1;transform:translate3d(0,0,0) rotateY(0) scale(1);filter:none}}
+@keyframes lexiDepthBackward{0%{opacity:.28;transform:translate3d(-42px,0,-34px) rotateY(.9deg) scale(.995);filter:none}100%{opacity:1;transform:translate3d(0,0,0) rotateY(0) scale(1);filter:none}}
+@keyframes lexiStageContentIn{0%{opacity:.55;transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes lexiStepPop{0%{transform:scale(.94)}65%{transform:scale(1.02)}100%{transform:scale(1)}}
+::view-transition-group(lexi-study-card){animation-duration:.40s;animation-timing-function:cubic-bezier(.22,.78,.22,1)}
+html[data-study-motion="forward"]::view-transition-old(lexi-study-card){animation:lexiViewOldForward .36s ease-in both}
+html[data-study-motion="forward"]::view-transition-new(lexi-study-card){animation:lexiViewNewForward .40s cubic-bezier(.22,.78,.22,1) both}
+html[data-study-motion="backward"]::view-transition-old(lexi-study-card){animation:lexiViewOldBackward .36s ease-in both}
+html[data-study-motion="backward"]::view-transition-new(lexi-study-card){animation:lexiViewNewBackward .40s cubic-bezier(.22,.78,.22,1) both}
+@keyframes lexiViewOldForward{from{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}to{opacity:.08;transform:perspective(1400px) translate3d(-52px,0,-34px) rotateY(1deg) scale(.992);filter:none}}
+@keyframes lexiViewNewForward{from{opacity:.24;transform:perspective(1400px) translate3d(52px,0,-34px) rotateY(-1deg) scale(.994);filter:none}to{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}}
+@keyframes lexiViewOldBackward{from{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}to{opacity:.08;transform:perspective(1400px) translate3d(46px,0,-32px) rotateY(-.9deg) scale(.993);filter:none}}
+@keyframes lexiViewNewBackward{from{opacity:.24;transform:perspective(1400px) translate3d(-46px,0,-32px) rotateY(.9deg) scale(.995);filter:none}to{opacity:1;transform:perspective(1400px) translate3d(0,0,0) rotateY(0) scale(1);filter:none}}
+html[data-study-motion]::view-transition-old(lexi-study-progress){animation:lexiProgressOut .16s ease both}
+html[data-study-motion]::view-transition-new(lexi-study-progress){animation:lexiProgressIn .24s ease both}
+@keyframes lexiProgressOut{from{opacity:1}to{opacity:.35}}
+@keyframes lexiProgressIn{from{opacity:.45}to{opacity:1}}

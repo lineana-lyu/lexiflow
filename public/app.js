@@ -84,6 +84,7 @@
     reviewQueue: [],
     reviewIndex: 0,
     librarySearch: "",
+    libraryEditor: null,
     lookupStatus: "idle",
     providerStatus: null,
     loadingMoreSenses: false,
@@ -227,6 +228,58 @@
       const el=document.getElementById(id);
       if(el) el.value=value;
     }
+
+    document.querySelectorAll("[data-library-card]").forEach(row=>{
+      const open=()=>openLibraryEditor(row.dataset.libraryCard);
+      row.addEventListener("click",e=>{
+        if(e.target.closest("button,a,input,label,textarea,select"))return;
+        open();
+      });
+      row.addEventListener("keydown",e=>{
+        if((e.key==="Enter"||e.key===" ")&&!e.target.closest("button,a,input,label,textarea,select")){
+          e.preventDefault();
+          open();
+        }
+      });
+    });
+
+    const libraryImageFile=document.getElementById("library-image-file");
+    if(libraryImageFile) libraryImageFile.addEventListener("change",e=>{
+      const file=e.target.files?.[0];if(!file)return;
+      if(file.size>900*1024){showNotice("图片太大","请选择小于 900KB 的 PNG、JPG 或 WebP 图片。","warn");return;}
+      const editor=state.libraryEditor;
+      if(!editor)return;
+      const cardId=editor.cardId;
+      const draft=captureLibraryEditorDraft();
+      const reader=new FileReader();
+      reader.onload=async()=>{
+        try{
+          const payload=await api("/api/images/local",{method:"POST",body:{dataUrl:String(reader.result||"")}});
+          if(state.libraryEditor?.cardId!==cardId)return;
+          state.libraryEditor.draft={
+            ...draft,
+            imageData:"",
+            imageUrl:payload.image.url,
+            generatedVisualScene:"",
+            imageGeneration:{status:"success",message:"已选择本地图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()}
+          };
+          render();
+        }catch(err){
+          if(state.libraryEditor?.cardId===cardId)showErrorNotice(err,"图片没有保存成功");
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.querySelectorAll(".library-editor-image").forEach(img=>img.addEventListener("error",()=>{
+      const editor=state.libraryEditor;
+      if(!editor)return;
+      const card=getCard(editor.cardId);
+      const draft=editor.draft||libraryEditorBaseDraft(card);
+      editor.draft={...draft,imageData:"",imageUrl:"",imageGeneration:{status:"error",message:"原图片文件已不在本机。",code:"IMAGE_MISSING",finishedAt:new Date().toISOString()}};
+      render();
+    }));
+
     const modelSelect=document.getElementById("codex-model-select");
     const custom=document.getElementById("codex-model-custom");
     if(modelSelect&&custom) custom.style.display=modelSelect.value==="__custom__"?"block":"none";
@@ -337,7 +390,8 @@
   }
 
   function navButton(route, icon, label){
-    return `<button class="nav-btn ${state.route===route?"active":""}" data-route="${route}">
+    const active=state.route===route||(route==="library"&&state.route==="library-edit");
+    return `<button class="nav-btn ${active?"active":""}" data-route="${route}">
       <span class="nav-icon">${icon}</span><span>${label}</span>
     </button>`;
   }
@@ -1095,18 +1149,113 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const q=state.librarySearch.trim().toLowerCase();
     const list=state.data.cards.filter(c=>!q||c.word.toLowerCase().includes(q)||c.meaningZh.includes(q));
     return shell(
-      header("","单词库","",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
+      header("","单词库","点击任意单词卡可以查看并修改内容。",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
       + `<div class="search-row"><input class="input" id="library-search" placeholder="搜索单词或中文释义" value="${escapeHtml(state.librarySearch)}" /><span class="pill">${list.length} 张卡片</span></div>
       <div class="table-wrap"><table class="table library-table"><thead><tr><th>联想图</th><th>单词</th><th>词性</th><th>中文释义</th><th>阶段</th><th>下次复习</th><th></th></tr></thead>
-      <tbody>${list.length?list.map(c=>`<tr>
+      <tbody>${list.length?list.map(c=>`<tr class="library-row" data-library-card="${c.id}" tabindex="0" aria-label="编辑 ${escapeHtml(c.word)}">
         <td><div class="library-thumb">${(c.imageData||c.imageUrl)?`<img src="${c.imageData||c.imageUrl}" alt="${escapeHtml(c.word)} 联想图" loading="lazy" />`:`<span>—</span>`}</div></td>
         <td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td>
         <td><span class="pill blue">${escapeHtml(c.pos)}</span></td>
         <td>${escapeHtml(c.meaningZh)}</td>
         <td>${stageLabelOf(c.stage)}</td>
         <td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td>
-        <td><button class="btn small danger" data-delete-card="${c.id}">删除</button></td>
+        <td><div class="library-actions"><button class="btn small" data-action="open-library-editor" data-card-id="${c.id}">编辑</button><button class="btn small danger" data-delete-card="${c.id}">删除</button></div></td>
       </tr>`).join(""):`<tr><td colspan="7"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
+    );
+  }
+
+  function libraryEditorBaseDraft(card){
+    return {
+      word:card.word||"",
+      phonetic:card.phonetic||"",
+      pos:card.pos||"",
+      meaningZh:card.meaningZh||"",
+      exampleEn:card.exampleEn||"",
+      exampleZh:card.exampleZh||"",
+      visualNote:card.visualNote||card.visualSceneSuggestion?.scene||"",
+      imageData:card.imageData||"",
+      imageUrl:card.imageUrl||"",
+      generatedVisualScene:card.generatedVisualScene||"",
+      imageGeneration:card.imageGeneration?{...card.imageGeneration}:null
+    };
+  }
+
+  function openLibraryEditor(cardId){
+    const card=getCard(cardId);
+    if(!card)return;
+    state.libraryEditor={
+      cardId:card.id,
+      originalWord:card.word||"",
+      originalPhonetic:card.phonetic||"",
+      originalMeaningZh:card.meaningZh||"",
+      imageGenerating:false,
+      draft:libraryEditorBaseDraft(card)
+    };
+    state.route="library-edit";
+    render();
+  }
+
+  function captureLibraryEditorDraft(){
+    const editor=state.libraryEditor;
+    const card=editor&&getCard(editor.cardId);
+    if(!editor||!card)return null;
+    const current=editor.draft||libraryEditorBaseDraft(card);
+    const read=(id,fallback)=>document.getElementById(id)?.value??fallback;
+    editor.draft={
+      ...current,
+      word:String(read("library-edit-word",current.word)||"").trim(),
+      phonetic:String(read("library-edit-phonetic",current.phonetic)||"").trim(),
+      pos:String(read("library-edit-pos",current.pos)||"").trim(),
+      meaningZh:String(read("library-edit-meaning",current.meaningZh)||"").trim(),
+      exampleEn:String(read("library-edit-example-en",current.exampleEn)||"").trim(),
+      exampleZh:String(read("library-edit-example-zh",current.exampleZh)||"").trim(),
+      visualNote:String(read("library-edit-visual-note",current.visualNote)||"").trim()
+    };
+    return editor.draft;
+  }
+
+  function libraryEditPage(){
+    const editor=state.libraryEditor;
+    const card=editor&&getCard(editor.cardId);
+    if(!editor||!card)return libraryPage();
+    const d=editor.draft||libraryEditorBaseDraft(card);
+    const image=d.imageData||d.imageUrl||"";
+    const generating=Boolean(editor.imageGenerating);
+    return shell(
+      header("","编辑单词卡","修改会保留原来的学习阶段、复习次数和下次复习时间。",`<button class="btn" data-action="library-edit-back">← 返回单词库</button>`)
+      + `<div class="library-editor-grid">
+        <section class="card pad library-editor-form">
+          <div class="library-editor-section-head"><div><h2>单词内容</h2><p>这些内容会直接用于后续记忆和复习。</p></div></div>
+          <div class="library-editor-form-grid compact-two">
+            <div class="field"><label>单词</label><input class="input" id="library-edit-word" value="${escapeHtml(d.word)}" /></div>
+            <div class="field"><label>音标</label><input class="input" id="library-edit-phonetic" value="${escapeHtml(d.phonetic)}" placeholder="留空可重新获取" /></div>
+          </div>
+          <div class="library-editor-form-grid compact-two">
+            <div class="field"><label>词性</label><input class="input" id="library-edit-pos" value="${escapeHtml(d.pos)}" placeholder="noun / verb / adjective" /></div>
+            <div class="field"><label>中文释义</label><input class="input" id="library-edit-meaning" value="${escapeHtml(d.meaningZh)}" /></div>
+          </div>
+          <div class="field"><label>英文例句</label><textarea class="textarea library-editor-textarea" id="library-edit-example-en">${escapeHtml(d.exampleEn)}</textarea></div>
+          <div class="field"><label>中文例句</label><textarea class="textarea library-editor-textarea" id="library-edit-example-zh">${escapeHtml(d.exampleZh)}</textarea></div>
+          <div class="library-editor-divider"></div>
+          <div class="field"><label>联想场景 <span>可选</span></label><textarea class="textarea library-editor-scene" id="library-edit-visual-note" placeholder="例如：我把钥匙留在玄关柜上。留空也可以直接重新生成图片。">${escapeHtml(d.visualNote)}</textarea></div>
+          <div class="library-editor-savebar"><button class="btn" data-action="library-edit-back">取消</button><button class="btn primary" data-action="save-library-card">保存修改</button></div>
+        </section>
+
+        <aside class="card pad library-editor-image-panel">
+          <div class="library-editor-section-head"><div><h2>联想图</h2><p>重新生成或上传图片，保存卡片后一起生效。</p></div></div>
+          <div class="library-editor-image-frame ${image?"has-image":""}">
+            ${image?`<img class="library-editor-image" src="${image}" alt="${escapeHtml(d.word)} 联想图" />`:`<div class="library-editor-image-empty"><span>✦</span><strong>暂无联想图</strong></div>`}
+            ${generating?`<div class="library-editor-image-loading"><span class="mini-spinner"></span><strong>正在生成新图片</strong><small>可以稍等片刻，不会修改当前已保存内容。</small></div>`:""}
+          </div>
+          <div class="library-editor-image-actions">
+            <button class="btn primary" data-action="regenerate-library-image" ${generating?"disabled":""}>${generating?"生成中…":image?"✦ 重新生成":"✦ AI 生成图片"}</button>
+            <label class="btn" for="library-image-file">上传图片</label>
+            ${image?`<button class="btn ghost" data-action="clear-library-image" ${generating?"disabled":""}>移除图片</button>`:""}
+          </div>
+          <input id="library-image-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
+          <div class="library-editor-tip">图片只是记忆辅助，不会改变复习进度。</div>
+        </aside>
+      </div>`
     );
   }
 
@@ -1291,6 +1440,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     else if(state.route==="review") html=reviewPage();
     else if(state.route==="review-session") html=reviewSessionPage();
     else if(state.route==="library") html=libraryPage();
+    else if(state.route==="library-edit") html=libraryEditPage();
     else if(state.route==="stats") html=statsPage();
     else if(state.route==="settings") html=settingsPage();
     else html=homePage();
@@ -1317,6 +1467,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   function bind(){
     document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{
       state.route=el.dataset.route;
+      if(state.route!=="library-edit") state.libraryEditor=null;
       if(state.route!=="study"&&state.route!=="review-session") state.study=null;
       render();
       if(state.route==="settings"||state.route==="add") refreshProviderStatus(true);
@@ -1540,6 +1691,104 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
   async function handleAction(action,el){
     if(action==="dismiss-notice"){state.notice=null;render();return;}
+    if(action==="open-library-editor"){openLibraryEditor(el.dataset.cardId);return;}
+    if(action==="library-edit-back"){state.libraryEditor=null;state.route="library";render();return;}
+    if(action==="clear-library-image"){
+      const draft=captureLibraryEditorDraft();
+      if(state.libraryEditor&&draft){
+        state.libraryEditor.draft={...draft,imageData:"",imageUrl:"",generatedVisualScene:"",imageGeneration:null};
+        render();
+      }
+      return;
+    }
+    if(action==="save-library-card"){
+      const editor=state.libraryEditor;
+      const card=editor&&getCard(editor.cardId);
+      const draft=card&&captureLibraryEditorDraft();
+      if(!editor||!card||!draft)return;
+      if(!/^[A-Za-z][A-Za-z\s'-]*$/.test(draft.word)){
+        showNotice("单词格式不正确","请输入英文单词或常见英文短语。","warn");
+        return;
+      }
+      if(!draft.pos||!draft.meaningZh||!draft.exampleEn||!draft.exampleZh){
+        showNotice("还有内容没有填写","词性、中文释义和中英文例句都需要保留。","warn");
+        return;
+      }
+      const duplicate=state.data.cards.find(c=>c.id!==card.id&&c.word.toLowerCase()===draft.word.toLowerCase()&&normalizeSearchText(c.meaningZh)===normalizeSearchText(draft.meaningZh));
+      if(duplicate){
+        showNotice("已经有相同卡片","这个单词和中文释义已经存在，不需要再保存一张重复卡片。","warn");
+        return;
+      }
+      const oldWord=String(card.word||"");
+      const oldPhonetic=String(card.phonetic||"");
+      const oldMeaning=String(card.meaningZh||"");
+      const wordChanged=normalizeSearchText(oldWord)!==normalizeSearchText(draft.word);
+      const meaningChanged=normalizeSearchText(oldMeaning)!==normalizeSearchText(draft.meaningZh);
+      card.word=draft.word;
+      card.pos=draft.pos;
+      card.meaningZh=draft.meaningZh;
+      card.exampleEn=draft.exampleEn;
+      card.exampleZh=draft.exampleZh;
+      card.visualNote=draft.visualNote;
+      card.imageData=draft.imageData||"";
+      card.imageUrl=draft.imageUrl||"";
+      card.generatedVisualScene=draft.generatedVisualScene||"";
+      card.imageGeneration=draft.imageGeneration||null;
+      card.phonetic=wordChanged&&draft.phonetic===oldPhonetic?"":draft.phonetic;
+      if(wordChanged){
+        card.audioUrl="";
+        card.sourceQuery=draft.word;
+      }
+      if(meaningChanged){
+        card.senseIntentEn="";
+        card.avoidVisualEn=[];
+      }
+      card.updatedAt=new Date().toISOString();
+      saveData();
+      state.libraryEditor=null;
+      state.route="library";
+      toast("单词卡已更新");
+      if(wordChanged&&!card.phonetic)setTimeout(()=>void ensureCardPronunciation(card),0);
+      return;
+    }
+    if(action==="regenerate-library-image"){
+      const editor=state.libraryEditor;
+      const card=editor&&getCard(editor.cardId);
+      if(!editor||!card||editor.imageGenerating)return;
+      const draft=captureLibraryEditorDraft();
+      if(!draft?.word||!draft.meaningZh){showNotice("先补全单词和释义","图片生成至少需要单词和中文释义。","warn");return;}
+      const cardId=card.id;
+      const scene=draft.visualNote||`围绕“${draft.meaningZh}”设计一个具体、清晰、生活化的记忆场景，突出 ${draft.word} 的当前含义。`;
+      editor.imageGenerating=true;
+      render();
+      try{
+        const payload=await api("/api/ai/image",{method:"POST",body:{
+          word:draft.word,
+          meaningZh:draft.meaningZh,
+          exampleEn:draft.exampleEn,
+          visualNote:scene,
+          suggestedScene:"",
+          sourceQuery:draft.word,
+          senseIntentEn:normalizeSearchText(draft.meaningZh)===normalizeSearchText(card.meaningZh)?card.senseIntentEn||"":"",
+          avoidVisualEn:normalizeSearchText(draft.meaningZh)===normalizeSearchText(card.meaningZh)?card.avoidVisualEn||[]:[]
+        }});
+        if(state.libraryEditor?.cardId!==cardId)return;
+        state.libraryEditor.draft={
+          ...draft,
+          imageData:"",
+          imageUrl:payload.image.url,
+          generatedVisualScene:String(payload.image.visualNote||scene||"").trim(),
+          imageGeneration:{status:"success",phase:"done",message:"联想图已重新生成。",code:"",finishedAt:new Date().toISOString()}
+        };
+        state.libraryEditor.imageGenerating=false;
+        render();
+      }catch(err){
+        if(state.libraryEditor?.cardId!==cardId)return;
+        state.libraryEditor.imageGenerating=false;
+        showErrorNotice(err,"图片没有生成成功");
+      }
+      return;
+    }
     if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="speak"){speak(el.dataset.word,el.dataset.audio||"");return;}
