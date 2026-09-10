@@ -498,19 +498,19 @@
         <div class="primary-meaning">${escapeHtml(primarySense.meaningZh||"请手动编辑")}</div>
         <div class="example-pair">
           <div class="example-label">例句</div>
-          <div class="example-en">${escapeHtml(primarySense.exampleEn||"暂无例句，请手动编辑")}</div>
+          ${primarySense.exampleEn?sentenceExample(primarySense.exampleEn,"example-en"):`<div class="example-en">暂无例句，请手动编辑</div>`}
           <div class="example-zh">${escapeHtml(primarySense.exampleZh||"暂无翻译，请手动编辑")}</div>
         </div>
       </div>`:"";
 
     const expandedView=r.mode==="expanded"?`
       <div class="expanded-senses-head"><strong>其它常用词义</strong><span>一个中文学习词义对应一张卡片</span></div>
-      <div class="sense-list">${senses.map(s=>`<button class="sense ${s.id===state.selectedSenseId?"selected":""}" data-sense-id="${s.id}">
+      <div class="sense-list">${senses.map(s=>`<div class="sense ${s.id===state.selectedSenseId?"selected":""}" data-sense-id="${s.id}" role="button" tabindex="0">
         <div class="sense-head"><span class="pill blue">${escapeHtml(s.pos)}</span>${s.id===state.selectedSenseId?`<span class="sense-selected-mark">✓</span>`:""}</div>
         <div class="sense-meaning">${escapeHtml(s.meaningZh||"请手动编辑")}</div>
-        <div class="sense-example">${escapeHtml(s.exampleEn||"暂无例句")}</div>
+        ${s.exampleEn?sentenceExample(s.exampleEn,"sense-example"):`<div class="sense-example">暂无例句</div>`}
         <div class="sense-example-zh">${escapeHtml(s.exampleZh||"")}</div>
-      </button>`).join("")}</div>`:"";
+      </div>`).join("")}</div>`:"";
 
     return `${resolvedNote}
       <div class="word-top learning-card-wordtop">
@@ -552,6 +552,52 @@
     const vs=speechSynthesis.getVoices();
     u.voice=vs.find(v=>v.lang.toLowerCase()==="en-us")||vs.find(v=>v.lang.toLowerCase().startsWith("en"))||null;
     speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+
+  function speakSentence(sentence){
+    const text=String(sentence||"").trim();
+    if(!text)return;
+    if(!("speechSynthesis" in window)){ toast("当前设备无法播放例句"); return; }
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="en-US";
+    u.rate=.9;
+    const vs=speechSynthesis.getVoices();
+    u.voice=vs.find(v=>v.lang.toLowerCase()==="en-us")||vs.find(v=>v.lang.toLowerCase().startsWith("en"))||null;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
+
+  function highlightKeyword(text,keyword){
+    const source=String(text||"");
+    const key=String(keyword||"").trim();
+    if(!key)return escapeHtml(source);
+    const escaped=key.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+    const re=new RegExp(`\\b(${escaped})\\b`,"ig");
+    let cursor=0;
+    let out="";
+    let match;
+    while((match=re.exec(source))){
+      out+=escapeHtml(source.slice(cursor,match.index));
+      out+=`<mark class="keyword-mark">${escapeHtml(match[0])}</mark>`;
+      cursor=match.index+match[0].length;
+      if(re.lastIndex===match.index)re.lastIndex++;
+    }
+    out+=escapeHtml(source.slice(cursor));
+    return out;
+  }
+
+  function sentenceExample(text,className="example-en",keyword=""){
+    const value=String(text||"").trim();
+    if(!value)return "";
+    const body=keyword?highlightKeyword(value,keyword):escapeHtml(value);
+    return `<div class="sentence-audio-line ${className}">
+      <span class="sentence-audio-text">${body}</span>
+      <button class="sentence-speaker" data-action="speak-sentence" data-sentence="${escapeHtml(value)}" title="播放例句" aria-label="播放例句">🔊</button>
+    </div>`;
+  }
+
+  function containsChinese(text){
+    return /[\u3400-\u9fff]/.test(String(text||""));
   }
 
   function startStudy(cardId){
@@ -647,7 +693,7 @@
   function stageSelect(card){
     return `${stageTop(card,"选词确认")}
       <div class="study-center" style="align-items:stretch;text-align:left">
-        <div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong><p>${escapeHtml(card.exampleEn)}</p><p>${escapeHtml(card.exampleZh)}</p></div>
+        <div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn primary" data-action="complete-stage" data-next="memorize1">确认卡片，开始记忆</button></div>
       </div>`;
   }
@@ -662,7 +708,7 @@
             <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
             <div class="memory-example-section compact-example">
               <div class="memory-example-label">例句</div>
-              <div class="memory-example-en">${escapeHtml(card.exampleEn)}</div>
+              ${sentenceExample(card.exampleEn,"memory-example-en")}
               <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
             </div>
           </div>
@@ -687,7 +733,7 @@
             ${wordIdentity(card,{size:"large",showPos:true,center:false})}
             <div class="memory-example-section">
               <div class="memory-example-label">例句</div>
-              <div class="memory-example-en">${escapeHtml(card.exampleEn)}</div>
+              ${sentenceExample(card.exampleEn,"memory-example-en")}
               <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
             </div>
           </div>
@@ -771,7 +817,7 @@
             <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
             <div class="memory-example-section compact-example">
               <div class="memory-example-label">例句</div>
-              <div class="memory-example-en">${escapeHtml(card.exampleEn)}</div>
+              ${sentenceExample(card.exampleEn,"memory-example-en")}
               <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
             </div>
           </div>
@@ -798,6 +844,7 @@
   function stageApply(card){
     const fb=state.study.feedback;
     const suggested=String(fb?.suggestedSentence||"").trim();
+    const keyword=String(fb?.keyword||card.word||"").trim();
     const applied=Boolean(state.study.aiSuggestionApplied);
     const canRestore=Boolean(state.study.originalApplyText && state.study.originalApplyText!==state.study.applyText);
 
@@ -807,41 +854,35 @@
           ${wordIdentity(card,{size:"medium",showPos:true,center:true})}
         </div>
         <div class="field">
-          <label>请用目标词写一个与你自己相关的句子</label>
-          <textarea class="textarea" id="apply-text" placeholder="写一个真实、完整的英文句子">${escapeHtml(state.study.applyText||"")}</textarea>
+          <label>写一个与你自己相关的句子（中英文都可以）</label>
+          <textarea class="textarea" id="apply-text" placeholder="例如：I have a keyboard / 我每天用键盘写代码">${escapeHtml(state.study.applyText||"")}</textarea>
         </div>
 
         ${applied?`
-          <div class="apply-status success">
-            ✓ 已应用 AI 建议。请检查最终句子；满意后可以直接确认通过。
-          </div>
+          <div class="apply-status success">✓ 已应用 AI 建议</div>
           <div class="apply-after-ai-actions">
             ${canRestore?`<button class="btn" data-action="restore-original-apply">恢复原句</button>`:""}
             <button class="btn" data-action="revise-apply">继续修改</button>
-            <button class="btn primary" data-action="pass-apply">确认通过，进入首次复习</button>
+            <button class="btn primary" data-action="pass-apply">确认通过</button>
           </div>
         `:`
-          <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:11px">
+          <div class="apply-primary-actions">
             ${canRestore?`<button class="btn" data-action="restore-original-apply">恢复原句</button>`:""}
-            <button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting?"disabled":""}>${state.study.applySubmitting?"正在获取建议…":"获取 AI 建议"}</button>
+            <button class="btn" data-action="submit-apply" ${state.study.applySubmitting?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"获取 AI 建议"}</button>
+            <button class="btn primary" data-action="pass-apply">确认通过</button>
           </div>
         `}
 
         ${fb && !applied?`<div class="feedback ${fb.level}">
           <h4>${escapeHtml(fb.title)}</h4>
-          <ul>${(fb.tips||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+          ${(fb.tips||[]).length?`<ul>${(fb.tips||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>`:""}
           ${suggested?`
             <div class="ai-suggestion-box">
-              <div class="ai-suggestion-label">AI 建议句</div>
-              <div class="ai-suggestion-text">${escapeHtml(suggested)}</div>
-              <button class="btn primary full" data-action="apply-ai-suggestion">一键应用 AI 建议</button>
+              <div class="ai-suggestion-label"><span>AI 建议句</span><span class="ai-keyword-chip">关键词 · ${escapeHtml(keyword||card.word)}</span></div>
+              <div class="ai-suggestion-text">${highlightKeyword(suggested,keyword||card.word)}</div>
+              <button class="btn primary full" data-action="apply-ai-suggestion">应用这个句子</button>
             </div>
           `:""}
-        </div>
-
-        <div class="rating-row">
-          <button class="btn" data-action="revise-apply">继续修改</button>
-          <button class="btn primary" data-action="pass-apply">确认通过，进入首次复习</button>
         </div>`:""}
       </div>`;
   }
@@ -912,7 +953,7 @@
       header("","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
       + `<div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}<div class="prompt-small">先回忆中文释义，再查看答案。</div>
-        ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong><p>${escapeHtml(card.exampleEn)}</p><p>${escapeHtml(card.exampleZh)}</p></div>
+        ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn" data-action="review-rate" data-quality="again">没记住 · 明天再复习</button><button class="btn primary" data-action="review-rate" data-quality="good">记住了 · 3 天后复习</button></div>`
         :`<button class="btn primary" style="margin-top:22px" data-action="review-reveal">查看答案</button>`}
       </div></div>`
@@ -1169,9 +1210,15 @@
       }
     });
 
-    document.querySelectorAll("[data-sense-id]").forEach(el=>el.addEventListener("click",()=>{
-      state.selectedSenseId=el.dataset.senseId;state.addDraft=null;render();
-    }));
+    document.querySelectorAll("[data-sense-id]").forEach(el=>{
+      el.addEventListener("click",e=>{
+        if(e.target.closest("[data-action]"))return;
+        state.selectedSenseId=el.dataset.senseId;state.addDraft=null;render();
+      });
+      el.addEventListener("keydown",e=>{
+        if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click();}
+      });
+    });
 
     document.querySelectorAll("[data-suggestion]").forEach(el=>el.addEventListener("click",async ()=>{
       const q=el.dataset.suggestion;
@@ -1273,6 +1320,7 @@
     if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="speak"){speak(el.dataset.word,el.dataset.audio||"");return;}
+    if(action==="speak-sentence"){speakSentence(el.dataset.sentence||"");return;}
     if(action==="load-more-senses"){
       const q=state.lookup?.result?.word||state.lookup?.query?.trim()||"";
       if(!q || state.loadingMoreSenses)return;
@@ -1414,7 +1462,8 @@
           level:fb.level||"warn",
           title:fb.title||"AI 反馈",
           tips:Array.isArray(fb.tips)?fb.tips:[],
-          suggestedSentence:String(fb.suggestion||"").trim()
+          suggestedSentence:String(fb.suggestion||"").trim(),
+          keyword:String(fb.keyword||c.word||"").trim()
         };
       }catch(err){
         if(state.study?.cardId!==cardId)return;
@@ -1504,6 +1553,11 @@
 
       if(!text){
         toast("请先写一个句子");
+        return;
+      }
+      if(containsChinese(text)){
+        state.study.applyText=text;
+        showNotice("先把中文转成英文","点击“获取 AI 建议”，AI 会按当前词义改成自然英文并使用目标词。","warn");
         return;
       }
 
