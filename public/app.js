@@ -546,6 +546,7 @@
     const r=state.lookup.result;
     const senses=Array.isArray(r.senses)?r.senses:[];
     const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
+    const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r.word));
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || r.normalizedQuery)
       ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
       : "";
@@ -584,6 +585,7 @@
       </div>
       ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
+      ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
       ${r.mode==="expanded"?expandedView:primaryView}
       ${state.addDraft?renderSenseEditor(state.addDraft):""}
       <div class="action-row learning-card-actions">
@@ -592,7 +594,7 @@
           <button class="btn ghost" data-action="edit-sense">手动编辑</button>
           <button class="btn ghost" data-action="lookup-again">重新查询</button>
         </div>
-        <button class="btn primary save-learning-card" data-action="save-card">保存并开始学习</button>
+        <button class="btn primary save-learning-card" data-action="save-card" ${targetExampleMismatch?"disabled":""}>保存并开始学习</button>
       </div>`;
   }
 
@@ -702,6 +704,14 @@
 
   function sentenceUsesTargetWord(text,word){
     return targetWordForms(word).some(form=>textContainsKeyword(text,form));
+  }
+
+  function learningExampleUsesTarget(text,word){
+    const example=String(text||"").trim().toLowerCase().replace(/\s+/g," ");
+    const target=String(word||"").trim().toLowerCase().replace(/\s+/g," ");
+    if(!example||!target)return false;
+    if(target.includes(" "))return example.includes(target);
+    return sentenceUsesTargetWord(example,target);
   }
 
   function startStudy(cardId){
@@ -1783,6 +1793,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         showNotice("例句还没有填写完整","请保留一组对应的中英文例句。","warn");
         return;
       }
+      if(!learningExampleUsesTarget(draft.exampleEn,card.word)){
+        showNotice("例句没有使用当前词","英文例句需要实际包含当前学习词或常见词形，再保存修改。","warn");
+        return;
+      }
       // Fixed lexical identity: word / phonetic / POS / Chinese meaning are never changed here.
       card.exampleEn=draft.exampleEn;
       card.exampleZh=draft.exampleZh;
@@ -1878,6 +1892,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(action==="save-card"){
       const r=state.lookup?.result,s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
       if(!s.meaningZh?.trim()||!s.exampleEn?.trim()||!s.exampleZh?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和中英文例句");render();return;}
+      if(!learningExampleUsesTarget(s.exampleEn,r.word)){
+        showNotice("这张卡片还不能保存",`例句没有使用当前目标词“${r.word}”。请重新识别结果，或修改例句后再保存。`,"warn");
+        return;
+      }
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
