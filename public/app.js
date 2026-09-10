@@ -1519,17 +1519,17 @@
         c.imageGeneration={status:"success",message:note?"已按你提供的场景描述生成图片。":"已根据当前词义生成图片。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
         c.updatedAt=new Date().toISOString();
         saveData();
-        if(state.study?.cardId===cardId) toast("联想图生成成功");
+        if(state.study?.cardId===cardId&&c.stage==="visualize") toast("联想图生成成功");
       }catch(err){
         const user=err?.userError||err?.payload?.userError;
         c.imageGeneration={status:"error",message:user?.message||"这次没有生成成功。你可以重试、上传本地图或暂时跳过。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
         c.updatedAt=new Date().toISOString();
         saveData();
-        if(state.study?.cardId===cardId) toast("图片没有生成成功，处理建议已保留在页面");
+        if(state.study?.cardId===cardId&&c.stage==="visualize") toast("图片没有生成成功，处理建议已保留在页面");
       }finally{
         if(state.study?.cardId===cardId){
           state.study.imageGenerating=false;
-          render();
+          if(c.stage==="visualize") render();
         }
       }
       return;
