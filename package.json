@@ -1,6 +1,6 @@
 {
   "name": "lexiflow",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "LexiFlow 本地优先英语单词学习桌面应用",
   "productName": "LexiFlow",
   "main": "electron-main.js",
