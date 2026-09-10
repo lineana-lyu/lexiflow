@@ -22,6 +22,15 @@ jobs:
           node-version: '22'
           cache: npm
 
+      - name: Normalize patch runner
+        shell: pwsh
+        run: |
+          $path = 'scripts/apply_codex_app_server_fast_review.cjs'
+          $text = Get-Content $path -Raw
+          $text = $text.Replace('const key = `${model}|${effort || ""}`;', 'const key = model + "|" + (effort || "");')
+          $text = $text.Replace('reject(appServerError(`Codex app-server request timed out: ${method}`, "CODEX_APP_SERVER_REQUEST_TIMEOUT"));', 'reject(appServerError("Codex app-server request timed out: " + method, "CODEX_APP_SERVER_REQUEST_TIMEOUT"));')
+          Set-Content $path $text -Encoding UTF8
+
       - name: Apply app-server transport patch
         run: node scripts/apply_codex_app_server_fast_review.cjs
 
@@ -38,7 +47,6 @@ jobs:
           foreach ($needle in @('app-server", "--listen", "stdio://', 'thread/start', 'turn/start', 'item/agentMessage/delta', 'fastTextTransport: appServerPublicStatus()', 'provider: result.transport === "app-server"')) {
             if (-not $server.Contains($needle)) { throw "Missing app-server integration anchor: $needle" }
           }
-          if ($server.Contains('merriamWebsterLearnersKey: "')) { Write-Host 'Settings schema present; no literal key value is embedded by this patch.' }
 
       - name: Build Windows application
         run: npm run build:win
