@@ -1284,10 +1284,20 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     else html=homePage();
     const nextStudyMotionSnapshot=studyMotionSnapshot();
     const previousStudyMotionSnapshot=lastStudyMotionSnapshot;
-    app.innerHTML=html;
-    bind();
-    if(nextStudyMotionSnapshot?.key!==previousStudyMotionSnapshot?.key){
-      requestAnimationFrame(()=>animateStudySurface(previousStudyMotionSnapshot,nextStudyMotionSnapshot));
+    const motionChanged=nextStudyMotionSnapshot?.key!==previousStudyMotionSnapshot?.key;
+    const reducedMotion=Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+    const motionDirection=previousStudyMotionSnapshot&&nextStudyMotionSnapshot&&previousStudyMotionSnapshot.cardId===nextStudyMotionSnapshot.cardId&&nextStudyMotionSnapshot.order<previousStudyMotionSnapshot.order?-1:1;
+    const commitDom=()=>{app.innerHTML=html;bind();};
+
+    if(motionChanged&&!reducedMotion&&nextStudyMotionSnapshot&&typeof document.startViewTransition==="function"){
+      document.documentElement.dataset.studyMotion=motionDirection<0?"backward":"forward";
+      const transition=document.startViewTransition(commitDom);
+      transition.finished.finally(()=>{delete document.documentElement.dataset.studyMotion;});
+    }else{
+      commitDom();
+      if(motionChanged&&nextStudyMotionSnapshot){
+        requestAnimationFrame(()=>animateStudySurface(previousStudyMotionSnapshot,nextStudyMotionSnapshot));
+      }
     }
     lastStudyMotionSnapshot=nextStudyMotionSnapshot;
   }
