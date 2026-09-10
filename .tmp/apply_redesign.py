@@ -1,0 +1,390 @@
+import json
+import re
+from pathlib import Path
+
+app_path = Path('public/app.js')
+css_path = Path('public/styles.css')
+server_path = Path('server.js')
+app = app_path.read_text(encoding='utf-8')
+css = css_path.read_text(encoding='utf-8')
+server = server_path.read_text(encoding='utf-8')
+
+def replace_once(text, pattern, replacement, label, flags=re.S):
+    updated, count = re.subn(pattern, replacement, text, count=1, flags=flags)
+    if count != 1:
+        raise SystemExit(f'{label}: expected 1 replacement, got {count}')
+    return updated
+
+new_study_page = r'''  function studyPage(){
+    const s=state.study, card=s&&getCard(s.cardId);
+    if(card && !card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
+    if(!card) return shell(header("","学习会话","当前没有学习任务。")+`<div class="card empty"><div class="empty-icon">✓</div><strong>暂无学习任务</strong></div>`);
+    return shell(
+      header(
+        "",
+        "学习会话",
+        `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
+        `<button class="btn" data-route="home">退出会话</button>`
+      )
+      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="card study-card study-card-focus">${renderStage(card)}</div></div>`
+    );
+  }
+
+'''
+app = replace_once(app, r'  function studyPage\(\)\{.*?\n  \}\n\n\n  function formatPhonetic', new_study_page + '  function formatPhonetic', 'studyPage')
+
+new_stage_rail = r'''  function renderStageRail(card){
+    const idx=stageIndex(card.stage);
+    return `<div class="study-stepper">${STAGES.map(([k,label],i)=>`<div class="study-stepper-item ${i<idx?"done":i===idx?"active":""}"><span class="study-stepper-dot">${i<idx?"✓":i+1}</span><span>${label}</span></div>${i<STAGES.length-1?`<i class="study-stepper-line ${i<idx?"done":""}"></i>`:""}`).join("")}</div>`;
+  }
+'''
+app = replace_once(app, r'  function renderStageRail\(card\)\{.*?\n  \}', new_stage_rail.rstrip(), 'renderStageRail')
+
+anchor='      applyDetectedLanguage:"",\n      visualNote:card.visualNote||""'
+replacement='      applyDetectedLanguage:"",\n      visualNote:card.visualNote||"",\n      visualSceneLoading:false,\n      practicePromptLoading:false'
+if anchor not in app:
+    raise SystemExit('startStudy state anchor missing')
+app = app.replace(anchor,replacement,1)
+
+assist_helpers = r'''
+  async function ensureVisualSceneSuggestion(card,refresh=false){
+    if(!card||!state.study||state.study.cardId!==card.id)return;
+    if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
+    if(state.study.visualSceneLoading)return;
+    const cardId=card.id;
+    const previous=String(card.visualSceneSuggestion?.scene||"");
+    state.study.visualSceneLoading=true;
+    render();
+    try{
+      const payload=await api("/api/ai/visual-scene",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:refresh?previous:""}});
+      const latest=getCard(cardId);
+      if(!latest)return;
+      latest.visualSceneSuggestion={scene:String(payload.assist?.scene||"").trim(),cue:String(payload.assist?.cue||"").trim()};
+      if(payload.assist?.practiceQuestion)latest.practicePrompt={question:String(payload.assist.practiceQuestion).trim()};
+      latest.updatedAt=new Date().toISOString();
+      saveData();
+    }catch{
+      const latest=getCard(cardId);
+      if(latest&&!latest.visualSceneSuggestion?.scene)latest.visualSceneSuggestion={scene:`把“${latest.meaningZh}”放进一个你熟悉、具体的生活场景。`,cue:`${latest.word} → ${latest.meaningZh}`};
+      if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
+    }finally{
+      if(state.study?.cardId===cardId){state.study.visualSceneLoading=false;render();}
+    }
+  }
+
+  async function ensurePracticePrompt(card,refresh=false){
+    if(!card||!state.study||state.study.cardId!==card.id)return;
+    if(!refresh&&card.practicePrompt?.question)return;
+    if(state.study.practicePromptLoading)return;
+    const cardId=card.id;
+    const previous=String(card.practicePrompt?.question||"");
+    state.study.practicePromptLoading=true;
+    render();
+    try{
+      const payload=await api("/api/ai/practice-prompt",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,previousQuestion:refresh?previous:""}});
+      const latest=getCard(cardId);
+      if(!latest)return;
+      latest.practicePrompt={question:String(payload.prompt?.question||"").trim()};
+      latest.updatedAt=new Date().toISOString();
+      saveData();
+    }catch{
+      const latest=getCard(cardId);
+      if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
+    }finally{
+      if(state.study?.cardId===cardId){state.study.practicePromptLoading=false;render();}
+    }
+  }
+
+'''
+
+new_visual = r'''  function stageVisual(card){
+    const currentScene=String(state.study.visualNote||"").trim();
+    const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:""};
+    const customOpen=Boolean(state.visualSceneExpanded||currentScene);
+    const hasImage=Boolean(card.imageData||card.imageUrl);
+    const generating=Boolean(state.study.imageGenerating||generation.status==="generating");
+    const scene=String(card.visualSceneSuggestion?.scene||"").trim();
+    const cue=String(card.visualSceneSuggestion?.cue||"").trim();
+    const sceneLoading=Boolean(state.study.visualSceneLoading);
+
+    if((!scene||!card.practicePrompt?.question)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,false),0);}
+
+    const imageArea=hasImage
+      ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
+      : `<div class="visual-canvas-empty"><span>✦</span><strong>${generating?"正在把场景画出来":"你的联想图会出现在这里"}</strong></div>`;
+
+    const scenePanel=sceneLoading&&!scene
+      ? `<div class="ai-scene-loading"><span class="mini-spinner"></span><span>AI 正在为这个词构思一个好记的场景…</span></div>`
+      : `<div class="ai-scene-copy"><p>${escapeHtml(scene||`把“${card.meaningZh}”放进一个具体生活场景。`)}</p>${cue?`<div class="ai-scene-cue">记忆钩子 · ${escapeHtml(cue)}</div>`:""}</div>`;
+
+    return `${stageKicker("视觉联想")}
+      <div class="visual-learning-stage">
+        <div class="learning-stage-heading">
+          <div><span class="learning-stage-index">04</span><h2>用一个画面记住 ${escapeHtml(card.word)}</h2></div>
+          <div class="learning-stage-meta">${escapeHtml(card.meaningZh)} · ${escapeHtml(card.pos||"")}</div>
+        </div>
+
+        <div class="visual-workspace">
+          <div class="visual-image-canvas ${hasImage?"has-image":""} ${generating?"is-generating":""}">
+            ${imageArea}
+            ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>AI 正在绘制</strong><small>${escapeHtml(currentScene||scene||card.meaningZh)}</small></div>`:""}
+          </div>
+          <aside class="ai-scene-panel">
+            <div class="ai-panel-label"><span class="ai-spark">✦</span> AI 联想场景</div>
+            ${scenePanel}
+            <button class="text-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>换一个场景</button>
+          </aside>
+        </div>
+
+        ${generation.status==="error"?`<div class="visual-status-inline error"><span>这次没有生成成功，可以重试或直接继续。</span></div>`:""}
+
+        <div class="visual-command-bar">
+          <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating?"disabled":""}>${generating?"正在生成…":hasImage?"✦ 重新生成":"✦ AI 生成联想图"}</button>
+          <button class="text-action" data-action="toggle-visual-scene">${customOpen?"收起自定义场景":"自定义场景"}</button>
+          <label class="text-action upload-text-action" for="visual-file">上传自己的图片</label>
+        </div>
+
+        ${customOpen?`<div class="visual-custom-inline"><textarea class="textarea visual-scene-input" id="visual-note" placeholder="用中文描述人物、地点或动作；你的描述会优先于 AI 场景。">${escapeHtml(state.study.visualNote||"")}</textarea></div>`:""}
+        <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
+
+        <div class="learning-stage-footer">
+          <button class="text-action" data-action="skip-visual">跳过此步</button>
+          <button class="btn primary" data-action="finish-visual">${generating?"先去造句 →":hasImage?"继续造句 →":"不生成，继续造句 →"}</button>
+        </div>
+      </div>`;
+  }
+
+'''
+app = replace_once(app, r'  function stageVisual\(card\)\{.*?\n  \}\n\n  function stageInitialReview', assist_helpers + new_visual + '  function stageInitialReview', 'stageVisual')
+
+new_apply = r'''  function stageApply(card){
+    const fb=state.study.feedback;
+    const current=String(state.study.applyText||"").trim();
+    const checked=Boolean(state.study.applyApproved && state.study.applyLastCheckedText===current);
+    const chinese=containsChinese(current);
+    const missingKeyword=Boolean(current && !chinese && !sentenceUsesTargetWord(current,card.word));
+    const corrected=Boolean(state.study.originalApplyText && state.study.originalApplyText.trim()!==current);
+    const keyword=String(fb?.keyword||card.word||"").trim();
+    const suggestion=String(fb?.suggestion||"").trim();
+    const question=String(card.practicePrompt?.question||"").trim();
+    const promptLoading=Boolean(state.study.practicePromptLoading);
+
+    if(!question&&!promptLoading){setTimeout(()=>void ensurePracticePrompt(card,false),0);}
+
+    let feedbackPanel="";
+    if(state.study.applySubmitting){
+      feedbackPanel=`<div class="ai-feedback-panel pending"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 正在帮你看看</small><strong>${chinese?"正在把你的意思转成自然英文":"正在检查用词和表达"}</strong></div></div><div class="ai-feedback-progress"><i></i></div></div>`;
+    }else if(fb&&suggestion){
+      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>${fb.inputLanguage==="zh"?"AI 已把你的意思转成英文":"AI 建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用这句话</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+    }else if(fb&&checked){
+      feedbackPanel=`<div class="ai-feedback-panel good"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 反馈</small><strong>${escapeHtml(fb.title||"表达自然，可以直接使用")}</strong></div><span class="ai-keyword-chip">${escapeHtml(keyword)}</span></div>${sentenceExample(current,"example-en",keyword)}<div class="ai-feedback-actions"><button class="btn primary" data-action="pass-apply">继续首次复习 →</button></div></div>`;
+    }else if(fb){
+      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 反馈</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+    }
+
+    return `${stageKicker("造句应用")}
+      <div class="apply-learning-stage">
+        <div class="apply-word-hero">${wordIdentity(card,{size:"large",showPos:true,center:true})}<span>${escapeHtml(card.meaningZh)}</span></div>
+        <div class="ai-practice-prompt"><span class="ai-spark">✦</span><div><small>AI 给你一个话题</small><strong>${escapeHtml(question||(promptLoading?"正在想一个更具体的问题…":`你在什么情况下会用到“${card.meaningZh}”？`))}</strong></div><button class="text-action" data-action="refresh-practice-prompt" ${promptLoading||state.study.applySubmitting?"disabled":""}>换一个</button></div>
+        <div class="apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，写你真正想表达的话…">${escapeHtml(state.study.applyText||"")}</textarea><div class="apply-composer-bottom"><span>Enter 发送 · Shift + Enter 换行</span><button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting||!current?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"✦ AI 帮我看看"}</button></div></div>
+        <div id="apply-keyword-warning" class="apply-keyword-warning" ${missingKeyword?"":"hidden"}>还没有用到目标词 “${escapeHtml(card.word)}”，AI 会尝试帮你自然地放进句子里。</div>
+        ${corrected?`<button class="text-action apply-undo" data-action="restore-original-apply">↶ 撤销 AI 修改</button>`:""}
+        ${feedbackPanel}
+      </div>`;
+  }
+'''
+app = replace_once(app, r'  function stageApply\(card\)\{.*?\n  \}\n\n  function advanceStage', new_apply.rstrip() + '\n\n  function advanceStage', 'stageApply')
+
+old='if(submit&&!state.study.applySubmitting) submit.textContent=containsChinese(value)?"翻译并审核":"提交审核";\n        document.querySelector(\'.apply-review-result\')?.remove();'
+new='if(submit&&!state.study.applySubmitting) submit.textContent="✦ AI 帮我看看";\n        if(submit) submit.disabled=!value.trim()||Boolean(state.study.applySubmitting);\n        state.study.feedback=null;\n        document.querySelector(\'.ai-feedback-panel\')?.remove();'
+if old not in app:
+    raise SystemExit('apply input sync anchor missing')
+app=app.replace(old,new,1)
+
+old_body='body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}'
+new_body='body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,suggestedScene:note?"":String(c.visualSceneSuggestion?.scene||""),sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}'
+if old_body not in app:
+    raise SystemExit('visual request body anchor missing')
+app=app.replace(old_body,new_body,1)
+
+submit_block = r'''    if(action==="submit-apply"){
+      if(!state.study||state.study.applySubmitting)return;
+      const cardId=state.study.cardId;
+      const sentence=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
+      const c=getCard(cardId);
+      if(!c)return;
+      state.study.applyText=sentence;
+      state.study.applyApproved=false;
+      state.study.applyLastCheckedText="";
+      state.study.applyDetectedLanguage=containsChinese(sentence)?"zh":"en";
+      if(!sentence){render();return;}
+      state.study.applySubmitting=true;
+      state.study.feedback=null;
+      render();
+      try{
+        const payload=await api("/api/ai/text",{method:"POST",body:{word:c.word,meaningZh:c.meaningZh,sentence}});
+        if(state.study?.cardId!==cardId)return;
+        const fb=payload.feedback||{};
+        const suggested=String(fb.suggestion||"").trim();
+        const inputLanguage=fb.inputLanguage==="zh"?"zh":state.study.applyDetectedLanguage;
+        const keyword=String(fb.keyword||c.word||"").trim()||c.word;
+        const candidate=suggested||sentence;
+        const keywordOk=textContainsKeyword(candidate,keyword)||sentenceUsesTargetWord(candidate,c.word);
+        const candidateApproved=fb.approved!==false&&fb.level==="good"&&keywordOk&&!(inputLanguage==="zh"&&!suggested);
+        const originalApproved=inputLanguage==="en"&&!suggested&&candidateApproved;
+        state.study.applyApproved=originalApproved;
+        state.study.applyLastCheckedText=originalApproved?sentence:"";
+        state.study.feedback={level:candidateApproved?"good":"warn",title:inputLanguage==="zh"?(candidateApproved?"意思保留了，英文也自然":"这句话还需要调整"):suggested?(candidateApproved?"可以这样说得更自然":"这句话还需要调整"):(originalApproved?"表达自然，可以直接使用":String(fb.title||"这句话还需要调整")),tips:[...(Array.isArray(fb.tips)?fb.tips:[]),...(!keywordOk?[`需要自然使用 “${c.word}” 或它的常见词形。`]:[])].slice(0,2),suggestion:suggested,suggestionApproved:Boolean(suggested&&candidateApproved),keyword,inputLanguage};
+      }catch(err){
+        if(state.study?.cardId!==cardId)return;
+        state.study.applyApproved=false;
+        state.study.applyLastCheckedText="";
+        state.study.feedback={level:"warn",title:"AI 暂时没有完成检查",tips:["你的句子还在，可以直接再试一次。"],suggestion:"",suggestionApproved:false,keyword:c.word,inputLanguage:state.study.applyDetectedLanguage};
+      }finally{
+        if(state.study?.cardId===cardId){state.study.applySubmitting=false;render();}
+      }
+      return;
+    }
+    if(action==="adopt-ai-sentence"){
+      if(!state.study)return;
+      const c=getCard(state.study.cardId);
+      const fb=state.study.feedback||{};
+      const suggestion=String(fb.suggestion||"").trim();
+      if(!c||!suggestion||!fb.suggestionApproved)return;
+      const current=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
+      if(current&&!state.study.originalApplyText)state.study.originalApplyText=current;
+      const keyword=String(fb.keyword||c.word||"").trim()||c.word;
+      const keywordOk=textContainsKeyword(suggestion,keyword)||sentenceUsesTargetWord(suggestion,c.word);
+      state.study.applyText=suggestion;
+      state.study.applyApproved=keywordOk;
+      state.study.applyLastCheckedText=keywordOk?suggestion:"";
+      state.study.feedback={...fb,title:"已采用 AI 建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
+      render();
+      setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
+      return;
+    }
+    if(action==="edit-apply"){document.getElementById("apply-text")?.focus();return;}
+    if(action==="refresh-visual-scene"){const c=state.study&&getCard(state.study.cardId);if(c)void ensureVisualSceneSuggestion(c,true);return;}
+    if(action==="refresh-practice-prompt"){const c=state.study&&getCard(state.study.cardId);if(c)void ensurePracticePrompt(c,true);return;}
+'''
+app = replace_once(app, r'    if\(action==="submit-apply"\)\{.*?\n    if\(action==="restore-original-apply"\)\{', submit_block + '    if(action==="restore-original-apply"){', 'submit handler')
+
+server=server.replace('const sentenceFeedbackCache = new Map();','const sentenceFeedbackCache = new Map();\nconst visualSceneCache = new Map();\nconst practicePromptCache = new Map();',1)
+
+assist_server=r'''
+function putSmallCache(cache,key,value,limit=100){
+  cache.set(key,value);
+  if(cache.size>limit){const first=cache.keys().next().value;cache.delete(first);}
+}
+
+async function visualSceneAssist(body){
+  const word=String(body.word||"").trim();
+  const meaningZh=String(body.meaningZh||"").trim();
+  const exampleEn=String(body.exampleEn||"").trim();
+  const senseIntentEn=String(body.senseIntentEn||"").trim();
+  const previousScene=String(body.previousScene||"").trim();
+  if(!word)throw new Error("INVALID_INPUT");
+  const settings=await loadSettings();
+  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn].join("|");
+  if(!previousScene&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
+  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：场景必须具体、生活化、可直接画成图片，严格对应当前词义；问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
+  const result=await runCodexFastText(prompt,{timeoutMs:10000,reasoningEffortOverride:"low"});
+  const parsed=extractJson(result.stdout);
+  const assist={scene:String(parsed.scene||"").trim(),cue:String(parsed.cue||"").trim(),practiceQuestion:String(parsed.practiceQuestion||"").trim()};
+  if(!assist.scene)throw new Error("EMPTY_VISUAL_SCENE");
+  if(!previousScene)putSmallCache(visualSceneCache,cacheKey,assist);
+  return assist;
+}
+
+async function practicePromptAssist(body){
+  const word=String(body.word||"").trim();
+  const meaningZh=String(body.meaningZh||"").trim();
+  const exampleEn=String(body.exampleEn||"").trim();
+  const previousQuestion=String(body.previousQuestion||"").trim();
+  if(!word)throw new Error("INVALID_INPUT");
+  const settings=await loadSettings();
+  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn].join("|");
+  if(!previousQuestion&&practicePromptCache.has(cacheKey))return practicePromptCache.get(cacheKey);
+  const prompt=`给英语学习者一个非常简短的中文问题，引导他用目标词说一句与自己真实生活有关的话。\n目标词：${word}\n词义：${meaningZh}\n参考例句：${exampleEn}\n${previousQuestion?`不要重复这个旧问题：${previousQuestion}`:""}\n不要给英文答案，不要讲解。只输出 JSON：{"question":"一句中文问题"}`;
+  const result=await runCodexFastText(prompt,{timeoutMs:8000,reasoningEffortOverride:"low"});
+  const parsed=extractJson(result.stdout);
+  const value={question:String(parsed.question||"").trim()};
+  if(!value.question)throw new Error("EMPTY_PRACTICE_PROMPT");
+  if(!previousQuestion)putSmallCache(practicePromptCache,cacheKey,value);
+  return value;
+}
+
+'''
+if 'async function sentenceFeedback(body) {' not in server:
+    raise SystemExit('sentenceFeedback anchor missing')
+server=server.replace('async function sentenceFeedback(body) {',assist_server+'async function sentenceFeedback(body) {',1)
+server=server.replace('  const visualNote = String(body.visualNote || "").trim();','  const visualNote = String(body.visualNote || "").trim();\n  const suggestedScene = String(body.suggestedScene || "").trim();',1)
+old_scene='  const scene = visualNote\n    ? `用户指定场景（最高优先级，必须严格实现）：${visualNote}`\n    : `用户未指定场景：请根据当前词义设计一个自然、具体、生活化的记忆场景。`;'
+new_scene='  const scene = visualNote\n    ? `用户指定场景（最高优先级，必须严格实现）：${visualNote}`\n    : suggestedScene\n      ? `AI 已设计的记忆场景（优先实现）：${suggestedScene}`\n      : `用户未指定场景：请根据当前词义设计一个自然、具体、生活化的记忆场景。`;'
+if old_scene not in server:
+    raise SystemExit('visual scene anchor missing')
+server=server.replace(old_scene,new_scene,1)
+server=server.replace('    sceneMode: visualNote ? "user-directed" : "auto",\n    visualNote,','    sceneMode: visualNote ? "user-directed" : suggestedScene ? "ai-scene" : "auto",\n    visualNote: visualNote || suggestedScene,',1)
+
+api_routes=r'''
+    if (req.method === "POST" && url.pathname === "/api/ai/visual-scene") {
+      const body = await readJsonBody(req);
+      try {
+        const assist = await visualSceneAssist(body);
+        return sendJson(res, 200, { ok: true, assist });
+      } catch (err) {
+        console.error("visual scene assist failed:", err?.message || err);
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/ai/practice-prompt") {
+      const body = await readJsonBody(req);
+      try {
+        const prompt = await practicePromptAssist(body);
+        return sendJson(res, 200, { ok: true, prompt });
+      } catch (err) {
+        console.error("practice prompt failed:", err?.message || err);
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
+      }
+    }
+
+'''
+if '    if (req.method === "POST" && url.pathname === "/api/ai/text") {' not in server:
+    raise SystemExit('AI text route anchor missing')
+server=server.replace('    if (req.method === "POST" && url.pathname === "/api/ai/text") {',api_routes+'    if (req.method === "POST" && url.pathname === "/api/ai/text") {',1)
+server=server.replace('version: "0.5.0-desktop"','version: "0.7.0-desktop"')
+
+css += r'''
+
+/* v0.7 — AI-assisted learning experience */
+.study-progress-wrap{margin:-4px 0 18px;padding:0 8px}
+.study-stepper{display:grid;grid-template-columns:repeat(11,auto);align-items:center;justify-content:center;gap:9px;color:#9aa6b7;font-size:11px;white-space:nowrap}
+.study-stepper-item{display:flex;align-items:center;gap:7px;transition:color .18s ease}.study-stepper-item.done{color:var(--green)}.study-stepper-item.active{color:var(--blue);font-weight:850}
+.study-stepper-dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#edf1f6;color:#7f8da0;font-size:11px;font-weight:850}.study-stepper-item.done .study-stepper-dot{background:var(--green-soft);color:var(--green)}.study-stepper-item.active .study-stepper-dot{background:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(52,104,223,.18)}
+.study-stepper-line{display:block;width:34px;height:1px;background:#dfe5ed}.study-stepper-line.done{background:#bfe4d6}.study-shell-single{display:block!important}.study-card-focus{min-height:610px;padding:34px 38px}.stage-rail{display:none!important}
+.learning-stage-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:22px}.learning-stage-heading>div:first-child{display:flex;align-items:center;gap:12px}.learning-stage-heading h2{margin:0;font-size:24px;letter-spacing:-.025em}.learning-stage-index{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:900}.learning-stage-meta{color:var(--muted);font-size:13px}
+.visual-learning-stage{max-width:980px;margin:0 auto;padding:8px 0 0}.visual-workspace{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:18px;align-items:stretch}.visual-image-canvas{position:relative;min-height:360px;border-radius:20px;background:#f6f8fb;border:1px solid #e3e9f1;display:grid;place-items:center;overflow:hidden}.visual-image-canvas.has-image{background:#eef2f7}.visual-memory-image{width:100%;height:100%;max-height:460px;object-fit:contain;display:block}.visual-canvas-empty{display:grid;place-items:center;gap:10px;color:#8b98aa;text-align:center}.visual-canvas-empty span{width:52px;height:52px;border-radius:17px;background:#fff;display:grid;place-items:center;color:var(--blue);font-size:23px;box-shadow:0 10px 26px rgba(38,58,89,.07)}.visual-canvas-empty strong{font-size:14px;color:#65748a}
+.visual-generating-overlay{position:absolute;inset:0;background:rgba(247,250,254,.88);backdrop-filter:blur(5px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:28px}.visual-generating-overlay strong{font-size:16px}.visual-generating-overlay small{max-width:380px;color:var(--muted);line-height:1.55}
+.ai-scene-panel{border-radius:20px;background:#f7f9fd;border:1px solid #e0e7f2;padding:22px;display:flex;flex-direction:column;min-height:220px}.ai-panel-label{display:flex;align-items:center;gap:8px;color:#50617a;font-size:12px;font-weight:850}.ai-spark{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:9px;background:#eaf1ff;color:var(--blue);font-weight:900;flex:0 0 auto}.ai-scene-copy{display:flex;flex:1;flex-direction:column;justify-content:center;padding:12px 0}.ai-scene-copy p{margin:0;color:#1c2b43;font-size:17px;font-weight:750;line-height:1.8}.ai-scene-cue{margin-top:15px;color:#718097;font-size:12px}.ai-scene-loading{display:flex;flex:1;align-items:center;gap:10px;color:#718097;font-size:13px;line-height:1.6}
+.text-action{border:0;background:transparent;padding:5px 2px;color:#6a7890;font:inherit;font-size:12px;font-weight:750;cursor:pointer}.text-action:hover:not(:disabled){color:var(--blue)}.text-action:disabled{opacity:.42;cursor:default}.visual-command-bar{display:flex;align-items:center;justify-content:center;gap:18px;margin:20px 0 8px}.visual-primary-action{min-width:170px}.upload-text-action{cursor:pointer}.visual-custom-inline{max-width:720px;margin:14px auto 0}.visual-custom-inline .textarea{min-height:92px}.learning-stage-footer{display:flex;align-items:center;justify-content:flex-end;gap:16px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line-soft)}.visual-status-inline.error{margin:14px 0 0;padding:10px 12px;border-radius:11px;background:#fff4f4;color:#a95050;font-size:12px;text-align:center}
+.apply-learning-stage{max-width:860px;margin:0 auto;padding:4px 0 10px}.apply-word-hero{display:flex;flex-direction:column;align-items:center;gap:9px;margin:4px 0 24px}.apply-word-hero>span{color:#627289;font-size:14px;font-weight:750}.ai-practice-prompt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:14px;padding:15px 17px;border-radius:16px;background:#f5f8ff;border:1px solid #dfe8fa}.ai-practice-prompt small{display:block;color:#7d8ca1;font-size:10px;font-weight:850;margin-bottom:4px}.ai-practice-prompt strong{display:block;color:#24354f;font-size:14px;line-height:1.55}
+.apply-composer{border:1px solid #cfd9e7;border-radius:18px;background:#fff;overflow:hidden;transition:border-color .18s ease,box-shadow .18s ease}.apply-composer:focus-within{border-color:var(--blue);box-shadow:0 0 0 4px rgba(52,104,223,.08),0 12px 30px rgba(37,66,119,.06)}.apply-composer-input{min-height:142px;border:0!important;border-radius:0!important;box-shadow:none!important;resize:none;padding:18px 20px;font-size:16px;line-height:1.75}.apply-composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 12px 11px 18px;border-top:1px solid #edf1f5;background:#fbfcfe}.apply-composer-bottom>span{color:#98a3b3;font-size:11px}
+.apply-keyword-warning{margin-top:10px;padding:9px 12px;border-radius:11px;background:#fff8e8;color:#9a6a20;font-size:12px}.apply-undo{margin-top:8px}.ai-feedback-panel{margin-top:18px;padding:18px;border-radius:18px;border:1px solid #dde5ef;background:#f9fbfd}.ai-feedback-panel.good{border-color:#c8eadb;background:#f1faf6}.ai-feedback-panel.warn{border-color:#efd8ac;background:#fff9ed}.ai-feedback-panel.pending{border-color:#d6e2f8;background:#f6f9ff}.ai-feedback-head{display:flex;align-items:center;gap:11px}.ai-feedback-head>div{flex:1}.ai-feedback-head small{display:block;color:#8491a3;font-size:10px;font-weight:850;margin-bottom:3px}.ai-feedback-head strong{display:block;font-size:14px;color:#24344b}.ai-suggestion-sentence{margin-top:14px;padding:15px 16px;border-radius:13px;background:#fff;border:1px solid rgba(100,125,160,.15);font-size:16px}.ai-suggestion-sentence mark,.sentence-audio-text mark{background:#e8f0ff;color:#2457c7;border-radius:4px;padding:0 2px}.ai-feedback-notes{display:grid;gap:5px;margin-top:11px;color:#66758a;font-size:12px}.ai-feedback-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:14px}.ai-feedback-progress{height:3px;margin-top:14px;border-radius:999px;background:#e6edf8;overflow:hidden}.ai-feedback-progress i{display:block;width:36%;height:100%;background:linear-gradient(90deg,transparent,#4b78df,transparent);animation:lookupSweep 1.05s ease-in-out infinite}.ai-keyword-chip{padding:5px 9px;border-radius:999px;background:#fff;color:#3a6fdc;font-size:11px;font-weight:850}
+@media(max-width:900px){.study-stepper{grid-template-columns:repeat(6,1fr);gap:5px}.study-stepper-line{display:none}.study-stepper-item{justify-content:center}.study-stepper-item span:last-child{display:none}.study-card-focus{padding:24px;min-height:560px}.visual-workspace{grid-template-columns:1fr}.visual-image-canvas{min-height:300px}.learning-stage-heading{align-items:flex-start;flex-direction:column}.visual-command-bar{flex-wrap:wrap}.apply-learning-stage{max-width:none}}
+@media(max-width:620px){.apply-composer-bottom{align-items:stretch;flex-direction:column}.apply-composer-bottom .btn{width:100%}.ai-practice-prompt{grid-template-columns:auto 1fr}.ai-practice-prompt>.text-action{grid-column:2}.learning-stage-footer{justify-content:space-between}.visual-command-bar{justify-content:flex-start}}
+'''
+
+app_path.write_text(app, encoding='utf-8')
+css_path.write_text(css, encoding='utf-8')
+server_path.write_text(server, encoding='utf-8')
+
+for filename in ['package.json','package-lock.json']:
+    p=Path(filename)
+    data=json.loads(p.read_text(encoding='utf-8'))
+    data['version']='0.7.0'
+    if filename=='package-lock.json' and isinstance(data.get('packages'),dict) and '' in data['packages']:
+        data['packages']['']['version']='0.7.0'
+    p.write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
