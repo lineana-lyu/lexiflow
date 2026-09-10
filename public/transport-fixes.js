@@ -5,6 +5,8 @@
   const IMAGE_JOB_TIMEOUT_MS = 165000;
   let activeImageJob = null;
   let clearJobTimer = null;
+  let lastIndicatorKey = "";
+  let lastVisualStageVisible = null;
 
   function endpointOf(input) {
     try {
@@ -85,33 +87,108 @@
     return data;
   }
 
+  function normalizeSentence(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[“”‘’'"`]/g, "")
+      .replace(/[.,!?;:，。！？；：()（）\[\]{}]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function levenshtein(a, b) {
+    const s = String(a || ""), t = String(b || "");
+    if (!s.length) return t.length;
+    if (!t.length) return s.length;
+    const prev = Array.from({ length: t.length + 1 }, (_, i) => i);
+    const next = new Array(t.length + 1);
+    for (let i = 1; i <= s.length; i++) {
+      next[0] = i;
+      for (let j = 1; j <= t.length; j++) {
+        const cost = s[i - 1] === t[j - 1] ? 0 : 1;
+        next[j] = Math.min(next[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
+      }
+      for (let j = 0; j <= t.length; j++) prev[j] = next[j];
+    }
+    return prev[t.length];
+  }
+
+  function sentenceSimilarity(a, b) {
+    const aa = normalizeSentence(a), bb = normalizeSentence(b);
+    if (!aa || !bb) return 0;
+    if (aa === bb) return 1;
+    const maxLen = Math.max(aa.length, bb.length);
+    return maxLen ? 1 - levenshtein(aa, bb) / maxLen : 1;
+  }
+
+  function softenNearIdenticalSentenceFeedback(data, body) {
+    const feedback = data?.feedback;
+    const original = String(body?.sentence || "").trim();
+    const suggestion = String(feedback?.suggestion || "").trim();
+    if (!feedback || !original || !suggestion || hasChinese(original)) return data;
+
+    const score = sentenceSimilarity(original, suggestion);
+    const normalizedSame = normalizeSentence(original) === normalizeSentence(suggestion);
+    const tinyEdit = score >= 0.94;
+    if (!normalizedSame && !tinyEdit) return data;
+    if (feedback.approved === false || feedback.level !== "good") return data;
+
+    return {
+      ...data,
+      feedback: {
+        ...feedback,
+        approved: true,
+        level: "good",
+        title: "表达正确，可以直接继续",
+        suggestion: "",
+        tips: [`可选润色：${suggestion}`],
+        optionalSuggestion: suggestion,
+        originalSimilarity: Number(score.toFixed(3)),
+      },
+    };
+  }
+
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   function setImageJobState(next) {
+    const previous = activeImageJob;
     activeImageJob = next ? { ...(activeImageJob || {}), ...next } : null;
-    renderImageJobIndicator();
+
+    const changed = !previous || !activeImageJob ||
+      previous.id !== activeImageJob.id ||
+      previous.status !== activeImageJob.status ||
+      previous.word !== activeImageJob.word;
+    if (changed) renderImageJobIndicator(true);
 
     if (clearJobTimer) clearTimeout(clearJobTimer);
     clearJobTimer = null;
     if (activeImageJob && (activeImageJob.status === "succeeded" || activeImageJob.status === "failed")) {
       clearJobTimer = setTimeout(() => {
         activeImageJob = null;
-        renderImageJobIndicator();
+        lastIndicatorKey = "";
+        renderImageJobIndicator(true);
       }, activeImageJob.status === "succeeded" ? 3200 : 5200);
     }
   }
 
-  function renderImageJobIndicator() {
+  function renderImageJobIndicator(force = false) {
     let pill = document.querySelector(".runtime-image-job-pill");
     if (!activeImageJob) {
       pill?.remove();
+      lastIndicatorKey = "";
       return;
     }
 
     const visualStageVisible = Boolean(document.querySelector(".visual-learning-stage"));
-    if (visualStageVisible && (activeImageJob.status === "queued" || activeImageJob.status === "running")) {
+    const status = String(activeImageJob.status || "running");
+    const hiddenForStudy = visualStageVisible && (status === "queued" || status === "running");
+    const key = `${activeImageJob.id}|${status}|${activeImageJob.word || ""}|${hiddenForStudy ? 1 : 0}`;
+    if (!force && key === lastIndicatorKey) return;
+    lastIndicatorKey = key;
+
+    if (hiddenForStudy) {
       pill?.remove();
       return;
     }
@@ -125,15 +202,15 @@
     }
 
     const word = String(activeImageJob.word || "联想图");
-    if (activeImageJob.status === "succeeded") {
+    if (status === "succeeded") {
       pill.className = "runtime-image-job-pill success";
       pill.innerHTML = `<span class="runtime-job-check">✓</span><div><strong>联想图已完成</strong><span>${escapeHtml(word)} · 已自动保存到单词卡</span></div>`;
-    } else if (activeImageJob.status === "failed") {
+    } else if (status === "failed") {
       pill.className = "runtime-image-job-pill error";
       pill.innerHTML = `<span class="runtime-job-mark">!</span><div><strong>联想图没有生成成功</strong><span>${escapeHtml(word)} · 可以稍后重试或上传图片</span></div>`;
     } else {
       pill.className = "runtime-image-job-pill running";
-      pill.innerHTML = `<span class="runtime-job-spinner"></span><div><strong>联想图正在后台生成</strong><span>${escapeHtml(word)} · 可以继续下一步</span></div>`;
+      pill.innerHTML = `<span class="runtime-job-spinner"></span><div><strong>${status === "queued" ? "联想图正在排队" : "联想图正在后台生成"}</strong><span>${escapeHtml(word)} · 可以继续编辑或进入下一步</span></div>`;
     }
   }
 
@@ -153,7 +230,6 @@
       return nativeFetch(input, init);
     }
 
-    // Compatibility fallback: an older backend can still use the original long request.
     if (createResponse.status === 404 || createResponse.status === 405) {
       return nativeFetch(input, init);
     }
@@ -173,7 +249,7 @@
 
     while (Date.now() - startedAt < IMAGE_JOB_TIMEOUT_MS) {
       const elapsed = Date.now() - startedAt;
-      await delay(elapsed < 8000 ? 850 : elapsed < 30000 ? 1300 : 2200);
+      await delay(elapsed < 10000 ? 1100 : elapsed < 35000 ? 1800 : 3000);
 
       let statusResponse;
       try {
@@ -264,6 +340,17 @@
       }
     }
 
+    if (endpoint === "/api/ai/text" && body?.sentence) {
+      const response = await nativeFetch(input, init);
+      if (!response.ok) return response;
+      try {
+        const data = await response.clone().json();
+        return jsonResponse(response.status, softenNearIdenticalSentenceFeedback(data, body), response);
+      } catch {
+        return response;
+      }
+    }
+
     if (endpoint === "/api/ai/image" && body) {
       return pollImageJob(input, init, body);
     }
@@ -271,14 +358,26 @@
     return nativeFetch(input, init);
   };
 
-  const observer = new MutationObserver(() => renderImageJobIndicator());
+  function observeAppRouteChanges() {
+    const app = document.getElementById("app");
+    if (!app) return;
+    const observer = new MutationObserver(() => {
+      const visible = Boolean(document.querySelector(".visual-learning-stage"));
+      if (visible === lastVisualStageVisible) return;
+      lastVisualStageVisible = visible;
+      renderImageJobIndicator(true);
+    });
+    observer.observe(app, { childList: true, subtree: false });
+    lastVisualStageVisible = Boolean(document.querySelector(".visual-learning-stage"));
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
-      observer.observe(document.body, { childList: true, subtree: true });
-      renderImageJobIndicator();
+      observeAppRouteChanges();
+      renderImageJobIndicator(true);
     }, { once: true });
   } else {
-    observer.observe(document.body, { childList: true, subtree: true });
-    renderImageJobIndicator();
+    observeAppRouteChanges();
+    renderImageJobIndicator(true);
   }
 })();
