@@ -1941,7 +1941,7 @@ async function visualSceneAssist(body){
   const settings=await loadSettings();
   const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn].join("|");
   if(!previousScene&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
-  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：\n1. 场景必须具体、生活化、可直接画成图片，严格对应当前词义。\n2. 场景只能依靠人物、动作、环境和物体表达含义，绝不能依靠画面中的文字来提示答案。\n3. scene 中不要出现“写着/标着/印着/标签/招牌/logo/屏幕文字”等设计，也不要出现目标英文单词、中文释义、字母、数字或引号中的文案。\n4. 如果涉及瓶子、包装、书本、屏幕、菜单、路牌等容易带字的物体，明确写成“无标签、无品牌、无可读文字”的版本。\n5. 优先一个清晰动作和一个视觉焦点，避免堆砌物件。\n6. 问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面，不含任何画面文字要求","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
+  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：\n1. 场景必须具体、生活化、可直接画成图片，严格对应当前词义。\n2. 场景只能依靠人物、动作、环境和物体表达含义，绝不能依靠画面中的文字来提示答案。\n3. scene 中不要出现“写着/标着/印着/标签/招牌/logo/屏幕文字”等设计，也不要出现目标英文单词、中文释义、字母、数字或引号中的文案。\n4. 如果涉及瓶子、包装、书本、屏幕、菜单、路牌等容易带字的物体，明确写成“无标签、无品牌、无可读文字”的版本。\n5. 优先一个清晰动作和一个视觉焦点，避免堆砌物件。尽量避开超市密集货架、广告墙、街道路牌、电脑界面等天然文字很多的构图；若语义需要这些环境，只保留无品牌、无可读文字的简化背景。\n6. 问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面，不含任何画面文字要求","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
   const result=await runCodexFastText(prompt,{timeoutMs:10000,reasoningEffortOverride:"low"});
   const parsed=extractJson(result.stdout);
   const assist={scene:String(parsed.scene||"").trim(),cue:String(parsed.cue||"").trim(),practiceQuestion:String(parsed.practiceQuestion||"").trim()};

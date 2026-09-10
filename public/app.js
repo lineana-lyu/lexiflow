@@ -916,7 +916,9 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
   if(state.study.visualSceneLoading)return;
   const cardId=card.id;
-  const previous=String(state.study.visualNote||card.visualSceneSuggestion?.scene||"");
+  const previousSuggestedScene=String(card.visualSceneSuggestion?.scene||"");
+  const previous=String(state.study.visualNote||previousSuggestedScene||"");
+  const draftFollowedSuggestion=!state.study.visualSceneDirty||normalizeSearchText(state.study.visualNote)===normalizeSearchText(previousSuggestedScene);
   state.study.visualSceneLoading=true;
   state.study.visualSceneRefreshing=Boolean(refresh);
   render();
@@ -927,8 +929,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const nextScene=String(payload.assist?.scene||"").trim();
     latest.visualSceneSuggestion={scene:nextScene,cue:String(payload.assist?.cue||"").trim()};
     if(payload.assist?.practiceQuestion)latest.practicePrompt={question:String(payload.assist.practiceQuestion).trim()};
-    if(state.study?.cardId===cardId&&!state.study.visualSceneDirty&&nextScene){
+    if(state.study?.cardId===cardId&&nextScene&&draftFollowedSuggestion){
       state.study.visualNote=nextScene;
+      state.study.visualSceneDirty=false;
+      if(refresh&&visualSceneNeedsRefresh(previous,card.word)) latest.visualNote=nextScene;
     }
     latest.updatedAt=new Date().toISOString();
     saveData();
@@ -984,7 +988,8 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   const progress=visualProgressMeta(generation.phase||"waiting");
 
   const riskyStoredScene=visualSceneNeedsRefresh(scene,card.word);
-  if((!scene||!card.practicePrompt?.question||riskyStoredScene)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,riskyStoredScene),0);}
+  const riskyDraftScene=scene&&normalizeSearchText(sceneDraft)===normalizeSearchText(scene)&&visualSceneNeedsRefresh(sceneDraft,card.word);
+  if((!scene||!card.practicePrompt?.question||riskyStoredScene||riskyDraftScene)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,riskyStoredScene||riskyDraftScene),0);}
 
   const imageArea=hasImage
     ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
@@ -1077,13 +1082,13 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
     let feedbackPanel="";
     if(state.study.applySubmitting){
-      feedbackPanel=`<div class="ai-feedback-panel pending"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 正在帮你看看</small><strong>${chinese?"正在把你的意思转成自然英文":"正在检查用词和表达"}</strong></div></div><div class="ai-feedback-progress"><i></i></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel pending"><div class="ai-feedback-head"><div><small>正在检查</small><strong>${chinese?"正在把你的意思转成自然英文":"正在检查用词和表达"}</strong></div></div><div class="ai-feedback-progress"><i></i></div></div>`;
     }else if(fb&&suggestion){
-      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>${fb.inputLanguage==="zh"?"AI 已把你的意思转成英文":"AI 建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用这句话</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><div><small>${fb.inputLanguage==="zh"?"英文表达":"修改建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用建议</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
     }else if(fb&&checked){
-      feedbackPanel=`<div class="ai-feedback-panel good"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 反馈</small><strong>${escapeHtml(fb.title||"表达自然，可以直接使用")}</strong></div><span class="ai-keyword-chip">${escapeHtml(keyword)}</span></div>${sentenceExample(current,"example-en",keyword)}<div class="ai-feedback-actions"><button class="btn primary" data-action="pass-apply">继续首次复习 →</button></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel good"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"表达自然，可以直接使用")}</strong></div><span class="ai-keyword-chip">${escapeHtml(keyword)}</span></div>${sentenceExample(current,"example-en",keyword)}<div class="ai-feedback-actions"><button class="btn primary" data-action="pass-apply">继续首次复习</button></div></div>`;
     }else if(fb){
-      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><span class="ai-spark">✦</span><div><small>AI 反馈</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
     }
 
     return `${stageKicker("造句应用")}
@@ -2037,7 +2042,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       state.study.applyText=suggestion;
       state.study.applyApproved=keywordOk;
       state.study.applyLastCheckedText=keywordOk?suggestion:"";
-      state.study.feedback={...fb,title:"已采用 AI 建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
+      state.study.feedback={...fb,title:"已采用 修改建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
       render();
       setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
       return;
