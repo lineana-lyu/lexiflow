@@ -1,4 +1,4 @@
-name: Apply desktop persistence migration
+name: Apply desktop persistence migration v2
 
 on:
   push:
