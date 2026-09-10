@@ -7,6 +7,8 @@
   let clearJobTimer = null;
   let lastIndicatorKey = "";
   let lastVisualStageVisible = null;
+  let preferredEnglishVoice = null;
+  let activeSpeechButton = null;
 
   function endpointOf(input) {
     try {
@@ -147,6 +149,85 @@
       },
     };
   }
+
+  function voiceScore(voice) {
+    const lang = String(voice?.lang || "").toLowerCase();
+    const name = String(voice?.name || "").toLowerCase();
+    let score = 0;
+    if (lang === "en-us") score += 100;
+    else if (lang.startsWith("en-us")) score += 90;
+    else if (lang.startsWith("en")) score += 55;
+    if (/natural|neural|online/.test(name)) score += 45;
+    if (/microsoft/.test(name)) score += 18;
+    if (/aria|jenny|ava|guy|david|zira|mark|samantha/.test(name)) score += 15;
+    if (/uk|australia|india|canada/.test(name) && lang !== "en-us") score -= 8;
+    return score;
+  }
+
+  function resolvePreferredEnglishVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices.length) return preferredEnglishVoice;
+    if (preferredEnglishVoice && voices.includes(preferredEnglishVoice)) return preferredEnglishVoice;
+    preferredEnglishVoice = voices
+      .filter(v => String(v.lang || "").toLowerCase().startsWith("en"))
+      .sort((a, b) => voiceScore(b) - voiceScore(a))[0] || null;
+    return preferredEnglishVoice;
+  }
+
+  function clearSpeakingButton() {
+    if (activeSpeechButton) activeSpeechButton.classList.remove("is-unified-speaking");
+    activeSpeechButton = null;
+  }
+
+  function speakPhraseContinuously(text, button) {
+    const value = String(text || "").trim();
+    if (!value || !("speechSynthesis" in window) || !("SpeechSynthesisUtterance" in window)) return false;
+
+    window.speechSynthesis.cancel();
+    clearSpeakingButton();
+
+    const utterance = new SpeechSynthesisUtterance(value);
+    utterance.lang = "en-US";
+    utterance.rate = 0.88;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    const voice = resolvePreferredEnglishVoice();
+    if (voice) utterance.voice = voice;
+
+    activeSpeechButton = button || null;
+    activeSpeechButton?.classList.add("is-unified-speaking");
+    utterance.onend = clearSpeakingButton;
+    utterance.onerror = clearSpeakingButton;
+    window.speechSynthesis.speak(utterance);
+    return true;
+  }
+
+  function shouldUseUnifiedPhraseVoice(button) {
+    const word = String(button?.dataset?.word || "").trim();
+    if (!word) return false;
+    if (/\s/.test(word)) return true;
+    try {
+      const segments = JSON.parse(button.dataset.audios || "[]");
+      return Array.isArray(segments) && segments.filter(Boolean).length > 1;
+    } catch {
+      return false;
+    }
+  }
+
+  if ("speechSynthesis" in window) {
+    resolvePreferredEnglishVoice();
+    window.speechSynthesis.addEventListener?.("voiceschanged", resolvePreferredEnglishVoice);
+  }
+
+  document.addEventListener("click", event => {
+    const button = event.target?.closest?.('[data-action="speak"]');
+    if (!button || button.disabled || !shouldUseUnifiedPhraseVoice(button)) return;
+    if (!speakPhraseContinuously(button.dataset.word || "", button)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+  }, true);
 
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
