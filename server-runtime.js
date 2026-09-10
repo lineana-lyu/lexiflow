@@ -8,6 +8,7 @@ const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
 const JOB_TTL_MS = 30 * 60 * 1000;
 const MAX_JOBS = 40;
 const imageJobs = new Map();
+let imageWorkerQueue = Promise.resolve();
 
 const originalCreateServer = http.createServer.bind(http);
 
@@ -83,6 +84,7 @@ function existingActiveJob(signature) {
 }
 
 async function runImageJob(job) {
+  if (!job || job.status !== "queued") return;
   job.status = "running";
   job.startedAt = new Date().toISOString();
 
@@ -125,6 +127,14 @@ async function runImageJob(job) {
   }
 }
 
+function enqueueImageJob(job) {
+  imageWorkerQueue = imageWorkerQueue.then(
+    () => runImageJob(job),
+    () => runImageJob(job)
+  );
+  imageWorkerQueue = imageWorkerQueue.catch(() => {});
+}
+
 function createImageJob(body) {
   cleanupJobs();
   const signature = bodySignature(body);
@@ -149,7 +159,7 @@ function createImageJob(body) {
   };
 
   imageJobs.set(job.id, job);
-  setImmediate(() => { void runImageJob(job); });
+  enqueueImageJob(job);
   return job;
 }
 
