@@ -647,6 +647,8 @@
       applyDetectedLanguage:"",
       visualNote:card.visualNote||"",
       visualSceneLoading:false,
+      visualSceneRefreshing:false,
+      visualSceneDirty:Boolean(card.visualNote),
       practicePromptLoading:false
     };
     state.route="study";
@@ -783,31 +785,76 @@
       </div>`;
   }
 
+const visualProgressTimers=new Map();
 
-  async function ensureVisualSceneSuggestion(card,refresh=false){
-    if(!card||!state.study||state.study.cardId!==card.id)return;
-    if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
-    if(state.study.visualSceneLoading)return;
-    const cardId=card.id;
-    const previous=String(card.visualSceneSuggestion?.scene||"");
-    state.study.visualSceneLoading=true;
-    render();
-    try{
-      const payload=await api("/api/ai/visual-scene",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:refresh?previous:""}});
-      const latest=getCard(cardId);
-      if(!latest)return;
-      latest.visualSceneSuggestion={scene:String(payload.assist?.scene||"").trim(),cue:String(payload.assist?.cue||"").trim()};
-      if(payload.assist?.practiceQuestion)latest.practicePrompt={question:String(payload.assist.practiceQuestion).trim()};
-      latest.updatedAt=new Date().toISOString();
-      saveData();
-    }catch{
-      const latest=getCard(cardId);
-      if(latest&&!latest.visualSceneSuggestion?.scene)latest.visualSceneSuggestion={scene:`把“${latest.meaningZh}”放进一个你熟悉、具体的生活场景。`,cue:`${latest.word} → ${latest.meaningZh}`};
-      if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
-    }finally{
-      if(state.study?.cardId===cardId){state.study.visualSceneLoading=false;render();}
+function stopVisualProgress(cardId){
+  const timers=visualProgressTimers.get(cardId)||[];
+  timers.forEach(timer=>clearTimeout(timer));
+  visualProgressTimers.delete(cardId);
+}
+
+function visualProgressMeta(phase){
+  const phases={
+    preparing:{index:0,title:"正在准备画面",detail:"整理当前词义和联想场景。"},
+    submitted:{index:1,title:"生成任务已提交",detail:"图片任务已经交给图像服务。"},
+    waiting:{index:2,title:"等待图片返回",detail:"图像生成比文字更慢，可以直接进入下一步。"},
+    long:{index:3,title:"仍在生成",detail:"任务仍在继续，不需要停留在这一页。"}
+  };
+  return phases[phase]||phases.waiting;
+}
+
+function startVisualProgress(cardId){
+  stopVisualProgress(cardId);
+  const setPhase=phase=>{
+    const card=getCard(cardId);
+    if(!card||card.imageGeneration?.status!=="generating")return;
+    card.imageGeneration={...card.imageGeneration,phase};
+    if(state.study?.cardId===cardId&&card.stage==="visualize")render();
+  };
+  const timers=[
+    setTimeout(()=>setPhase("submitted"),450),
+    setTimeout(()=>setPhase("waiting"),4200),
+    setTimeout(()=>setPhase("long"),15000)
+  ];
+  visualProgressTimers.set(cardId,timers);
+}
+
+async function ensureVisualSceneSuggestion(card,refresh=false){
+  if(!card||!state.study||state.study.cardId!==card.id)return;
+  if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
+  if(state.study.visualSceneLoading)return;
+  const cardId=card.id;
+  const previous=String(state.study.visualNote||card.visualSceneSuggestion?.scene||"");
+  state.study.visualSceneLoading=true;
+  state.study.visualSceneRefreshing=Boolean(refresh);
+  render();
+  try{
+    const payload=await api("/api/ai/visual-scene",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:refresh?previous:""}});
+    const latest=getCard(cardId);
+    if(!latest)return;
+    const nextScene=String(payload.assist?.scene||"").trim();
+    latest.visualSceneSuggestion={scene:nextScene,cue:String(payload.assist?.cue||"").trim()};
+    if(payload.assist?.practiceQuestion)latest.practicePrompt={question:String(payload.assist.practiceQuestion).trim()};
+    if(state.study?.cardId===cardId&&!state.study.visualSceneDirty&&nextScene){
+      state.study.visualNote=nextScene;
+    }
+    latest.updatedAt=new Date().toISOString();
+    saveData();
+  }catch{
+    const latest=getCard(cardId);
+    if(latest&&!latest.visualSceneSuggestion?.scene)latest.visualSceneSuggestion={scene:`把“${latest.meaningZh}”放进一个你熟悉、具体的生活场景。`,cue:`${latest.word} → ${latest.meaningZh}`};
+    if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
+    if(state.study?.cardId===cardId&&!state.study.visualSceneDirty&&!state.study.visualNote&&latest?.visualSceneSuggestion?.scene){
+      state.study.visualNote=latest.visualSceneSuggestion.scene;
+    }
+  }finally{
+    if(state.study?.cardId===cardId){
+      state.study.visualSceneLoading=false;
+      state.study.visualSceneRefreshing=false;
+      render();
     }
   }
+}
 
   async function ensurePracticePrompt(card,refresh=false){
     if(!card||!state.study||state.study.cardId!==card.id)return;
@@ -833,61 +880,59 @@
   }
 
   function stageVisual(card){
-    const currentScene=String(state.study.visualNote||"").trim();
-    const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:""};
-    const customOpen=Boolean(state.visualSceneExpanded||currentScene);
-    const hasImage=Boolean(card.imageData||card.imageUrl);
-    const generating=Boolean(state.study.imageGenerating||generation.status==="generating");
-    const scene=String(card.visualSceneSuggestion?.scene||"").trim();
-    const cue=String(card.visualSceneSuggestion?.cue||"").trim();
-    const sceneLoading=Boolean(state.study.visualSceneLoading);
+  const currentScene=String(state.study.visualNote||"").trim();
+  const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:"",phase:""};
+  const hasImage=Boolean(card.imageData||card.imageUrl);
+  const generating=Boolean(state.study.imageGenerating||generation.status==="generating");
+  const scene=String(card.visualSceneSuggestion?.scene||"").trim();
+  const cue=String(card.visualSceneSuggestion?.cue||"").trim();
+  const sceneLoading=Boolean(state.study.visualSceneLoading);
+  const sceneRefreshing=Boolean(state.study.visualSceneRefreshing);
+  const sceneDraft=String(currentScene||scene||"").trim();
+  const progress=visualProgressMeta(generation.phase||"waiting");
 
-    if((!scene||!card.practicePrompt?.question)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,false),0);}
+  if((!scene||!card.practicePrompt?.question)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,false),0);}
 
-    const imageArea=hasImage
-      ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
-      : `<div class="visual-canvas-empty"><span>✦</span><strong>${generating?"正在把场景画出来":"你的联想图会出现在这里"}</strong></div>`;
+  const imageArea=hasImage
+    ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
+    : `<div class="visual-canvas-empty"><span>✦</span><strong>${generating?progress.title:"你的联想图会出现在这里"}</strong></div>`;
 
-    const scenePanel=sceneLoading&&!scene
-      ? `<div class="ai-scene-loading"><span class="mini-spinner"></span><span>AI 正在为这个词构思一个好记的场景…</span></div>`
-      : `<div class="ai-scene-copy"><p>${escapeHtml(scene||`把“${card.meaningZh}”放进一个具体生活场景。`)}</p>${cue?`<div class="ai-scene-cue">记忆钩子 · ${escapeHtml(cue)}</div>`:""}</div>`;
+  const progressSteps=["准备","提交","等待","持续生成"];
+  const progressStrip=generating?`<div class="visual-progress-strip">${progressSteps.map((label,index)=>`<span class="${index<progress.index?"done":index===progress.index?"active":""}">${index<progress.index?"✓":index+1}<em>${label}</em></span>`).join("")}</div>`:"";
 
-    return `${stageKicker("视觉联想")}
-      <div class="visual-learning-stage">
-        <div class="learning-stage-heading">
-          <div><span class="learning-stage-index">04</span><h2>用一个画面记住 ${escapeHtml(card.word)}</h2></div>
-          <div class="learning-stage-meta">${escapeHtml(card.meaningZh)} · ${escapeHtml(card.pos||"")}</div>
+  return `${stageKicker("视觉联想")}
+    <div class="visual-learning-stage">
+      <div class="learning-stage-heading">
+        <div><span class="learning-stage-index">04</span><h2>用一个画面记住 ${escapeHtml(card.word)}</h2></div>
+        <div class="learning-stage-meta">${escapeHtml(card.meaningZh)} · ${escapeHtml(card.pos||"")}</div>
+      </div>
+
+      <div class="visual-workspace">
+        <div class="visual-image-canvas ${hasImage?"has-image":""} ${generating?"is-generating":""}">
+          ${imageArea}
+          ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>${escapeHtml(progress.title)}</strong><small>${escapeHtml(progress.detail)}</small>${progressStrip}</div>`:""}
         </div>
+        <aside class="ai-scene-panel ${sceneLoading?"is-loading":""}">
+          <div class="ai-panel-label"><span class="ai-spark">✦</span><span>AI 联想场景</span><small>可直接修改</small></div>
+          ${sceneLoading&&!sceneDraft?`<div class="ai-scene-loading"><span class="mini-spinner"></span><span>正在构思一个好记的画面…</span></div>`:`<textarea class="ai-scene-editor" id="visual-note" placeholder="直接修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
+          ${cue?`<div class="ai-scene-cue">记忆钩子 · ${escapeHtml(cue)}</div>`:""}
+          <button class="text-action scene-refresh-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>${sceneLoading?`<span class="mini-spinner"></span>${sceneRefreshing?"正在换一个…":"正在准备…"}`:"换一个"}</button>
+        </aside>
+      </div>
 
-        <div class="visual-workspace">
-          <div class="visual-image-canvas ${hasImage?"has-image":""} ${generating?"is-generating":""}">
-            ${imageArea}
-            ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>AI 正在绘制</strong><small>${escapeHtml(currentScene||scene||card.meaningZh)}</small></div>`:""}
-          </div>
-          <aside class="ai-scene-panel">
-            <div class="ai-panel-label"><span class="ai-spark">✦</span> AI 联想场景</div>
-            ${scenePanel}
-            <button class="text-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>换一个场景</button>
-          </aside>
-        </div>
+      ${generation.status==="error"?`<div class="visual-status-inline error"><span>这次没有生成成功，可以重试或上传自己的图片。</span></div>`:""}
 
-        ${generation.status==="error"?`<div class="visual-status-inline error"><span>这次没有生成成功，可以重试或直接继续。</span></div>`:""}
+      <div class="visual-command-bar">
+        <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating||!sceneDraft?"disabled":""}>${generating?"生成中…":hasImage?"✦ 重新生成":"✦ AI 生成联想图"}</button>
+        <label class="text-action upload-text-action" for="visual-file">上传自己的图片</label>
+      </div>
+      <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
 
-        <div class="visual-command-bar">
-          <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating?"disabled":""}>${generating?"正在生成…":hasImage?"✦ 重新生成":"✦ AI 生成联想图"}</button>
-          <button class="text-action" data-action="toggle-visual-scene">${customOpen?"收起自定义场景":"自定义场景"}</button>
-          <label class="text-action upload-text-action" for="visual-file">上传自己的图片</label>
-        </div>
-
-        ${customOpen?`<div class="visual-custom-inline"><textarea class="textarea visual-scene-input" id="visual-note" placeholder="用中文描述人物、地点或动作；你的描述会优先于 AI 场景。">${escapeHtml(state.study.visualNote||"")}</textarea></div>`:""}
-        <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
-
-        <div class="learning-stage-footer">
-          <button class="text-action" data-action="skip-visual">跳过此步</button>
-          <button class="btn primary" data-action="finish-visual">${generating?"先去造句 →":hasImage?"继续造句 →":"不生成，继续造句 →"}</button>
-        </div>
-      </div>`;
-  }
+      <div class="learning-stage-footer single-action">
+        <button class="btn primary" data-action="finish-visual">进入下一步 →</button>
+      </div>
+    </div>`;
+}
 
   function stageInitialReview(card){
     return `${stageKicker("首次复习 · 主动回忆")}
@@ -951,7 +996,7 @@
     return `${stageKicker("造句应用")}
       <div class="apply-learning-stage">
         <div class="apply-word-hero">${wordIdentity(card,{size:"large",showPos:true,center:true})}<span>${escapeHtml(card.meaningZh)}</span></div>
-        <div class="ai-practice-prompt"><span class="ai-spark">✦</span><div><small>AI 给你一个话题</small><strong>${escapeHtml(question||(promptLoading?"正在想一个更具体的问题…":`你在什么情况下会用到“${card.meaningZh}”？`))}</strong></div><button class="text-action" data-action="refresh-practice-prompt" ${promptLoading||state.study.applySubmitting?"disabled":""}>换一个</button></div>
+        <div class="ai-practice-prompt"><span class="ai-spark">✦</span><div><small>AI 给你一个话题</small><strong>${escapeHtml(question||(promptLoading?"正在想一个更具体的问题…":`你在什么情况下会用到“${card.meaningZh}”？`))}</strong></div><button class="text-action scene-refresh-action" data-action="refresh-practice-prompt" ${promptLoading||state.study.applySubmitting?"disabled":""}>${promptLoading?`<span class="mini-spinner"></span>正在换一个…`:"换一个"}</button></div>
         <div class="apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，写你真正想表达的话…">${escapeHtml(state.study.applyText||"")}</textarea><div class="apply-composer-bottom"><span>Enter 发送 · Shift + Enter 换行</span><button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting||!current?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"✦ AI 帮我看看"}</button></div></div>
         <div id="apply-keyword-warning" class="apply-keyword-warning" ${missingKeyword?"":"hidden"}>还没有用到目标词 “${escapeHtml(card.word)}”，AI 会尝试帮你自然地放进句子里。</div>
         ${corrected?`<button class="text-action apply-undo" data-action="restore-original-apply">↶ 撤销 AI 修改</button>`:""}
@@ -1392,6 +1437,16 @@
       });
     }
 
+
+    const visualNote=document.getElementById("visual-note");
+    if(visualNote){
+      visualNote.addEventListener("input",e=>{
+        if(!state.study)return;
+        state.study.visualNote=String(e.target.value||"");
+        state.study.visualSceneDirty=true;
+      });
+    }
+
     const visualFile=document.getElementById("visual-file");
     if(visualFile) visualFile.addEventListener("change",e=>{
       const file=e.target.files?.[0];if(!file)return;
@@ -1494,55 +1549,61 @@
     }
 
     if(action==="generate-visual"){
-      if(!state.study||state.study.imageGenerating)return;
-      const cardId=state.study.cardId;
-      const c=getCard(cardId);
-      if(!c)return;
+    if(!state.study||state.study.imageGenerating)return;
+    const cardId=state.study.cardId;
+    const c=getCard(cardId);
+    if(!c)return;
 
-      const note=document.getElementById("visual-note")?.value.trim()??String(state.study.visualNote||"").trim();
-      state.study.visualNote=note;
-      state.study.imageGenerating=true;
-      c.visualNote=note;
-      c.imageGeneration={status:"generating",message:"正在生成联想图，这一步可能需要一些时间。",code:"",startedAt:new Date().toISOString()};
-      c.updatedAt=new Date().toISOString();
-      saveData();
-      render();
-
-      try{
-        const payload=await api("/api/ai/image",{
-          method:"POST",
-          body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,suggestedScene:note?"":String(c.visualSceneSuggestion?.scene||""),sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}
-        });
-        c.imageUrl=payload.image.url;
-        c.imageData="";
-        c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();
-        c.imageGeneration={status:"success",message:note?"已按你提供的场景描述生成图片。":"已根据当前词义生成图片。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
-        c.updatedAt=new Date().toISOString();
-        saveData();
-        if(state.study?.cardId===cardId&&c.stage==="visualize") toast("联想图生成成功");
-      }catch(err){
-        const user=err?.userError||err?.payload?.userError;
-        c.imageGeneration={status:"error",message:user?.message||"这次没有生成成功。你可以重试、上传本地图或暂时跳过。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
-        c.updatedAt=new Date().toISOString();
-        saveData();
-        if(state.study?.cardId===cardId&&c.stage==="visualize") toast("图片没有生成成功，处理建议已保留在页面");
-      }finally{
-        if(state.study?.cardId===cardId){
-          state.study.imageGenerating=false;
-          if(c.stage==="visualize") render();
-        }
-      }
+    const note=String(document.getElementById("visual-note")?.value??state.study.visualNote??c.visualSceneSuggestion?.scene??"").trim();
+    if(!note){
+      showNotice("还没有联想场景","等 AI 场景生成后再试，或者直接写一个你想看到的画面。","warn");
       return;
     }
-    if(action==="skip-visual"||action==="finish-visual"){
-      const c=getCard(state.study.cardId);
-      const note=document.getElementById("visual-note")?.value.trim()??String(state.study.visualNote||"").trim();
-      c.visualNote=note;
-      if(action==="skip-visual") c.visualSkipped=true;
-      else c.visualSkipped=false;
-      advanceStage(c,"apply");return;
+    state.study.visualNote=note;
+    state.study.visualSceneDirty=false;
+    state.study.imageGenerating=true;
+    c.visualNote=note;
+    c.imageGeneration={status:"generating",phase:"preparing",message:"正在准备生成任务。",code:"",startedAt:new Date().toISOString()};
+    c.updatedAt=new Date().toISOString();
+    saveData();
+    render();
+    startVisualProgress(cardId);
+
+    try{
+      const payload=await api("/api/ai/image",{
+        method:"POST",
+        body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,suggestedScene:"",sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}
+      });
+      c.imageUrl=payload.image.url;
+      c.imageData="";
+      c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();
+      c.imageGeneration={status:"success",phase:"done",message:"联想图已生成。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
+      c.updatedAt=new Date().toISOString();
+      saveData();
+      if(state.study?.cardId===cardId&&c.stage==="visualize") toast("联想图已生成");
+    }catch(err){
+      const user=err?.userError||err?.payload?.userError;
+      c.imageGeneration={status:"error",phase:"error",message:user?.message||"这次没有生成成功。可以重试或上传自己的图片。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
+      c.updatedAt=new Date().toISOString();
+      saveData();
+      if(state.study?.cardId===cardId&&c.stage==="visualize") toast("图片没有生成成功");
+    }finally{
+      stopVisualProgress(cardId);
+      if(state.study?.cardId===cardId){
+        state.study.imageGenerating=false;
+        if(c.stage==="visualize") render();
+      }
     }
-    if(action==="submit-apply"){
+    return;
+  }
+  if(action==="finish-visual"){
+    const c=getCard(state.study.cardId);
+    const note=String(document.getElementById("visual-note")?.value??state.study.visualNote??"").trim();
+    c.visualNote=note;
+    c.visualSkipped=false;
+    advanceStage(c,"apply");return;
+  }
+  if(action==="submit-apply"){
       if(!state.study||state.study.applySubmitting)return;
       const cardId=state.study.cardId;
       const sentence=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
@@ -1599,7 +1660,7 @@
       return;
     }
     if(action==="edit-apply"){document.getElementById("apply-text")?.focus();return;}
-    if(action==="refresh-visual-scene"){const c=state.study&&getCard(state.study.cardId);if(c)void ensureVisualSceneSuggestion(c,true);return;}
+    if(action==="refresh-visual-scene"){const c=state.study&&getCard(state.study.cardId);if(c){const edited=document.getElementById("visual-note")?.value;if(edited!==undefined)state.study.visualNote=edited;state.study.visualSceneDirty=false;void ensureVisualSceneSuggestion(c,true);}return;}
     if(action==="refresh-practice-prompt"){const c=state.study&&getCard(state.study.cardId);if(c)void ensurePracticePrompt(c,true);return;}
     if(action==="restore-original-apply"){
       const original=String(state.study?.originalApplyText||"");
