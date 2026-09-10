@@ -600,6 +600,38 @@
     return /[\u3400-\u9fff]/.test(String(text||""));
   }
 
+
+  function escapeRegExp(value){
+    return String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  }
+
+  function targetWordForms(word){
+    const w=String(word||"").trim().toLowerCase();
+    if(!w)return [];
+    const forms=new Set([w]);
+    if(w.endsWith("y")&&w.length>2){forms.add(w.slice(0,-1)+"ies");forms.add(w.slice(0,-1)+"ied");}
+    if(w.endsWith("e")){forms.add(w+"s");forms.add(w+"d");forms.add(w.slice(0,-1)+"ing");}
+    else{forms.add(w+"s");forms.add(w+"es");forms.add(w+"ed");forms.add(w+"ing");}
+    const irregular={
+      keep:["kept"],run:["ran","running"],write:["wrote","written","writing"],go:["went","gone"],
+      have:["has","had"],do:["does","did","done"],make:["made"],take:["took","taken"],
+      see:["saw","seen"],come:["came"],get:["got","gotten"],give:["gave","given"],
+      eat:["ate","eaten"],buy:["bought"],bring:["brought"],think:["thought"],say:["said"]
+    };
+    (irregular[w]||[]).forEach(x=>forms.add(x));
+    return Array.from(forms);
+  }
+
+  function textContainsKeyword(text,keyword){
+    const key=String(keyword||"").trim();
+    if(!key)return false;
+    return new RegExp(`\\b${escapeRegExp(key)}\\b`,"i").test(String(text||""));
+  }
+
+  function sentenceUsesTargetWord(text,word){
+    return targetWordForms(word).some(form=>textContainsKeyword(text,form));
+  }
+
   function startStudy(cardId){
     const card=cardId?getCard(cardId):activeLearningCards()[0];
     if(!card){toast("当前没有首次学习任务");state.route="home";render();return;}
@@ -610,6 +642,9 @@
       applyText:card.userSentence||"",
       originalApplyText:"",
       aiSuggestionApplied:false,
+      applyApproved:false,
+      applyLastCheckedText:"",
+      applyDetectedLanguage:"",
       visualNote:card.visualNote||""
     };
     state.route="study";
@@ -751,57 +786,45 @@
     const currentScene=String(state.study.visualNote||"").trim();
     const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:""};
     const customOpen=Boolean(state.visualSceneExpanded||currentScene);
+    const hasImage=Boolean(card.imageData||card.imageUrl);
+    const generating=Boolean(state.study.imageGenerating||generation.status==="generating");
+
+    const status = generating
+      ? `<div class="visual-status-inline working"><span class="mini-spinner"></span><span>正在生成联想图…</span></div>`
+      : generation.status==="error"
+        ? `<div class="visual-status-inline error"><strong>生成失败</strong><span>${escapeHtml(generation.message||"可以重试或上传本地图。")}</span></div>`
+        : "";
 
     return `${stageKicker("视觉联想")}
-      <div class="study-center visualize-stage" style="align-items:stretch;text-align:left">
-        <div class="visual-context-line">
-          <span>当前词义</span>
-          <strong>${escapeHtml(card.meaningZh)}</strong>
+      <div class="study-center visualize-stage visual-tight" style="align-items:stretch;text-align:left">
+        <div class="visual-tight-head">
+          <div class="visual-context-line compact"><span>当前词义</span><strong>${escapeHtml(card.meaningZh)}</strong></div>
+          <button class="btn ghost small" data-action="toggle-visual-scene">${customOpen?"收起场景":"自定义场景"}</button>
         </div>
 
-        <div class="auto-visual-card ${customOpen?"compact":""}">
-          <div class="auto-visual-icon">✦</div>
-          <div class="auto-visual-copy">
-            <strong>直接生成记忆画面</strong>
-            <p>根据当前词义和例句自动构图。</p>
-          </div>
-          <button class="btn primary" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>
-            ${state.study.imageGenerating?"正在生成…":"直接生成"}
-          </button>
-        </div>
-
-        <button class="visual-custom-toggle" data-action="toggle-visual-scene">
-          <span>${customOpen?"收起自定义场景":"我想自己描述场景"}</span><b>${customOpen?"−":"＋"}</b>
-        </button>
-
-        ${customOpen?`<div class="visual-custom-panel">
-          <div class="field">
-            <label>描述你希望看到的画面（可选）</label>
-            <textarea class="textarea visual-scene-input" id="visual-note" placeholder="例如：一双手正在电脑桌前使用机械键盘，屏幕在背景中">${escapeHtml(state.study.visualNote||"")}</textarea>
-            <div class="visual-scene-help"></div>
-          </div>
-          <button class="btn" data-action="generate-visual" ${state.study.imageGenerating?"disabled":""}>按我的描述生成</button>
+        ${customOpen?`<div class="field visual-scene-compact">
+          <textarea class="textarea visual-scene-input" id="visual-note" placeholder="例如：一家人在晚餐桌前分享烤鸡">${escapeHtml(state.study.visualNote||"")}</textarea>
+          <div class="visual-scene-help">中文描述即可；留空会按当前词义自动构图。</div>
         </div>`:""}
 
-        ${generation.status!=="idle"?`
-          <div class="image-generation-state ${escapeHtml(generation.status)}">
-            <div class="image-generation-state-head">
-              <strong>${generation.status==="generating"?"正在生成联想图":generation.status==="success"?"联想图已生成":"这次没有生成成功"}</strong>
-              <span>${generation.status==="generating"?"可以稍等片刻":generation.status==="error"&&generation.code==="TIMEOUT"?"等待时间较长":""}</span>
-            </div>
-            <div class="image-generation-message">${escapeHtml(generation.message||"")}</div>
-            ${generation.status==="error"?`<div class="image-generation-actions"><button class="btn primary" data-action="generate-visual">再试一次</button><span>也可以上传本地图或直接跳过。</span></div>`:""}
-          </div>`:""}
+        ${status}
 
-        <div class="upload-zone visual-upload-zone">
-          <div class="visual-upload-copy"><strong>已有记忆图片？</strong></div>
-          <label class="file-picker-button">选择图片<input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" /></label>
-        </div>
+        ${hasImage?`
+          <div class="visual-preview compact"><img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的视觉联想图片" /></div>
+          <div class="visual-inline-actions">
+            <button class="btn" data-action="generate-visual" ${generating?"disabled":""}>${generating?"生成中…":"重新生成"}</button>
+            <label class="btn" for="visual-file">换一张图片</label>
+          </div>
+        `:`
+          <div class="visual-generate-compact">
+            <button class="btn primary" data-action="generate-visual" ${generating?"disabled":""}>${generating?"生成中…":"生成联想图"}</button>
+            <label class="btn" for="visual-file">上传本地图</label>
+          </div>
+        `}
+        <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
 
-        ${(card.imageData||card.imageUrl)?`<div class="visual-preview"><img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的视觉联想图片" /></div>`:""}
-
-        <div class="rating-row visual-actions">
-          <button class="btn" data-action="skip-visual">暂时跳过</button>
+        <div class="rating-row visual-actions tight">
+          <button class="btn ghost" data-action="skip-visual">跳过</button>
           <button class="btn primary" data-action="finish-visual">完成视觉联想</button>
         </div>
       </div>`;
@@ -843,47 +866,36 @@
 
   function stageApply(card){
     const fb=state.study.feedback;
-    const suggested=String(fb?.suggestedSentence||"").trim();
+    const current=String(state.study.applyText||"").trim();
+    const checked=Boolean(state.study.applyApproved && state.study.applyLastCheckedText===current);
+    const chinese=containsChinese(current);
+    const missingKeyword=Boolean(current && !chinese && !sentenceUsesTargetWord(current,card.word));
+    const corrected=Boolean(state.study.originalApplyText && state.study.originalApplyText.trim()!==current);
     const keyword=String(fb?.keyword||card.word||"").trim();
-    const applied=Boolean(state.study.aiSuggestionApplied);
-    const canRestore=Boolean(state.study.originalApplyText && state.study.originalApplyText!==state.study.applyText);
+
+    const reviewStatus = state.study.applySubmitting
+      ? `<div class="apply-review-result pending"><span class="mini-spinner"></span><div><strong>${chinese?"正在翻译并审核":"正在审核"}</strong><span>快速检查中…</span></div></div>`
+      : fb
+        ? `<div class="apply-review-result ${checked?"good":"warn"}"><div><strong>${escapeHtml(fb.title||(checked?"审核通过":"需要修改"))}</strong>${(fb.tips||[]).length?`<span>${escapeHtml((fb.tips||[]).join(" · "))}</span>`:""}</div>${checked?`<span class="ai-keyword-chip">关键词 · ${escapeHtml(keyword)}</span>`:""}</div>`
+        : "";
 
     return `${stageKicker("造句应用")}
-      <div class="study-center" style="align-items:stretch;text-align:left">
-        <div class="apply-target-word">
-          ${wordIdentity(card,{size:"medium",showPos:true,center:true})}
-        </div>
+      <div class="study-center apply-stage-tight" style="align-items:stretch;text-align:left">
+        <div class="apply-target-word">${wordIdentity(card,{size:"medium",showPos:true,center:true})}</div>
         <div class="field">
-          <label>写一个与你自己相关的句子（中英文都可以）</label>
-          <textarea class="textarea" id="apply-text" placeholder="例如：I have a keyboard / 我每天用键盘写代码">${escapeHtml(state.study.applyText||"")}</textarea>
+          <label>写一句与你自己相关的话</label>
+          <textarea class="textarea" id="apply-text" placeholder="英文或中文；Enter 提交，Shift + Enter 换行">${escapeHtml(state.study.applyText||"")}</textarea>
+          <div class="apply-mini-hint">Enter 提交 · Shift + Enter 换行</div>
         </div>
 
-        ${applied?`
-          <div class="apply-status success">✓ 已应用 AI 建议</div>
-          <div class="apply-after-ai-actions">
-            ${canRestore?`<button class="btn" data-action="restore-original-apply">恢复原句</button>`:""}
-            <button class="btn" data-action="revise-apply">继续修改</button>
-            <button class="btn primary" data-action="pass-apply">确认通过</button>
-          </div>
-        `:`
-          <div class="apply-primary-actions">
-            ${canRestore?`<button class="btn" data-action="restore-original-apply">恢复原句</button>`:""}
-            <button class="btn" data-action="submit-apply" ${state.study.applySubmitting?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"获取 AI 建议"}</button>
-            <button class="btn primary" data-action="pass-apply">确认通过</button>
-          </div>
-        `}
+        <div id="apply-keyword-warning" class="apply-keyword-warning" ${missingKeyword?"":"hidden"}>当前句子还没有目标词 “${escapeHtml(card.word)}”。</div>
+        ${reviewStatus}
 
-        ${fb && !applied?`<div class="feedback ${fb.level}">
-          <h4>${escapeHtml(fb.title)}</h4>
-          ${(fb.tips||[]).length?`<ul>${(fb.tips||[]).map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>`:""}
-          ${suggested?`
-            <div class="ai-suggestion-box">
-              <div class="ai-suggestion-label"><span>AI 建议句</span><span class="ai-keyword-chip">关键词 · ${escapeHtml(keyword||card.word)}</span></div>
-              <div class="ai-suggestion-text">${highlightKeyword(suggested,keyword||card.word)}</div>
-              <button class="btn primary full" data-action="apply-ai-suggestion">应用这个句子</button>
-            </div>
-          `:""}
-        </div>`:""}
+        <div class="apply-primary-actions compact">
+          ${corrected?`<button class="btn ghost" data-action="restore-original-apply">恢复原句</button>`:""}
+          <button class="btn" data-action="submit-apply" ${state.study.applySubmitting?"disabled":""}>${state.study.applySubmitting?"处理中…":chinese?"翻译并审核":"提交审核"}</button>
+          <button class="btn primary" data-action="pass-apply" ${checked&&!state.study.applySubmitting?"":"disabled"}>确认通过</button>
+        </div>
       </div>`;
   }
 
@@ -980,8 +992,16 @@
     return shell(
       header("","单词库","",`<button class="btn primary" data-route="add">＋ 添加单词</button>`)
       + `<div class="search-row"><input class="input" id="library-search" placeholder="搜索单词或中文释义" value="${escapeHtml(state.librarySearch)}" /><span class="pill">${list.length} 张卡片</span></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>词性</th><th>中文释义</th><th>阶段</th><th>下次复习</th><th></th></tr></thead>
-      <tbody>${list.length?list.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td><td><span class="pill blue">${escapeHtml(c.pos)}</span></td><td>${escapeHtml(c.meaningZh)}</td><td>${stageLabelOf(c.stage)}</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td><td><button class="btn small danger" data-delete-card="${c.id}">删除</button></td></tr>`).join(""):`<tr><td colspan="6"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
+      <div class="table-wrap"><table class="table library-table"><thead><tr><th>联想图</th><th>单词</th><th>词性</th><th>中文释义</th><th>阶段</th><th>下次复习</th><th></th></tr></thead>
+      <tbody>${list.length?list.map(c=>`<tr>
+        <td><div class="library-thumb">${(c.imageData||c.imageUrl)?`<img src="${c.imageData||c.imageUrl}" alt="${escapeHtml(c.word)} 联想图" loading="lazy" />`:`<span>—</span>`}</div></td>
+        <td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td>
+        <td><span class="pill blue">${escapeHtml(c.pos)}</span></td>
+        <td>${escapeHtml(c.meaningZh)}</td>
+        <td>${stageLabelOf(c.stage)}</td>
+        <td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td>
+        <td><button class="btn small danger" data-delete-card="${c.id}">删除</button></td>
+      </tr>`).join(""):`<tr><td colspan="7"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
     );
   }
 
@@ -1025,14 +1045,14 @@
         "",
         `<button class="btn" data-action="refresh-provider">刷新状态</button>`
       )
-      + `<div class="settings-list">
+      + `<div class="settings-security-banner">🔒 API Key 仅保存在本机 settings.json；Windows 桌面版使用系统加密，仓库不会包含该文件。</div><div class="settings-list">
         <div class="setting-row">
           <div>
             <h3>英语词典</h3>
             <p>Merriam-Webster Learner's Dictionary · ${dict?.configured?`已连接 ${escapeHtml(dict.maskedKey||"")}`:"未连接"}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="粘贴 Learner's Dictionary API Key" />
+            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="粘贴 Dictionary API Key（仅本机）" />
             <button class="btn primary" data-action="save-dictionary-key">保存</button>
             <button class="btn" data-action="test-dictionary">检查连接</button>
           </div>
@@ -1062,8 +1082,7 @@
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
             <h3>模型与思考强度</h3>
-            <p>默认：GPT-5.6 Luna · 中</p>
-            <p></p>
+            
           </div>
           <div class="codex-runtime-grid">
             <div class="field">
@@ -1283,6 +1302,34 @@
       if(state.study?.cardId===cardId) render();
     }));
 
+    const applyText=document.getElementById("apply-text");
+    if(applyText){
+      const syncApplyUi=()=>{
+        if(!state.study)return;
+        const value=String(applyText.value||"");
+        state.study.applyText=value;
+        state.study.applyApproved=false;
+        state.study.applyLastCheckedText="";
+        const warning=document.getElementById("apply-keyword-warning");
+        const word=getCard(state.study.cardId)?.word||"";
+        const missing=Boolean(value.trim()&&!containsChinese(value)&&!sentenceUsesTargetWord(value,word));
+        if(warning) warning.hidden=!missing;
+        const pass=document.querySelector('[data-action="pass-apply"]');
+        if(pass) pass.disabled=true;
+        const submit=document.querySelector('[data-action="submit-apply"]');
+        if(submit&&!state.study.applySubmitting) submit.textContent=containsChinese(value)?"翻译并审核":"提交审核";
+        document.querySelector('.apply-review-result')?.remove();
+      };
+      applyText.addEventListener("input",syncApplyUi);
+      applyText.addEventListener("keydown",e=>{
+        if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){
+          e.preventDefault();
+          syncApplyUi();
+          document.querySelector('[data-action="submit-apply"]')?.click();
+        }
+      });
+    }
+
     const visualFile=document.getElementById("visual-file");
     if(visualFile) visualFile.addEventListener("change",e=>{
       const file=e.target.files?.[0];if(!file)return;
@@ -1436,39 +1483,55 @@
     if(action==="submit-apply"){
       if(!state.study||state.study.applySubmitting)return;
       const cardId=state.study.cardId;
-      const sentence=document.getElementById("apply-text")?.value||"";
+      const sentence=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
       const c=getCard(cardId);
       if(!c)return;
 
       state.study.applyText=sentence;
-      state.study.aiSuggestionApplied=false;
-      if(sentence.trim() && !state.study.originalApplyText) state.study.originalApplyText=sentence;
+      state.study.applyApproved=false;
+      state.study.applyLastCheckedText="";
+      state.study.applyDetectedLanguage=containsChinese(sentence)?"zh":"en";
 
-      if(!sentence.trim()){
-        state.study.feedback=localFeedback(sentence,c.word);
+      if(!sentence){
+        state.study.feedback={level:"warn",title:"请先写一句话",tips:[],keyword:c.word};
         render();
         return;
       }
 
       state.study.applySubmitting=true;
-      state.study.feedback={level:"warn",title:"AI 正在分析…",tips:["正在整理这句话的用法建议。"],suggestedSentence:""};
+      state.study.feedback=null;
       render();
 
       try{
         const payload=await api("/api/ai/text",{method:"POST",body:{word:c.word,meaningZh:c.meaningZh,sentence}});
         if(state.study?.cardId!==cardId)return;
         const fb=payload.feedback||{};
+        const suggested=String(fb.suggestion||"").trim();
+        const finalText=suggested||sentence;
+        const keyword=String(fb.keyword||c.word||"").trim()||c.word;
+        const keywordOk=textContainsKeyword(finalText,keyword)||sentenceUsesTargetWord(finalText,c.word);
+
+        if(suggested && suggested!==sentence){
+          if(!state.study.originalApplyText) state.study.originalApplyText=sentence;
+          state.study.applyText=suggested;
+        }
+
+        const approved=fb.approved!==false && fb.level==="good" && keywordOk;
+        state.study.applyApproved=approved;
+        state.study.applyLastCheckedText=approved?finalText:"";
         state.study.feedback={
-          level:fb.level||"warn",
-          title:fb.title||"AI 反馈",
-          tips:Array.isArray(fb.tips)?fb.tips:[],
-          suggestedSentence:String(fb.suggestion||"").trim(),
-          keyword:String(fb.keyword||c.word||"").trim()
+          level:approved?"good":"warn",
+          title:approved?(suggested?"已纠正并审核通过":"审核通过"):(fb.title||"这句话还不能通过"),
+          tips:[...(Array.isArray(fb.tips)?fb.tips:[]),...(!keywordOk?[`最终句子需要包含目标词 “${c.word}” 或其词形。`]:[])].slice(0,2),
+          suggestedSentence:suggested,
+          keyword,
+          inputLanguage:fb.inputLanguage||state.study.applyDetectedLanguage,
         };
       }catch(err){
         if(state.study?.cardId!==cardId)return;
-        const fallback=localFeedback(sentence,c.word);
-        state.study.feedback={...fallback,title:"AI 暂时没有返回，已完成基础检查",suggestedSentence:""};
+        state.study.applyApproved=false;
+        state.study.applyLastCheckedText="";
+        state.study.feedback={level:"warn",title:"审核没有完成",tips:["请再提交一次；未审核的句子不会被直接通过。"],keyword:c.word};
       }finally{
         if(state.study?.cardId===cardId){
           state.study.applySubmitting=false;
@@ -1477,95 +1540,43 @@
       }
       return;
     }
-    if(action==="apply-ai-suggestion"){
-      const suggested=String(state.study.feedback?.suggestedSentence||"").trim();
-      if(!suggested){
-        toast("当前没有可应用的 AI 建议句");
-        return;
-      }
-
-      const current=document.getElementById("apply-text")?.value ?? state.study.applyText ?? "";
-      if(current.trim() && !state.study.originalApplyText){
-        state.study.originalApplyText=current;
-      }
-
-      state.study.applyText=suggested;
-      state.study.aiSuggestionApplied=true;
-      state.study.feedback=null;
-      toast("已应用 AI 建议，你可以继续修改或重新获取反馈");
-      render();
-
-      // Put focus back into the sentence editor for a natural editing loop.
-      setTimeout(()=>{
-        const textarea=document.getElementById("apply-text");
-        if(textarea){
-          textarea.focus();
-          const end=textarea.value.length;
-          textarea.setSelectionRange(end,end);
-        }
-      },0);
-      return;
-    }
 
     if(action==="restore-original-apply"){
-      const original=String(state.study.originalApplyText||"");
-      if(!original){
-        toast("没有可恢复的原句");
-        return;
-      }
+      const original=String(state.study?.originalApplyText||"");
+      if(!original)return;
       state.study.applyText=original;
-      state.study.aiSuggestionApplied=false;
+      state.study.originalApplyText="";
+      state.study.applyApproved=false;
+      state.study.applyLastCheckedText="";
       state.study.feedback=null;
-      toast("已恢复原句");
       render();
-
-      setTimeout(()=>{
-        const textarea=document.getElementById("apply-text");
-        if(textarea){
-          textarea.focus();
-          const end=textarea.value.length;
-          textarea.setSelectionRange(end,end);
-        }
-      },0);
+      setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
       return;
     }
 
-    if(action==="revise-apply"){
-      const current=document.getElementById("apply-text")?.value;
-      if(current!==undefined) state.study.applyText=current;
-      state.study.feedback=null;
-      state.study.aiSuggestionApplied=false;
-      render();
-      setTimeout(()=>{
-        const textarea=document.getElementById("apply-text");
-        if(textarea){
-          textarea.focus();
-          const end=textarea.value.length;
-          textarea.setSelectionRange(end,end);
-        }
-      },0);
-      return;
-    }
     if(action==="pass-apply"){
       const c=getCard(state.study.cardId);
-      const latest=document.getElementById("apply-text")?.value ?? state.study.applyText ?? "";
-      const text=String(latest).trim();
+      const latest=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
+      const checked=Boolean(state.study.applyApproved && state.study.applyLastCheckedText===latest);
+      const keyword=String(state.study.feedback?.keyword||c?.word||"").trim();
 
-      if(!text){
-        toast("请先写一个句子");
+      if(!latest){toast("请先写一句话");return;}
+      if(!checked){
+        showNotice("需要先审核","提交后通过审核，才能进入下一步。","warn");
         return;
       }
-      if(containsChinese(text)){
-        state.study.applyText=text;
-        showNotice("先把中文转成英文","点击“获取 AI 建议”，AI 会按当前词义改成自然英文并使用目标词。","warn");
+      if(!(textContainsKeyword(latest,keyword)||sentenceUsesTargetWord(latest,c.word))){
+        state.study.applyApproved=false;
+        state.study.applyLastCheckedText="";
+        showNotice("缺少目标词",`句子需要包含 “${c.word}” 或其常见词形。`,"warn");
+        render();
         return;
       }
 
-      state.study.applyText=text;
-      c.userSentence=text;
+      state.study.applyText=latest;
+      c.userSentence=latest;
       c.updatedAt=new Date().toISOString();
       saveData();
-
       enterInitialReview(c);
       return;
     }

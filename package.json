@@ -1,6 +1,6 @@
 {
   "name": "lexiflow",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "LexiFlow 本地优先英语单词学习桌面应用",
   "productName": "LexiFlow",
   "main": "electron-main.js",
@@ -32,19 +32,25 @@
       "package.json"
     ],
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
-      ]
+      ],
+      "icon": "build/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -52,7 +58,9 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "LexiFlow"
+      "shortcutName": "LexiFlow",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico"
     }
   }
 }
