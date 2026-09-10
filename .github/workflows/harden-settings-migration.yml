@@ -25,22 +25,10 @@ jobs:
         run: |
           @'
           const fs = require('fs');
-          const path = 'server.js';
-          let s = fs.readFileSync(path, 'utf8');
-          const oldText = `  for (const name of ["settings.json", "dictionary-cache.json", "learning-data.json"]) {
-            const from = path.join(LEGACY_DATA_DIR, name);
-            const to = path.join(DATA_DIR, name);
-            try {
-              if (!fs.existsSync(to) && fs.existsSync(from)) await fsp.copyFile(from, to);
-            } catch (err) {
-              console.warn(\`legacy \${name} migration skipped:\`, err.message);
-            }
-          }`;
-          const newText = `  for (const name of ["settings.json", "dictionary-cache.json", "learning-data.json"]) {
-            const from = path.join(LEGACY_DATA_DIR, name);
-            const to = path.join(DATA_DIR, name);
-            try {
-              if (!fs.existsSync(to) && fs.existsSync(from)) {
+          const file = 'server.js';
+          let s = fs.readFileSync(file, 'utf8');
+          const oldLine = 'if (!fs.existsSync(to) && fs.existsSync(from)) await fsp.copyFile(from, to);';
+          const replacement = `if (!fs.existsSync(to) && fs.existsSync(from)) {
                 await fsp.copyFile(from, to);
                 if (name === "settings.json") {
                   try {
@@ -49,14 +37,10 @@ jobs:
                     console.warn("legacy settings cleanup skipped:", err.message);
                   }
                 }
-              }
-            } catch (err) {
-              console.warn(\`legacy \${name} migration skipped:\`, err.message);
-            }
-          }`;
-          if (!s.includes(oldText)) throw new Error('migration target not found');
-          s = s.replace(oldText, newText);
-          fs.writeFileSync(path, s, 'utf8');
+              }`;
+          if (!s.includes(oldLine)) throw new Error('migration target not found');
+          s = s.replace(oldLine, replacement);
+          fs.writeFileSync(file, s, 'utf8');
           '@ | Set-Content patch-settings.cjs -Encoding UTF8
           node patch-settings.cjs
           Remove-Item patch-settings.cjs
