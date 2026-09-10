@@ -1376,29 +1376,48 @@ async function sentenceFeedback(body) {
   const sentence = String(body.sentence || "").trim();
   if (!word || !sentence) throw new Error("INVALID_INPUT");
 
-  const prompt = `你是面向中国英语学习者的造句反馈助手。
+  const prompt = `你是面向中国英语学习者的“造句转换与反馈助手”。
+
 目标词：${word}
 本次中文词义：${meaningZh}
-学生句子：${sentence}
+用户输入：${sentence}
 
-请判断：
-- 是否正确使用了“本次词义”
-- 语法是否基本正确
-- 搭配是否自然
-- 是否需要最小修改
+用户输入可能是中文，也可能是英文。请先判断语言，再按下面规则处理。
+
+如果输入是中文：
+- 把用户真正想表达的意思转换成自然、简单的英文。
+- 最终英文 suggestion 必须使用目标词，并且必须表达“本次中文词义”。
+- 语法需要时可以使用目标词的常见词形变化。
+- keyword 返回 suggestion 中实际出现的目标词或词形，供界面高亮。
+- 不要额外扩写用户没有表达的新信息。
+- level 返回 good，title 简短写“已转换为英文”。
+- tips 只在存在歧义或值得提醒的问题时返回，通常可以为空。
+
+如果输入是英文：
+- 判断目标词是否正确表达了“本次中文词义”、语法是否基本正确、搭配是否自然。
+- 已经正确自然时 suggestion 返回空字符串，不要为了显得有建议而改写。
+- 有必要修改时，只做最小修改；suggestion 中保留并正确使用目标词。
+- keyword 返回最终句子中实际使用的目标词或词形；如果原句没使用目标词，keyword 返回目标词。
+- 不要用苛刻的母语者标准。
 
 只输出 JSON：
-{"level":"good|warn","title":"一句中文结论","tips":["最多3条中文建议"],"suggestion":"必要时给出一个最小修改后的英文句子，否则为空字符串"}
+{"inputLanguage":"zh|en","level":"good|warn","title":"一句简短中文结论","tips":["最多2条中文建议"],"suggestion":"中文输入时必须返回英文句子；英文需要修改时返回修改句，否则空字符串","keyword":"最终英文中实际出现的目标词或词形"}
 
-不要用苛刻的母语者标准；只指出对学习最有价值的问题。`;
+不要输出 JSON 之外的内容。`;
 
-  const result = await runCodex(prompt, { timeoutMs: 70000, workspaceWrite: false });
+  const result = await runCodex(prompt, {
+    timeoutMs: 30000,
+    workspaceWrite: false,
+    reasoningEffortOverride: "low",
+  });
   const parsed = extractJson(result.stdout);
   return {
+    inputLanguage: parsed.inputLanguage === "zh" ? "zh" : "en",
     level: parsed.level === "good" ? "good" : "warn",
     title: String(parsed.title || "AI 已完成反馈"),
-    tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 3).map(String) : [],
-    suggestion: String(parsed.suggestion || ""),
+    tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(String) : [],
+    suggestion: String(parsed.suggestion || "").trim(),
+    keyword: String(parsed.keyword || word).trim() || word,
     provider: "codex-local",
   };
 }
