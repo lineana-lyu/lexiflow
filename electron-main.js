@@ -36,7 +36,7 @@ function createBrowserWindow() {
     height: 920,
     minWidth: 1080,
     minHeight: 720,
-    backgroundColor: "#f5f7fb",
+    backgroundColor: "#fafbf9",
     autoHideMenuBar: true,
     show: true,
     title: "LexiFlow · 英语词汇学习",
@@ -62,7 +62,7 @@ async function createWindow() {
   });
 
   try {
-    backend = require("./server");
+    backend = require("./server-runtime");
     const started = await backend.startServer();
     mainWindow.webContents.on("will-navigate", (event, url) => {
       if (!url.startsWith(started.address)) {
@@ -75,7 +75,7 @@ async function createWindow() {
     console.log(`LexiFlow desktop data: ${runtimePaths.appDataDir}`);
   } catch (err) {
     console.error("LexiFlow desktop startup failed:", err);
-    const html = `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#f5f7fb;font-family:Segoe UI,Microsoft YaHei,sans-serif;display:grid;place-items:center;height:100vh;color:#172033"><div style="text-align:center"><h2>LexiFlow</h2><p>应用没有正常启动，请关闭后重试。</p></div></body>`;
+    const html = `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#fafbf9;font-family:Segoe UI,Microsoft YaHei,sans-serif;display:grid;place-items:center;height:100vh;color:#172033"><div style="text-align:center"><h2>LexiFlow</h2><p>应用没有正常启动，请关闭后重试。</p></div></body>`;
     await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(()=>{});
   }
 
