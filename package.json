@@ -14,7 +14,7 @@
     "app": "electron .",
     "start": "electron .",
     "web": "node server-runtime.js",
-    "check": "node --check electron-main.js && node --check server-runtime.js && node --check server.js && node --check public/runtime-fixes.js && node --check public/legacy-data-fix.js && node --check public/app.js",
+    "check": "node --check electron-main.js && node --check server-runtime.js && node --check server.js && node --check public/transport-fixes.js && node --check public/runtime-fixes.js && node --check public/legacy-data-fix.js && node --check public/app.js",
     "build:win": "electron-builder --win nsis portable --x64 --publish never"
   },
   "devDependencies": {
