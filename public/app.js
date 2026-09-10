@@ -1068,12 +1068,12 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(!card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
     return shell(
       header("","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
-      + `<div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
+      + `<div class="review-depth-stage"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
         ${wordIdentity(card,{size:"hero",showPos:true,center:true})}<div class="prompt-small">先回忆中文释义，再查看答案。</div>
         ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn" data-action="review-rate" data-quality="again">没记住 · 明天再复习</button><button class="btn primary" data-action="review-rate" data-quality="good">记住了 · 3 天后复习</button></div>`
         :`<button class="btn primary" style="margin-top:22px" data-action="review-reveal">查看答案</button>`}
-      </div></div>`
+      </div></div></div></div>`
     );
   }
 
@@ -1243,14 +1243,26 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
   let studyMotionCleanupTimer=null;
 
   function studyMotionSnapshot(){
-    if(state.route!=="study"||!state.study?.cardId)return null;
-    const card=getCard(state.study.cardId);
-    if(!card)return null;
-    return {
-      key:`${card.id}:${card.stage}`,
-      cardId:card.id,
-      order:stageIndex(card.stage)
-    };
+    if(state.route==="study"&&state.study?.cardId){
+      const card=getCard(state.study.cardId);
+      if(!card)return null;
+      return {
+        key:`study:${card.id}:${card.stage}`,
+        cardId:card.id,
+        order:stageIndex(card.stage)
+      };
+    }
+    if(state.route==="review-session"){
+      const cardId=state.reviewQueue[state.reviewIndex];
+      const card=cardId&&getCard(cardId);
+      if(!card)return null;
+      return {
+        key:`review:${state.reviewIndex}:${card.id}`,
+        cardId:card.id,
+        order:state.reviewIndex
+      };
+    }
+    return null;
   }
 
   function animateStudySurface(previous,current){

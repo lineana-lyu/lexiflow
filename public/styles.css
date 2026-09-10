@@ -852,3 +852,10 @@ html[data-study-motion]::view-transition-new(lexi-study-progress){animation:lexi
 @media(prefers-reduced-motion:reduce){
   .study-depth-shell,.study-progress-wrap{view-transition-name:none}
 }
+
+
+/* Keep non-card chrome stable during native card snapshots; review cards share the same depth language. */
+.review-depth-stage{max-width:1080px;margin:0 auto;padding:2px 0 12px}
+::view-transition-old(root){animation:none!important;opacity:0}
+::view-transition-new(root){animation:none!important;opacity:1}
+@media(max-width:760px){.review-depth-stage{padding-bottom:8px}}
