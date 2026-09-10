@@ -668,7 +668,7 @@
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
       )
-      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="card study-card study-card-focus">${renderStage(card)}</div></div>`
+      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card study-card-focus">${renderStage(card)}</div></div></div>`
     );
   }
 
@@ -1239,6 +1239,37 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     return "";
   }
 
+  let lastStudyMotionSnapshot=null;
+  let studyMotionCleanupTimer=null;
+
+  function studyMotionSnapshot(){
+    if(state.route!=="study"||!state.study?.cardId)return null;
+    const card=getCard(state.study.cardId);
+    if(!card)return null;
+    return {
+      key:`${card.id}:${card.stage}`,
+      cardId:card.id,
+      order:stageIndex(card.stage)
+    };
+  }
+
+  function animateStudySurface(previous,current){
+    const shell=document.querySelector(".study-depth-shell");
+    if(!shell||!current||previous?.key===current.key)return;
+    if(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)return;
+
+    const direction=previous&&previous.cardId===current.cardId&&current.order<previous.order?-1:1;
+    shell.classList.add("study-depth-motion",direction<0?"study-depth-backward":"study-depth-forward");
+    const stepper=document.querySelector(".study-stepper");
+    if(stepper)stepper.classList.add("study-stepper-motion");
+
+    if(studyMotionCleanupTimer)clearTimeout(studyMotionCleanupTimer);
+    studyMotionCleanupTimer=setTimeout(()=>{
+      shell.classList.remove("study-depth-motion","study-depth-forward","study-depth-backward");
+      stepper?.classList.remove("study-stepper-motion");
+    },720);
+  }
+
   function render(){
     const app=document.getElementById("app");
     let html;
@@ -1251,8 +1282,14 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     else if(state.route==="stats") html=statsPage();
     else if(state.route==="settings") html=settingsPage();
     else html=homePage();
+    const nextStudyMotionSnapshot=studyMotionSnapshot();
+    const previousStudyMotionSnapshot=lastStudyMotionSnapshot;
     app.innerHTML=html;
     bind();
+    if(nextStudyMotionSnapshot?.key!==previousStudyMotionSnapshot?.key){
+      requestAnimationFrame(()=>animateStudySurface(previousStudyMotionSnapshot,nextStudyMotionSnapshot));
+    }
+    lastStudyMotionSnapshot=nextStudyMotionSnapshot;
   }
 
   function bind(){
