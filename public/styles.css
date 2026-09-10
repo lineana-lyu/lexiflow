@@ -545,3 +545,8 @@ body:before{display:none}
 .settings-list .setting-row{padding:18px 20px}
 .settings-list .setting-row p{max-width:720px;line-height:1.45}
 @media(max-width:760px){.visual-upload-zone{align-items:stretch;flex-direction:column}.file-picker-button{width:100%}}
+
+/* Compact product copy */
+.page-head p:empty,.auto-visual-copy p:empty,.setting-row p:empty{display:none}
+.settings-list .setting-row p{font-size:12px;color:#7c899a}
+.visual-memory-image{display:block}

@@ -15,6 +15,7 @@ const DATA_DIR = process.env.LEXIFLOW_DATA_DIR || LEGACY_DATA_DIR;
 const GENERATED_DIR = process.env.LEXIFLOW_GENERATED_DIR || (process.env.LEXIFLOW_DATA_DIR ? path.join(DATA_DIR, "generated") : LEGACY_GENERATED_DIR);
 const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
 const LEARNING_FILE = path.join(DATA_DIR, "learning-data.json");
+const RUNTIME_CWD = process.env.LEXIFLOW_RUNTIME_CWD || DATA_DIR;
 const CODEX_CONFIG = path.join(os.homedir(), ".codex", "config.toml");
 const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 
@@ -169,7 +170,7 @@ async function migrateLegacyRuntimeData() {
   await fsp.mkdir(DATA_DIR, { recursive: true });
   await fsp.mkdir(GENERATED_DIR, { recursive: true });
 
-  for (const name of ["settings.json", "dictionary-cache.json"]) {
+  for (const name of ["settings.json", "dictionary-cache.json", "learning-data.json"]) {
     const from = path.join(LEGACY_DATA_DIR, name);
     const to = path.join(DATA_DIR, name);
     try {
@@ -213,7 +214,13 @@ async function loadSettings() {
         }
       }
     }
-    return { ...defaults, ...parsed, merriamWebsterLearnersKey: key };
+    return {
+      ...defaults,
+      ...parsed,
+      merriamWebsterLearnersKey: key,
+      codexModel: String(parsed.codexModel || "").trim() || DEFAULT_CODEX_MODEL,
+      codexReasoningEffort: String(parsed.codexReasoningEffort || "").trim().toLowerCase() || DEFAULT_CODEX_REASONING_EFFORT,
+    };
   } catch {
     return defaults;
   }
@@ -496,7 +503,7 @@ function friendlyError(err, context = "general") {
 async function runCodex(
   prompt,
   {
-    cwd = ROOT,
+    cwd = RUNTIME_CWD,
     timeoutMs = 90000,
     workspaceWrite = false,
     reasoningEffortOverride = null,
@@ -1572,7 +1579,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, {
         ok: true,
         service: "lexiflow-local",
-        version: "4.2",
+        version: "0.5.0-desktop",
         address: `http://${HOST}:${PORT}`,
       });
     }

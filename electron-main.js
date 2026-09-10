@@ -11,6 +11,7 @@ if (!gotLock) {
 
 let mainWindow = null;
 let backend = null;
+let runtimePaths = null;
 
 function configureRuntimePaths() {
   const userData = app.getPath("userData");
@@ -28,12 +29,12 @@ function configureRuntimePaths() {
   process.env.LEXIFLOW_NO_OPEN = "1";
   process.env.LEXIFLOW_DATA_DIR = appDataDir;
   process.env.LEXIFLOW_GENERATED_DIR = generatedDir;
+  process.env.LEXIFLOW_RUNTIME_CWD = appDataDir;
 
   return { userData, appDataDir, generatedDir };
 }
 
 async function createWindow() {
-  const runtimePaths = configureRuntimePaths();
   backend = require("./server");
   const started = await backend.startServer();
 
@@ -83,6 +84,8 @@ app.on("second-instance", () => {
   mainWindow.focus();
 });
 
+runtimePaths = configureRuntimePaths();
+
 app.whenReady().then(createWindow).catch(err => {
   console.error("LexiFlow desktop startup failed:", err);
   app.quit();
@@ -98,7 +101,7 @@ app.on("activate", () => {
   }
 });
 
-app.on("before-quit", () => {
+app.on("will-quit", () => {
   try {
     backend?.stopServer?.();
   } catch {}
