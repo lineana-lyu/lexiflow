@@ -91,6 +91,7 @@
     pronunciationHydration: {},
     notice: null,
     searchResolution: null,
+    lookupAlternativesOpen: false,
     visualSceneExpanded: false
   };
 
@@ -316,9 +317,12 @@
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:card.word}});
       const phonetic=String(payload.result?.phonetic||"").trim();
       const audioUrl=String(payload.result?.audioUrl||"").trim();
+      const audioUrls=Array.isArray(payload.result?.audioUrls)?payload.result.audioUrls.map(String).filter(Boolean):[];
       if(phonetic) card.phonetic=phonetic;
       if(audioUrl && !card.audioUrl) card.audioUrl=audioUrl;
-      if(phonetic || audioUrl){card.updatedAt=new Date().toISOString();saveData();}
+      if(audioUrls.length) card.audioUrls=audioUrls;
+      if(payload.result?.pronunciationSource) card.pronunciationSource=String(payload.result.pronunciationSource);
+      if(phonetic || audioUrl || audioUrls.length){card.updatedAt=new Date().toISOString();saveData();}
       state.pronunciationHydration[card.id]="done";
       render();
     }catch{
@@ -542,9 +546,17 @@
     const r=state.lookup.result;
     const senses=Array.isArray(r.senses)?r.senses:[];
     const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
+    const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r.word));
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || r.normalizedQuery)
       ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
       : "";
+    const alternativeWords=Array.isArray(r.alternatives)?r.alternatives.filter(item=>item?.word&&String(item.word).toLowerCase()!==String(r.word).toLowerCase()):[];
+    const alternativePanel=(r.sourceQuery&&/[\u3400-\u9fff]/.test(r.sourceQuery)&&(alternativeWords.length||r.autoResolved))?`
+      <div class="lookup-recovery-row">
+        <button class="text-action" data-action="toggle-lookup-alternatives">${state.lookupAlternativesOpen?"收起其它结果":"不是这个词？换个结果"}</button>
+        <button class="text-action" data-action="refresh-lookup">重新识别</button>
+      </div>
+      ${state.lookupAlternativesOpen&&alternativeWords.length?`<div class="lookup-alternatives">${alternativeWords.map(item=>`<button class="lookup-alternative" data-search-alternative="${escapeHtml(item.word)}"><strong>${escapeHtml(item.word)}</strong><span>${escapeHtml(item.meaningZh||r.normalizedQuery||r.sourceQuery)}</span></button>`).join("")}</div>`:""}`:"";
 
     const primaryView=primarySense?`
       <div class="primary-sense-card">
@@ -566,13 +578,14 @@
         <div class="sense-example-zh">${escapeHtml(s.exampleZh||"")}</div>
       </div>`).join("")}</div>`:"";
 
-    return `${resolvedNote}
+    return `${resolvedNote}${alternativePanel}
       <div class="word-top learning-card-wordtop">
-        <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
+        <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" data-audios="${escapeHtml(JSON.stringify(r.audioUrls||[]))}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
       ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
+      ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
       ${r.mode==="expanded"?expandedView:primaryView}
       ${state.addDraft?renderSenseEditor(state.addDraft):""}
       <div class="action-row learning-card-actions">
@@ -581,7 +594,7 @@
           <button class="btn ghost" data-action="edit-sense">手动编辑</button>
           <button class="btn ghost" data-action="lookup-again">重新查询</button>
         </div>
-        <button class="btn primary save-learning-card" data-action="save-card">保存并开始学习</button>
+        <button class="btn primary save-learning-card" data-action="save-card" ${targetExampleMismatch?"disabled":""}>保存并开始学习</button>
       </div>`;
   }
 
@@ -595,11 +608,18 @@
     </div></div>`;
   }
 
-  function speak(word,audioUrl=""){
-    if(audioUrl){
-      const audio=new Audio(audioUrl);
-      audio.play().catch(()=>speak(word,""));
-      return;
+  async function speak(word,audioUrl="",audioUrls=[]){
+    const segments=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
+    if(audioUrl) segments.unshift(audioUrl);
+    if(segments.length){
+      try{
+        for(const src of Array.from(new Set(segments))){
+          await new Promise((resolve,reject)=>{
+            const audio=new Audio(src);audio.onended=resolve;audio.onerror=reject;audio.play().catch(reject);
+          });
+        }
+        return;
+      }catch{}
     }
     if(!("speechSynthesis" in window)){ toast("当前设备无法播放发音"); return; }
     const u=new SpeechSynthesisUtterance(word); u.lang="en-US";u.rate=.88;
@@ -686,6 +706,14 @@
     return targetWordForms(word).some(form=>textContainsKeyword(text,form));
   }
 
+  function learningExampleUsesTarget(text,word){
+    const example=String(text||"").trim().toLowerCase().replace(/\s+/g," ");
+    const target=String(word||"").trim().toLowerCase().replace(/\s+/g," ");
+    if(!example||!target)return false;
+    if(target.includes(" "))return example.includes(target);
+    return sentenceUsesTargetWord(example,target);
+  }
+
   function startStudy(cardId){
     const card=cardId?getCard(cardId):activeLearningCards()[0];
     if(!card){toast("当前没有首次学习任务");state.route="home";render();return;}
@@ -745,6 +773,7 @@
           data-action="speak"
           data-word="${escapeHtml(card.word)}"
           data-audio="${escapeHtml(card.audioUrl||"")}"
+          data-audios="${escapeHtml(JSON.stringify(card.audioUrls||[]))}"
           title="播放美式发音"
           aria-label="播放 ${escapeHtml(card.word)} 的美式发音"
         >🔊</button>
@@ -1514,6 +1543,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
       state.notice=null;
       state.lookup={query:q,result:null};
+      state.lookupAlternativesOpen=false;
       state.lookupStatus="loading";
       state.selectedSenseId=null;
       state.addDraft=null;
@@ -1592,6 +1622,17 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const payload=await api("/api/dictionary/lookup",{method:"POST",body:{word:q,mode:"primary"}});
         state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
       }catch(err){state.lookupStatus="idle";showErrorNotice(err,"暂时没有查到这个词");render();}
+    }));
+
+    document.querySelectorAll("[data-search-alternative]").forEach(el=>el.addEventListener("click",async ()=>{
+      const preferredWord=String(el.dataset.searchAlternative||"").trim();
+      const sourceQuery=String(state.lookup?.result?.sourceQuery||state.lookup?.query||"").trim();
+      if(!preferredWord||!sourceQuery)return;
+      state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
+      try{
+        const payload=await api("/api/search/smart",{method:"POST",body:{query:sourceQuery,preferredWord}});
+        state.lookup={query:sourceQuery,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+      }catch(err){state.lookupStatus="idle";showErrorNotice(err,"这个表达暂时没有可靠结果");render();}
     }));
 
     document.querySelectorAll("[data-action]").forEach(el=>el.addEventListener("click",()=>void handleAction(el.dataset.action,el)));
@@ -1722,6 +1763,17 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
   async function handleAction(action,el){
     if(action==="dismiss-notice"){state.notice=null;render();return;}
+    if(action==="toggle-lookup-alternatives"){state.lookupAlternativesOpen=!state.lookupAlternativesOpen;render();return;}
+    if(action==="refresh-lookup"){
+      const q=String(state.lookup?.result?.sourceQuery||state.lookup?.query||"").trim();
+      if(!q||state.lookupStatus==="loading")return;
+      state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
+      try{
+        const payload=await api("/api/search/smart",{method:"POST",body:{query:q,forceRefresh:true}});
+        state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+      }catch(err){state.lookupStatus="idle";showErrorNotice(err,"重新识别没有完成");render();}
+      return;
+    }
     if(action==="open-library-editor"){openLibraryEditor(el.dataset.cardId);return;}
     if(action==="library-edit-back"){state.libraryEditor=null;state.route="library";render();return;}
     if(action==="clear-library-image"){
@@ -1739,6 +1791,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       if(!editor||!card||!draft)return;
       if(!draft.exampleEn||!draft.exampleZh){
         showNotice("例句还没有填写完整","请保留一组对应的中英文例句。","warn");
+        return;
+      }
+      if(!learningExampleUsesTarget(draft.exampleEn,card.word)){
+        showNotice("例句没有使用当前词","英文例句需要实际包含当前学习词或常见词形，再保存修改。","warn");
         return;
       }
       // Fixed lexical identity: word / phonetic / POS / Chinese meaning are never changed here.
@@ -1794,9 +1850,9 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       }
       return;
     }
-    if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
+    if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.lookupAlternativesOpen=false;state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
-    if(action==="speak"){speak(el.dataset.word,el.dataset.audio||"");return;}
+    if(action==="speak"){let segments=[];try{segments=JSON.parse(el.dataset.audios||"[]");}catch{}speak(el.dataset.word,el.dataset.audio||"",segments);return;}
     if(action==="speak-sentence"){speakSentence(el.dataset.sentence||"");return;}
     if(action==="load-more-senses"){
       const q=state.lookup?.result?.word||state.lookup?.query?.trim()||"";
@@ -1836,10 +1892,14 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(action==="save-card"){
       const r=state.lookup?.result,s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
       if(!s.meaningZh?.trim()||!s.exampleEn?.trim()||!s.exampleZh?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和中英文例句");render();return;}
+      if(!learningExampleUsesTarget(s.exampleEn,r.word)){
+        showNotice("这张卡片还不能保存",`例句没有使用当前目标词“${r.word}”。请重新识别结果，或修改例句后再保存。`,"warn");
+        return;
+      }
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh,senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh,senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       state.data.cards.unshift(card);recordActivity("card-created",card.id);saveData();toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
     if(action==="continue-learning"){startStudy();return;}

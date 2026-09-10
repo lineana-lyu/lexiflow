@@ -988,3 +988,10 @@ html[data-study-motion]::view-transition-new(lexi-study-progress){animation:lexi
 @media(prefers-reduced-motion:reduce){
   .btn,.speaker,.nav-btn,.input,.textarea,.select,.library-row{transition:none!important}
 }
+
+
+/* v0.8.3 — verified lookup recovery */
+.lookup-recovery-row{display:flex;align-items:center;gap:14px;margin:10px 0 2px;padding:0 2px}.lookup-recovery-row .text-action{font-size:11px;color:#6f7d90}.lookup-recovery-row .text-action:first-child{color:#3f73e5;font-weight:800}
+.lookup-alternatives{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 18px;padding:12px;border:1px solid #e5eaf1;border-radius:12px;background:#fafbfd}
+.lookup-alternative{display:flex;align-items:baseline;gap:7px;padding:8px 11px;border:1px solid #dbe3ee;border-radius:10px;background:#fff;color:#23314a;transition:transform 140ms var(--ease-out),border-color 160ms ease,background-color 160ms ease}
+.lookup-alternative:hover{border-color:#b9cdf5;background:#f7f9ff}.lookup-alternative:active{transform:scale(.98)}.lookup-alternative strong{font-size:12px}.lookup-alternative span{font-size:10px;color:#8a96a8}
