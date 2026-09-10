@@ -20,6 +20,163 @@ input,textarea,select,button{font:inherit}
   line-height:1.7;
 }
 
+/* Search-card loader: this is the loader used by 选词制卡. */
+.lookup-surface:has(.lookup-loader){
+  overflow:hidden;
+  min-height:360px;
+  background:
+    radial-gradient(circle at 30% 18%,rgba(235,246,239,.72),transparent 34%),
+    radial-gradient(circle at 75% 72%,rgba(236,242,249,.68),transparent 32%),
+    rgba(255,255,255,.79)!important;
+}
+.lookup-loader{
+  position:relative;
+  min-height:350px;
+  display:flex!important;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-align:center;
+  isolation:isolate;
+}
+.lookup-loader::before,
+.lookup-loader::after{
+  content:"";
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:-1;
+  filter:blur(4px);
+}
+.lookup-loader::before{
+  width:210px;height:210px;
+  left:calc(50% - 190px);top:52px;
+  background:radial-gradient(circle,rgba(224,240,230,.45),rgba(224,240,230,0) 68%);
+  animation:lexi-lookup-cloud-a 5.2s ease-in-out infinite;
+}
+.lookup-loader::after{
+  width:230px;height:230px;
+  right:calc(50% - 205px);bottom:34px;
+  background:radial-gradient(circle,rgba(226,235,247,.42),rgba(226,235,247,0) 70%);
+  animation:lexi-lookup-cloud-b 5.8s ease-in-out infinite;
+}
+.lookup-loader-orb{
+  position:relative!important;
+  width:86px!important;
+  height:86px!important;
+  margin:0 0 8px!important;
+  border-radius:50%!important;
+  background:rgba(255,255,255,.68)!important;
+  border:1px solid rgba(106,139,120,.09)!important;
+  box-shadow:0 16px 40px rgba(72,97,82,.08),inset 0 1px 0 rgba(255,255,255,.92)!important;
+  backdrop-filter:blur(10px);
+}
+.lookup-loader-orb::before{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border-radius:50%;
+  background:conic-gradient(from 10deg,
+    rgba(124,157,140,.08),
+    rgba(124,157,140,.78),
+    rgba(126,153,183,.28),
+    rgba(215,174,144,.26),
+    rgba(124,157,140,.08));
+  -webkit-mask:radial-gradient(circle,#0000 58%,#000 60%);
+  mask:radial-gradient(circle,#0000 58%,#000 60%);
+  animation:lexi-lookup-orbit 1.85s linear infinite;
+}
+.lookup-loader-orb::after{
+  content:"";
+  position:absolute;
+  inset:22px;
+  border-radius:50%;
+  background:radial-gradient(circle at 42% 36%,#fff 0 18%,rgba(228,239,232,.92) 42%,rgba(232,238,246,.74) 100%);
+  box-shadow:0 0 0 1px rgba(115,145,128,.07),0 7px 18px rgba(80,104,90,.08);
+  animation:lexi-lookup-breathe 2.4s ease-in-out infinite;
+}
+.lookup-loader-orb>span{
+  position:absolute!important;
+  width:7px!important;
+  height:7px!important;
+  left:50%!important;
+  top:5px!important;
+  margin-left:-3.5px!important;
+  border-radius:50%!important;
+  background:#85a294!important;
+  box-shadow:0 0 0 6px rgba(133,162,148,.08)!important;
+  transform-origin:3.5px 38px;
+  animation:lexi-lookup-dot 1.85s linear infinite!important;
+}
+.lookup-loader strong{
+  margin-top:2px;
+  font-family:var(--lexi-editorial-font)!important;
+  font-size:21px!important;
+  line-height:1.35;
+  font-weight:620!important;
+  letter-spacing:-.02em;
+  color:#36453d!important;
+}
+.lookup-loader p{
+  margin:0!important;
+  font-size:12.5px!important;
+  line-height:1.6;
+  color:#89958e!important;
+}
+.lookup-loader-track{
+  position:relative;
+  width:min(330px,62%);
+  height:4px!important;
+  margin-top:10px!important;
+  overflow:hidden;
+  border-radius:999px!important;
+  background:rgba(126,153,139,.08)!important;
+}
+.lookup-loader-track i{
+  position:absolute!important;
+  inset:0 auto 0 0!important;
+  width:42%!important;
+  height:100%!important;
+  border-radius:inherit!important;
+  background:linear-gradient(90deg,rgba(116,151,132,0),rgba(116,151,132,.66),rgba(128,151,180,.34),rgba(116,151,132,0))!important;
+  animation:lexi-lookup-track 1.8s cubic-bezier(.4,0,.2,1) infinite!important;
+}
+@keyframes lexi-lookup-orbit{to{transform:rotate(360deg)}}
+@keyframes lexi-lookup-dot{to{transform:rotate(360deg)}}
+@keyframes lexi-lookup-breathe{0%,100%{transform:scale(.94);opacity:.72}50%{transform:scale(1.04);opacity:1}}
+@keyframes lexi-lookup-track{0%{transform:translateX(-130%)}100%{transform:translateX(330%)}}
+@keyframes lexi-lookup-cloud-a{0%,100%{transform:translate3d(0,0,0);opacity:.62}50%{transform:translate3d(18px,8px,0);opacity:.9}}
+@keyframes lexi-lookup-cloud-b{0%,100%{transform:translate3d(0,0,0);opacity:.58}50%{transform:translate3d(-16px,-6px,0);opacity:.86}}
+
+/* Visual-association empty state: one clear message, no tiny stacked copy. */
+.visual-canvas-empty{
+  min-height:260px!important;
+  gap:13px!important;
+  padding:28px!important;
+}
+.visual-canvas-empty::before{
+  content:"✦";
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  border-radius:19px;
+  color:#789789;
+  font-size:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.82),rgba(236,244,239,.82));
+  border:1px solid rgba(111,145,126,.08);
+  box-shadow:0 13px 30px rgba(74,99,84,.07),inset 0 1px 0 rgba(255,255,255,.9);
+}
+.visual-canvas-empty strong{
+  font-family:var(--lexi-editorial-font)!important;
+  font-size:18px!important;
+  line-height:1.35!important;
+  font-weight:620!important;
+  color:#56655c!important;
+}
+.visual-canvas-empty span{display:none!important}
+
 .visual-workspace{align-items:start!important}
 .scene-panel{
   align-self:start!important;
@@ -171,6 +328,18 @@ input,textarea,select,button{font:inherit}
   opacity:.58!important;
 }
 
+/* One coherent voice is used for multi-word terms. */
+.speaker.is-unified-speaking,
+.target-word-speaker.is-unified-speaking,
+.library-editor-speaker.is-unified-speaking{
+  color:#557565!important;
+  border-color:rgba(103,145,121,.18)!important;
+  background:linear-gradient(145deg,rgba(239,248,243,.96),rgba(244,247,251,.94))!important;
+  box-shadow:0 0 0 5px rgba(115,154,132,.07)!important;
+  animation:lexi-speaking-pulse 1.4s ease-in-out infinite;
+}
+@keyframes lexi-speaking-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+
 .runtime-image-job-pill{
   position:fixed;
   left:50%;
@@ -235,11 +404,20 @@ input,textarea,select,button{font:inherit}
   .visual-generating-overlay .mini-spinner::after,
   .library-editor-image-loading .mini-spinner::after,
   .visual-generating-overlay::before,
-  .library-editor-image-loading::before{animation:none!important}
+  .library-editor-image-loading::before,
+  .lookup-loader::before,
+  .lookup-loader::after,
+  .lookup-loader-orb::before,
+  .lookup-loader-orb::after,
+  .lookup-loader-orb>span,
+  .lookup-loader-track i,
+  .speaker.is-unified-speaking{animation:none!important}
 }
 
 @media(max-width:760px){
   .scene-panel{padding:14px!important}
   .scene-panel .scene-editor{min-height:104px!important;max-height:170px!important}
   .runtime-image-job-pill{bottom:14px;min-width:0;width:calc(100vw - 28px)}
+  .lookup-loader{min-height:300px}
+  .lookup-loader-track{width:min(280px,76%)}
 }
