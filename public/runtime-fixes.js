@@ -5,6 +5,7 @@
   const SCENE_HISTORY_KEY = "lexiflow-ai-scene-history-v1";
   const PROMPT_HISTORY_KEY = "lexiflow-ai-prompt-history-v1";
   const MAX_HISTORY = 4;
+  let manualSceneRefreshUntil = 0;
 
   function endpointOf(input) {
     try {
@@ -28,6 +29,13 @@
       status: original.status,
       statusText: original.statusText,
       headers,
+    });
+  }
+
+  function syntheticJsonResponse(data, status = 200) {
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
     });
   }
 
@@ -159,7 +167,40 @@
     return `${old.join("；")}。刷新要求：必须换一个明显不同的地点、人物动作或时间情境，不能只改写句子；场景必须包含具体环境、具体物体和明确动作。`;
   }
 
-  async function robustVisualScene(input, init, body) {
+  function escapeRegExp(value) {
+    return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function sanitizeAutomaticScene(scene, body) {
+    let text = String(scene || "").trim();
+    const target = String(body?.word || "").trim();
+    if (target) text = text.replace(new RegExp(escapeRegExp(target), "ig"), "");
+    text = text
+      .replace(/\b[A-Za-z0-9]{2,}\b/g, "")
+      .replace(/(?:写着|标着|印着|标签|招牌|屏幕文字|文字为|字样)[^，。；]*/g, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/，\s*，/g, "，")
+      .replace(/^\s*[，。；]+|[，；]+\s*$/g, "")
+      .trim();
+    if (text.length >= 12) return text;
+    const meaning = String(body?.meaningZh || "当前词义").trim();
+    return `在一个自然、具体的日常场景中，用清晰动作表现“${meaning}”，画面保持简洁且不出现可读文字。`;
+  }
+
+  async function singleInitialVisualScene(input, init, body) {
+    const response = await nativeFetch(input, init);
+    if (!response.ok) return response;
+    try {
+      const data = await response.clone().json();
+      const scene = String(data?.assist?.scene || "").trim();
+      if (scene) remember(sceneHistory, SCENE_HISTORY_KEY, historyKey(body), scene);
+      return responseWithJson(response, data);
+    } catch {
+      return response;
+    }
+  }
+
+  async function robustManualVisualScene(input, init, body) {
     const key = historyKey(body);
     const known = Array.isArray(sceneHistory[key]) ? [...sceneHistory[key]] : [];
     if (body.previousScene) known.unshift(body.previousScene);
@@ -169,9 +210,7 @@
     for (let attempt = 0; attempt < 3; attempt++) {
       const nextBody = {
         ...body,
-        previousScene: attempt === 0 && !body.previousScene
-          ? ""
-          : composeSceneAvoidance(body, known, failedCandidate),
+        previousScene: composeSceneAvoidance(body, known, failedCandidate),
       };
       const response = await nativeFetch(input, requestWithJson(init, nextBody));
       lastResponse = response;
@@ -190,6 +229,18 @@
       if (scene) known.unshift(scene);
     }
     return lastResponse || nativeFetch(input, init);
+  }
+
+  function stableInternalVisualScene(body) {
+    const scene = sanitizeAutomaticScene(body?.previousScene || "", body);
+    return syntheticJsonResponse({
+      ok: true,
+      assist: {
+        scene,
+        cue: "",
+        practiceQuestion: `你在什么情况下会用到“${String(body?.meaningZh || body?.word || "这个词").trim()}”？`,
+      },
+    });
   }
 
   function composePromptAvoidance(body, previousValues, failedCandidate = "") {
@@ -232,6 +283,12 @@
     return lastResponse || nativeFetch(input, init);
   }
 
+  document.addEventListener("click", event => {
+    const button = event.target?.closest?.('[data-action="refresh-visual-scene"]');
+    if (!button || button.disabled) return;
+    manualSceneRefreshUntil = Date.now() + 2500;
+  }, true);
+
   window.fetch = async function lexiFlowFetch(input, init = {}) {
     const endpoint = endpointOf(input);
     const body = parseBody(init);
@@ -248,7 +305,11 @@
     }
 
     if (endpoint === "/api/ai/visual-scene" && body) {
-      return robustVisualScene(input, init, body);
+      if (!body.previousScene) return singleInitialVisualScene(input, init, body);
+      const manual = Date.now() <= manualSceneRefreshUntil;
+      manualSceneRefreshUntil = 0;
+      if (!manual) return stableInternalVisualScene(body);
+      return robustManualVisualScene(input, init, body);
     }
 
     if (endpoint === "/api/ai/practice-prompt" && body) {
@@ -303,7 +364,10 @@
 
     document.querySelectorAll(".ai-practice-prompt").forEach(panel => {
       const text = panel.textContent || "";
-      panel.classList.toggle("is-generating-topic", /正在想一个更具体的问题|正在换一个/.test(text));
+      const shouldShow = /正在想一个更具体的问题|正在换一个/.test(text);
+      if (panel.classList.contains("is-generating-topic") !== shouldShow) {
+        panel.classList.toggle("is-generating-topic", shouldShow);
+      }
     });
   }
 
@@ -317,14 +381,17 @@
     });
   }
 
-  const observer = new MutationObserver(scheduleDecorate);
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => {
-      observer.observe(document.body, { childList: true, subtree: true });
-      scheduleDecorate();
-    }, { once: true });
-  } else {
-    observer.observe(document.body, { childList: true, subtree: true });
+  function startObserver() {
+    const app = document.getElementById("app");
+    if (!app) return;
+    const observer = new MutationObserver(scheduleDecorate);
+    observer.observe(app, { childList: true, subtree: false });
     scheduleDecorate();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startObserver, { once: true });
+  } else {
+    startObserver();
   }
 })();
