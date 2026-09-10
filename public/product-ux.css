@@ -1,0 +1,106 @@
+/* Product UX refinements: speaker, settings consolidation, manual goal, clearer AI states. */
+
+/* Speaker icon inspired by the supplied cyan/purple reference, recolored to LexiFlow. */
+.lexi-speaker-button{
+  position:relative;
+  overflow:visible;
+  display:inline-grid!important;
+  place-items:center;
+  padding:0!important;
+  color:inherit;
+}
+.lexi-speaker-svg{width:20px;height:20px;display:block;overflow:visible}
+.lexi-speaker-body{fill:#42585c;transition:fill .18s ease,transform .18s ease;transform-origin:12px 14px}
+.lexi-speaker-wave{fill:none;stroke-linecap:round;stroke-width:1.75;transition:opacity .18s ease}
+.lexi-speaker-wave.wave-one{stroke:#6f86cf}
+.lexi-speaker-wave.wave-two{stroke:#aa91d3}
+.lexi-speaker-aura{transform-origin:8px 8px;transition:transform .2s ease,opacity .2s ease}
+.lexi-speaker-button:hover .lexi-speaker-aura{transform:scale(1.08);opacity:.96}
+.lexi-speaker-button:hover .lexi-speaker-body{fill:#30484d}
+.lexi-speaker-playing::before,
+.is-unified-speaking::before{
+  content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:1px solid rgba(111,134,207,.20);
+  animation:lexi-speaker-ring 1.05s ease-out infinite;
+  pointer-events:none
+}
+.lexi-speaker-playing .wave-one,
+.is-unified-speaking .wave-one{animation:lexi-speaker-wave 680ms ease-in-out infinite alternate}
+.lexi-speaker-playing .wave-two,
+.is-unified-speaking .wave-two{animation:lexi-speaker-wave 760ms ease-in-out 70ms infinite alternate}
+.lexi-speaker-playing .lexi-speaker-aura,
+.is-unified-speaking .lexi-speaker-aura{animation:lexi-speaker-aura 1.05s ease-in-out infinite}
+@keyframes lexi-speaker-wave{from{opacity:.3;transform:translateX(-.45px)}to{opacity:1;transform:translateX(.45px)}}
+@keyframes lexi-speaker-aura{0%,100%{transform:scale(.96);opacity:.72}50%{transform:scale(1.12);opacity:1}}
+@keyframes lexi-speaker-ring{0%{opacity:.46;transform:scale(.78)}80%,100%{opacity:0;transform:scale(1.22)}}
+
+/* Friendlier security note. */
+.settings-security-banner{
+  display:flex!important;align-items:center;gap:11px!important;
+  padding:12px 15px!important;border-radius:14px!important;
+  background:linear-gradient(135deg,rgba(239,248,243,.88),rgba(247,250,248,.92))!important;
+  color:#5f7166!important;font-size:12px!important;line-height:1.45!important
+}
+.settings-security-icon{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:rgba(255,255,255,.72);font-size:15px;color:#6f8d7c}
+.settings-security-banner div{display:grid;gap:1px}.settings-security-banner strong{font-size:12px;font-weight:680;color:#506258}.settings-security-banner span{font-size:10.8px;color:#88958d}
+
+.settings-inline-link{
+  display:inline-flex;align-items:center;gap:4px;width:max-content;margin-top:7px;
+  color:#6a7fae;text-decoration:none;font-size:11px;font-weight:650;
+  transition:color .18s ease,transform .18s ease
+}
+.settings-inline-link:hover{color:#4f6b9f;transform:translateX(1px)}
+#mw-api-key{font-size:12px!important;letter-spacing:.005em}
+#mw-api-key::placeholder{font-size:10.8px!important;color:#a1aaa4!important;font-weight:400!important}
+
+/* Merge the three AI settings into one user-facing surface. */
+.ai-unified-setting{
+  display:block!important;padding:20px!important;border-radius:18px!important;
+  background:linear-gradient(145deg,rgba(255,255,255,.86),rgba(244,249,246,.78))!important;
+}
+.ai-unified-head{display:flex;align-items:flex-start;justify-content:space-between;gap:22px;padding-bottom:16px;border-bottom:1px solid rgba(87,105,92,.075)}
+.ai-unified-head h3{margin:2px 0 4px!important;font-size:17px!important;font-family:var(--lexi-editorial-font)!important}
+.ai-unified-head p{margin:0!important;font-size:11.5px!important;color:#8c9790!important}
+.settings-section-kicker{display:block;font-size:9.5px;letter-spacing:.1em;font-weight:760;color:#82998b}
+.ai-unified-status .setting-actions-inline{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.ai-unified-controls{padding:16px 0 14px;border-bottom:1px solid rgba(87,105,92,.075)}
+.ai-unified-controls .codex-runtime-grid{display:grid;grid-template-columns:minmax(180px,1fr) minmax(160px,.8fr) auto;gap:10px;align-items:end;width:100%}
+.ai-unified-controls .field{margin:0}.ai-unified-controls .field label{font-size:10.5px!important}
+.ai-unified-image-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0 2px}
+.ai-unified-image-row>div:first-child{display:grid;gap:2px}.ai-unified-image-row strong{font-size:12px;color:#4a564f}.ai-unified-image-row span{font-size:10.5px;color:#909a93}
+.ai-unified-diagnostics{margin-top:8px}.ai-unified-diagnostics .advanced-diagnostics{margin-top:0}.ai-unified-diagnostics summary{font-size:10.5px;color:#879188;cursor:pointer}
+
+/* Manual daily goal instead of a fixed preset-only select. */
+.daily-goal-native-select{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+.daily-goal-editor{display:flex;align-items:center;gap:7px;padding:4px;border-radius:13px;background:rgba(245,248,245,.86);border:1px solid rgba(86,105,91,.075)}
+.daily-goal-editor label{display:flex;align-items:center;gap:6px;padding:0 6px}
+.daily-goal-number{width:44px;border:0;background:transparent;text-align:center;font:600 15px/1.2 var(--lexi-ui-font);color:#344039;outline:none;-moz-appearance:textfield}
+.daily-goal-number::-webkit-inner-spin-button,.daily-goal-number::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.daily-goal-editor label span{font-size:10.8px;color:#879189;white-space:nowrap}
+.goal-step{width:31px;height:31px;border:0;border-radius:9px;background:rgba(255,255,255,.85);color:#617066;font-size:16px;cursor:pointer;box-shadow:0 1px 5px rgba(54,71,60,.05);transition:transform .15s ease,background .18s ease}
+.goal-step:hover{background:#fff}.goal-step:active{transform:scale(.94)}
+
+/* Initial AI scene generation should be obvious the moment the stage opens. */
+.scene-generation-state{
+  position:relative;overflow:hidden;
+  min-height:82px!important;padding:14px 14px!important;margin:4px 0 10px!important;
+  align-items:center!important;
+  background:linear-gradient(135deg,rgba(237,247,242,.96),rgba(241,246,252,.90),rgba(249,244,239,.80))!important;
+  border:1px solid rgba(120,150,133,.13)!important;
+  box-shadow:0 10px 28px rgba(57,82,66,.055)!important
+}
+.scene-generation-state::after{content:"";position:absolute;inset:-30% auto -30% -32%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);transform:skewX(-10deg);animation:lexi-scene-sheen 2.5s ease-in-out infinite;pointer-events:none}
+.scene-generation-state .runtime-spinner{width:28px!important;height:28px!important;border:0!important;background:conic-gradient(from 10deg,rgba(123,158,139,.10),rgba(108,141,178,.46),rgba(203,163,139,.32),rgba(123,158,139,.10));-webkit-mask:radial-gradient(circle,#0000 53%,#000 55%);mask:radial-gradient(circle,#0000 53%,#000 55%);animation:runtime-spin 1.05s linear infinite!important}
+.scene-generation-state strong{font-size:13.5px!important;color:#435249!important}.scene-generation-state span:not(.runtime-spinner){font-size:10.8px!important;color:#89958d!important}
+@keyframes lexi-scene-sheen{0%,18%{transform:translateX(-170%) skewX(-10deg);opacity:0}48%{opacity:.55}68%{transform:translateX(520%) skewX(-10deg);opacity:0}100%{transform:translateX(520%) skewX(-10deg);opacity:0}}
+
+/* Background image job is now an entry point, not a passive notification. */
+.runtime-image-job-pill{pointer-events:auto!important;cursor:pointer!important;transition:box-shadow .18s ease,border-color .18s ease,background .18s ease,transform .16s ease!important}
+.runtime-image-job-pill:hover{border-color:rgba(111,143,125,.20)!important;background:rgba(255,255,255,.94)!important;box-shadow:0 20px 52px rgba(40,54,45,.15),inset 0 1px 0 rgba(255,255,255,.96)!important}
+.runtime-image-job-pill:active{transform:translateX(-50%) scale(.985)!important}
+.runtime-image-job-pill:focus-visible{outline:3px solid rgba(111,134,207,.17);outline-offset:3px}
+.runtime-image-job-pill::after{content:"查看";margin-left:auto;padding-left:8px;font-size:10px;font-weight:700;color:#74847a}
+
+@media(max-width:900px){.ai-unified-controls .codex-runtime-grid{grid-template-columns:1fr 1fr}.ai-unified-controls .codex-runtime-grid>.btn{grid-column:1/-1;justify-self:start}}
+@media(max-width:620px){.ai-unified-head,.ai-unified-image-row{display:grid}.ai-unified-status .setting-actions-inline{justify-content:flex-start}.ai-unified-controls .codex-runtime-grid{grid-template-columns:1fr}.ai-unified-controls .codex-runtime-grid>.btn{grid-column:auto}.daily-goal-editor{width:max-content}}
+@media(prefers-reduced-motion:reduce){.lexi-speaker-playing::before,.is-unified-speaking::before,.lexi-speaker-playing .lexi-speaker-wave,.is-unified-speaking .lexi-speaker-wave,.lexi-speaker-playing .lexi-speaker-aura,.is-unified-speaking .lexi-speaker-aura,.scene-generation-state::after{animation:none!important}}
