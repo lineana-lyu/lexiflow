@@ -29,6 +29,7 @@ jobs:
           $text = Get-Content $path -Raw
           $text = $text.Replace('const key = `${model}|${effort || ""}`;', 'const key = model + "|" + (effort || "");')
           $text = $text.Replace('reject(appServerError(`Codex app-server request timed out: ${method}`, "CODEX_APP_SERVER_REQUEST_TIMEOUT"));', 'reject(appServerError("Codex app-server request timed out: " + method, "CODEX_APP_SERVER_REQUEST_TIMEOUT"));')
+          $text = $text.Replace("let s = fs.readFileSync(serverPath, 'utf8');", "let s = fs.readFileSync(serverPath, 'utf8').replace(/\\r\\n/g, '\\n');")
           Set-Content $path $text -Encoding UTF8
 
       - name: Apply app-server transport patch
