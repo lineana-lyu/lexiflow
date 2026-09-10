@@ -1,0 +1,51 @@
+name: Add final lookup UI guard
+
+on:
+  push:
+    branches:
+      - 'fix/verified-chinese-lookup-phrases'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  integrate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/verified-chinese-lookup-phrases
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      - name: Apply guard
+        run: python scripts/add_lookup_ui_guard_083.py
+      - name: Install dependencies
+        run: npm ci
+      - name: Validate JavaScript
+        run: npm run check
+      - name: Validate UI guards
+        shell: pwsh
+        run: |
+          $app = Get-Content public/app.js -Raw
+          if ($app -notmatch 'learningExampleUsesTarget') { throw 'target/example helper missing' }
+          if ($app -notmatch 'lookup-consistency-warning') { throw 'visible consistency warning missing' }
+          if ($app -notmatch '例句没有使用当前词') { throw 'library example guard missing' }
+      - name: Build Windows application
+        run: npm run build:win
+      - name: Verify no tracked test artifacts
+        shell: pwsh
+        run: |
+          $bad = git ls-files | Select-String -Pattern '(^|/)(test|tests|__tests__|fixtures?|mocks?)(/|$)|\.(test|spec)\.'
+          if ($bad) { $bad; throw 'tracked test/spec/fixture/mock artifacts found' }
+      - name: Commit guard and remove temporary helpers
+        shell: pwsh
+        run: |
+          Remove-Item scripts/add_lookup_ui_guard_083.py -ErrorAction SilentlyContinue
+          Remove-Item .github/workflows/add-lookup-ui-guard-083.yml -ErrorAction SilentlyContinue
+          git config user.name "LexiFlow Automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app.js scripts/add_lookup_ui_guard_083.py .github/workflows/add-lookup-ui-guard-083.yml
+          git commit -m "fix: block inconsistent lookup cards before save"
+          git push origin HEAD:fix/verified-chinese-lookup-phrases
