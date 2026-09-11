@@ -1,0 +1,63 @@
+/* Product UX V2: immediate AI scene status + uploaded brand icon. */
+
+.brand .logo.lexi-brand-icon{
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  padding:0!important;
+  overflow:hidden;
+  border:0!important;
+  border-radius:13px!important;
+  background:transparent!important;
+  box-shadow:0 6px 18px rgba(75,98,84,.08)!important;
+}
+.brand .logo.lexi-brand-icon img{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.scene-generation-state.lexi-scene-immediate-state,
+.scene-panel .scene-generation-state{
+  display:flex!important;
+  align-items:center!important;
+  gap:11px!important;
+  width:100%;
+  padding:12px 13px!important;
+  margin:2px 0 8px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(119,151,133,.10)!important;
+  background:linear-gradient(135deg,rgba(240,248,243,.94),rgba(245,248,253,.90))!important;
+  color:#53665b!important;
+  box-shadow:0 9px 26px rgba(64,91,73,.045)!important;
+}
+.scene-generation-state .runtime-spinner{
+  width:20px!important;
+  height:20px!important;
+  flex:0 0 20px;
+  border:0!important;
+  border-radius:50%;
+  background:conic-gradient(from 40deg,rgba(130,163,144,.12),rgba(103,145,123,.78),rgba(127,161,191,.30),rgba(130,163,144,.12));
+  -webkit-mask:radial-gradient(circle,#0000 54%,#000 56%);
+  mask:radial-gradient(circle,#0000 54%,#000 56%);
+  animation:lexi-scene-spin 1.05s linear infinite;
+}
+.scene-generation-state > div{display:grid;gap:2px;min-width:0}
+.scene-generation-state strong{
+  font-size:12.5px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+  color:#40534a!important;
+}
+.scene-generation-state > div > span{
+  font-size:10.8px!important;
+  line-height:1.5!important;
+  color:#849188!important;
+}
+
+@keyframes lexi-scene-spin{to{transform:rotate(360deg)}}
+
+@media(prefers-reduced-motion:reduce){
+  .scene-generation-state .runtime-spinner{animation:none!important}
+}
