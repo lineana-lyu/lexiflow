@@ -4,6 +4,7 @@
   const nativeFetch = window.fetch.bind(window);
   const hydratedResults = new WeakSet();
   const inFlight = new Map();
+  const pronunciationInFlight = new Map();
   const activeHydrations = new Map();
   const API_ORIGIN = location.protocol === "file:" ? "http://127.0.0.1:4177" : "";
 
@@ -78,6 +79,51 @@
     button.disabled = false;
     button.textContent = button.dataset.exampleHydrationLabel || "保存并开始学习";
     delete button.dataset.exampleHydrationLocked;
+  }
+
+  function patchPronunciation(result, pronunciation) {
+    if (!result || !pronunciation) return;
+    const phonetic = clean(pronunciation.phonetic);
+    const audioUrl = clean(pronunciation.audioUrl);
+    const audioUrls = Array.isArray(pronunciation.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
+    if (phonetic) result.phonetic = phonetic;
+    if (audioUrl) result.audioUrl = audioUrl;
+    if (audioUrls.length) result.audioUrls = audioUrls;
+    if (pronunciation.pronunciationSource) result.pronunciationSource = clean(pronunciation.pronunciationSource);
+
+    if (!currentLookupMatches(result.word)) return;
+    const phoneticNode = document.querySelector(".learning-card-wordtop .phonetic");
+    if (phoneticNode && phonetic) phoneticNode.textContent = phonetic.startsWith("/") || phonetic.startsWith("[") ? phonetic : `/${phonetic}/`;
+    const speaker = document.querySelector(".learning-card-wordtop .speaker[data-action=\"speak\"]");
+    if (speaker) {
+      speaker.dataset.audio = audioUrl;
+      speaker.dataset.audios = JSON.stringify(audioUrls);
+    }
+  }
+
+  async function hydratePronunciation(result) {
+    if (!result?.word) return;
+    const existing = [clean(result.audioUrl), ...(Array.isArray(result.audioUrls) ? result.audioUrls.map(clean) : [])].filter(Boolean);
+    if (existing.length) return;
+    const word = normalizeWord(result.word);
+    let task = pronunciationInFlight.get(word);
+    if (!task) {
+      task = nativeFetch(`${API_ORIGIN}/api/dictionary/pronunciation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word: result.word }),
+      }).then(async response => {
+        let payload = {};
+        try { payload = await response.json(); } catch {}
+        if (!response.ok || !payload?.ok) return null;
+        return payload.result || null;
+      }).finally(() => pronunciationInFlight.delete(word));
+      pronunciationInFlight.set(word, task);
+    }
+    try {
+      const pronunciation = await task;
+      if (pronunciation) patchPronunciation(result, pronunciation);
+    } catch {}
   }
 
   function markLoading(result, senses) {
@@ -267,7 +313,10 @@
         if (prop === "json") {
           return async () => {
             const payload = await target.json();
-            if (isLocalDictionaryPayload(payload)) void hydrateResult(payload.result);
+            if (isLocalDictionaryPayload(payload)) {
+              void hydrateResult(payload.result);
+              void hydratePronunciation(payload.result);
+            }
             return payload;
           };
         }

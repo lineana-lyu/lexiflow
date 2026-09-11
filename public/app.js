@@ -311,7 +311,8 @@
   }
 
   async function ensureCardPronunciation(card){
-    if(!card || card.phonetic || state.pronunciationHydration[card.id]) return;
+    const existingAudios=Array.isArray(card?.audioUrls)?card.audioUrls.filter(Boolean):[];
+    if(!card || card.audioUrl || existingAudios.length || state.pronunciationHydration[card.id]) return;
     state.pronunciationHydration[card.id]="loading";
     try{
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:card.word}});
@@ -583,7 +584,7 @@
         <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" data-audios="${escapeHtml(JSON.stringify(r.audioUrls||[]))}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
-      ${r.aiEnriched===false?`<div class="feedback warn"><h4>中文释义暂未整理完成</h4><ul><li>英文词典结果已经找到，你可以稍后重试，或直接手动补充中文释义与例句。</li></ul></div>`:""}
+      ${primarySense&&!String(primarySense.meaningZh||"").trim()?`<div class="feedback warn"><h4>中文释义暂缺</h4><ul><li>当前词条没有可用中文释义，可以重新查询或手动补充。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
       ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
       ${r.mode==="expanded"?expandedView:primaryView}
@@ -726,6 +727,7 @@
       aiSuggestionApplied:false,
       applyApproved:false,
       applyLastCheckedText:"",
+      applyReviewedText:"",
       applyDetectedLanguage:"",
       visualNote:card.visualNote||"",
       visualSceneLoading:false,
@@ -1011,8 +1013,8 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
           ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>${escapeHtml(progress.title)}</strong><small>${escapeHtml(progress.detail)}</small>${progressStrip}</div>`:""}
         </div>
         <aside class="scene-panel ${sceneLoading?"is-loading":""}">
-          <div class="scene-panel-label"><span>联想场景</span><small>可编辑</small></div>
-          ${sceneLoading&&!sceneDraft?`<div class="scene-loading"><span class="mini-spinner"></span><span>正在准备场景…</span></div>`:`<textarea class="scene-editor" id="visual-note" placeholder="修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
+          <div class="scene-panel-label"><span>联想场景</span><small>${generating?"生成中已锁定":"可编辑"}</small></div>
+          ${sceneLoading&&!sceneDraft?`<div class="scene-loading"><span class="mini-spinner"></span><span>正在准备场景…</span></div>`:`<textarea class="scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
           ${cue?`<div class="scene-cue">记忆提示 · ${escapeHtml(cue)}</div>`:""}
           <button class="text-action scene-refresh-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>${sceneLoading?`<span class="mini-spinner"></span>${sceneRefreshing?"正在更换…":"正在准备…"}`:"换一个场景"}</button>
         </aside>
@@ -1022,7 +1024,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
       <div class="visual-command-bar">
         <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating||!sceneDraft?"disabled":""}>${generating?"生成中…":hasImage?"重新生成":"生成联想图"}</button>
-        <label class="text-action upload-text-action" for="visual-file">上传图片</label>
+        <label class="text-action upload-text-action" for="visual-file" ${generating?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.5\"":""}>上传图片</label>
       </div>
       <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
 
@@ -1084,11 +1086,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(state.study.applySubmitting){
       feedbackPanel=`<div class="ai-feedback-panel pending"><div class="ai-feedback-head"><div><small>正在检查</small><strong>${chinese?"正在把你的意思转成自然英文":"正在检查用词和表达"}</strong></div></div><div class="ai-feedback-progress"><i></i></div></div>`;
     }else if(fb&&suggestion){
-      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><div><small>${fb.inputLanguage==="zh"?"英文表达":"修改建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用建议</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><div><small>${fb.inputLanguage==="zh"?"英文表达":"修改建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用建议</button><button class="btn" data-action="pass-apply">保留原句，继续首次复习</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
     }else if(fb&&checked){
       feedbackPanel=`<div class="ai-feedback-panel good"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"表达自然，可以直接使用")}</strong></div><span class="ai-keyword-chip">${escapeHtml(keyword)}</span></div>${sentenceExample(current,"example-en",keyword)}<div class="ai-feedback-actions"><button class="btn primary" data-action="pass-apply">继续首次复习</button></div></div>`;
     }else if(fb){
-      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
+      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn" data-action="pass-apply">保留原句，继续首次复习</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
     }
 
     return `${stageKicker("造句应用")}
@@ -1220,7 +1222,8 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       imageData:card.imageData||"",
       imageUrl:card.imageUrl||"",
       generatedVisualScene:card.generatedVisualScene||"",
-      imageGeneration:card.imageGeneration?{...card.imageGeneration}:null
+      imageGeneration:card.imageGeneration?{...card.imageGeneration}:null,
+      userSentence:card.userSentence||""
     };
   }
 
@@ -1252,8 +1255,9 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       phonetic:card.phonetic||"",
       pos:card.pos||"",
       meaningZh:card.meaningZh||"",
-      exampleEn:String(read("library-edit-example-en",current.exampleEn)||"").trim(),
-      exampleZh:String(read("library-edit-example-zh",current.exampleZh)||"").trim(),
+      exampleEn:card.exampleEn||"",
+      exampleZh:card.exampleZh||"",
+      userSentence:String(read("library-edit-user-sentence",current.userSentence)||"").trim(),
       visualNote:String(read("library-edit-visual-note",current.visualNote)||"").trim()
     };
     return editor.draft;
@@ -1265,10 +1269,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(!editor||!card)return libraryPage();
     const d=editor.draft||libraryEditorBaseDraft(card);
     const image=d.imageData||d.imageUrl||"";
-    const generating=Boolean(editor.imageGenerating);
+    const activeGeneration=d.imageGeneration||card.imageGeneration||null;
+    const generating=Boolean(editor.imageGenerating||activeGeneration?.status==="generating");
     const phonetic=formatPhonetic(d.phonetic||"")||"暂无音标";
     return shell(
-      header("","编辑单词卡","只调整例句和视觉联想；词条信息保持原样，复习进度不会改变。",`<button class="btn" data-action="library-edit-back">← 返回单词库</button>`)
+      header("","编辑单词卡","只调整你的造句和视觉联想；词条、释义与参考例句保持原样，复习进度不会改变。",`<button class="btn" data-action="library-edit-back">← 返回单词库</button>`)
       + `<div class="library-editor-grid library-editor-grid-refined">
         <section class="card library-editor-identity" aria-label="固定词条信息">
           <div class="library-editor-word-block">
@@ -1287,17 +1292,17 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
 
         <section class="card pad library-editor-copy-card">
           <div class="library-editor-section-head">
-            <div><span class="library-editor-section-kicker">可编辑</span><h2>例句</h2><p>只在表达不自然或不够贴合词义时修改。</p></div>
+            <div><span class="library-editor-section-kicker">学习内容</span><h2>参考例句</h2><p>参考例句来自制卡流程，在单词库中保持只读。</p></div>
+          </div>
+          <div class="answer-box library-editor-reference-example">
+            ${sentenceExample(d.exampleEn,"example-en")}
+            <p>${escapeHtml(d.exampleZh)}</p>
           </div>
           <div class="field library-editor-editable-field">
-            <label>英文例句</label>
-            <textarea class="textarea library-editor-textarea" id="library-edit-example-en" placeholder="写一句自然、明确体现当前词义的英文例句">${escapeHtml(d.exampleEn)}</textarea>
+            <label>我的造句 <span>可编辑</span></label>
+            <textarea class="textarea library-editor-textarea" id="library-edit-user-sentence" placeholder="这里会保存你在“造句应用”中写下的句子">${escapeHtml(d.userSentence||"")}</textarea>
+            <small>修改的是你的造句，不会改动词典参考例句。</small>
           </div>
-          <div class="field library-editor-editable-field">
-            <label>中文例句</label>
-            <textarea class="textarea library-editor-textarea" id="library-edit-example-zh" placeholder="填写对应的自然中文翻译">${escapeHtml(d.exampleZh)}</textarea>
-          </div>
-          <div class="library-editor-copy-note">例句会直接用于后续记忆与复习。</div>
         </section>
 
         <aside class="card pad library-editor-image-panel">
@@ -1306,25 +1311,25 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
           </div>
           <div class="library-editor-image-frame ${image?"has-image":""}">
             ${image?`<img class="library-editor-image" src="${image}" alt="${escapeHtml(d.word)} 联想图" />`:`<div class="library-editor-image-empty"><span>✦</span><strong>暂无联想图</strong><small>AI 可根据词义和例句自动设计</small></div>`}
-            ${generating?`<div class="library-editor-image-loading"><span class="mini-spinner"></span><strong>正在生成新图片</strong><small>可以继续修改例句或场景，当前已保存内容不会被覆盖。</small></div>`:""}
+            ${generating?`<div class="library-editor-image-loading"><span class="mini-spinner"></span><strong>正在生成新图片</strong><small>生成期间场景已锁定，完成后可继续修改。</small></div>`:""}
           </div>
           <div class="library-editor-image-actions">
             <button class="btn primary" data-action="regenerate-library-image" ${generating?"disabled":""}>${generating?"生成中…":image?"✦ 重新生成":"✦ AI 生成图片"}</button>
-            <label class="btn" for="library-image-file">上传图片</label>
+            <label class="btn" for="library-image-file" ${generating?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.55\"":""}>上传图片</label>
             ${image?`<button class="btn ghost" data-action="clear-library-image" ${generating?"disabled":""}>移除</button>`:""}
           </div>
           <input id="library-image-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
 
           <div class="field library-editor-scene-field">
             <label>联想场景 <span>可选</span></label>
-            <textarea class="textarea library-editor-scene" id="library-edit-visual-note" placeholder="例如：傍晚的书房里，台灯照亮摊开的英语课本。留空也可以直接生成。">${escapeHtml(d.visualNote)}</textarea>
-            <small>填写后优先按你的描述生成；留空时 AI 会自动设计画面。</small>
+            <textarea class="textarea library-editor-scene" id="library-edit-visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="例如：傍晚的书房里，台灯照亮摊开的英语课本。留空也可以直接生成。">${escapeHtml(d.visualNote)}</textarea>
+            <small>${generating?"图片生成中，当前场景暂时锁定。":"填写后优先按你的描述生成；留空时 AI 会自动设计画面。"}</small>
           </div>
           <div class="library-editor-tip">图片和场景只用于记忆辅助，不会改变学习阶段或复习时间。</div>
         </aside>
 
         <div class="library-editor-footer">
-          <span>保存后只更新例句、联想场景和图片。</span>
+          <span>保存后只更新我的造句、联想场景和图片。</span>
           <div class="library-editor-footer-actions">
             <button class="btn" data-action="library-edit-back">取消</button>
             <button class="btn primary" data-action="save-library-card">保存修改</button>
@@ -1571,10 +1576,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const saved=local.length
           ? state.data.cards.find(c=>c.word.toLowerCase()===String(local[0].word).toLowerCase())
           : null;
-        const exactLocal=Boolean(saved&&(
-          normalizeSearchText(saved.word)===qNormalized ||
-          String(saved.meaningZh||"").split(/[；;、，,/]/).some(part=>normalizeSearchText(part)===qNormalized)
-        ));
+        // Exact English headwords can safely reuse an existing learning card.
+        // Chinese queries must be resolved again: an older card may contain a
+        // previously mis-resolved translation and must not shadow the verified resolver.
+        const exactLocal=Boolean(saved&&!containsChinese(q)&&normalizeSearchText(saved.word)===qNormalized);
         if(exactLocal){
           if(saved){
             state.lookup={query:q,result:{
@@ -1712,6 +1717,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         state.study.applyText=value;
         state.study.applyApproved=false;
         state.study.applyLastCheckedText="";
+        state.study.applyReviewedText="";
         const warning=document.getElementById("apply-keyword-warning");
         const word=getCard(state.study.cardId)?.word||"";
         const missing=Boolean(value.trim()&&!containsChinese(value)&&!sentenceUsesTargetWord(value,word));
@@ -1804,17 +1810,9 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const card=editor&&getCard(editor.cardId);
       const draft=card&&captureLibraryEditorDraft();
       if(!editor||!card||!draft)return;
-      if(!draft.exampleEn||!draft.exampleZh){
-        showNotice("例句还没有填写完整","请保留一组对应的中英文例句。","warn");
-        return;
-      }
-      if(!learningExampleUsesTarget(draft.exampleEn,card.word)){
-        showNotice("例句没有使用当前词","英文例句需要实际包含当前学习词或常见词形，再保存修改。","warn");
-        return;
-      }
-      // Fixed lexical identity: word / phonetic / POS / Chinese meaning are never changed here.
-      card.exampleEn=draft.exampleEn;
-      card.exampleZh=draft.exampleZh;
+      // Fixed lexical identity and reference example: only the learner's own
+      // sentence plus visual-memory content can be changed in the library.
+      card.userSentence=draft.userSentence||"";
       card.visualNote=draft.visualNote;
       card.imageData=draft.imageData||"";
       card.imageUrl=draft.imageUrl||"";
@@ -1836,6 +1834,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const cardId=card.id;
       const scene=draft.visualNote||`围绕“${draft.meaningZh}”设计一个具体、清晰、生活化的记忆场景，突出 ${draft.word} 的当前含义。`;
       editor.imageGenerating=true;
+      card.visualNote=scene;
+      card.imageGeneration={status:"generating",phase:"preparing",message:"正在生成联想图。",code:"",startedAt:new Date().toISOString()};
+      card.updatedAt=new Date().toISOString();
+      editor.draft={...draft,visualNote:scene,imageGeneration:{...card.imageGeneration}};
+      saveData();
       render();
       try{
         const payload=await api("/api/ai/image",{method:"POST",body:{
@@ -1848,20 +1851,31 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
           senseIntentEn:normalizeSearchText(draft.meaningZh)===normalizeSearchText(card.meaningZh)?card.senseIntentEn||"":"",
           avoidVisualEn:normalizeSearchText(draft.meaningZh)===normalizeSearchText(card.meaningZh)?card.avoidVisualEn||[]:[]
         }});
-        if(state.libraryEditor?.cardId!==cardId)return;
-        state.libraryEditor.draft={
-          ...draft,
-          imageData:"",
-          imageUrl:payload.image.url,
-          generatedVisualScene:String(payload.image.visualNote||scene||"").trim(),
-          imageGeneration:{status:"success",phase:"done",message:"联想图已重新生成。",code:"",finishedAt:new Date().toISOString()}
-        };
-        state.libraryEditor.imageGenerating=false;
-        render();
+        const latest=getCard(cardId);
+        if(!latest)return;
+        latest.imageData="";
+        latest.imageUrl=payload.image.url;
+        latest.generatedVisualScene=String(payload.image.visualNote||scene||"").trim();
+        latest.imageGeneration={status:"success",phase:"done",message:"联想图已重新生成。",code:"",finishedAt:new Date().toISOString()};
+        latest.updatedAt=new Date().toISOString();
+        saveData();
+        if(state.libraryEditor?.cardId===cardId){
+          state.libraryEditor.imageGenerating=false;
+          state.libraryEditor.draft=libraryEditorBaseDraft(latest);
+          render();
+        }
       }catch(err){
-        if(state.libraryEditor?.cardId!==cardId)return;
-        state.libraryEditor.imageGenerating=false;
-        showErrorNotice(err,"图片没有生成成功");
+        const latest=getCard(cardId);
+        if(latest){
+          latest.imageGeneration={status:"error",phase:"error",message:"图片没有生成成功，可以稍后重试。",code:err.code||"IMAGE_GENERATION_FAILED",finishedAt:new Date().toISOString()};
+          latest.updatedAt=new Date().toISOString();
+          saveData();
+        }
+        if(state.libraryEditor?.cardId===cardId){
+          state.libraryEditor.imageGenerating=false;
+          if(latest)state.libraryEditor.draft=libraryEditorBaseDraft(latest);
+          showErrorNotice(err,"图片没有生成成功");
+        }
       }
       return;
     }
@@ -1968,12 +1982,22 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       c.imageGeneration={status:"success",phase:"done",message:"联想图已生成。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
       c.updatedAt=new Date().toISOString();
       saveData();
+      if(state.libraryEditor?.cardId===cardId){
+        state.libraryEditor.imageGenerating=false;
+        state.libraryEditor.draft=libraryEditorBaseDraft(c);
+        render();
+      }
       if(state.study?.cardId===cardId&&c.stage==="visualize") toast("联想图已生成");
     }catch(err){
       const user=err?.userError||err?.payload?.userError;
       c.imageGeneration={status:"error",phase:"error",message:user?.message||"这次没有生成成功。可以重试或上传自己的图片。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
       c.updatedAt=new Date().toISOString();
       saveData();
+      if(state.libraryEditor?.cardId===cardId){
+        state.libraryEditor.imageGenerating=false;
+        state.libraryEditor.draft=libraryEditorBaseDraft(c);
+        render();
+      }
       if(state.study?.cardId===cardId&&c.stage==="visualize") toast("图片没有生成成功");
     }finally{
       stopVisualProgress(cardId);
@@ -2000,6 +2024,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       state.study.applyText=sentence;
       state.study.applyApproved=false;
       state.study.applyLastCheckedText="";
+      state.study.applyReviewedText="";
       state.study.applyDetectedLanguage=containsChinese(sentence)?"zh":"en";
       if(!sentence){render();return;}
       state.study.applySubmitting=true;
@@ -2018,6 +2043,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const originalApproved=inputLanguage==="en"&&!suggested&&candidateApproved;
         state.study.applyApproved=originalApproved;
         state.study.applyLastCheckedText=originalApproved?sentence:"";
+        state.study.applyReviewedText=sentence;
         state.study.feedback={level:candidateApproved?"good":"warn",title:inputLanguage==="zh"?(candidateApproved?"意思保留了，英文也自然":"这句话还需要调整"):suggested?(candidateApproved?"可以这样说得更自然":"这句话还需要调整"):(originalApproved?"表达自然，可以直接使用":String(fb.title||"这句话还需要调整")),tips:[...(Array.isArray(fb.tips)?fb.tips:[]),...(!keywordOk?[`需要自然使用 “${c.word}” 或它的常见词形。`]:[])].slice(0,2),suggestion:suggested,suggestionApproved:Boolean(suggested&&candidateApproved),keyword,inputLanguage};
       }catch(err){
         if(state.study?.cardId!==cardId)return;
@@ -2042,6 +2068,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       state.study.applyText=suggestion;
       state.study.applyApproved=keywordOk;
       state.study.applyLastCheckedText=keywordOk?suggestion:"";
+      state.study.applyReviewedText=suggestion;
       state.study.feedback={...fb,title:"已采用修改建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
       render();
       setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
@@ -2057,6 +2084,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       state.study.originalApplyText="";
       state.study.applyApproved=false;
       state.study.applyLastCheckedText="";
+      state.study.applyReviewedText="";
       state.study.feedback=null;
       render();
       setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
@@ -2066,19 +2094,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(action==="pass-apply"){
       const c=getCard(state.study.cardId);
       const latest=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
-      const checked=Boolean(state.study.applyApproved && state.study.applyLastCheckedText===latest);
-      const keyword=String(state.study.feedback?.keyword||c?.word||"").trim();
+      const reviewed=Boolean(state.study.feedback && state.study.applyReviewedText===latest);
 
       if(!latest){toast("请先写一句话");return;}
-      if(!checked){
-        showNotice("需要先审核","提交后通过审核，才能进入下一步。","warn");
-        return;
-      }
-      if(!(textContainsKeyword(latest,keyword)||sentenceUsesTargetWord(latest,c.word))){
-        state.study.applyApproved=false;
-        state.study.applyLastCheckedText="";
-        showNotice("缺少目标词",`句子需要包含 “${c.word}” 或其常见词形。`,"warn");
-        render();
+      if(!reviewed){
+        showNotice("请先检查句子","先让 AI 给出一次反馈，再决定采用建议、继续修改，或保留原句进入下一步。","warn");
         return;
       }
 
