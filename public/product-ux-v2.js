@@ -2,27 +2,32 @@
   "use strict";
 
   let scheduled = false;
-
-  function iconDataUrl() {
-    const value = String(window.LEXIFLOW_APP_ICON_BASE64 || "").trim();
-    return value ? `data:image/png;base64,${value}` : "./icon.png";
-  }
+  const APP_ICON_URL = "./icon.png?v=20260911-icon2";
 
   function applyAppIcon() {
-    const src = iconDataUrl();
-
     const favicon = document.querySelector('link[rel="icon"]');
-    if (favicon && favicon.dataset.lexiIconApplied !== "1") {
-      favicon.dataset.lexiIconApplied = "1";
+    if (favicon) {
       favicon.type = "image/png";
-      favicon.href = src;
+      favicon.href = APP_ICON_URL;
     }
 
     document.querySelectorAll(".brand .logo").forEach(logo => {
-      if (logo.dataset.lexiIconApplied === "1") return;
-      logo.dataset.lexiIconApplied = "1";
       logo.classList.add("lexi-brand-icon");
-      logo.innerHTML = `<img src="${src}" alt="LexiFlow" />`;
+      const current = logo.querySelector("img");
+      if (current && current.getAttribute("src") === APP_ICON_URL) return;
+
+      logo.textContent = "";
+      const image = document.createElement("img");
+      image.src = APP_ICON_URL;
+      image.alt = "LexiFlow";
+      image.decoding = "async";
+      image.draggable = false;
+      image.addEventListener("load", () => logo.classList.add("is-icon-ready"), { once: true });
+      image.addEventListener("error", () => {
+        logo.classList.remove("is-icon-ready");
+        logo.textContent = "L";
+      }, { once: true });
+      logo.appendChild(image);
     });
   }
 
@@ -89,7 +94,7 @@
   function start() {
     const app = document.getElementById("app");
     if (!app) return;
-    new MutationObserver(schedule).observe(app, { childList: true, subtree: false });
+    new MutationObserver(schedule).observe(app, { childList: true, subtree: true });
     schedule();
   }
 
