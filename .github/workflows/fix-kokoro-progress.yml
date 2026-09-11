@@ -23,8 +23,14 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Apply patch
-        run: python scripts/apply-kokoro-progress-fix.py
+      - name: Repair patch target and apply
+        shell: pwsh
+        run: |
+          $path = 'scripts/apply-kokoro-progress-fix.py'
+          $text = Get-Content $path -Raw
+          $text = $text.Replace('''      }catch(err){\n        showErrorNotice(err,"自然语音下载失败");\n      }\n      return;\n    }\n''', '''      }catch(err){showErrorNotice(err,"自然语音没有准备完成");}\n      return;\n    }\n''')
+          Set-Content -Path $path -Value $text -Encoding UTF8
+          python scripts/apply-kokoro-progress-fix.py
       - name: Syntax check
         run: npm run check
       - name: Verify progress architecture
