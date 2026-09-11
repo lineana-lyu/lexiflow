@@ -3,14 +3,24 @@
 
   function strengthenResetEntry(){
     const trigger=document.querySelector('[data-action="confirm-reset"]');
-    if(!trigger)return;
+    if(!trigger||trigger.dataset.safetyHardened==="1")return;
+
+    // IMPORTANT: mark the node before changing textContent. This script watches
+    // childList mutations because LexiFlow re-renders pages with innerHTML.
+    // Without this guard, changing textContent creates another childList mutation,
+    // which calls refresh() again and causes an endless MutationObserver microtask
+    // loop as soon as the Settings page appears.
+    trigger.dataset.safetyHardened="1";
     trigger.textContent="清除所有学习数据";
     trigger.classList.add("danger");
+
     const row=trigger.closest(".setting-row");
     const title=row?.querySelector("h3");
     const description=row?.querySelector("p");
-    if(title)title.textContent="清除所有学习数据 · 高风险";
-    if(description)description.textContent="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。建议先导出 JSON 备份。";
+    if(title&&title.textContent!=="清除所有学习数据 · 高风险")title.textContent="清除所有学习数据 · 高风险";
+    if(description&&description.textContent!=="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。建议先导出 JSON 备份。"){
+      description.textContent="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。建议先导出 JSON 备份。";
+    }
   }
 
   function strengthenResetModal(){
@@ -18,7 +28,11 @@
     if(!modal)return;
     const title=modal.querySelector("h2");
     const action=modal.querySelector('[data-action="reset-data"]');
-    if(!title||!action||!title.textContent.includes("清空"))return;
+    if(!title||!action||!title.textContent.includes("清空")||action.dataset.safetyHardened==="1")return;
+
+    // Same idempotency rule as the Settings entry above: protect first, then
+    // mutate DOM so the observer can never recursively rewrite the same modal.
+    action.dataset.safetyHardened="1";
     title.textContent="高风险操作：清空全部学习数据";
     const p=modal.querySelector("p");
     if(p)p.innerHTML="将永久删除全部单词卡、学习进度、复习记录、造句和统计数据。<strong>此操作无法撤销，也无法从 LexiFlow 恢复。</strong><br><br>建议先导出 JSON 备份。点击下方按钮后，还需要输入“清空”进行二次确认。";
@@ -26,8 +40,10 @@
   }
 
   function refresh(){strengthenResetEntry();strengthenResetModal();}
+
   const observer=new MutationObserver(refresh);
-  observer.observe(document.documentElement,{subtree:true,childList:true});
+  const appRoot=document.getElementById("app")||document.documentElement;
+  observer.observe(appRoot,{subtree:true,childList:true});
   refresh();
 
   document.addEventListener("click",event=>{
