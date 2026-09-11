@@ -11,12 +11,24 @@
     return clean(document.documentElement.dataset.lexiflowTtsVoice) || clean(localStorage.getItem("lexiflow-tts-voice")) || DEFAULT_VOICE;
   }
 
+  function showToast(message,duration=3200){
+    const text=clean(message);if(!text)return;
+    const existing=document.querySelector(".toast[data-tts-toast='1']");
+    if(existing)existing.remove();
+    const toast=document.createElement("div");
+    toast.className="toast";
+    toast.dataset.ttsToast="1";
+    toast.textContent=text;
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),duration);
+  }
+
   function setBusy(button,busy){
     if(!button)return;
     button.classList.toggle("tts-loading",busy);
     button.setAttribute("aria-busy",busy?"true":"false");
     if(busy) button.dataset.ttsOriginalTitle=button.getAttribute("title")||"";
-    if(busy) button.setAttribute("title","正在准备本地自然语音…");
+    if(busy) button.setAttribute("title","正在后台准备本地自然语音…");
     else if(Object.prototype.hasOwnProperty.call(button.dataset,"ttsOriginalTitle")){
       const original=button.dataset.ttsOriginalTitle;
       if(original)button.setAttribute("title",original);else button.removeAttribute("title");
@@ -30,12 +42,16 @@
     setBusy(activeButton,false);
     activeButton=button||null;
     setBusy(activeButton,true);
+    let slowNoticeTimer=setTimeout(()=>{
+      showToast("首次自然发音正在后台准备，你可以继续查词或进入设置。",4200);
+    },700);
     try{
       const response=await fetch(`${API_ORIGIN}/api/tts/kokoro`,{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({text:value,voice,speed:.94})
       });
+      clearTimeout(slowNoticeTimer);slowNoticeTimer=null;
       const payload=await response.json().catch(()=>({}));
       if(!response.ok||!payload?.ok||!payload.audioDataUrl){
         const err=new Error(payload?.userError?.message||payload?.error||"本地自然语音暂时不可用");
@@ -53,6 +69,7 @@
       document.dispatchEvent(new CustomEvent("lexiflow:tts-error",{detail:{message:err?.message||"本地自然语音暂时不可用"}}));
       return false;
     }finally{
+      if(slowNoticeTimer)clearTimeout(slowNoticeTimer);
       if(!activeAudio||activeAudio.paused)setBusy(button,false);
     }
   }
@@ -88,13 +105,6 @@
 
   document.addEventListener("lexiflow:tts-error",event=>{
     const message=clean(event.detail?.message);
-    if(!message)return;
-    const existing=document.querySelector(".toast");
-    if(existing)return;
-    const toast=document.createElement("div");
-    toast.className="toast";
-    toast.textContent=message;
-    document.body.appendChild(toast);
-    setTimeout(()=>toast.remove(),2600);
+    if(message)showToast(message,3200);
   });
 })();
