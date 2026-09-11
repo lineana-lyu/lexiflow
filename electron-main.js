@@ -26,6 +26,9 @@ function configureRuntimePaths() {
   process.env.LEXIFLOW_DATA_DIR = appDataDir;
   process.env.LEXIFLOW_GENERATED_DIR = generatedDir;
   process.env.LEXIFLOW_RUNTIME_CWD = appDataDir;
+  process.env.LEXIFLOW_ECDICT_DB = app.isPackaged
+    ? path.join(process.resourcesPath, "ecdict.sqlite")
+    : path.join(__dirname, "resources", "ecdict.sqlite");
   return { userData, appDataDir, generatedDir };
 }
 
@@ -62,7 +65,7 @@ async function createWindow() {
   });
 
   try {
-    backend = require("./server");
+    backend = require("./server-entry");
     const started = await backend.startServer();
     mainWindow.webContents.on("will-navigate", (event, url) => {
       if (!url.startsWith(started.address)) {

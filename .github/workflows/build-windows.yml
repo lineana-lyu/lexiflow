@@ -10,7 +10,27 @@ on:
       - package-lock.json
       - electron-main.js
       - server.js
+      - server-entry.js
+      - lib/**
+      - scripts/**
       - public/**
+      - build/**
+      - THIRD_PARTY_NOTICES.md
+      - .github/workflows/build-windows.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - package.json
+      - package-lock.json
+      - electron-main.js
+      - server.js
+      - server-entry.js
+      - lib/**
+      - scripts/**
+      - public/**
+      - build/**
+      - THIRD_PARTY_NOTICES.md
       - .github/workflows/build-windows.yml
 
 permissions:
