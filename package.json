@@ -18,7 +18,7 @@
     "start": "electron .",
     "preweb": "npm run prepare:dictionary",
     "web": "node server-runtime.js",
-    "check": "node --check electron-main.js && node --check server-runtime.js && node --check server-image-runtime.js && node --check server.js && node --check lib/ecdict.js && node --check lib/core-lexicon.js && node --check lib/example-enrichment.js && node --check scripts/prepare-ecdict.js && node --check scripts/prepare-core-lexicon.js && node --check public/example-hydration.js && node --check public/transport-fixes.js && node --check public/runtime-fixes.js && node --check public/legacy-data-fix.js && node --check public/product-ux.js && node --check public/product-ux-v2.js && node --check public/feedback-fixes.js && node --check public/app.js",
+    "check": "node --check electron-main.js && node --check server-runtime.js && node --check server-image-runtime.js && node --check server.js && node --check lib/ecdict.js && node --check lib/core-lexicon.js && node --check lib/example-enrichment.js && node --check lib/chattts.js && node --check scripts/prepare-ecdict.js && node --check scripts/prepare-core-lexicon.js && node --check public/example-hydration.js && node --check public/chattts-voice.js && node --check public/safety-controls.js && node --check public/transport-fixes.js && node --check public/runtime-fixes.js && node --check public/legacy-data-fix.js && node --check public/product-ux.js && node --check public/product-ux-v2.js && node --check public/feedback-fixes.js && node --check public/app.js",
     "build:win": "npm run prepare:dictionary && electron-builder --win nsis portable --x64 --publish never"
   },
   "devDependencies": {
@@ -47,6 +47,10 @@
       {
         "from": "resources/core-lexicon.sqlite",
         "to": "core-lexicon.sqlite"
+      },
+      {
+        "from": "resources/chattts-voice",
+        "to": "chattts-voice"
       }
     ],
     "directories": {
