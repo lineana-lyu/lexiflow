@@ -63,7 +63,7 @@
           ]
         }
       ],
-      "icon": "build/icon.ico"
+      "icon": "public/icon.png"
     },
     "nsis": {
       "oneClick": false,
@@ -71,9 +71,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "LexiFlow",
-      "installerIcon": "build/icon.ico",
-      "uninstallerIcon": "build/icon.ico"
+      "shortcutName": "LexiFlow"
     }
   }
 }
