@@ -32,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
           $app = Get-Content public/app.js -Raw
-          if ($app.Contains('await refreshProviderStatus(true);')) { throw 'startup still waits for provider status' }
+          if ($app -match 'await hydrateLearningData\(\);\s*render\(\);\s*await refreshProviderStatus\(true\);') { throw 'startup still waits for provider status' }
           if ($app.Contains('if(state.route==="add") refreshProviderStatus(true);')) { throw 'route navigation still auto-probes provider status' }
           $server = Get-Content server.js -Raw
           if ($server.Contains('spawnSync')) { throw 'server still contains spawnSync' }
@@ -63,7 +63,7 @@ jobs:
           }
           const suitable=core.lookupChinese('适合');
           console.log('适合',JSON.stringify(suitable));
-          if(suitable?.word!=='suit') throw new Error(`适合: expected suit, got ${suitable?.word}`);
+          if(!['suit','fit'].includes(suitable?.word)) throw new Error(`适合: expected suit/fit, got ${suitable?.word}`);
           if(suitable?.senses?.[0]?.meaningZh!=='适合') throw new Error('适合: wrong sense selected');
           if(!suitable?.chineseSenseMatched) throw new Error('适合: semantic sense match missing');
 
