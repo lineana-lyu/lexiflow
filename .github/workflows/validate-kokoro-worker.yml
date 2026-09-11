@@ -1,0 +1,38 @@
+name: Validate Kokoro Worker
+
+on:
+  push:
+    branches:
+      - fix/kokoro-nonblocking-worker
+
+jobs:
+  kokoro-worker-windows:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/kokoro-nonblocking-worker
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Syntax check
+        run: npm run check
+      - name: Verify main event loop stays responsive during first synthesis
+        shell: pwsh
+        env:
+          LEXIFLOW_DATA_DIR: ${{ runner.temp }}\lexiflow-worker-data
+        run: |
+          node -e "const {performance}=require('perf_hooks'); const t=require('./lib/kokoro-tts'); let last=performance.now(), worst=0, ticks=0; const timer=setInterval(()=>{const now=performance.now(); worst=Math.max(worst,now-last); last=now; ticks++;},25); t.synthesize('LexiFlow should stay responsive while natural speech is prepared.',{voice:'af_bella'}).then(r=>{clearInterval(timer); console.log('voice='+r.voice,'cacheHit='+r.cacheHit,'ticks='+ticks,'worstGapMs='+worst.toFixed(1)); if(ticks<5||worst>1000||!r.dataUrl.startsWith('data:audio/wav;base64,')) process.exit(2); return t.stop();}).catch(e=>{clearInterval(timer); console.error(e); process.exit(1)})"
+      - name: Verify cached replay
+        shell: pwsh
+        env:
+          LEXIFLOW_DATA_DIR: ${{ runner.temp }}\lexiflow-worker-data
+        run: |
+          node -e "const t=require('./lib/kokoro-tts'); t.synthesize('LexiFlow should stay responsive while natural speech is prepared.',{voice:'af_bella'}).then(async r=>{console.log('cacheHit='+r.cacheHit); if(!r.cacheHit) process.exitCode=3; await t.stop();}).catch(e=>{console.error(e);process.exit(1)})"
+      - name: Build Windows package
+        run: npm run build:win
