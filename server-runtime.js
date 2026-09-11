@@ -5,6 +5,7 @@ const path = require("path");
 const ecdict = require("./lib/ecdict");
 const coreLexicon = require("./lib/core-lexicon");
 const exampleEnrichment = require("./lib/example-enrichment");
+const chattts = require("./lib/chattts");
 
 const HOST = "127.0.0.1";
 const OUTER_PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -324,6 +325,8 @@ async function handleExampleHydration(req, res, body) {
       pos: clean(sense?.pos),
       meaningZh: clean(sense?.meaningZh),
       senseIntentEn: clean(sense?.senseIntentEn),
+      exampleEn: clean(sense?.exampleEn),
+      exampleZh: clean(sense?.exampleZh),
     }))
     .filter(sense => sense.meaningZh);
 
@@ -332,25 +335,51 @@ async function handleExampleHydration(req, res, body) {
   }
 
   const warnings = [];
+  const supplied = senses
+    .filter(sense => sense.exampleEn && sense.exampleZh)
+    .map(sense => ({ id: sense.id, exampleEn: sense.exampleEn, exampleZh: sense.exampleZh, source: "local-dictionary", cacheHit: false }));
   const cached = await exampleEnrichment.getCachedExamples(word, senses);
-  let combined = mergeExamples(cached);
-  const missingAfterCache = senses.filter(sense => !combined.some(item => item.id === sense.id));
+  let combined = mergeExamples(supplied, cached);
 
+  // If a dictionary already supplied the English example, preserve it exactly.
+  // AI is only allowed to translate the missing Chinese text; it must not rewrite
+  // or replace the source example.
+  const translationOnly = senses.filter(sense =>
+    sense.exampleEn && !sense.exampleZh && !combined.some(item => item.id === sense.id)
+  );
+  if (translationOnly.length) {
+    try {
+      const translated = await exampleEnrichment.translateExamples(word, translationOnly);
+      if (translated.length) {
+        await exampleEnrichment.storeExamples(word, translationOnly, translated).catch(() => {});
+        combined = mergeExamples(combined, translated);
+      }
+    } catch (err) {
+      warnings.push(clean(err?.code) || "EXAMPLE_TRANSLATION_UNAVAILABLE");
+      console.warn("example translation failed:", err?.message || err);
+    }
+  }
+
+  // Only senses that genuinely have no English example may ask another dictionary
+  // or AI to supply one. This avoids replacing a perfectly good local example.
+  const missingEnglish = senses.filter(sense =>
+    !sense.exampleEn && !combined.some(item => item.id === sense.id)
+  );
   let dictionaryExamples = [];
-  if (missingAfterCache.length) {
-    dictionaryExamples = await tryDictionaryExamples(word, missingAfterCache);
+  if (missingEnglish.length) {
+    dictionaryExamples = await tryDictionaryExamples(word, missingEnglish);
     if (dictionaryExamples.length) {
-      await exampleEnrichment.storeExamples(word, missingAfterCache, dictionaryExamples).catch(() => {});
+      await exampleEnrichment.storeExamples(word, missingEnglish, dictionaryExamples).catch(() => {});
       combined = mergeExamples(combined, dictionaryExamples);
     }
   }
 
-  const missingAfterDictionary = senses.filter(sense => !combined.some(item => item.id === sense.id));
-  if (missingAfterDictionary.length) {
+  const stillMissingEnglish = missingEnglish.filter(sense => !combined.some(item => item.id === sense.id));
+  if (stillMissingEnglish.length) {
     try {
-      const generated = await exampleEnrichment.generateExamples(word, missingAfterDictionary);
+      const generated = await exampleEnrichment.generateExamples(word, stillMissingEnglish);
       if (generated.length) {
-        await exampleEnrichment.storeExamples(word, missingAfterDictionary, generated).catch(() => {});
+        await exampleEnrichment.storeExamples(word, stillMissingEnglish, generated).catch(() => {});
         combined = mergeExamples(combined, generated);
       }
     } catch (err) {
@@ -366,6 +395,32 @@ async function handleExampleHydration(req, res, body) {
     complete: combined.length >= senses.length,
     warnings,
   });
+}
+
+async function handleChatTts(res, body) {
+  let parsed;
+  try {
+    parsed = parseJsonBuffer(body);
+  } catch {
+    return writeJson(res, 400, { ok: false, code: "INVALID_JSON", error: "请求格式不正确" });
+  }
+  const text = clean(parsed.text).slice(0, 500);
+  if (!text) return writeJson(res, 400, { ok: false, code: "TTS_EMPTY", error: "没有可朗读的内容" });
+  try {
+    const audio = await chattts.synthesize(text);
+    return writeJson(res, 200, { ok: true, audioDataUrl: audio.dataUrl, cacheHit: audio.cacheHit, voice: audio.voice });
+  } catch (err) {
+    console.warn("ChatTTS unavailable:", err?.message || err);
+    return writeJson(res, 503, {
+      ok: false,
+      code: err?.code || "CHATTTS_UNAVAILABLE",
+      error: "自定义语音当前不可用",
+      userError: {
+        title: "自定义语音没有启动",
+        message: "请使用安装了 ChatTTS、PyTorch、NumPy 和 SciPy 的 Python 环境，并可通过 LEXIFLOW_PYTHON 指定 python.exe。"
+      }
+    });
+  }
 }
 
 function forward(req, res, body = null) {
@@ -462,6 +517,15 @@ function createProxy() {
       }
     }
 
+    if (req.method === "POST" && url.pathname === "/api/tts/chattts") {
+      try {
+        const body = await readBody(req, 64 * 1024);
+        return await handleChatTts(res, body);
+      } catch (err) {
+        return writeJson(res, 500, { ok: false, code: err?.code || "CHATTTS_FAILED", error: "自定义语音没有完成" });
+      }
+    }
+
     const interceptable = req.method === "POST" && new Set([
       "/api/search/smart",
       "/api/dictionary/lookup",
@@ -519,6 +583,7 @@ async function startServer() {
 }
 
 function stopServer() {
+  chattts.stop();
   coreLexicon.close();
   ecdict.close();
   try { if (proxy?.listening) proxy.close(); } catch {}

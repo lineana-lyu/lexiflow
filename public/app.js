@@ -1920,7 +1920,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     }
     if(action==="save-card"){
       const r=state.lookup?.result,s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
-      if(!s.meaningZh?.trim()||!s.exampleEn?.trim()||!s.exampleZh?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和中英文例句");render();return;}
+      if(!s.meaningZh?.trim()||!s.exampleEn?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和英文例句");render();return;}
       if(!learningExampleUsesTarget(s.exampleEn,r.word)){
         showNotice("这张卡片还不能保存",`例句没有使用当前目标词“${r.word}”。请重新识别结果，或修改例句后再保存。`,"warn");
         return;
@@ -1928,7 +1928,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh,senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       state.data.cards.unshift(card);recordActivity("card-created",card.id);saveData();toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
     if(action==="continue-learning"){startStudy();return;}
@@ -2178,6 +2178,29 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(action==="close-modal"){state.modal=null;render();return;}
     if(action==="reset-data"){state.data=defaultData();saveData();state.modal=null;state.route="home";toast("本地数据已清空");render();return;}
   }
+
+  window.addEventListener("lexiflow:examples-hydrated", event => {
+    const detail=event.detail||{};
+    const word=String(detail.word||"").trim().toLowerCase();
+    const senses=Array.isArray(detail.senses)?detail.senses:[];
+    if(!word||!senses.length)return;
+    let changed=false;
+    for(const card of state.data.cards){
+      if(String(card.word||"").trim().toLowerCase()!==word)continue;
+      const hit=senses.find(s=>
+        String(s.exampleEn||"").trim()===String(card.exampleEn||"").trim() &&
+        (!card.meaningZh || String(s.meaningZh||"").trim()===String(card.meaningZh||"").trim())
+      );
+      if(!hit||!String(hit.exampleZh||"").trim())continue;
+      if(!String(card.exampleZh||"").trim()){
+        card.exampleZh=String(hit.exampleZh).trim();
+        card.exampleTranslationPending=false;
+        card.updatedAt=new Date().toISOString();
+        changed=true;
+      }
+    }
+    if(changed){saveData();render();}
+  });
 
   window.addEventListener("beforeunload",()=>{
     if(!persistenceReady)return;
