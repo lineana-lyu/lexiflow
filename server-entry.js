@@ -8,6 +8,7 @@ const HOST = "127.0.0.1";
 const OUTER_PORT = Number(process.env.LEXIFLOW_PORT || 4177);
 const INNER_PORT = Number(process.env.LEXIFLOW_INNER_PORT || (OUTER_PORT + 1));
 const ORIGINAL_PORT = process.env.LEXIFLOW_PORT;
+const ORIGINAL_NO_OPEN = process.env.LEXIFLOW_NO_OPEN;
 
 let inner = null;
 let proxy = null;
@@ -113,11 +114,11 @@ async function handleLocalDictionary(req, res, pathname, body) {
   return false;
 }
 
-function forward(req, res, body) {
+function forward(req, res, body = null) {
   const headers = { ...req.headers };
   delete headers.origin;
   delete headers.host;
-  if (body) headers["content-length"] = String(body.length);
+  if (Buffer.isBuffer(body)) headers["content-length"] = String(body.length);
 
   const upstream = http.request({
     host: HOST,
@@ -137,8 +138,12 @@ function forward(req, res, body) {
     }
     console.error("LexiFlow proxy error:", err.message);
   });
-  if (body?.length) upstream.write(body);
-  upstream.end();
+
+  if (Buffer.isBuffer(body)) {
+    upstream.end(body);
+  } else {
+    req.pipe(upstream);
+  }
 }
 
 async function forwardStatus(req, res) {
@@ -207,7 +212,7 @@ function createProxy() {
       }
     }
 
-    return forward(req, res, null);
+    return forward(req, res);
   });
 }
 
@@ -215,6 +220,7 @@ async function startServer() {
   if (proxy?.listening) return { server: proxy, address: startedAddress };
 
   process.env.LEXIFLOW_PORT = String(INNER_PORT);
+  process.env.LEXIFLOW_NO_OPEN = "1";
   // Require after setting the internal port because server.js reads it at module load.
   inner = require("./server");
   await inner.startServer();
@@ -246,6 +252,8 @@ function stopServer() {
   try { inner?.stopServer?.(); } catch {}
   if (ORIGINAL_PORT === undefined) delete process.env.LEXIFLOW_PORT;
   else process.env.LEXIFLOW_PORT = ORIGINAL_PORT;
+  if (ORIGINAL_NO_OPEN === undefined) delete process.env.LEXIFLOW_NO_OPEN;
+  else process.env.LEXIFLOW_NO_OPEN = ORIGINAL_NO_OPEN;
 }
 
 if (require.main === module) {
