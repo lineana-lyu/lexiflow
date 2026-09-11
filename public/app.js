@@ -1576,10 +1576,10 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         const saved=local.length
           ? state.data.cards.find(c=>c.word.toLowerCase()===String(local[0].word).toLowerCase())
           : null;
-        const exactLocal=Boolean(saved&&(
-          normalizeSearchText(saved.word)===qNormalized ||
-          String(saved.meaningZh||"").split(/[；;、，,/]/).some(part=>normalizeSearchText(part)===qNormalized)
-        ));
+        // Exact English headwords can safely reuse an existing learning card.
+        // Chinese queries must be resolved again: an older card may contain a
+        // previously mis-resolved translation and must not shadow the verified resolver.
+        const exactLocal=Boolean(saved&&!containsChinese(q)&&normalizeSearchText(saved.word)===qNormalized);
         if(exactLocal){
           if(saved){
             state.lookup={query:q,result:{
