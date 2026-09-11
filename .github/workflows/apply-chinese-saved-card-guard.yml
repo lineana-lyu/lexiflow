@@ -1,0 +1,33 @@
+name: Apply Chinese saved-card guard
+
+on:
+  push:
+    branches:
+      - fix/dictionary-learning-flow
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/dictionary-learning-flow
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: Patch and validate
+        run: |
+          python scripts/apply-chinese-saved-card-guard.py
+          npm run check
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/app.js
+          git diff --cached --check
+          git commit -m "fix: re-resolve Chinese queries instead of trusting old cards"
+          git push origin HEAD:fix/dictionary-learning-flow
