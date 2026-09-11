@@ -6,33 +6,35 @@
   height:42px!important;
   flex:0 0 42px!important;
   padding:0!important;
-  overflow:hidden;
+  overflow:hidden!important;
   border:0!important;
   border-radius:13px!important;
-  background:transparent!important;
+  background-color:transparent!important;
+  background-image:url("./icon.png?v=20260911-icon3")!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
   box-shadow:0 6px 18px rgba(75,98,84,.08)!important;
   color:transparent!important;
   font-size:0!important;
 }
-.brand .logo.lexi-brand-icon::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  background:url("./icon.png?v=20260911-icon2") center/contain no-repeat;
+.brand .logo.lexi-brand-icon::before,
+.brand .logo.lexi-brand-icon::after{
+  content:none!important;
+  display:none!important;
 }
-.brand .logo.lexi-brand-icon img{
-  position:relative;
-  z-index:1;
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  opacity:0;
-  transition:opacity .16s ease;
+.brand .logo.lexi-brand-icon img,
+.brand .logo.lexi-brand-icon .lexi-brand-icon-image{
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  opacity:1!important;
+  visibility:visible!important;
 }
-.brand .logo.lexi-brand-icon.is-icon-ready img{opacity:1}
-.brand .logo.lexi-brand-icon.is-icon-ready::before{opacity:0}
 
 .scene-generation-state.lexi-scene-immediate-state,
 .scene-panel .scene-generation-state{
