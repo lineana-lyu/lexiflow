@@ -3,6 +3,7 @@
 const http = require("http");
 const path = require("path");
 const ecdict = require("./lib/ecdict");
+const coreLexicon = require("./lib/core-lexicon");
 const exampleEnrichment = require("./lib/example-enrichment");
 
 const HOST = "127.0.0.1";
@@ -53,16 +54,15 @@ function isAllowedOrigin(req) {
 }
 
 function localLookupResult(word, mode = "primary", sourceQuery = "") {
-  return ecdict.lookupExact(word, mode, {
+  const options = {
     sourceQuery: sourceQuery || word,
     autoResolved: Boolean(sourceQuery && sourceQuery.toLowerCase() !== String(word || "").toLowerCase()),
-  });
+  };
+  return coreLexicon.lookupExact(word, mode, options) || ecdict.lookupExact(word, mode, options);
 }
 
 function localChineseResult(query) {
-  const result = ecdict.bestChineseLookup(query);
-  if (!result) return null;
-  return Number(result.localSearchScore || 0) >= 400 ? result : null;
+  return coreLexicon.lookupChinese(query);
 }
 
 async function handleLocalDictionary(req, res, pathname, body) {
@@ -79,15 +79,19 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const query = clean(parsed.query);
     if (!query) return false;
     const hasChinese = /[\u3400-\u9fff]/.test(query);
-    // ECDICT is excellent for exact English headword lookup, but translation
-    // substring search is not a reliable Chinese -> English resolver. Chinese
-    // queries therefore fall through to the semantic resolver in server.js.
-    if (hasChinese) return false;
+    if (hasChinese) {
+      const result = localChineseResult(query);
+      if (!result) return false;
+      writeJson(res, 200, { ok: true, result: { ...result, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+      console.log(`LexiFlow lookup [${result.lookupPath || "core-zh"}] ${result.lookupMs ?? "?"}ms: ${query} -> ${result.word}`);
+      return true;
+    }
     const result = /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
       ? localLookupResult(query.toLowerCase(), "primary", query)
       : null;
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+    console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${query}`);
     return true;
   }
 
@@ -98,6 +102,7 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const result = localLookupResult(word, mode, word);
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+    console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${word}`);
     return true;
   }
 
@@ -150,6 +155,21 @@ async function handlePronunciation(res, body) {
   }
 
   const local = localLookupResult(word, "primary", word);
+  if (local?.audioUrl) {
+    writeJson(res, 200, {
+      ok: true,
+      result: {
+        phonetic: local.phonetic || "",
+        audioUrl: local.audioUrl,
+        audioUrls: Array.isArray(local.audioUrls) ? local.audioUrls : [local.audioUrl],
+        pronunciationSource: local.pronunciationSource || "wikimedia-commons",
+        exactMatch: true,
+        dictionaryAudio: true,
+        localLookup: true,
+      },
+    });
+    return true;
+  }
   try {
     const remote = await requestInnerJson("/api/dictionary/pronunciation", {
       method: "POST",
@@ -385,14 +405,20 @@ async function forwardStatus(req, res) {
       try {
         const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
         const local = ecdict.status();
+        const core = coreLexicon.status();
         payload.dictionary = {
           ...(payload.dictionary || {}),
-          provider: local.available ? "ECDICT 本地词典 + Merriam-Webster / AI 例句补全" : "Merriam-Webster's Learner's Dictionary（ECDICT 未准备）",
-          localAvailable: local.available,
+          provider: core.available ? "LexiFlow Core + ECDICT + Merriam-Webster 增强" : (local.available ? "ECDICT 本地词典 + Merriam-Webster / AI 例句补全" : "Merriam-Webster's Learner's Dictionary（本地词库未准备）"),
+          localAvailable: core.available || local.available,
           localEntries: local.entries,
           localDatabase: local.path ? path.basename(local.path) : "",
+          coreAvailable: core.available,
+          coreWords: core.words,
+          coreSenses: core.senses,
+          coreChineseAliases: core.zhAliases,
+          coreDatabase: core.path ? path.basename(core.path) : "",
           fallbackConfigured: Boolean(payload.dictionary?.configured),
-          configured: local.available || Boolean(payload.dictionary?.configured),
+          configured: core.available || local.available || Boolean(payload.dictionary?.configured),
           exampleHydration: true,
         };
         writeJson(res, upstreamRes.statusCode || 200, payload);
@@ -487,11 +513,13 @@ async function startServer() {
 
   startedAddress = `http://${HOST}:${OUTER_PORT}`;
   const local = ecdict.status();
-  console.log(`LexiFlow dictionary: ${local.available ? `ECDICT local (${local.entries || "ready"})` : "MW/Codex fallback"}`);
+  const core = coreLexicon.status();
+  console.log(`LexiFlow dictionary: ${core.available ? `Core local (${core.words || "ready"} words / ${core.zhAliases || 0} zh aliases)` : (local.available ? `ECDICT local (${local.entries || "ready"})` : "MW/Codex fallback")}`);
   return { server: proxy, address: startedAddress };
 }
 
 function stopServer() {
+  coreLexicon.close();
   ecdict.close();
   try { if (proxy?.listening) proxy.close(); } catch {}
   try { inner?.stopServer?.(); } catch {}
