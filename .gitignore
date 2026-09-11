@@ -3,6 +3,8 @@ data/*
 !data/.gitkeep
 generated/*
 !generated/.gitkeep
+resources/ecdict.sqlite
+resources/*.tmp
 startup.log
 *.log
 
