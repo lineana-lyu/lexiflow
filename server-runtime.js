@@ -79,11 +79,13 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const query = clean(parsed.query);
     if (!query) return false;
     const hasChinese = /[\u3400-\u9fff]/.test(query);
-    const result = hasChinese
-      ? localChineseResult(query)
-      : /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
-        ? localLookupResult(query.toLowerCase(), "primary", query)
-        : null;
+    // ECDICT is excellent for exact English headword lookup, but translation
+    // substring search is not a reliable Chinese -> English resolver. Chinese
+    // queries therefore fall through to the semantic resolver in server.js.
+    if (hasChinese) return false;
+    const result = /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
+      ? localLookupResult(query.toLowerCase(), "primary", query)
+      : null;
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
     return true;
@@ -100,22 +102,9 @@ async function handleLocalDictionary(req, res, pathname, body) {
   }
 
   if (pathname === "/api/dictionary/pronunciation") {
-    const word = clean(parsed.word).toLowerCase();
-    if (!/^[a-z][a-z '-]*$/i.test(word)) return false;
-    const result = localLookupResult(word, "primary", word);
-    if (!result?.phonetic) return false;
-    writeJson(res, 200, {
-      ok: true,
-      result: {
-        phonetic: result.phonetic,
-        audioUrl: "",
-        audioUrls: [],
-        pronunciationSource: "ecdict-phonetic",
-        exactMatch: true,
-        localLookup: true,
-      },
-    });
-    return true;
+    // Pronunciation is handled separately: prefer real dictionary audio and
+    // fall back to the ECDICT phonetic transcription when audio is unavailable.
+    return false;
   }
 
   return false;
@@ -143,6 +132,62 @@ function requestInnerJson(pathname, { method = "GET", body = null, timeoutMs = 5
     if (buffer) request.end(buffer);
     else request.end();
   });
+}
+
+async function handlePronunciation(res, body) {
+  let parsed;
+  try {
+    parsed = parseJsonBuffer(body);
+  } catch {
+    writeJson(res, 400, { ok: false, code: "INVALID_JSON", error: "请求格式不正确" });
+    return true;
+  }
+
+  const word = clean(parsed.word).toLowerCase();
+  if (!/^[a-z][a-z '-]*$/i.test(word)) {
+    writeJson(res, 400, { ok: false, code: "INVALID_WORD", error: "请输入英文单词或短语" });
+    return true;
+  }
+
+  const local = localLookupResult(word, "primary", word);
+  try {
+    const remote = await requestInnerJson("/api/dictionary/pronunciation", {
+      method: "POST",
+      body: { word },
+      timeoutMs: 10000,
+    });
+    const pronunciation = remote.payload?.result;
+    const hasAudio = Boolean(clean(pronunciation?.audioUrl) || (Array.isArray(pronunciation?.audioUrls) && pronunciation.audioUrls.some(Boolean)));
+    if (remote.status >= 200 && remote.status < 300 && pronunciation && (hasAudio || clean(pronunciation.phonetic))) {
+      writeJson(res, 200, {
+        ok: true,
+        result: {
+          ...pronunciation,
+          phonetic: clean(pronunciation.phonetic) || local?.phonetic || "",
+          dictionaryAudio: hasAudio,
+          localLookup: false,
+        },
+      });
+      return true;
+    }
+  } catch {}
+
+  if (local?.phonetic) {
+    writeJson(res, 200, {
+      ok: true,
+      result: {
+        phonetic: local.phonetic,
+        audioUrl: "",
+        audioUrls: [],
+        pronunciationSource: "ecdict-phonetic",
+        exactMatch: true,
+        dictionaryAudio: false,
+        localLookup: true,
+      },
+    });
+    return true;
+  }
+  return false;
 }
 
 function normalizePos(value) {
@@ -400,6 +445,10 @@ function createProxy() {
     if (interceptable) {
       try {
         const body = await readBody(req);
+        if (url.pathname === "/api/dictionary/pronunciation") {
+          const pronunciationHandled = await handlePronunciation(res, body);
+          if (pronunciationHandled) return;
+        }
         const handled = await handleLocalDictionary(req, res, url.pathname, body);
         if (handled) return;
         return forward(req, res, body);
