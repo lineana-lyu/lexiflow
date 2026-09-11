@@ -47,10 +47,11 @@ jobs:
             const synth=t.synthesize('LexiFlow keeps the interface responsive while natural speech is prepared.',{voice:'af_bella'});
             await new Promise(r=>setTimeout(r,800));
             const live=t.status();
-            if(!live.processIsolated) throw new Error('Kokoro is not process isolated');
+            if(!live.workerIsolated) throw new Error('Kokoro is not worker isolated');
+            if(Number(live.cpuThreadLimit)!==1) throw new Error(`unexpected CPU thread limit: ${live.cpuThreadLimit}`);
             const result=await synth;
             clearInterval(timer);
-            console.log(JSON.stringify({ticks,maxGap,cacheHit:result.cacheHit,voice:result.voice,mode:t.status().processMode}));
+            console.log(JSON.stringify({ticks,maxGap,cacheHit:result.cacheHit,voice:result.voice,workerIsolated:t.status().workerIsolated,cpuThreadLimit:t.status().cpuThreadLimit}));
             if(ticks<5) throw new Error(`parent event loop barely progressed: ${ticks} ticks`);
             if(maxGap>1800) throw new Error(`parent event loop stalled for ${maxGap}ms`);
             if(!result.dataUrl.startsWith('data:audio/wav;base64,')) throw new Error('missing WAV output');
