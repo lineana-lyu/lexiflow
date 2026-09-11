@@ -1,0 +1,37 @@
+name: Diagnose Chinese Lookup
+
+on:
+  push:
+    branches:
+      - fix/settings-startup-and-chinese-accuracy
+
+jobs:
+  diagnose:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/settings-startup-and-chinese-accuracy
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run prepare:dictionary
+      - name: Print Chinese candidates
+        shell: pwsh
+        run: |
+          @'
+          const core=require('./lib/core-lexicon');
+          const ecdict=require('./lib/ecdict');
+          const queries=['发卡','苹果','坚持','改善','挑战','码头','键盘','银行','适合','释放','预约','支持','地址','方法'];
+          for(const q of queries){
+            console.log('\nQUERY',q);
+            console.log('CORE',JSON.stringify(core.chineseCandidates(q,8)));
+            console.log('CORE_RESULT',JSON.stringify(core.lookupChinese(q)));
+            console.log('ECDICT',JSON.stringify(ecdict.searchChinese(q,8).map(x=>({score:x.score,word:x.result?.word,meaning:x.result?.senses?.[0]?.meaningZh}))));
+          }
+          core.close();ecdict.close();
+          '@ | Set-Content -Encoding UTF8 .tmp-diagnose.js
+          node .tmp-diagnose.js
