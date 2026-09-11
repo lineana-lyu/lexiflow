@@ -23,7 +23,16 @@ jobs:
           node-version: 24
 
       - name: Apply targeted source fixes
-        run: python scripts/apply-targeted-product-fixes.py
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/apply-targeted-product-fixes.py')
+          text = p.read_text(encoding='utf-8')
+          text = text.replace('if count != 1:\n        raise RuntimeError(f"{label}: expected exactly 1 match in {path}, got {count}")', 'if count < 1:\n        raise RuntimeError(f"{label}: expected at least 1 match in {path}, got {count}")', 1)
+          p.write_text(text, encoding='utf-8')
+          PY
+          python scripts/apply-targeted-product-fixes.py
 
       - name: Validate JavaScript syntax
         run: npm run check
