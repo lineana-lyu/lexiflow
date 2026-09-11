@@ -4,10 +4,15 @@
   const nativeFetch = window.fetch.bind(window);
   const hydratedResults = new WeakSet();
   const inFlight = new Map();
+  const activeHydrations = new Map();
   const API_ORIGIN = location.protocol === "file:" ? "http://127.0.0.1:4177" : "";
 
   function clean(value) {
     return String(value || "").trim();
+  }
+
+  function normalizeWord(value) {
+    return clean(value).toLowerCase();
   }
 
   function escapeHtml(value) {
@@ -41,18 +46,43 @@
 
   function resultKey(result, senses) {
     return [
-      clean(result?.word).toLowerCase(),
+      normalizeWord(result?.word),
       ...senses.map(sense => `${clean(sense?.id)}:${clean(sense?.meaningZh)}`),
     ].join("|");
   }
 
-  function currentLookupMatches(word) {
+  function currentLookupWord() {
     const heading = document.querySelector(".learning-card-wordtop .word-line h2, .word-result .word-line h2");
-    return !heading || clean(heading.textContent).toLowerCase() === clean(word).toLowerCase();
+    return normalizeWord(heading?.textContent);
+  }
+
+  function currentLookupMatches(word) {
+    const current = currentLookupWord();
+    return !current || current === normalizeWord(word);
+  }
+
+  function lockSaveButton(word) {
+    if (!currentLookupMatches(word)) return;
+    const button = document.querySelector('[data-action="save-card"]');
+    if (!button) return;
+    if (!button.dataset.exampleHydrationLabel) button.dataset.exampleHydrationLabel = clean(button.textContent) || "保存并开始学习";
+    button.dataset.exampleHydrationLocked = "1";
+    button.disabled = true;
+    button.textContent = "例句准备中…";
+  }
+
+  function unlockSaveButton(word) {
+    if (!currentLookupMatches(word)) return;
+    const button = document.querySelector('[data-action="save-card"]');
+    if (!button || button.dataset.exampleHydrationLocked !== "1") return;
+    button.disabled = false;
+    button.textContent = button.dataset.exampleHydrationLabel || "保存并开始学习";
+    delete button.dataset.exampleHydrationLocked;
   }
 
   function markLoading(result, senses) {
     if (!currentLookupMatches(result?.word)) return;
+    lockSaveButton(result?.word);
     const firstId = clean(result?.senses?.[0]?.id);
     const missingIds = new Set(senses.map(sense => clean(sense.id)));
 
@@ -130,6 +160,34 @@
     bindHydratedSpeakers(document);
   }
 
+  function requestExamples(result, missing) {
+    const key = resultKey(result, missing);
+    let task = inFlight.get(key);
+    if (task) return task;
+
+    task = nativeFetch(`${API_ORIGIN}/api/dictionary/examples`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        word: result.word,
+        senses: missing.map(sense => ({
+          id: sense.id,
+          pos: sense.pos,
+          meaningZh: sense.meaningZh,
+          senseIntentEn: sense.senseIntentEn || "",
+        })),
+      }),
+    }).then(async response => {
+      let payload = {};
+      try { payload = await response.json(); } catch {}
+      if (!response.ok || !payload?.ok) throw new Error(payload?.error || "example hydration failed");
+      return Array.isArray(payload.senses) ? payload.senses : [];
+    }).finally(() => inFlight.delete(key));
+
+    inFlight.set(key, task);
+    return task;
+  }
+
   async function hydrateResult(result) {
     if (!result || hydratedResults.has(result)) return;
     hydratedResults.add(result);
@@ -137,54 +195,67 @@
     const missing = (Array.isArray(result.senses) ? result.senses : []).filter(sense => !clean(sense.exampleEn) || !clean(sense.exampleZh));
     if (!missing.length) return;
 
-    const key = resultKey(result, missing);
-    setTimeout(() => markLoading(result, missing), 30);
+    const wordKey = normalizeWord(result.word);
+    const sourceTask = requestExamples(result, missing);
+    const work = (async () => {
+      try {
+        const hydrated = await sourceTask;
+        const byId = new Map(hydrated.map(item => [clean(item.id), item]));
+        for (const sense of result.senses || []) {
+          const item = byId.get(clean(sense.id));
+          if (!item) continue;
+          sense.exampleEn = clean(item.exampleEn) || sense.exampleEn;
+          sense.exampleZh = clean(item.exampleZh) || sense.exampleZh;
+          sense.exampleSource = clean(item.source) || "enriched";
+        }
+        result.examplesPending = (result.senses || []).some(sense => !clean(sense.exampleEn) || !clean(sense.exampleZh));
+        patchDom(result, hydrated);
+      } catch (err) {
+        console.warn("LexiFlow example hydration skipped:", err?.message || err);
+        if (currentLookupMatches(result?.word)) {
+          const en = document.querySelector(".example-pair .example-en");
+          const zh = document.querySelector(".example-pair .example-zh");
+          if (en && /准备中/.test(clean(en.textContent))) en.textContent = "暂无例句，可稍后重试或手动编辑";
+          if (zh && /随例句/.test(clean(zh.textContent))) zh.textContent = "";
+        }
+      }
+    })();
 
-    let task = inFlight.get(key);
-    if (!task) {
-      task = nativeFetch(`${API_ORIGIN}/api/dictionary/examples`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          word: result.word,
-          senses: missing.map(sense => ({
-            id: sense.id,
-            pos: sense.pos,
-            meaningZh: sense.meaningZh,
-            senseIntentEn: sense.senseIntentEn || "",
-          })),
-        }),
-      }).then(async response => {
-        let payload = {};
-        try { payload = await response.json(); } catch {}
-        if (!response.ok || !payload?.ok) throw new Error(payload?.error || "example hydration failed");
-        return Array.isArray(payload.senses) ? payload.senses : [];
-      }).finally(() => inFlight.delete(key));
-      inFlight.set(key, task);
-    }
+    activeHydrations.set(wordKey, work);
+    setTimeout(() => {
+      if (activeHydrations.get(wordKey) === work) markLoading(result, missing);
+    }, 30);
 
     try {
-      const hydrated = await task;
-      const byId = new Map(hydrated.map(item => [clean(item.id), item]));
-      for (const sense of result.senses || []) {
-        const item = byId.get(clean(sense.id));
-        if (!item) continue;
-        sense.exampleEn = clean(item.exampleEn) || sense.exampleEn;
-        sense.exampleZh = clean(item.exampleZh) || sense.exampleZh;
-        sense.exampleSource = clean(item.source) || "enriched";
-      }
-      result.examplesPending = (result.senses || []).some(sense => !clean(sense.exampleEn) || !clean(sense.exampleZh));
-      patchDom(result, hydrated);
-    } catch (err) {
-      console.warn("LexiFlow example hydration skipped:", err?.message || err);
-      if (currentLookupMatches(result?.word)) {
-        const en = document.querySelector(".example-pair .example-en");
-        const zh = document.querySelector(".example-pair .example-zh");
-        if (en && /准备中/.test(clean(en.textContent))) en.textContent = "暂无例句，可稍后重试或手动编辑";
-        if (zh && /随例句/.test(clean(zh.textContent))) zh.textContent = "";
-      }
+      await work;
+    } finally {
+      if (activeHydrations.get(wordKey) === work) activeHydrations.delete(wordKey);
+      unlockSaveButton(result.word);
     }
   }
+
+  document.addEventListener("click", event => {
+    const button = event.target?.closest?.('[data-action="save-card"]');
+    if (!button) return;
+    const word = currentLookupWord();
+    const work = word ? activeHydrations.get(word) : null;
+    if (!work) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    lockSaveButton(word);
+
+    Promise.resolve(work).finally(() => {
+      setTimeout(() => {
+        if (activeHydrations.has(word) || currentLookupWord() !== word) return;
+        const currentButton = document.querySelector('[data-action="save-card"]');
+        if (!currentButton) return;
+        unlockSaveButton(word);
+        currentButton.click();
+      }, 0);
+    });
+  }, true);
 
   window.fetch = async function lexiFlowExampleAwareFetch(input, init) {
     const response = await nativeFetch(input, init);
