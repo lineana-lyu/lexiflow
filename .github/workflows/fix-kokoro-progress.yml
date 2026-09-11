@@ -6,56 +6,34 @@ on:
       - fix/kokoro-download-progress
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate:
-    if: github.actor != 'github-actions[bot]'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v5
         with:
           ref: fix/kokoro-download-progress
-          fetch-depth: 0
       - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
       - name: Install
         run: npm ci
-      - name: Repair patch target and apply
-        shell: pwsh
-        run: |
-          $path = 'scripts/apply-kokoro-progress-fix.py'
-          $text = Get-Content $path -Raw
-          $text = $text.Replace('''      }catch(err){\n        showErrorNotice(err,"自然语音下载失败");\n      }\n      return;\n    }\n''', '''      }catch(err){showErrorNotice(err,"自然语音没有准备完成");}\n      return;\n    }\n''')
-          Set-Content -Path $path -Value $text -Encoding UTF8
-          python scripts/apply-kokoro-progress-fix.py
       - name: Syntax check
-        run: npm run check
-      - name: Verify progress architecture
         shell: pwsh
         run: |
-          $server = Get-Content server-runtime.js -Raw
-          $app = Get-Content public/app.js -Raw
-          $tts = Get-Content lib/kokoro-tts.js -Raw
-          $worker = Get-Content lib/kokoro-worker.js -Raw
-          if (-not $server.Contains('kokoroTts.startPrepare()')) { throw 'prepare endpoint still blocks' }
-          if (-not $app.Contains('pollKokoroStatus')) { throw 'progress polling missing' }
-          if (-not $app.Contains('tts-progress-bar')) { throw 'progress bar missing' }
-          if (-not $tts.Contains('startPrepare')) { throw 'background prepare missing' }
-          if (-not $worker.Contains('loadedBytes')) { throw 'download byte progress missing' }
+          npm run check
+          node --check public/kokoro-progress-ui.js
+      - name: Verify progress UI wiring
+        shell: pwsh
+        run: |
+          $index = Get-Content public/index.html -Raw
+          $ui = Get-Content public/kokoro-progress-ui.js -Raw
+          if (-not $index.Contains('kokoro-progress-ui.js')) { throw 'progress UI is not loaded' }
+          if (-not $ui.Contains('/api/tts/kokoro/status')) { throw 'status polling missing' }
+          if (-not $ui.Contains('data-kokoro-progress-bar')) { throw 'progress bar missing' }
+          if (-not $ui.Contains('stopImmediatePropagation')) { throw 'legacy blocking click handler is not bypassed' }
       - name: Diff check
         run: git diff --check
-      - name: Commit validated code
-        shell: pwsh
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add lib/kokoro-tts.js lib/kokoro-worker.js server-runtime.js public/app.js
-          if (git diff --cached --quiet) {
-            Write-Host 'No generated code changes'
-          } else {
-            git commit -m 'fix: show Kokoro download progress and surface failures [skip ci]'
-            git push origin HEAD:fix/kokoro-download-progress
-          }
