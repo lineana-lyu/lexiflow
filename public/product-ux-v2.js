@@ -5,12 +5,11 @@
 
   function iconDataUrl() {
     const value = String(window.LEXIFLOW_APP_ICON_BASE64 || "").trim();
-    return value ? `data:image/png;base64,${value}` : "";
+    return value ? `data:image/png;base64,${value}` : "./icon.png";
   }
 
   function applyAppIcon() {
     const src = iconDataUrl();
-    if (!src) return;
 
     const favicon = document.querySelector('link[rel="icon"]');
     if (favicon && favicon.dataset.lexiIconApplied !== "1") {
