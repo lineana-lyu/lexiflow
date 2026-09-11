@@ -15,6 +15,12 @@
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;",
     }[char]));
   }
+  function sanitizeExample(value) {
+    return clean(value)
+      .replace(/\s*\[\s*[=≈~]\s*[^\]]+\]\s*$/u, "")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
 
   function requestPath(input) {
     try {
@@ -29,7 +35,7 @@
   }
 
   function resultKey(result, senses) {
-    return [normalizeWord(result?.word), ...senses.map(sense => `${clean(sense?.id)}:${clean(sense?.meaningZh)}:${clean(sense?.exampleEn)}`)].join("|");
+    return [normalizeWord(result?.word), ...senses.map(sense => `${clean(sense?.id)}:${clean(sense?.meaningZh)}:${sanitizeExample(sense?.exampleEn)}`)].join("|");
   }
 
   function currentLookupWord() {
@@ -111,17 +117,11 @@
   async function speakSentence(text) {
     const value = clean(text);
     if (!value) return;
-    if (await playChatTts(value)) return;
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(value);
-    utterance.lang = "en-US";
-    utterance.rate = 0.92;
-    window.speechSynthesis.speak(utterance);
+    if (!(await playChatTts(value))) console.warn("LexiFlow custom ChatTTS voice is unavailable");
   }
 
   function sentenceMarkup(text, className) {
-    const value = clean(text);
+    const value = sanitizeExample(text);
     return `<div class="sentence-audio-line ${className}" data-example-hydrated="1"><span class="sentence-audio-text">${escapeHtml(value)}</span><button class="sentence-speaker" type="button" data-hydrated-sentence="${escapeHtml(value)}" title="播放例句" aria-label="播放例句">🔊</button></div>`;
   }
 
@@ -170,7 +170,7 @@
         word:result.word,
         senses:missing.map(sense=>({
           id:sense.id, pos:sense.pos, meaningZh:sense.meaningZh,
-          senseIntentEn:sense.senseIntentEn || "", exampleEn:sense.exampleEn || "", exampleZh:sense.exampleZh || "",
+          senseIntentEn:sense.senseIntentEn || "", exampleEn:sanitizeExample(sense.exampleEn), exampleZh:sense.exampleZh || "",
         })),
       }),
     }).then(async response => {
@@ -185,6 +185,11 @@
   async function hydrateResult(result) {
     if (!result || hydratedResults.has(result)) return;
     hydratedResults.add(result);
+
+    for (const sense of Array.isArray(result.senses) ? result.senses : []) {
+      if (sense?.exampleEn) sense.exampleEn = sanitizeExample(sense.exampleEn);
+    }
+
     const missing = (Array.isArray(result.senses) ? result.senses : []).filter(sense => !clean(sense.exampleEn) || !clean(sense.exampleZh));
     if (!missing.length) return;
     const wordKey = normalizeWord(result.word);
@@ -195,12 +200,14 @@
         for (const sense of result.senses || []) {
           const item = byId.get(clean(sense.id));
           if (!item) continue;
-          sense.exampleEn = clean(item.exampleEn) || sense.exampleEn;
-          sense.exampleZh = clean(item.exampleZh) || sense.exampleZh;
+          // Existing dictionary English takes precedence. Enrichment may only fill
+          // it when the dictionary did not provide one in the first place.
+          if (!clean(sense.exampleEn) && clean(item.exampleEn)) sense.exampleEn = sanitizeExample(item.exampleEn);
+          if (!clean(sense.exampleZh) && clean(item.exampleZh)) sense.exampleZh = clean(item.exampleZh);
           sense.exampleSource = clean(item.source) || "enriched";
         }
         result.examplesPending = (result.senses || []).some(sense => !clean(sense.exampleEn) || !clean(sense.exampleZh));
-        patchDom(result, hydrated);
+        patchDom(result, hydrated.map(item => ({...item, exampleEn:sanitizeExample(item.exampleEn)})));
         window.dispatchEvent(new CustomEvent("lexiflow:examples-hydrated", { detail:{ word:result.word, senses:result.senses } }));
       } catch(err) {
         console.warn("LexiFlow example hydration skipped:", err?.message || err);
