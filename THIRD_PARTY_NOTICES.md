@@ -1,9 +1,10 @@
 # Third-Party Notices
 
-LexiFlow builds a local learning dictionary from multiple open data sources. The
-source code of LexiFlow and the licenses of bundled/generated dictionary data are
-separate matters; redistributors must preserve the notices and comply with the
-licenses below.
+LexiFlow builds a local learning dictionary from multiple open data sources and
+uses third-party runtime/model components for optional local text-to-speech.
+The source code of LexiFlow and the licenses of bundled/generated data and model
+components are separate matters; redistributors must preserve the notices and
+comply with the licenses below.
 
 ## ECDICT
 
@@ -71,3 +72,20 @@ local Chinese-to-English candidate index.
 CC-CEDICT is a community-maintained Chinese-English dictionary originally based
 on CEDICT by Paul Andrew Denisowski. Preserve attribution and CC BY-SA 4.0
 requirements when redistributing the generated Chinese alias index.
+
+## Kokoro-82M / kokoro-js
+
+LexiFlow can use Kokoro-82M locally as a natural English text-to-speech fallback
+when a real dictionary/Wikimedia pronunciation recording is unavailable.
+
+- Model: `onnx-community/Kokoro-82M-v1.0-ONNX`
+- Base model: `hexgrad/Kokoro-82M`
+- JavaScript runtime: `kokoro-js`
+- Runtime source: https://github.com/IsmaCortGtz/kokoro-js
+- Model page: https://huggingface.co/onnx-community/Kokoro-82M-v1.0-ONNX
+- License: Apache License 2.0
+
+The Kokoro model is downloaded to the user's local LexiFlow data directory on
+first use and is not generated from or dependent on the Windows system voice.
+Redistributors should preserve the Apache-2.0 notices shipped with the npm/model
+artifacts and comply with their respective license terms.
