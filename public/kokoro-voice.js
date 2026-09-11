@@ -24,7 +24,7 @@
   }
 
   function setBusy(button,busy){
-    if(!button)return;
+    if(!button||!button.isConnected)return;
     button.classList.toggle("tts-loading",busy);
     button.setAttribute("aria-busy",busy?"true":"false");
     if(busy) button.dataset.ttsOriginalTitle=button.getAttribute("title")||"";
@@ -36,14 +36,14 @@
     }
   }
 
-  async function play(text,button){
+  async function play(text,button=null){
     const value=clean(text); if(!value)return false;
     const voice=selectedVoice();
     setBusy(activeButton,false);
     activeButton=button||null;
     setBusy(activeButton,true);
     let slowNoticeTimer=setTimeout(()=>{
-      showToast("首次自然发音正在后台准备，你可以继续查词或进入设置。",4200);
+      showToast("首次自然发音正在后台准备，你可以继续查词或切换页面。",4200);
     },700);
     try{
       const response=await fetch(`${API_ORIGIN}/api/tts/kokoro`,{
@@ -74,6 +74,11 @@
     }
   }
 
+  window.LexiFlowNaturalTts=Object.freeze({
+    play,
+    selectedVoice,
+  });
+
   document.addEventListener("change",event=>{
     const select=event.target?.closest?.("#tts-voice");
     if(!select)return;
@@ -96,7 +101,7 @@
     if(!speaker)return;
     const audio=clean(speaker.dataset.audio);
     let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
-    if(audio||audios.length)return; // Real dictionary/Wikimedia audio always wins.
+    if(audio||audios.length)return; // Real dictionary/Wikimedia audio always wins when it can play.
     const word=clean(speaker.dataset.word || speaker.closest(".word-line")?.querySelector("h2")?.textContent || speaker.closest(".learning-card-wordtop")?.querySelector("h2")?.textContent || speaker.closest(".library-editor-word-line")?.querySelector(".library-editor-word")?.textContent);
     if(!word)return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
