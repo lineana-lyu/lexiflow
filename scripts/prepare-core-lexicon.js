@@ -14,7 +14,7 @@ const DEFAULT_ECDICT_DB = path.join(ROOT, "resources", "ecdict.sqlite");
 const DEFAULT_OUTPUT = path.join(ROOT, "resources", "core-lexicon.sqlite");
 const SIMPLE_WIKTIONARY_URL = "https://kaikki.org/simplewiktionary/raw-wiktextract-data.jsonl.gz";
 const CC_CEDICT_URL = "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz";
-const SCHEMA = "lexiflow-core-v2";
+const SCHEMA = "lexiflow-core-v3";
 
 const POS_MAP = new Map([
   ["n", "noun"], ["noun", "noun"], ["proper_noun", "proper noun"],
@@ -179,7 +179,7 @@ function ccCedictEnglishCandidate(value) {
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
-  if (!text || text.length > 48) return "";
+  if (!text || text.length > 56) return "";
   if (/^(cl:|classifier|surname|variant of|abbr\.|see |old variant|also written|used in)/i.test(text)) return "";
   if (/[^a-z '\-]/i.test(text)) return "";
   const words = text.split(/\s+/).filter(Boolean);
@@ -300,6 +300,35 @@ async function prepareCoreLexicon({
   `);
   const wordExists = db.prepare("SELECT learner_rank FROM words WHERE word=? COLLATE NOCASE LIMIT 1");
 
+  function ensureCcCandidateWord(candidate, alias, definition) {
+    const normalized = clean(candidate).toLowerCase();
+    if (!/^[a-z][a-z '\-]{0,55}$/i.test(normalized)) return null;
+    const existing = wordExists.get(normalized);
+    if (existing) return existing;
+
+    const exactRow = ecdictLookup.get(normalized);
+    if (exactRow) {
+      const pos = normalizePos(clean(exactRow.pos).split(/[\s,/;|]+/)[0]?.split(":")[0]) || (normalized.includes(" ") ? "phrase" : "word");
+      const meaningZh = conciseChineseMeaning(exactRow.translation, pos) || conciseChineseMeaning(exactRow.translation, "") || alias;
+      const rank = learnerRank(exactRow);
+      upsertWord.run(normalized, clean(exactRow.phonetic), "", rank, pos, clean(exactRow.tag), Number(exactRow.collins || 0), Number(exactRow.oxford || 0), Number(exactRow.bnc || 0), Number(exactRow.frq || 0), "cc-cedict+ecdict");
+      const definitionEn = normalizeNewlines(exactRow.definition).split(/\r?\n/).map(x => x.trim()).filter(Boolean)[0] || definition;
+      insertSense.run(normalized, pos, definitionEn, meaningZh, "", rank, "cc-cedict+ecdict");
+      coreWords += 1;
+      return wordExists.get(normalized);
+    }
+
+    const tokens = normalized.split(/\s+/).filter(Boolean);
+    const tokenRanks = tokens.map(token => Number(wordExists.get(token)?.learner_rank || 0));
+    const tokenRank = tokenRanks.length ? Math.max(...tokenRanks) : 0;
+    const rank = Math.max(80, Math.min(520, tokenRank || 160));
+    const pos = tokens.length > 1 ? "phrase" : "word";
+    upsertWord.run(normalized, "", "", rank, pos, "", 0, 0, 0, 0, "cc-cedict");
+    insertSense.run(normalized, pos, definition, alias, "", rank, "cc-cedict");
+    coreWords += 1;
+    return wordExists.get(normalized);
+  }
+
   let wiktionaryRecords = 0;
   let coreWords = 0;
   db.exec("BEGIN");
@@ -415,9 +444,11 @@ async function prepareCoreLexicon({
       defs.forEach((def, index) => {
         const candidate = ccCedictEnglishCandidate(def);
         if (!candidate) return;
-        const hit = wordExists.get(candidate);
+        const hit = ensureCcCandidateWord(candidate, simplified, def);
         if (!hit) return;
-        const phrasePenalty = Math.max(0, candidate.split(/\s+/).length - 1) * 15;
+        // Prefer compact learner-friendly words/phrases, but never discard the
+        // primary CC-CEDICT phrase just because it is multiword.
+        const phrasePenalty = Math.max(0, candidate.split(/\s+/).length - 1) * 80;
         const rank = 1800 - index * 90 + Math.min(Number(hit.learner_rank || 0), 350) - phrasePenalty;
         for (const alias of aliases) {
           if (alias && alias.length <= 16) upsertAlias.run(alias, candidate, rank, "cc-cedict");
