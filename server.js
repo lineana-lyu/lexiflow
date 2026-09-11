@@ -3,7 +3,7 @@ const fs = require("fs");
 const fsp = fs.promises;
 const path = require("path");
 const os = require("os");
-const { spawn, spawnSync, exec } = require("child_process");
+const { spawn, exec } = require("child_process");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -362,13 +362,21 @@ function commandNeedsShell(command) {
   return /\.(cmd|bat)$/i.test(command);
 }
 
-function runSync(command, args) {
-  return spawnSync(command, args, {
-    encoding: "utf8",
-    windowsHide: true,
-    shell: commandNeedsShell(command),
-    timeout: 8000,
-  });
+function commandAvailableWithoutSpawn(command) {
+  const value = String(command || "").trim();
+  if (!value) return false;
+  if (path.isAbsolute(value)) return Boolean(existingFile(value));
+  const pathValue = String(process.env.PATH || "");
+  if (!pathValue) return false;
+  const names = process.platform === "win32"
+    ? [value, `${value}.exe`, `${value}.cmd`, `${value}.bat`]
+    : [value];
+  for (const dir of pathValue.split(path.delimiter).filter(Boolean)) {
+    for (const name of names) {
+      if (existingFile(path.join(dir, name))) return true;
+    }
+  }
+  return false;
 }
 
 function parseCodexConfig() {
@@ -427,21 +435,16 @@ function codexStatus(force = false) {
 
   const resolved = resolveCodexExecutable();
   const executable = resolved.command;
-  const probe = runSync(executable, ["--version"]);
   const cfg = parseCodexConfig();
   const authFound = fs.existsSync(CODEX_AUTH);
-
-  if (probe.status !== 0) {
-    const detail = String(probe.stderr || probe.error?.message || probe.stdout || "").trim();
-    if (detail) console.warn("Codex probe failed:", detail.slice(0, 800));
-  }
+  const cliAvailable = commandAvailableWithoutSpawn(executable);
 
   const value = {
     executable: path.isAbsolute(executable) ? executable : "codex (PATH)",
     executableSource: resolved.source,
-    cliAvailable: probe.status === 0,
-    version: probe.status === 0 ? String(probe.stdout || probe.stderr || "").trim() : "",
-    probeError: probe.status === 0 ? "" : "Codex CLI 启动检测未通过",
+    cliAvailable,
+    version: "",
+    probeError: cliAvailable ? "" : "未在本机可执行路径中检测到 Codex CLI",
     authPath: CODEX_AUTH,
     authFound,
     configPath: CODEX_CONFIG,

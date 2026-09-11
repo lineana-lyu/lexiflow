@@ -514,7 +514,9 @@
     const dict=state.providerStatus?.dictionary;
     const badge=dict?.configured
       ? `<span class="pill green">● 词典已连接</span>`
-      : `<button class="btn small" data-route="settings">配置词典</button>`;
+      : state.providerStatus
+        ? `<button class="btn small" data-route="settings">检查词典状态</button>`
+        : `<span class="pill green">● 本地词典已就绪</span>`;
     const shouldShowResult=state.lookupStatus==="loading"||Boolean(state.lookup?.result);
     return shell(
       header("","选词制卡","",badge)
@@ -1575,7 +1577,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       if(state.route!=="library-edit") state.libraryEditor=null;
       if(state.route!=="study"&&state.route!=="review-session") state.study=null;
       render();
-      if(state.route==="add") refreshProviderStatus(true);
     }));
 
     const lookupForm=document.getElementById("lookup-form");
@@ -2261,7 +2262,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       }
       await hydrateLearningData();
       render();
-      await refreshProviderStatus(true);
     }catch(err){
       state.providerStatus={ok:false,serviceUnavailable:true,error:err.message};
       showErrorNotice(err,"LexiFlow 暂时无法启动");
