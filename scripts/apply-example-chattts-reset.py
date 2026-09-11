@@ -20,8 +20,8 @@ replace_once(
 
 replace_once(
     server,
-    '''      meaningZh: clean(sense?.meaningZh),\n      senseIntentEn: clean(sense?.senseIntentEn),\n    }))''',
-    '''      meaningZh: clean(sense?.meaningZh),\n      senseIntentEn: clean(sense?.senseIntentEn),\n      exampleEn: clean(sense?.exampleEn),\n      exampleZh: clean(sense?.exampleZh),\n    }))''',
+    '      senseIntentEn: clean(sense?.senseIntentEn),',
+    '      senseIntentEn: clean(sense?.senseIntentEn),\n      exampleEn: clean(sense?.exampleEn),\n      exampleZh: clean(sense?.exampleZh),',
 )
 
 old_pipeline = '''  const warnings = [];\n  const cached = await exampleEnrichment.getCachedExamples(word, senses);\n  let combined = mergeExamples(cached);\n  const missingAfterCache = senses.filter(sense => !combined.some(item => item.id === sense.id));\n\n  let dictionaryExamples = [];\n  if (missingAfterCache.length) {\n    dictionaryExamples = await tryDictionaryExamples(word, missingAfterCache);\n    if (dictionaryExamples.length) {\n      await exampleEnrichment.storeExamples(word, missingAfterCache, dictionaryExamples).catch(() => {});\n      combined = mergeExamples(combined, dictionaryExamples);\n    }\n  }\n\n  const missingAfterDictionary = senses.filter(sense => !combined.some(item => item.id === sense.id));\n  if (missingAfterDictionary.length) {\n    try {\n      const generated = await exampleEnrichment.generateExamples(word, missingAfterDictionary);\n      if (generated.length) {\n        await exampleEnrichment.storeExamples(word, missingAfterDictionary, generated).catch(() => {});\n        combined = mergeExamples(combined, generated);\n      }\n    } catch (err) {\n      warnings.push(clean(err?.code) || "EXAMPLE_AI_UNAVAILABLE");\n      console.warn("example enrichment failed:", err?.message || err);\n    }\n  }\n'''
