@@ -4,6 +4,7 @@ data/*
 generated/*
 !generated/.gitkeep
 resources/ecdict.sqlite
+resources/core-lexicon.sqlite
 resources/*.tmp
 startup.log
 *.log
