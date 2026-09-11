@@ -1,6 +1,18 @@
 (() => {
   "use strict";
 
+  function strengthenResetEntry(){
+    const trigger=document.querySelector('[data-action="confirm-reset"]');
+    if(!trigger)return;
+    trigger.textContent="清除所有学习数据";
+    trigger.classList.add("danger");
+    const row=trigger.closest(".setting-row");
+    const title=row?.querySelector("h3");
+    const description=row?.querySelector("p");
+    if(title)title.textContent="清除所有学习数据 · 高风险";
+    if(description)description.textContent="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。建议先导出 JSON 备份。";
+  }
+
   function strengthenResetModal(){
     const modal=document.querySelector(".modal");
     if(!modal)return;
@@ -13,8 +25,10 @@
     action.textContent="永久清空全部数据";
   }
 
-  const observer=new MutationObserver(strengthenResetModal);
+  function refresh(){strengthenResetEntry();strengthenResetModal();}
+  const observer=new MutationObserver(refresh);
   observer.observe(document.documentElement,{subtree:true,childList:true});
+  refresh();
 
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.('[data-action="reset-data"]');
