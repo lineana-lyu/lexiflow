@@ -4,6 +4,9 @@
   let activeAudio = null;
 
   function clean(v){ return String(v || "").trim(); }
+  function notifyUnavailable(){
+    console.warn("LexiFlow ChatTTS candidate-3 voice is unavailable. Windows speech synthesis is intentionally not used.");
+  }
   async function play(text){
     const value=clean(text); if(!value)return false;
     try{
@@ -23,9 +26,7 @@
       const text=clean(sentence.dataset.hydratedSentence || sentence.closest(".sentence-audio-line")?.querySelector(".sentence-audio-text")?.textContent);
       if(!text)return;
       event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-      if(!(await play(text)) && "speechSynthesis" in window){
-        const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.9;speechSynthesis.cancel();speechSynthesis.speak(u);
-      }
+      if(!(await play(text)))notifyUnavailable();
       return;
     }
 
@@ -33,12 +34,10 @@
     if(!speaker)return;
     const audio=clean(speaker.dataset.audio);
     let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
-    if(audio||audios.length)return; // Prefer real dictionary/Wikimedia audio when it exists.
+    if(audio||audios.length)return; // Real dictionary/Wikimedia audio remains first choice.
     const word=clean(speaker.dataset.word || speaker.closest(".word-line")?.querySelector("h2")?.textContent || speaker.closest(".learning-card-wordtop")?.querySelector("h2")?.textContent);
     if(!word)return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-    if(!(await play(word)) && "speechSynthesis" in window){
-      const u=new SpeechSynthesisUtterance(word);u.lang="en-US";u.rate=.88;speechSynthesis.cancel();speechSynthesis.speak(u);
-    }
+    if(!(await play(word)))notifyUnavailable();
   },true);
 })();
