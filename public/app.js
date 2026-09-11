@@ -100,13 +100,13 @@
       version: APP_VERSION,
       cards: [],
       activities: [],
-      settings: { dailyGoal: 5 },
+      settings: { dailyGoal: 5, ttsVoice: "af_bella" },
       createdAt: new Date().toISOString()
     };
   }
 
   function normalizeLearningData(parsed){
-    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:5,...(parsed?.settings||{})} };
+    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:5,ttsVoice:"af_bella",...(parsed?.settings||{})} };
   }
 
   function loadLegacyBrowserData(){
@@ -1362,6 +1362,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const dict=status?.dictionary;
     const codex=status?.codex;
     const runtime=codex?.runtimeTest||{};
+    const tts=status?.tts||{};
     const selectedModel=codex?.selectedModel||"";
     const selectedEffort=codex?.selectedReasoningEffort||"";
 
@@ -1456,6 +1457,31 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
           <select class="select" id="daily-goal" style="width:130px">${[3,5,8,10,15].map(n=>`<option value="${n}" ${state.data.settings.dailyGoal===n?"selected":""}>${n} 个词</option>`).join("")}</select>
         </div>
 
+        <div class="setting-row" style="align-items:flex-start">
+          <div style="min-width:300px;flex:1">
+            <h3>本地自然发音</h3>
+            <p>Kokoro-82M 本地语音 · 真人词典/Wikimedia 发音仍优先。首次使用会自动下载模型，完成后可离线使用，不需要 Python 或 Windows 系统音色。</p>
+            ${tts.status==="downloading"?`<p>模型下载中${Number.isFinite(Number(tts.progress))?` · ${Math.round(Number(tts.progress))}%`:""}</p>`:tts.status==="error"?`<p>最近错误：${escapeHtml(tts.error||"模型没有准备完成")}</p>`:""}
+          </div>
+          <div class="setting-actions-inline" style="align-items:flex-end;flex-wrap:wrap">
+            <div class="field" style="min-width:210px">
+              <label>合成音色</label>
+              <select class="select" id="tts-voice">
+                ${[
+                  ["af_bella","美式女声 · Bella"],
+                  ["af_heart","美式女声 · Heart"],
+                  ["af_nicole","美式女声 · Nicole"],
+                  ["am_michael","美式男声 · Michael"],
+                  ["bf_emma","英式女声 · Emma"],
+                  ["bm_george","英式男声 · George"]
+                ].map(([id,label])=>`<option value="${id}" ${state.data.settings.ttsVoice===id?"selected":""}>${label}</option>`).join("")}
+              </select>
+            </div>
+            <span class="pill ${tts.status==="ready"?"green":tts.status==="error"?"red":"amber"}">${tts.status==="ready"?"本地模型已就绪":tts.status==="downloading"?"正在下载模型":"首次使用自动准备"}</span>
+            <button class="btn" data-action="prepare-kokoro-tts" ${tts.status==="downloading"||tts.status==="loading"?"disabled":""}>${tts.status==="ready"?"重新检查":"准备语音模型"}</button>
+          </div>
+        </div>
+
         <div class="setting-row"><div><h3>导出学习数据</h3><p></p></div><button class="btn" data-action="export-data">导出 JSON</button></div>
         <div class="setting-row"><div><h3>导入学习数据</h3><p></p></div><label class="btn">选择 JSON<input id="import-file" type="file" accept="application/json" style="display:none"></label></div>
         <div class="setting-row"><div><h3>清空学习数据</h3><p>删除全部单词与学习记录。</p></div><button class="btn danger" data-action="confirm-reset">清空数据</button></div>
@@ -1529,7 +1555,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const motionChanged=nextStudyMotionSnapshot?.key!==previousStudyMotionSnapshot?.key;
     const reducedMotion=Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
     const motionDirection=previousStudyMotionSnapshot&&nextStudyMotionSnapshot&&previousStudyMotionSnapshot.cardId===nextStudyMotionSnapshot.cardId&&nextStudyMotionSnapshot.order<previousStudyMotionSnapshot.order?-1:1;
-    const commitDom=()=>{app.innerHTML=html;bind();};
+    const commitDom=()=>{document.documentElement.dataset.lexiflowTtsVoice=state.data.settings.ttsVoice||"af_bella";app.innerHTML=html;bind();};
 
     if(motionChanged&&!reducedMotion&&nextStudyMotionSnapshot&&typeof document.startViewTransition==="function"){
       document.documentElement.dataset.studyMotion=motionDirection<0?"backward":"forward";
@@ -1681,13 +1707,21 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     const goal=document.getElementById("daily-goal");
     if(goal) goal.addEventListener("change",e=>{state.data.settings.dailyGoal=Number(e.target.value);saveData();toast("每日目标已更新");});
 
+    const ttsVoice=document.getElementById("tts-voice");
+    if(ttsVoice) ttsVoice.addEventListener("change",e=>{
+      state.data.settings.ttsVoice=String(e.target.value||"af_bella");
+      document.documentElement.dataset.lexiflowTtsVoice=state.data.settings.ttsVoice;
+      try{localStorage.setItem("lexiflow-tts-voice",state.data.settings.ttsVoice);}catch{}
+      saveData();toast("发音音色已更新");
+    });
+
     const importFile=document.getElementById("import-file");
     if(importFile) importFile.addEventListener("change",async e=>{
       const file=e.target.files?.[0];if(!file)return;
       try{
         const parsed=JSON.parse(await file.text());
         if(!parsed||!Array.isArray(parsed.cards)||!Array.isArray(parsed.activities))throw new Error();
-        state.data={...defaultData(),...parsed,settings:{dailyGoal:5,...(parsed.settings||{})}};
+        state.data={...defaultData(),...parsed,settings:{dailyGoal:5,ttsVoice:"af_bella",...(parsed.settings||{})}};
         saveData();toast("数据已导入");state.route="home";render();
       }catch{toast("导入失败：文件格式不正确");}
     });
@@ -2168,6 +2202,15 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       }finally{
         await refreshProviderStatus(true);
       }
+      return;
+    }
+    if(action==="prepare-kokoro-tts"){
+      toast("正在准备本地自然语音，首次下载可能需要一点时间…");
+      try{
+        await api("/api/tts/kokoro/prepare",{method:"POST",body:{}});
+        toast("本地自然语音已准备完成");
+        await refreshProviderStatus(true);
+      }catch(err){showErrorNotice(err,"自然语音没有准备完成");}
       return;
     }
     if(action==="export-data"){

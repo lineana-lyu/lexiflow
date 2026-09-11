@@ -5,7 +5,7 @@ const path = require("path");
 const ecdict = require("./lib/ecdict");
 const coreLexicon = require("./lib/core-lexicon");
 const exampleEnrichment = require("./lib/example-enrichment");
-const chattts = require("./lib/chattts");
+const kokoroTts = require("./lib/kokoro-tts");
 
 const HOST = "127.0.0.1";
 const OUTER_PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -397,27 +397,51 @@ async function handleExampleHydration(req, res, body) {
   });
 }
 
-async function handleChatTts(res, body) {
+async function handleKokoroTts(res, body) {
   let parsed;
   try {
     parsed = parseJsonBuffer(body);
   } catch {
     return writeJson(res, 400, { ok: false, code: "INVALID_JSON", error: "请求格式不正确" });
   }
-  const text = clean(parsed.text).slice(0, 500);
-  if (!text) return writeJson(res, 400, { ok: false, code: "TTS_EMPTY", error: "没有可朗读的内容" });
+  const text = clean(parsed.text).slice(0, 600);
+  if (!text) return writeJson(res, 400, { ok: false, code: "KOKORO_EMPTY", error: "没有可朗读的内容" });
   try {
-    const audio = await chattts.synthesize(text);
-    return writeJson(res, 200, { ok: true, audioDataUrl: audio.dataUrl, cacheHit: audio.cacheHit, voice: audio.voice });
+    const audio = await kokoroTts.synthesize(text, { voice: parsed.voice, speed: parsed.speed });
+    return writeJson(res, 200, {
+      ok: true,
+      audioDataUrl: audio.dataUrl,
+      cacheHit: audio.cacheHit,
+      voice: audio.voice,
+      speed: audio.speed,
+      engine: "kokoro-82m",
+    });
   } catch (err) {
-    console.warn("ChatTTS unavailable:", err?.message || err);
+    console.warn("Kokoro TTS unavailable:", err?.message || err);
     return writeJson(res, 503, {
       ok: false,
-      code: err?.code || "CHATTTS_UNAVAILABLE",
-      error: "自定义语音当前不可用",
+      code: err?.code || "KOKORO_UNAVAILABLE",
+      error: "本地自然语音当前不可用",
       userError: {
-        title: "自定义语音没有启动",
-        message: "请使用安装了 ChatTTS、PyTorch、NumPy 和 SciPy 的 Python 环境，并可通过 LEXIFLOW_PYTHON 指定 python.exe。"
+        title: "自然语音没有准备完成",
+        message: "Kokoro 首次使用需要联网下载本地模型。请检查网络后重试；下载完成后即可离线使用。"
+      }
+    });
+  }
+}
+
+async function handleKokoroPrepare(res) {
+  try {
+    const current = await kokoroTts.prepare();
+    return writeJson(res, 200, { ok: true, tts: current });
+  } catch (err) {
+    return writeJson(res, 503, {
+      ok: false,
+      code: err?.code || "KOKORO_PREPARE_FAILED",
+      error: "自然语音模型没有准备完成",
+      userError: {
+        title: "自然语音下载失败",
+        message: "请确认可以访问模型下载源后再试。已经下载的文件会继续保留，不需要从头安装 Python 环境。"
       }
     });
   }
@@ -476,6 +500,7 @@ async function forwardStatus(req, res) {
           configured: core.available || local.available || Boolean(payload.dictionary?.configured),
           exampleHydration: true,
         };
+        payload.tts = kokoroTts.status();
         writeJson(res, upstreamRes.statusCode || 200, payload);
       } catch {
         res.writeHead(upstreamRes.statusCode || 502, upstreamRes.headers);
@@ -517,12 +542,20 @@ function createProxy() {
       }
     }
 
-    if (req.method === "POST" && url.pathname === "/api/tts/chattts") {
+    if (req.method === "GET" && url.pathname === "/api/tts/kokoro/status") {
+      return writeJson(res, 200, { ok: true, tts: kokoroTts.status() });
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/tts/kokoro/prepare") {
+      return await handleKokoroPrepare(res);
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/tts/kokoro") {
       try {
         const body = await readBody(req, 64 * 1024);
-        return await handleChatTts(res, body);
+        return await handleKokoroTts(res, body);
       } catch (err) {
-        return writeJson(res, 500, { ok: false, code: err?.code || "CHATTTS_FAILED", error: "自定义语音没有完成" });
+        return writeJson(res, 500, { ok: false, code: err?.code || "KOKORO_FAILED", error: "本地自然语音没有完成" });
       }
     }
 
@@ -583,7 +616,6 @@ async function startServer() {
 }
 
 function stopServer() {
-  chattts.stop();
   coreLexicon.close();
   ecdict.close();
   try { if (proxy?.listening) proxy.close(); } catch {}
