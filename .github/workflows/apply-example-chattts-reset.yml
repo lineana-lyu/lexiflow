@@ -1,16 +1,12 @@
-name: Apply example ChatTTS reset fixes
+name: Validate example ChatTTS reset fixes
 
 on:
   push:
     branches:
       - fix/example-chattts-reset
 
-permissions:
-  contents: write
-
 jobs:
-  patch-and-check:
-    if: github.actor != 'github-actions[bot]'
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -22,19 +18,7 @@ jobs:
           cache: npm
       - name: Install
         run: npm ci
-      - name: Apply patch
-        run: python scripts/apply-example-chattts-reset.py
       - name: Syntax check
         run: npm run check
-      - name: Commit patched runtime
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server-runtime.js public/app.js
-          git diff --cached --check
-          if git diff --cached --quiet; then
-            echo "No runtime patch to commit"
-          else
-            git commit -m "fix: keep examples nonblocking and add ChatTTS endpoint"
-            git push origin HEAD:fix/example-chattts-reset
-          fi
+      - name: Validate Python voice worker syntax
+        run: python -m py_compile resources/chattts-voice/worker.py resources/chattts-voice/synthesize.py
