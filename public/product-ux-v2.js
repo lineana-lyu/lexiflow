@@ -2,7 +2,7 @@
   "use strict";
 
   let scheduled = false;
-  const APP_ICON_URL = "./icon.png?v=20260911-icon2";
+  const APP_ICON_URL = "./icon.png?v=20260911-icon3";
 
   function applyAppIcon() {
     const favicon = document.querySelector('link[rel="icon"]');
@@ -13,21 +13,16 @@
 
     document.querySelectorAll(".brand .logo").forEach(logo => {
       logo.classList.add("lexi-brand-icon");
-      const current = logo.querySelector("img");
-      if (current && current.getAttribute("src") === APP_ICON_URL) return;
-
       logo.textContent = "";
-      const image = document.createElement("img");
+      let image = logo.querySelector("img.lexi-brand-icon-image");
+      if (!image) {
+        image = document.createElement("img");
+        image.className = "lexi-brand-icon-image";
+        image.alt = "LexiFlow";
+        image.draggable = false;
+        logo.appendChild(image);
+      }
       image.src = APP_ICON_URL;
-      image.alt = "LexiFlow";
-      image.decoding = "async";
-      image.draggable = false;
-      image.addEventListener("load", () => logo.classList.add("is-icon-ready"), { once: true });
-      image.addEventListener("error", () => {
-        logo.classList.remove("is-icon-ready");
-        logo.textContent = "L";
-      }, { once: true });
-      logo.appendChild(image);
     });
   }
 
