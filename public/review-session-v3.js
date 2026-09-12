@@ -105,14 +105,11 @@
   }
 
   function enabledTypes(card){
-    const settings=data?.settings||{};
-    const enabled={enZh:true,zhEn:true,imageEn:true,...(settings.reviewTypes||{})};
-    const weights={enZh:30,zhEn:50,imageEn:20,...(settings.reviewTypeWeights||{})};
-    const out=[];
-    if(enabled.enZh!==false)out.push({type:"en-zh",weight:Math.max(1,Number(weights.enZh)||30)});
-    if(enabled.zhEn!==false)out.push({type:"zh-en",weight:Math.max(1,Number(weights.zhEn)||50)});
-    if(enabled.imageEn!==false&&(card.imageData||card.imageUrl))out.push({type:"image-en",weight:Math.max(1,Number(weights.imageEn)||20)});
-    if(!out.length)out.push({type:"zh-en",weight:1});
+    const out=[
+      {type:"en-zh",weight:30},
+      {type:"zh-en",weight:50},
+    ];
+    if(card.imageData||card.imageUrl)out.push({type:"image-en",weight:20});
     return out;
   }
 
@@ -188,6 +185,7 @@
 
   function renderCard(card,session){
     const active=activeFor(card,session);
+    const kind=reviewKind(card,new Date());
     let body="";
     if(active.type==="en-zh"){
       body=`<div class="lexi-r3-kicker">英文 → 中文 · 主动回忆</div><div class="lexi-r3-word">${esc(card.word)}</div><div class="lexi-r3-meta">先在脑中说出当前词义，再查看答案。</div>${active.revealed?`<div class="lexi-r3-result"><strong>${esc(card.meaningZh||"")}</strong><span>${esc(card.exampleEn||"")}</span><div class="lexi-r3-actions"><button class="btn" type="button" data-r3="rate" data-quality="again">没想起来</button><button class="btn primary" type="button" data-r3="rate" data-quality="good">我想起来了</button></div></div>`:`<div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="reveal">查看答案</button></div>`}`;
@@ -195,7 +193,8 @@
       const prompt=active.type==="image-en"
         ? `<div class="lexi-r3-kicker">图片 → 英文 · 主动回忆</div><img class="lexi-r3-image" src="${esc(card.imageData||card.imageUrl||"")}" alt="联想图"/>`
         : `<div class="lexi-r3-kicker">中文 → 英文 · 主动回忆</div><div class="lexi-r3-meaning">${esc(card.meaningZh||"")}</div>`;
-      body=`${prompt}<div class="lexi-r3-meta">不要先看答案，直接把英文完整输入出来。</div><div class="lexi-r3-input"><input id="lexi-r3-answer" class="input" autocomplete="off" spellcheck="false" value="${esc(active.draft||"")}" ${active.checked?"readonly":""}/>${active.checked?"":`<button class="btn primary" type="button" data-r3="check">提交答案</button>`}</div>${active.checked?`<div class="lexi-r3-result"><strong>${active.correct?"主动回忆成功":"这次没有完整想起来"}</strong><span>正确答案：${esc(card.word)} · ${answerMeta(card)}</span><div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="rate" data-quality="${active.correct?"good":"again"}">${active.correct?"记住了，继续":"没记住，进入修复"}</button><button class="btn" type="button" data-r3="speak">🔊 发音</button></div></div>`:""}`;
+      const failLabel=kind==="next-day-validation"?"没记住，明天再验证":"没记住，进入修复";
+      body=`${prompt}<div class="lexi-r3-meta">不要先看答案，直接把英文完整输入出来。</div><div class="lexi-r3-input"><input id="lexi-r3-answer" class="input" autocomplete="off" spellcheck="false" value="${esc(active.draft||"")}" ${active.checked?"readonly":""}/>${active.checked?"":`<button class="btn primary" type="button" data-r3="check">提交答案</button>`}</div>${active.checked?`<div class="lexi-r3-result"><strong>${active.correct?"主动回忆成功":"这次没有完整想起来"}</strong><span>正确答案：${esc(card.word)} · ${answerMeta(card)}</span><div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="rate" data-quality="${active.correct?"good":"again"}">${active.correct?"记住了，继续":failLabel}</button><button class="btn" type="button" data-r3="speak">🔊 发音</button></div></div>`:""}`;
     }
     return sessionFrame(`<section class="lexi-r3-card" data-r3-card="${esc(card.id)}">${body}</section>`,session);
   }
@@ -265,10 +264,8 @@
       const active=session.active;
       const baseline=Number(active?.reviewCount??card.reviewCount??0);
 
-      // If the app closed after storage succeeded but before the cursor advanced,
-      // reviewCount proves this exact attempt already committed. Advance only once.
       if(Number(card.reviewCount||0)<=baseline){
-        const now=new Date(),prev=clone(card),repair=isSameDayRepair(prev,now)||session.phase==="repair";
+        const now=new Date(),prev=clone(card),repair=isSameDayRepair(prev,now)||session.phase==="repair",kind=reviewKind(prev,now);
         const patch=core.reviewSchedulePatch(prev,quality,now);
         if(!patch)throw new Error("REVIEW_PATCH_FAILED");
         card.reviewCount=Number(card.reviewCount||0)+1;
@@ -278,14 +275,15 @@
         card.updatedAt=now.toISOString();
         data.activities=Array.isArray(data.activities)?data.activities:[];
         data.activities.push({
-          id:uid(),type:"review",cardId:card.id,quality,kind:reviewKind(prev,now),questionType:String(active?.type||""),
+          id:uid(),type:"review",cardId:card.id,quality,kind,questionType:String(active?.type||""),
           reviewStepBefore:Number(prev.reviewStep||0),reviewStepAfter:Number(card.reviewStep||0),
           memoryStateBefore:String(prev.memoryState||"reinforcing"),memoryStateAfter:String(card.memoryState||"reinforcing"),
           reviewCountAfter:Number(card.reviewCount||0),at:now.toISOString(),authority:"review-session-v3",
         });
         data.dailyPlan=core.buildDailyPlan(data,now);
+        const mayRepairToday=kind==="scheduled"||kind==="stable-maintenance";
         await persist(data);
-        if(quality==="again"&&!repair&&!session.repairTail.includes(card.id))session.repairTail.push(card.id);
+        if(quality==="again"&&mayRepairToday&&!repair&&!session.repairTail.includes(card.id))session.repairTail.push(card.id);
       }
 
       if(session.phase==="repair")session.repairCursor++;
