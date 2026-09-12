@@ -1,17 +1,12 @@
 (() => {
   "use strict";
 
+  const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before memorize-v2.js");
   const KEY = "lexiflow-memorize-v2";
   let data = null;
   let queued = false;
 
-  const dayKey = (d = new Date()) => {
-    const x = d instanceof Date ? d : new Date(d);
-    return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
-  };
-  const tomorrowIso = () => {
-    const d = new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+1); return d.toISOString();
-  };
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `mem-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const norm = v => String(v||"").trim().toLowerCase().replace(/[’‘]/g,"'").replace(/^[\s.,!?;:()\[\]{}"']+|[\s.,!?;:()\[\]{}"']+$/g,"").replace(/\s+/g," ");
@@ -97,10 +92,10 @@
 
   async function complete(card,s){
     await refresh(); const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
-    const r=s.results[s.round]||{}, weak=!(r.en===true&&r.zh===true);
-    c.stage="visualize"; c.stageEligibleOn=tomorrowIso(); c.memorizeCompletedOn=dayKey(); c.memorizeRound=s.round; c.initialMemoryWeak=weak; c.memoryState="learning"; c.updatedAt=new Date().toISOString();
-    c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[]; c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:r.en===true,zhToEn:r.zh===true,initialMemoryWeak:weak,at:new Date().toISOString()});
-    data.activities=Array.isArray(data.activities)?data.activities:[]; data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:weak,at:new Date().toISOString()});
+    const r=s.results[s.round]||{}, weak=!(r.en===true&&r.zh===true), now=new Date();
+    c.stage="visualize";Object.assign(c,core.crossDayPatch({stage:"memorize2"},{stage:"visualize"},now)||{});c.memorizeRound=s.round;c.initialMemoryWeak=weak;c.updatedAt=now.toISOString();
+    c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[]; c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:r.en===true,zhToEn:r.zh===true,initialMemoryWeak:weak,at:now.toISOString()});
+    data.activities=Array.isArray(data.activities)?data.activities:[]; data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:weak,at:now.toISOString()});
     await save(data); clearSession(card.id); location.reload();
   }
 
