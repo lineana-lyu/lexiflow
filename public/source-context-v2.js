@@ -154,9 +154,9 @@
 
   function currentCard(){
     if(!latestData?.cards)return null;
-    const word=String(document.querySelector(".study-card-focus .target-word-text,.apply-word-hero .target-word-text,.apply-word-hero strong")?.textContent||"").trim().toLowerCase();
-    if(!word)return null;
-    return latestData.cards.find(card=>String(card.word||"").trim().toLowerCase()===word)||null;
+    const id=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    if(!id)return null;
+    return latestData.cards.find(card=>String(card.id)===id)||null;
   }
 
   function reminderCopy(card){
