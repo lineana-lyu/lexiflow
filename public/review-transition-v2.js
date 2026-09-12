@@ -1,142 +1,133 @@
 (() => {
   "use strict";
 
-  const core = window.LexiFlowLearningCore;
-  if(!core) throw new Error("LexiFlowLearningCore must load before review-transition-v2.js");
+  const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before review-transition-v2.js");
 
-  let saving = false;
-  const uid = () => crypto.randomUUID ? crypto.randomUUID() : `review-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const normalize = value => String(value || "").trim().toLowerCase();
+  const previousFetch=window.fetch.bind(window);
+  let snapshot=null;
+  let pendingIntent=null;
 
-  async function loadData(){
-    const response = await fetch("/api/learning-data",{cache:"no-store"});
-    if(!response.ok) throw new Error("LOAD_FAILED");
-    const payload = await response.json();
-    return payload?.data ? core.normalizeData(payload.data) : null;
+  const normalize=value=>String(value||"").trim().toLowerCase();
+
+  function endpointOf(input){
+    try{return new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{return"";}
   }
-
-  async function persist(data){
-    const response = await fetch("/api/learning-data",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({data}),
-    });
-    if(!response.ok) throw new Error("SAVE_FAILED");
+  function parseBody(init){
+    if(!init||typeof init.body!=="string")return null;
+    try{return JSON.parse(init.body);}catch{return null;}
+  }
+  function requestWithJson(init,body){
+    return {...(init||{}),headers:{"Content-Type":"application/json",...((init&&init.headers)||{})},body:JSON.stringify(body)};
   }
 
   function domWord(){
     return normalize(
-      document.querySelector("[data-lexi-r2-word]")?.dataset.lexiR2Word ||
-      document.querySelector(".review-depth-stage .target-word-text")?.textContent ||
-      document.querySelector(".study-card-focus .target-word-text")?.textContent || ""
+      document.querySelector("[data-lexi-r2-word]")?.dataset.lexiR2Word||
+      document.querySelector(".review-depth-stage .target-word-text")?.textContent||
+      document.querySelector(".study-card-focus .target-word-text")?.textContent||""
     );
   }
 
-  function cardForDom(data){
-    const word = domWord();
-    if(!word || !Array.isArray(data?.cards)) return null;
-    return data.cards.find(card=>card.stage === "review" && normalize(card.word) === word) || null;
-  }
-
-  function activeQuestionType(card){
+  function currentQuestionType(){
     try{
-      const saved = JSON.parse(localStorage.getItem("lexiflow-review-resume-v2") || "{}");
-      const active = saved?.active;
-      if(active?.cardId === card.id && active?.type) return String(active.type);
-    }catch{}
-    return "";
+      const saved=JSON.parse(localStorage.getItem("lexiflow-review-resume-v2")||"{}");
+      return String(saved?.active?.type||"");
+    }catch{return"";}
   }
 
-  function reviewKind(card, now){
-    if(card.memoryState === "review_again"){
-      return card.reviewAgainFailedOn === core.dayKey(now) ? "same-day-repair" : "next-day-validation";
+  function latestReviewActivity(data,cardId){
+    const list=Array.isArray(data?.activities)?data.activities:[];
+    for(let i=list.length-1;i>=0;i--){
+      const item=list[i];
+      if(item?.type==="review"&&item?.cardId===cardId)return item;
     }
-    return card.memoryState === "stable" ? "stable-maintenance" : "scheduled";
+    return null;
   }
 
-  function updateReviewSessionLocal(card, quality, now){
-    const key = "lexiflow-review-session-state-v2";
-    try{
-      const current = JSON.parse(localStorage.getItem(key) || "null");
-      if(!current || current.date !== core.dayKey(now)) return;
-      const isRepair = card.memoryState === "review_again" && card.reviewAgainFailedOn === core.dayKey(now);
-      const attempt = `${card.id}:${isRepair?"repair":"normal"}`;
-      current.attempted = Array.isArray(current.attempted) ? current.attempted : [];
-      if(!current.attempted.includes(attempt)) current.attempted.push(attempt);
-      current.repairTail = Array.isArray(current.repairTail) ? current.repairTail : [];
-      if(quality !== "good" && !isRepair && !current.repairTail.includes(card.id)) current.repairTail.push(card.id);
-      current.activeCardId = card.id;
-      current.activeKind = isRepair ? "repair" : "normal";
-      current.updatedAt = now.toISOString();
-      localStorage.setItem(key,JSON.stringify(current));
-    }catch{}
-  }
-
-  async function complete(button, quality){
-    if(saving) return;
-    saving = true;
-    const originalText = button?.textContent || "";
-    if(button) button.disabled = true;
-    try{
-      const data = await loadData();
-      const card = cardForDom(data);
-      if(!card) throw new Error("REVIEW_CARD_NOT_FOUND");
-
-      const now = new Date();
-      const prev = {...card};
-      const patch = core.reviewSchedulePatch(prev,quality,now);
-      if(!patch) throw new Error("REVIEW_PATCH_FAILED");
-
-      card.reviewCount = Number(card.reviewCount || 0) + 1;
-      card.lastReviewedAt = now.toISOString();
-      card.initialReviewPending = false;
-      Object.assign(card,patch);
-      card.updatedAt = now.toISOString();
-
-      data.activities = Array.isArray(data.activities) ? data.activities : [];
-      data.activities.push({
-        id:uid(),
-        type:"review",
-        cardId:card.id,
-        quality,
-        kind:reviewKind(prev,now),
-        questionType:activeQuestionType(card),
-        reviewStepBefore:Number(prev.reviewStep || 0),
-        reviewStepAfter:Number(card.reviewStep || 0),
-        memoryStateBefore:String(prev.memoryState || "reinforcing"),
-        memoryStateAfter:String(card.memoryState || "reinforcing"),
-        at:now.toISOString(),
-      });
-
-      updateReviewSessionLocal(prev,quality,now);
-      data.dailyPlan = core.buildDailyPlan(data,now);
-      await persist(data);
-
-      if(button){
-        button.textContent = quality === "good" ? "已记录" : "已加入修复复测";
-      }
-      setTimeout(()=>location.reload(),120);
-    }catch(err){
-      console.error("authoritative review transition failed",err);
-      if(button){
-        button.disabled = false;
-        button.textContent = originalText;
-      }
-    }finally{
-      saving = false;
+  function reviewKind(card,now){
+    if(card.memoryState==="review_again"){
+      return card.reviewAgainFailedOn===core.dayKey(now)?"same-day-repair":"next-day-validation";
     }
+    return card.memoryState==="stable"?"stable-maintenance":"scheduled";
   }
 
-  // Capture Review ratings before the legacy app button handler. The legacy app still
-  // renders Review UI, but it no longer decides intervals, Review Again, or Stable state.
+  function transformReviewMutations(body){
+    if(!body?.data||!Array.isArray(body.data.cards)||!snapshot?.cards)return{body,failed:false};
+    const data=body.data;
+    let failed=false;
+
+    for(const next of data.cards){
+      if(next?.stage!=="review")continue;
+      const prev=snapshot.cards.find(card=>card.id===next.id);
+      if(!prev||Number(next.reviewCount||0)<=Number(prev.reviewCount||0))continue;
+
+      const activity=latestReviewActivity(data,next.id);
+      const quality=String(activity?.quality||pendingIntent?.quality||"");
+      if(!["good","again"].includes(quality))continue;
+
+      const now=new Date();
+      const patch=core.reviewSchedulePatch(prev,quality,now);
+      if(!patch)continue;
+
+      next.initialReviewPending=false;
+      Object.assign(next,patch);
+      next.updatedAt=now.toISOString();
+
+      if(activity){
+        activity.kind=reviewKind(prev,now);
+        activity.questionType=pendingIntent?.word===normalize(next.word)?String(pendingIntent.questionType||""):String(activity.questionType||"");
+        activity.reviewStepBefore=Number(prev.reviewStep||0);
+        activity.reviewStepAfter=Number(next.reviewStep||0);
+        activity.memoryStateBefore=String(prev.memoryState||"reinforcing");
+        activity.memoryStateAfter=String(next.memoryState||"reinforcing");
+      }
+
+      if(quality==="again")failed=true;
+    }
+
+    data.dailyPlan=core.buildDailyPlan(data,new Date());
+    pendingIntent=null;
+    return{body:{...body,data},failed};
+  }
+
+  window.fetch=async function lexiReviewTransitionFetch(input,init={}){
+    const endpoint=endpointOf(input),method=String(init?.method||"GET").toUpperCase();
+
+    if(endpoint==="/api/learning-data"&&method==="POST"){
+      const transformed=transformReviewMutations(parseBody(init));
+      const response=await previousFetch(input,requestWithJson(init,transformed.body));
+      if(response.ok&&transformed.body?.data){
+        snapshot=core.normalizeData(JSON.parse(JSON.stringify(transformed.body.data)));
+        if(transformed.failed)setTimeout(()=>location.reload(),120);
+      }
+      return response;
+    }
+
+    const response=await previousFetch(input,init);
+    if(endpoint==="/api/learning-data"&&method==="GET"&&response.ok){
+      try{
+        const payload=await response.clone().json();
+        if(payload?.data)snapshot=core.normalizeData(payload.data);
+      }catch{}
+    }
+    return response;
+  };
+
+  // The legacy app may still advance its in-memory Review cursor, but the persisted
+  // interval/state is rewritten here from Learning Core before it reaches storage.
+  // This keeps a seamless multi-card Review session without giving legacy +3/+1 logic
+  // authority over Review Again or Stable scheduling.
   document.addEventListener("click",event=>{
-    const button = event.target?.closest?.('[data-action="review-rate"],[data-action="initial-review-rate"]');
-    if(!button) return;
-    const quality = String(button.dataset.quality || "");
-    if(!["good","again"].includes(quality)) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    void complete(button,quality);
+    const button=event.target?.closest?.('[data-action="review-rate"],[data-action="initial-review-rate"]');
+    if(!button)return;
+    const quality=String(button.dataset.quality||"");
+    if(!["good","again"].includes(quality))return;
+    pendingIntent={
+      word:domWord(),
+      quality,
+      questionType:currentQuestionType(),
+      capturedAt:new Date().toISOString(),
+    };
   },true);
 })();
