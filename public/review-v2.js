@@ -47,7 +47,7 @@
   function typeFor(card){
     const options=typeSettings(card);
     const total=options.reduce((sum,item)=>sum+item.weight,0);
-    let target=hashSeed(`${card.id}:${Number(card.reviewCount||0)}`)%total;
+    let target=hashSeed(`${card.id}:${Number(card.reviewCount||0)}:${today()}`)%total;
     for(const item of options){if(target<item.weight)return item.type;target-=item.weight;}
     return options[0].type;
   }
@@ -56,8 +56,8 @@
 
   function activeFor(card){
     const stored=load().active;
-    if(stored&&stored.cardId===card.id&&Number(stored.reviewCount)===Number(card.reviewCount||0)&&typeAvailable(card,stored.type))return stored;
-    const next={cardId:card.id,reviewCount:Number(card.reviewCount||0),type:typeFor(card),revealed:false,draft:"",checked:false,correct:null};save({active:next});return next;
+    if(stored&&stored.date===today()&&stored.cardId===card.id&&Number(stored.reviewCount)===Number(card.reviewCount||0)&&typeAvailable(card,stored.type))return stored;
+    const next={date:today(),cardId:card.id,reviewCount:Number(card.reviewCount||0),type:typeFor(card),revealed:false,draft:"",checked:false,correct:null};save({active:next});return next;
   }
 
   function plannedToday(card){
@@ -93,7 +93,7 @@
     const host=document.querySelector(".review-depth-stage .study-card");if(!host)return;
     const card=currentCard();if(!card)return;
     if(exitDeferredCard(card))return;
-    const a=activeFor(card), key=`${card.id}:${card.reviewCount}:${a.type}`;if(host.dataset.lexiR2===key)return;host.dataset.lexiR2=key;
+    const a=activeFor(card), key=`${card.id}:${card.reviewCount}:${a.date}:${a.type}`;if(host.dataset.lexiR2===key)return;host.dataset.lexiR2=key;
     const center=host.querySelector(".study-center");if(!center)return;
     host.querySelector(".lexi-r2")?.remove();host.querySelector(".lexi-r2-badge")?.remove();
     if(a.type==="en-zh"){
@@ -135,6 +135,7 @@
 
   function resumeIfNeeded(){
     const a=load().active;if(!a||autoResuming||document.querySelector(".review-depth-stage"))return;
+    if(a.date!==today()){clear();return;}
     const home=Array.from(document.querySelectorAll("h1,h2")).some(x=>x.textContent.trim()==="今日学习");if(!home)return;
     const card=data?.cards?.find(x=>x.id===a.cardId);if(!card||card.stage!=="review"||!card.nextReviewAt||new Date(card.nextReviewAt).getTime()>Date.now()||!plannedToday(card)){clear();return;}
     const button=document.querySelector('[data-action="start-review"]');if(button){autoResuming=true;setTimeout(()=>{button.click();autoResuming=false;},120);}
