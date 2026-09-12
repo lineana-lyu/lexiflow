@@ -1,6 +1,7 @@
 const fs=require("fs");
 const path=require("path");
 
+// One-shot source migration. The workflow removes this file after it patches app.js.
 const file=path.join(__dirname,"..","public","app.js");
 let source=fs.readFileSync(file,"utf8");
 
