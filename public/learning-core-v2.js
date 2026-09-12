@@ -4,7 +4,7 @@
   const REVIEW_INTERVALS = Object.freeze([1, 3, 7, 16, 21]);
   const STABLE_INTERVALS = Object.freeze([30, 45, 68, 90]);
   const TODAY_ORDER = Object.freeze(["review", "memorize", "visualize", "apply", "select"]);
-  const PLAN_VERSION = 2;
+  const PLAN_VERSION = 3;
   const REVIEW_INTELLIGENT_CAP = 20;
 
   function dayKey(input = new Date()){
@@ -131,6 +131,11 @@
     return [...base, ...extra];
   }
 
+  function uniqueIds(ids){ return Array.from(new Set((ids||[]).filter(Boolean))); }
+  function planTaskIds(review,memorize,visualize,apply,select){
+    return uniqueIds([...(review||[]),...(memorize||[]),...(visualize||[]),...(apply||[]),...(select||[])]);
+  }
+
   function buildDailyPlan(data, now = new Date()){
     const cards = Array.isArray(data?.cards) ? data.cards : [];
     const goalRaw = Number(data?.settings?.dailyGoal);
@@ -157,6 +162,17 @@
       select = appendTodaySelections(keepFrozenOrder(previous.select, buckets.select), buckets.select, cards, now);
     }
 
+    const remainingTaskIds=planTaskIds(review,memorize,visualize,apply,select);
+    let initialTaskIds=sameDayFrozen
+      ? uniqueIds(Array.isArray(previous.initialTaskIds)?previous.initialTaskIds:planTaskIds(previous.review,previous.memorize,previous.visualize,previous.apply,previous.select))
+      : [...remainingTaskIds];
+    if(sameDayFrozen){
+      for(const id of select)if(!initialTaskIds.includes(id))initialTaskIds.push(id);
+    }
+    const taskTotal=initialTaskIds.length;
+    const taskRemaining=remainingTaskIds.length;
+    const taskCompleted=Math.max(0,taskTotal-taskRemaining);
+
     return {
       date: dayKey(now),
       generatedAt: sameDayFrozen ? previous.generatedAt : now.toISOString(),
@@ -176,6 +192,11 @@
       selectGoal: goal,
       selectedToday: Array.from(selectedIds),
       remainingSelectSlots: Math.max(0, goal-selectedIds.size),
+      initialTaskIds,
+      taskTotal,
+      taskRemaining,
+      taskCompleted,
+      taskProgressPercent:taskTotal?Math.round(taskCompleted/taskTotal*100):100,
     };
   }
 
