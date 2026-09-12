@@ -7,13 +7,16 @@
 
   async function refresh(){try{const r=await fetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}return data;}
   async function save(next){const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:next})});if(!r.ok)throw new Error("SAVE_FAILED");}
+  function currentCardId(){return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");}
   function card(){
     if(!data?.cards)return null;
-    const id=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    const id=currentCardId();
     if(!id)return null;
     const current=data.cards.find(item=>String(item.id)===id)||null;
     return current?.stage==="visualize"?current:null;
   }
+  function commandId(cardId,now=new Date()){return `stage:${core.dayKey(now)}:${String(cardId)}:visualize-skip`;}
+  function committed(id){return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===id);}
 
   function decorate(){
     const note=document.getElementById("visual-note"),footer=document.querySelector(".learning-stage-footer");if(!note||!footer)return;
@@ -29,11 +32,19 @@
   async function skip(){
     if(saving)return;saving=true;
     try{
-      await refresh();const c=card();if(!c)return;const note=String(document.getElementById("visual-note")?.value||"").trim();const now=new Date(),prev={...c};
+      await refresh();
+      const id=currentCardId();
+      if(!id)return;
+      const now=new Date(),cmd=commandId(id,now);
+      if(committed(cmd)){location.reload();return;}
+      const c=card();if(!c){location.reload();return;}
+      const note=String(document.getElementById("visual-note")?.value||"").trim(),prev={...c};
       c.visualNote=note;c.visualSkipped=true;c.stage="apply";Object.assign(c,core.crossDayPatch(prev,{stage:"apply"},now)||{});c.updatedAt=now.toISOString();
-      data.activities=Array.isArray(data.activities)?data.activities:[];data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"visualize",skipped:true,at:now.toISOString()});
+      data.activities=Array.isArray(data.activities)?data.activities:[];
+      data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"visualize",skipped:true,commandId:cmd,at:now.toISOString()});
       await save(data);location.reload();
-    }catch(err){console.error("visualize skip failed",err);saving=false;}
+    }catch(err){console.error("visualize skip failed",err);}
+    finally{saving=false;}
   }
 
   document.addEventListener("click",e=>{const b=e.target?.closest?.('[data-v2="skip-visual"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();void skip();},true);
