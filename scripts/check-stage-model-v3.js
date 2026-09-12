@@ -24,7 +24,7 @@ assert(legacyM1.customField==="keep"&&legacyM2.customField==="keep","canonical s
 const study=read("public/study-session-v3.js");
 const memorize=read("public/memorize-stage-v3.js");
 const advance=read("public/advance-learning-v2.js");
-const engine=read("public/learning-engine-v2.js");
+const gateway=read("public/learning-data-gateway-v3.js");
 const transition=read("public/stage-transition-v2.js");
 
 assert(study.includes("core.canonicalStage(card)"),"Study Session must bucket cards by canonical stage");
@@ -32,7 +32,8 @@ assert(!study.includes("currentStudyWord"),"Study Session must not infer card id
 assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical stage");
 assert(!memorize.includes('card.stage==="memorize2"'),"Memorize direction must not be encoded in the persisted stage anymore");
 assert(advance.includes("core.canonicalStage(card)"),"Advance Learning must use canonical stage");
-assert(engine.includes('["select","memorize","visualize","apply"].includes(core.canonicalStage(card))'),"Learning Engine entry guard must use canonical stages");
+assert(gateway.includes("core.normalizeData"),"Learning Data Gateway V3 must canonicalize legacy persisted stages before app/runtime reads");
+assert(!gateway.includes("memorize1")&&!gateway.includes("memorize2"),"Learning Data Gateway must delegate legacy-stage mapping to Learning Core instead of re-encoding sub-stages");
 assert(transition.includes('card.learningStage="memorize"'),"Select completion must expose canonical Memorize immediately");
 assert(transition.includes('nextStage:"memorize"'),"stage activity history must record canonical next stage");
 
