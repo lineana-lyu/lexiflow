@@ -7,7 +7,13 @@
 
   async function refresh(){try{const r=await fetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}return data;}
   async function save(next){const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:next})});if(!r.ok)throw new Error("SAVE_FAILED");}
-  function card(){if(!data?.cards)return null;const word=String(document.querySelector(".study-card-focus .target-word-text")?.textContent||"").trim().toLowerCase();if(!word)return null;return data.cards.find(x=>x.stage==="visualize"&&String(x.word||"").trim().toLowerCase()===word)||null;}
+  function card(){
+    if(!data?.cards)return null;
+    const id=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    if(!id)return null;
+    const current=data.cards.find(item=>String(item.id)===id)||null;
+    return current?.stage==="visualize"?current:null;
+  }
 
   function decorate(){
     const note=document.getElementById("visual-note"),footer=document.querySelector(".learning-stage-footer");if(!note||!footer)return;
