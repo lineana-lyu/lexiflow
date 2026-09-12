@@ -4,6 +4,7 @@ const path = require("path");
 function assert(condition,message){ if(!condition) throw new Error(message); }
 const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const exists=name=>fs.existsSync(path.join(root,name));
 
 const index=read("public/index.html");
 const reviewSession=read("public/review-session-v3.js");
@@ -29,6 +30,10 @@ assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy St
 assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"legacy Review transition shim must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy Review V2 UI must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy Review V2 session state must be retired from the runtime load chain");
+assert(!exists("public/study-entry-v3.js"),"retired Study Entry V3 file must stay deleted; use git history for rollback");
+assert(!exists("public/review-transition-v2.js"),"retired Review transition shim must stay deleted");
+assert(!exists("public/review-v2.js"),"retired Review V2 UI file must stay deleted");
+assert(!exists("public/review-session-state-v2.js"),"retired Review V2 session-state file must stay deleted");
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
