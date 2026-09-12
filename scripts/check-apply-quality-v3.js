@@ -19,6 +19,10 @@ assert(quality.includes("originalPass"),"gate must distinguish an approved origi
 assert(quality.includes("suggestionPass"),"an adopted AI correction may pass only when that correction was approved");
 assert(quality.includes("event.stopImmediatePropagation()"),"unapproved Apply completion must stop before stage-transition-v2");
 assert(quality.includes("你修改了句子，需要重新检查后再继续"),"editing after an audit must invalidate the previous approval");
+assert(quality.includes("isReferenceExampleCopy"),"Apply must deterministically detect exact copies of the dictionary example");
+assert(quality.includes('[data-action="submit-apply"]'),"copied examples must be stopped before an unnecessary AI check");
+assert(quality.includes("这句话和词典参考例句相同"),"copied reference examples must explain why they cannot complete Apply");
+assert(quality.includes("LexiFlowStudyRenderer?.currentCardId"),"reference-copy checks must bind to the exact current learning card");
 assert(!feedbackFixes.includes("optionalSuggestion"),"legacy feedback compatibility must not downgrade required corrections into optional polish");
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
