@@ -17,6 +17,7 @@ assert(index.indexOf("app.js")<index.indexOf("apply-actions-v3.js"),"Apply actio
 assert(apply.includes('data-apply-v3="draft"'),"Apply must expose an explicit save-draft action");
 assert(apply.includes('data-apply-v3="skip"'),"Apply must expose an explicit skip action");
 assert(apply.includes("applyDraftSavedAt"),"saving a draft must persist a durable draft checkpoint");
+assert(apply.includes("restoreDurableDraft"),"saved Apply drafts must restore from durable learning data");
 assert(apply.includes("applySkipped=true"),"skip must be recorded explicitly instead of being confused with completion");
 assert(apply.includes('skipped:true'),"Apply skip activity must be distinguishable in history");
 assert(apply.includes("core.crossDayPatch"),"Apply skip must use the same deterministic cross-day transition authority");
@@ -32,6 +33,9 @@ assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip m
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
 assert(source.includes("LexiFlowStudyRenderer?.currentCardId"),"source reminders must bind to the exact study card ID");
 assert(!source.includes("trim().toLowerCase()===word"),"source reminders must not resolve the learning card by word text");
+assert(source.includes("data-library-source-editor"),"Word Library editor must expose editable source context");
+assert(source.includes("captureLibrarySourceDraft"),"Word Library source edits must enter the authoritative source map before save");
+assert(source.includes("card.sourceTitle=remembered.sourceTitle"),"later card saves must preserve edited source metadata");
 
 assert(index.includes("new-user-defaults-v3.js"),"fresh-user defaults must be loaded by index.html");
 assert(fresh.includes('payload.hasStoredData!==false'),"three-word migration must only touch a genuinely fresh data store");
