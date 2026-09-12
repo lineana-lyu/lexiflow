@@ -30,7 +30,7 @@ const runtimeOrder=[
   "learning-core-v2.js","studyday-boundary-v2.js","stage-transition-v2.js","learning-engine-v2.js",
   "today-plan-v2.js","daily-plan-persistence-v2.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
   "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
-  "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v2.js"
+  "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"
 ];
 let previous=-1;
 for(const file of runtimeOrder){
@@ -39,14 +39,17 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js"]){
+for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
   assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
-  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
 }
 
 const sourceContext=read("public/source-context-v3.js");
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve the prior draft key for upgrades");
+const applyGuard=read("public/apply-guard-v3.js");
+assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit Study card identity");
+assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer target word from DOM text");
 
 const todayUi=read("public/today-plan-v2.js");
 assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
