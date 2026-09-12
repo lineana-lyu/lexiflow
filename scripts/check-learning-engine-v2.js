@@ -17,7 +17,8 @@ function dayDiff(a,b){
   return Math.round(ms/86400000);
 }
 
-const corePath = path.join(__dirname,"..","public","learning-core-v2.js");
+const root = path.join(__dirname,"..");
+const corePath = path.join(root,"public","learning-core-v2.js");
 const source = fs.readFileSync(corePath,"utf8");
 const sandbox = {window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);
@@ -28,6 +29,16 @@ assert(core,"learning core did not initialize");
 eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"review ladder changed unexpectedly");
 eq(core.STABLE_INTERVALS,[30,45,68,90],"stable ladder changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
+
+const indexHtml = fs.readFileSync(path.join(root,"public","index.html"),"utf8");
+const requiredOrder = ["learning-core-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","visualize-v2.js","apply-guard-v2.js"];
+let previousIndex = -1;
+for(const file of requiredOrder){
+  const index = indexHtml.indexOf(file);
+  assert(index >= 0,`${file} is not loaded by public/index.html`);
+  assert(index > previousIndex,`${file} is loaded out of order in public/index.html`);
+  previousIndex = index;
+}
 
 const d1 = utcLocalDate(2026,9,1);
 const d2 = utcLocalDate(2026,9,2);
