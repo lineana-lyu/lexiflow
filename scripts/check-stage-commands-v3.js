@@ -7,7 +7,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const transition=read("public/stage-transition-v2.js");
 const memorize=read("public/memorize-v2.js");
-const visualize=read("public/visualize-v2.js");
+const visualize=read("public/visualize-actions-v3.js");
 const apply=read("public/apply-actions-v3.js");
 
 assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must have deterministic command IDs");
@@ -27,6 +27,8 @@ assert(memorize.includes('core.canonicalStage(c)!=="memorize"'),"Memorize comple
 assert(visualize.includes(":visualize-skip`"),"Visualize skip must have a distinct deterministic command ID");
 assert(visualize.includes("commandId:cmd"),"Visualize skip activity must persist its command ID");
 assert(visualize.includes("finally{saving=false;}"),"Visualize skip must always release its saving lock after an early return or failure");
+assert(visualize.includes('data-visual-actions-v3="skip"'),"Visualize skip control must use the V3 action surface");
+assert(visualize.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip must validate the canonical stage");
 
 assert(apply.includes(":apply-skip`"),"Apply skip must have a distinct deterministic command ID");
 assert(apply.includes("commandCommitted(data,commandId)"),"Apply skip must tolerate a retried command");
