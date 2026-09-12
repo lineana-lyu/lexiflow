@@ -1,6 +1,9 @@
 (() => {
   "use strict";
 
+  const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before study-resume-v2.js");
+
   const KEY="lexiflow-study-drafts-v2";
   const LEGACY_ACTIVE_KEY="lexiflow-study-active-v2";
   let data=null;
@@ -14,7 +17,7 @@
   async function refresh(){
     try{
       const response=await fetch("/api/learning-data",{cache:"no-store"});
-      if(response.ok){const payload=await response.json();if(payload?.data?.cards)data=payload.data;}
+      if(response.ok){const payload=await response.json();if(payload?.data?.cards)data=core.normalizeData(payload.data);}
     }catch{}
   }
 
@@ -28,14 +31,15 @@
   function restore(){
     const card=currentCard();
     if(!card)return;
+    const stage=core.canonicalStage(card);
     const draft=get(card.id);
     const visual=document.getElementById("visual-note");
-    if(visual&&card.stage==="visualize"&&!visual.value&&draft.visual){
+    if(visual&&stage==="visualize"&&!visual.value&&draft.visual){
       visual.value=draft.visual;
       visual.dispatchEvent(new Event("input",{bubbles:true}));
     }
     const apply=document.getElementById("apply-text");
-    if(apply&&card.stage==="apply"&&!apply.value&&draft.apply){
+    if(apply&&stage==="apply"&&!apply.value&&draft.apply){
       apply.value=draft.apply;
       apply.dispatchEvent(new Event("input",{bubbles:true}));
     }
@@ -46,10 +50,11 @@
     const all=load();
     let changed=false;
     for(const [id,draft] of Object.entries(all)){
-      const card=data.cards.find(item=>item.id===id);
+      const card=data.cards.find(item=>String(item.id)===String(id));
       if(!card){delete all[id];changed=true;continue;}
-      if(draft.visual&&card.stage!=="visualize"){delete draft.visual;changed=true;}
-      if(draft.apply&&card.stage!=="apply"){delete draft.apply;changed=true;}
+      const stage=core.canonicalStage(card);
+      if(draft.visual&&stage!=="visualize"){delete draft.visual;changed=true;}
+      if(draft.apply&&stage!=="apply"){delete draft.apply;changed=true;}
       if(!Object.keys(draft).filter(key=>key!=="updatedAt").length){delete all[id];changed=true;}
     }
     if(changed)save(all);
@@ -60,8 +65,9 @@
     if(!(element instanceof HTMLTextAreaElement||element instanceof HTMLInputElement))return;
     const card=currentCard();
     if(!card)return;
-    if(element.id==="visual-note")patch(card.id,{visual:element.value});
-    if(element.id==="apply-text")patch(card.id,{apply:element.value});
+    const stage=core.canonicalStage(card);
+    if(element.id==="visual-note"&&stage==="visualize")patch(card.id,{visual:element.value});
+    if(element.id==="apply-text"&&stage==="apply")patch(card.id,{apply:element.value});
   },true);
 
   document.addEventListener("click",event=>{
