@@ -21,6 +21,7 @@ assert(core,"learning core did not initialize");
 eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"Review ladder changed unexpectedly");
 eq(core.STABLE_INTERVALS,[30,45,68,90],"Stable ladder changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
+assert(core.PLAN_VERSION===3,"DailyPlan version must include frozen task-progress metadata");
 
 const index=read("public/index.html");
 const runtimeOrder=[
@@ -41,11 +42,18 @@ assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"leg
 assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy review-v2.js must not execute in the V3 runtime");
 assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy review-session-state-v2.js must not execute in the V3 runtime");
 
+const todayUi=read("public/today-plan-v2.js");
+assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
+assert(todayUi.includes('class="lexi-today-progress"'),"Today progress must be integrated into the compact Today card");
+assert(todayUi.includes('data-library-filter="${key}"'),"Word Library must own the pending/learning/stable filters");
+assert(todayUi.includes("待学习"),"collected words must be presented as Pending inside Word Library");
+assert(!todayUi.includes('id="lexi-inbox"'),"Home must not expose a separate Inbox panel");
+
 const d1=date(2026,9,1), d2=date(2026,9,2);
 const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISOString()},d1);
-assert(collected.inboxPending===true,"newly collected cards must enter Inbox");
+assert(collected.inboxPending===true,"newly collected cards must enter internal pending state");
 const selected=core.normalizeCard({id:"picked",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()},d1);
-assert(selected.inboxPending===false,"Today-selected cards must leave Inbox");
+assert(selected.inboxPending===false,"Today-selected cards must leave internal pending state");
 
 const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize1"},d1);
 assert(diffDays(d1,selectPatch.stageEligibleOn)===1,"Select -> Memorize must wait until next StudyDay");
@@ -82,5 +90,13 @@ const data=core.normalizeData({settings:{dailyGoal:3},cards:[
 assert(core.firstPlanStage(data.dailyPlan)==="review","Review must remain first in Today Plan");
 eq([data.dailyPlan.review.length,data.dailyPlan.memorize.length,data.dailyPlan.visualize.length,data.dailyPlan.apply.length,data.dailyPlan.select.length],[1,1,1,1,1],"Today Plan stage buckets are incorrect");
 assert(data.dailyPlan.noVocabularyDebt===true,"DailyPlan must preserve No Vocabulary Debt");
+assert(data.dailyPlan.taskTotal===5&&data.dailyPlan.taskRemaining===5&&data.dailyPlan.taskCompleted===0,"new frozen plan must capture its initial task total");
+
+const progressed=JSON.parse(JSON.stringify(data));
+const reviewCard=progressed.cards.find(card=>card.id==="r");
+reviewCard.nextReviewAt=core.addDaysIso(morning,1);
+const progressedData=core.normalizeData(progressed,new Date(2026,8,10,18,0,0,0));
+assert(progressedData.dailyPlan.taskTotal===5,"same-day progress must preserve the frozen original task total");
+assert(progressedData.dailyPlan.taskRemaining===4&&progressedData.dailyPlan.taskCompleted===1,"Today progress must reflect completed frozen tasks");
 
 console.log("Learning Engine V3 runtime contract checks passed.");
