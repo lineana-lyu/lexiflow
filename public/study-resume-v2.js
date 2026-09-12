@@ -20,17 +20,9 @@
 
   function currentCard(){
     if(!data?.cards)return null;
-    const explicit=document.querySelector("[data-lexi-mem-word]")?.dataset.lexiMemWord;
-    const word=String(explicit||document.querySelector(".target-word-text,.apply-word-hero strong,.word-title,.lexi-m2-word strong")?.textContent||"").trim().toLowerCase();
-    if(word){
-      const card=data.cards.find(item=>String(item.word||"").trim().toLowerCase()===word);
-      if(card)return card;
-    }
-    const visual=document.getElementById("visual-note");
-    if(visual){const cards=data.cards.filter(item=>item.stage==="visualize");if(cards.length===1)return cards[0];}
-    const apply=document.getElementById("apply-text");
-    if(apply){const cards=data.cards.filter(item=>item.stage==="apply");if(cards.length===1)return cards[0];}
-    return null;
+    const id=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    if(!id)return null;
+    return data.cards.find(item=>String(item.id)===id)||null;
   }
 
   function restore(){
