@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
-      - name: Align patch anchor
+      - name: Align patch anchors
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -35,8 +35,24 @@ jobs:
           old='A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.'
           current='A change that restores a removed study/review shim, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.'
           if old not in s:
-              raise SystemExit('expected patch anchor missing')
-          p.write_text(s.replace(old,current,1),encoding='utf-8')
+              raise SystemExit('expected docs patch anchor missing')
+          s=s.replace(old,current,1)
+          bad="""    '''  function localFeedback(text,word){''',\n    \"remove legacy initial Review stage UI\","""
+          good="""    '''''',\n    \"remove legacy initial Review stage UI\","""
+          if bad not in s:
+              raise SystemExit('initial Review replacement anchor missing')
+          s=s.replace(bad,good,1)
+          bad="""  function libraryPage(){''',\n    \"replace legacy Review implementation with plan-only center\","""
+          good="""''',\n    \"replace legacy Review implementation with plan-only center\","""
+          if bad not in s:
+              raise SystemExit('Review center replacement anchor missing')
+          s=s.replace(bad,good,1)
+          bad="""    if(action===\"refresh-provider\"){''',\n    \"retire legacy Apply-to-Review and Review action fallbacks\","""
+          good="""''',\n    \"retire legacy Apply-to-Review and Review action fallbacks\","""
+          if bad not in s:
+              raise SystemExit('Review action replacement anchor missing')
+          s=s.replace(bad,good,1)
+          p.write_text(s,encoding='utf-8')
           PY
       - name: Apply cleanup
         run: python3 scripts/apply-legacy-review-cleanup-v3.py
