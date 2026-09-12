@@ -12,7 +12,6 @@
   let autoOpening=false;
 
   const day=()=>core.dayKey(new Date());
-  const normalizeWord=value=>String(value||"").trim().toLowerCase();
 
   function loadSession(){
     try{
@@ -59,10 +58,11 @@
 
   function bucketForCard(card){
     if(!card)return"";
-    if(card.stage==="memorize1"||card.stage==="memorize2")return"memorize";
-    if(card.stage==="visualize")return"visualize";
-    if(card.stage==="apply")return"apply";
-    if(card.stage==="select"&&!card.inboxPending)return"select";
+    const stage=core.canonicalStage(card);
+    if(stage==="memorize")return"memorize";
+    if(stage==="visualize")return"visualize";
+    if(stage==="apply")return"apply";
+    if(stage==="select"&&!card.inboxPending)return"select";
     return"";
   }
 
@@ -99,22 +99,8 @@
     return value&&typeof value.openCard==="function"?value:null;
   }
 
-  function currentStudyWord(){
-    return normalizeWord(
-      document.querySelector("[data-lexi-mem-word]")?.dataset.lexiMemWord||
-      document.querySelector(".study-card-focus .target-word-text")?.textContent||
-      document.querySelector(".apply-word-hero .target-word-text")?.textContent||
-      document.querySelector(".apply-word-hero strong")?.textContent||""
-    );
-  }
-
   function currentStudyCardId(){
-    const explicit=String(renderer()?.currentCardId?.()||"");
-    if(explicit)return explicit;
-    const word=currentStudyWord();
-    if(!word)return"";
-    const card=(data?.cards||[]).find(item=>normalizeWord(item.word)===word);
-    return card?.id||"";
+    return String(renderer()?.currentCardId?.()||"");
   }
 
   function showGuard(title,message){
@@ -154,7 +140,7 @@
       return false;
     }
 
-    window.__LEXIFLOW_PLAN_ENTRY__={cardId:card.id,word:card.word,stage:card.stage,date:day(),authority:"study-session-v3"};
+    window.__LEXIFLOW_PLAN_ENTRY__={cardId:card.id,word:card.word,stage:core.canonicalStage(card),date:day(),authority:"study-session-v3"};
     session.paused=false;
     session.activeBucket=bucketForCard(card);
     saveSession(session);
