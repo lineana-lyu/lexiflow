@@ -8,7 +8,8 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const index=read("public/index.html");
 const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
-const studyEntry=read("public/study-entry-v3.js");
+const studySession=read("public/study-session-v3.js");
+const studyResume=read("public/study-resume-v2.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
 
@@ -20,9 +21,10 @@ function before(a,b){
 }
 
 before("stage-transition-v2.js","app.js");
-before("app.js","study-entry-v3.js");
-before("study-entry-v3.js","review-transaction-v3.js");
+before("app.js","study-session-v3.js");
+before("study-session-v3.js","review-transaction-v3.js");
 before("review-transaction-v3.js","review-session-v3.js");
+assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 guard must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"legacy Review transition shim must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy Review V2 UI must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy Review V2 session state must be retired from the runtime load chain");
@@ -43,13 +45,20 @@ assert(stageTransition.includes("core.crossDayPatch"),"learning stage transition
 assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");
 assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
 
-assert(studyEntry.includes("firstPlanLearningId"),"Study entry must choose from the frozen Today Plan");
-assert(studyEntry.includes("legacyFirstActiveId"),"Study entry must verify the old renderer points at the planned card before allowing entry");
-assert(studyEntry.includes("event.stopImmediatePropagation()"),"Study entry mismatch must fail closed instead of opening the wrong card");
+assert(studySession.includes("plannedLearningIds"),"Study Session V3 must build learning work from the frozen Today Plan");
+assert(studySession.includes("legacyFirstActiveId"),"Study Session V3 must fail closed while the old renderer is still transitional");
+assert(studySession.includes("event.stopImmediatePropagation()"),"Study Session V3 must intercept the old continue-learning authority");
+assert(studySession.includes("pauseSession"),"Study Session V3 must own user pause semantics");
+assert(studySession.includes("maybeResume"),"Study Session V3 must own same-day crash/reload resume");
+assert(!studySession.includes("activeLearningCards()[0]"),"Study Session V3 must not select work through the old active-learning queue");
+assert(!studyResume.includes("resumeIfNeeded"),"draft recovery must not compete with Study Session V3 for auto-resume");
+assert(!studyResume.includes("setActive("),"draft recovery must not persist a second active-study authority");
 
+assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
+assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
 assert(boundary.includes('const REVIEW_SESSION_V3_KEY="lexiflow-review-session-v3"'),"StudyDay boundary must know the V3 Review session key");
 assert(boundary.includes("purgeSingle(REVIEW_SESSION_V3_KEY"),"StudyDay boundary must expire stale V3 Review sessions");
-assert(boundary.includes('const REVIEW_SESSION_KEY="lexiflow-review-session-state-v2"'),"StudyDay boundary should temporarily clean legacy V2 session residue during migration");
-assert(boundary.includes('const REVIEW_ATTEMPT_KEY="lexiflow-review-resume-v2"'),"StudyDay boundary should temporarily clean legacy V2 attempt residue during migration");
+assert(boundary.includes('const REVIEW_SESSION_KEY="lexiflow-review-session-state-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review session residue during migration");
+assert(boundary.includes('const REVIEW_ATTEMPT_KEY="lexiflow-review-resume-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review attempt residue during migration");
 
 console.log("Runtime Authority V3 checks passed.");
