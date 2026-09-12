@@ -7,7 +7,7 @@ const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);
-vm.runInContext(read("public/learning-core-v2.js"),sandbox,{filename:"learning-core-v2.js"});
+vm.runInContext(read("public/learning-core-v3.js"),sandbox,{filename:"learning-core-v3.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 
 assert(typeof core.canonicalStage==="function","Learning Core must expose canonicalStage");
