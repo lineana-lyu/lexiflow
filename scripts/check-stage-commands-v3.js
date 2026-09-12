@@ -6,7 +6,7 @@ const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const transition=read("public/stage-transition-v2.js");
-const memorize=read("public/memorize-v2.js");
+const memorize=read("public/memorize-stage-v3.js");
 const visualize=read("public/visualize-actions-v3.js");
 const apply=read("public/apply-actions-v3.js");
 
