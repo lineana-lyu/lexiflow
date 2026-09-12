@@ -5,8 +5,13 @@
   if(!core)throw new Error("LexiFlowLearningCore must load before review-transition-v2.js");
 
   const previousFetch=window.fetch.bind(window);
+  const REVIEW_AUTH_FIELDS=[
+    "memoryState","reviewStep","stableStep","nextReviewAt","initialReviewPending","lastReviewedAt",
+    "reviewAgainOriginStep","reviewAgainFailedOn","sameDayRetestUsedOn","reviewAgainNeedsNextDay"
+  ];
   let snapshot=null;
   let pendingIntent=null;
+  const authoritativeAttempts=new Map();
 
   const normalize=value=>String(value||"").trim().toLowerCase();
 
@@ -52,6 +57,23 @@
     return card.memoryState==="stable"?"stable-maintenance":"scheduled";
   }
 
+  function captureAuthority(card){
+    const fields={};
+    for(const key of REVIEW_AUTH_FIELDS){
+      if(Object.prototype.hasOwnProperty.call(card,key))fields[key]=card[key];
+    }
+    return{reviewCount:Number(card.reviewCount||0),fields};
+  }
+
+  function applyAuthority(card,authority){
+    if(!authority)return;
+    card.reviewCount=authority.reviewCount;
+    for(const key of REVIEW_AUTH_FIELDS){
+      if(Object.prototype.hasOwnProperty.call(authority.fields,key))card[key]=authority.fields[key];
+      else delete card[key];
+    }
+  }
+
   function transformReviewMutations(body){
     if(!body?.data||!Array.isArray(body.data.cards)||!snapshot?.cards)return{body,failed:false};
     const data=body.data;
@@ -60,7 +82,21 @@
     for(const next of data.cards){
       if(next?.stage!=="review")continue;
       const prev=snapshot.cards.find(card=>card.id===next.id);
-      if(!prev||Number(next.reviewCount||0)<=Number(prev.reviewCount||0))continue;
+      if(!prev)continue;
+
+      const nextCount=Number(next.reviewCount||0);
+      const prevCount=Number(prev.reviewCount||0);
+      const existingAuthority=authoritativeAttempts.get(next.id);
+
+      // app.js currently calls saveData twice for one Review rating (recordActivity +
+      // explicit save). The second snapshot still contains its legacy +3/+1 fields.
+      // Re-apply the first Core result so the duplicate write is idempotent instead of
+      // silently overwriting the authoritative schedule.
+      if(existingAuthority&&nextCount===existingAuthority.reviewCount){
+        applyAuthority(next,existingAuthority);
+        continue;
+      }
+      if(nextCount<=prevCount)continue;
 
       const activity=latestReviewActivity(data,next.id);
       const quality=String(activity?.quality||pendingIntent?.quality||"");
@@ -73,6 +109,7 @@
       next.initialReviewPending=false;
       Object.assign(next,patch);
       next.updatedAt=now.toISOString();
+      authoritativeAttempts.set(next.id,captureAuthority(next));
 
       if(activity){
         activity.kind=reviewKind(prev,now);
@@ -81,6 +118,7 @@
         activity.reviewStepAfter=Number(next.reviewStep||0);
         activity.memoryStateBefore=String(prev.memoryState||"reinforcing");
         activity.memoryStateAfter=String(next.memoryState||"reinforcing");
+        activity.reviewCountAfter=nextCount;
       }
 
       if(quality==="again")failed=true;
@@ -99,7 +137,7 @@
       const response=await previousFetch(input,requestWithJson(init,transformed.body));
       if(response.ok&&transformed.body?.data){
         snapshot=core.normalizeData(JSON.parse(JSON.stringify(transformed.body.data)));
-        if(transformed.failed)setTimeout(()=>location.reload(),120);
+        if(transformed.failed)setTimeout(()=>location.reload(),180);
       }
       return response;
     }
