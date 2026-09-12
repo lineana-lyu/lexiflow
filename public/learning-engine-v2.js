@@ -107,14 +107,10 @@
     }catch{}
   }
 
-  function currentStudyWord(){
-    return String(document.querySelector(".word-hero,.word-title,.apply-word-hero strong,.study-card h2")?.textContent||"").trim().toLowerCase();
-  }
-
   function currentCard(){
-    const word = currentStudyWord();
-    if(!word) return null;
-    return latestLearningData?.cards?.find(card=>String(card.word||"").trim().toLowerCase()===word) || null;
+    const id=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    if(!id)return null;
+    return latestLearningData?.cards?.find(card=>String(card.id)===id) || null;
   }
 
   function decorateStableStat(){
@@ -197,7 +193,7 @@
     const button = event.target?.closest?.("[data-action]");
     if(!button) return;
     if(button.dataset.action !== "continue-learning") return;
-    const eligible = latestLearningData?.cards?.filter(card=>["select","memorize1","memorize2","visualize","apply"].includes(card.stage) && !card.inboxPending && eligibleToday(card)) || [];
+    const eligible = latestLearningData?.cards?.filter(card=>["select","memorize","visualize","apply"].includes(core.canonicalStage(card)) && !card.inboxPending && eligibleToday(card)) || [];
     if(!eligible.length){
       event.preventDefault();
       event.stopImmediatePropagation();
