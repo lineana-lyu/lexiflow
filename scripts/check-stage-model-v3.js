@@ -14,8 +14,12 @@ assert(typeof core.canonicalStage==="function","Learning Core must expose canoni
 assert(core.canonicalStage("memorize1")==="memorize","memorize1 must be compatibility-only");
 assert(core.canonicalStage("memorize2")==="memorize","memorize2 must be compatibility-only");
 assert(core.canonicalStage("memorize")==="memorize","canonical Memorize must remain stable");
-assert(core.normalizeCard({id:"m1",stage:"memorize1"}).learningStage==="memorize","normalized legacy cards must expose canonical Memorize");
-assert(core.normalizeCard({id:"m2",stage:"memorize2"}).learningStage==="memorize","normalized memorize2 cards must expose canonical Memorize");
+const legacyM1=core.normalizeCard({id:"m1",stage:"memorize1",memorizeRound:1,customField:"keep"});
+const legacyM2=core.normalizeCard({id:"m2",stage:"memorize2",memorizeRound:2,customField:"keep"});
+assert(legacyM1.stage==="memorize"&&legacyM1.learningStage==="memorize","normalized memorize1 cards must physically expose canonical Memorize");
+assert(legacyM2.stage==="memorize"&&legacyM2.learningStage==="memorize","normalized memorize2 cards must physically expose canonical Memorize");
+assert(legacyM1.memorizeRound===1&&legacyM2.memorizeRound===2,"canonical stage migration must not discard Memorize round data");
+assert(legacyM1.customField==="keep"&&legacyM2.customField==="keep","canonical stage migration must preserve unrelated card data");
 
 const study=read("public/study-session-v3.js");
 const memorize=read("public/memorize-stage-v3.js");
