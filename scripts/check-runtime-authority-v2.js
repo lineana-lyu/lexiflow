@@ -31,15 +31,19 @@ before("learning-core-v2.js","studyday-boundary-v2.js");
 before("studyday-boundary-v2.js","app.js");
 before("learning-core-v2.js","stage-transition-v2.js");
 before("stage-transition-v2.js","app.js");
-before("review-transition-v2.js","app.js");
 before("learning-engine-v2.js","app.js");
 before("today-plan-v2.js","app.js");
 before("daily-plan-persistence-v2.js","app.js");
+before("source-context-v2.js","review-transition-v2.js");
+before("review-transition-v2.js","app.js");
 
 const reviewTransition=read("public/review-transition-v2.js");
 assert(reviewTransition.includes("core.reviewSchedulePatch"),"Review transition must delegate interval logic to Learning Core");
-assert(reviewTransition.includes('type:"review"'),"Review transition must persist a review activity");
-assert(reviewTransition.includes("event.stopPropagation()"),"Review transition must prevent legacy target handlers from owning Review mutations");
+assert(reviewTransition.includes("window.fetch=async function lexiReviewTransitionFetch"),"Review transition must own the final learning-data persistence rewrite before legacy app");
+assert(reviewTransition.includes("Number(next.reviewCount||0)<=Number(prev.reviewCount||0)"),"Review transition must only rewrite a real new Review attempt");
+assert(reviewTransition.includes('if(quality==="again")failed=true'),"Review failure must trigger a queue rebuild for same-day repair");
+assert(!reviewTransition.includes("event.preventDefault()"),"Review transition must not block the legacy UI cursor from advancing between cards");
+assert(!reviewTransition.includes("event.stopPropagation()"),"Review transition must not break continuous Review UI navigation");
 assert(!reviewTransition.includes('quality==="good"?3:1'),"Review transition must not reintroduce the legacy fixed +3/+1 scheduler");
 
 const stageTransition=read("public/stage-transition-v2.js");
@@ -57,6 +61,7 @@ assert(visualize.includes("core.crossDayPatch"),"Visualize skip must use the cen
 assert(!visualize.includes("tomorrowIso"),"Visualize must not own a duplicate next-day scheduler");
 assert(!reviewUi.includes("window.fetch="),"Review UI must not maintain a separate learning-data fetch mutation layer");
 assert(reviewUi.includes("stored.date===today()"),"Review attempt UI state must be scoped to one StudyDay");
+assert(!engine.includes("reviewSchedulePatch"),"Learning Engine must not compete with Review transition for persisted Review scheduling");
 assert(!engine.includes("scheduleReload"),"Learning Engine must not duplicate stage modules' reload orchestration");
 assert(boundary.includes("lexiflow-memorize-v2"),"StudyDay boundary must expire Memorize task UI state");
 assert(boundary.includes("lexiflow-study-active-v2"),"StudyDay boundary must expire active study resume state");
