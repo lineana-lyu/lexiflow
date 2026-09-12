@@ -93,7 +93,12 @@
       if(b.dataset.r2==="finish"){const quality=b.dataset.quality;clear();const hidden=document.querySelector(`.review-depth-stage [data-action="review-rate"][data-quality="${quality}"]`);hidden?.click();return;}
     }
     const reveal=e.target?.closest?.('[data-action="review-reveal"]');if(reveal){const card=currentCard();if(card){const a=activeFor(card);a.revealed=true;save({active:a});}}
-    const rate=e.target?.closest?.('[data-action="review-rate"]');if(rate)clear();
+    const rate=e.target?.closest?.('[data-action="review-rate"]');
+    if(rate){
+      const card=currentCard();
+      if(rate.dataset.quality==="again"&&card){const a=activeFor(card);save({active:{...a,forceResume:true}});}
+      else clear();
+    }
     const exit=e.target?.closest?.('[data-route="review"]');if(exit&&document.querySelector(".review-depth-stage"))clear();
   },true);
 
