@@ -8,7 +8,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const index=read("public/index.html");
 const apply=read("public/apply-actions-v3.js");
 const transition=read("public/stage-transition-v2.js");
-const visual=read("public/visualize-v2.js");
+const visual=read("public/visualize-actions-v3.js");
 const source=read("public/source-context-v2.js");
 const fresh=read("public/new-user-defaults-v3.js");
 
@@ -37,6 +37,7 @@ assert(transition.includes("copyNorm(card.exampleEn"),"authoritative Apply compl
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip must bind to the exact study card ID");
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
 assert(visual.includes("visualize-skip"),"Visualize skip must have its own idempotent command id");
+assert(visual.includes('data-visual-actions-v3="skip"'),"Visualize skip must be owned by the V3 action surface");
 assert(source.includes("LexiFlowStudyRenderer?.currentCardId"),"source reminders must bind to the exact study card ID");
 assert(!source.includes("trim().toLowerCase()===word"),"source reminders must not resolve the learning card by word text");
 assert(source.includes("data-library-source-editor"),"Word Library editor must expose editable source context");
