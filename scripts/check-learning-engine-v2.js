@@ -29,6 +29,7 @@ assert(core,"learning core did not initialize");
 eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"review ladder changed unexpectedly");
 eq(core.STABLE_INTERVALS,[30,45,68,90],"stable ladder changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
+assert(core.PLAN_VERSION === 2,"DailyPlan contract version changed unexpectedly");
 
 const indexHtml = fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const requiredOrder = ["learning-core-v2.js","stage-transition-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","visualize-v2.js","apply-guard-v2.js"];
@@ -93,16 +94,45 @@ const queueData = core.normalizeData({cards:[
 ]},d1);
 eq(queueData.dailyPlan.review,["repair-next","normal","repair-same"],"Review Again must validate next-day first and place same-day repair at queue tail");
 
-const plan = core.normalizeData({settings:{dailyGoal:3},cards:[
+const baseData = core.normalizeData({settings:{dailyGoal:3},cards:[
   {id:"r",stage:"review",nextReviewAt:d1.toISOString(),reviewStep:0,createdAt:d1.toISOString()},
   {id:"m",stage:"memorize1",stageEligibleOn:d1.toISOString(),createdAt:d1.toISOString(),inboxPending:false},
   {id:"v",stage:"visualize",stageEligibleOn:d1.toISOString(),createdAt:d1.toISOString(),inboxPending:false},
   {id:"p",stage:"apply",stageEligibleOn:d1.toISOString(),createdAt:d1.toISOString(),inboxPending:false},
   {id:"s",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString(),inboxPending:false},
   {id:"i",stage:"select",createdAt:d1.toISOString(),inboxPending:true},
-]},d1).dailyPlan;
+]},d1);
+const plan = baseData.dailyPlan;
 eq([plan.review.length,plan.memorize.length,plan.visualize.length,plan.apply.length,plan.select.length,plan.inbox.length],[1,1,1,1,1,1],"DailyPlan stage buckets are incorrect");
 assert(plan.remainingSelectSlots === 2,"daily goal must be a target, not accumulated debt");
 assert(core.firstPlanStage(plan) === "review","Review must be first Today task");
+assert(plan.frozen === true && plan.planVersion === 2,"Today plan must be frozen for the current StudyDay");
+
+const laterSameDay = utcLocalDate(2026,9,1,18);
+const frozenSameDay = core.normalizeData({
+  ...baseData,
+  cards:[
+    ...baseData.cards,
+    {id:"late-review",stage:"review",memoryState:"reinforcing",nextReviewAt:laterSameDay.toISOString(),createdAt:"2026-09-01T17:00:00Z"},
+  ],
+  dailyPlan:plan,
+},laterSameDay);
+assert(!frozenSameDay.dailyPlan.review.includes("late-review"),"newly due work must not silently mutate a frozen same-day plan");
+eq(frozenSameDay.dailyPlan.review,["r"],"same-day review membership/order must stay frozen");
+
+const selectedLater = core.normalizeData({
+  ...baseData,
+  cards:baseData.cards.map(card => card.id === "i" ? {...card,inboxPending:false,todaySelectedOn:"2026-09-01",inboxSelectedAt:"2026-09-01T18:05:00Z"} : card),
+  dailyPlan:plan,
+},laterSameDay);
+assert(selectedLater.dailyPlan.select.includes("i"),"explicit same-day Inbox selection must append to frozen Select queue");
+assert(selectedLater.dailyPlan.remainingSelectSlots === 1,"same-day Select target must update without creating debt");
+
+const nextDayPlan = core.normalizeData({
+  ...frozenSameDay,
+  dailyPlan:frozenSameDay.dailyPlan,
+},d2).dailyPlan;
+assert(nextDayPlan.date === "2026-09-02","new StudyDay must create a new plan");
+assert(nextDayPlan.frozen === true,"new StudyDay plan must be frozen independently");
 
 console.log("Learning Engine V2 contract checks passed.");
