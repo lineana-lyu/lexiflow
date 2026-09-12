@@ -139,4 +139,35 @@ data=core.normalizeData(roundTrip({
 eq(data.dailyPlan.review,["r1"],"restart later the same day must not append newly-due Review work");
 eq(data.dailyPlan.memorize,["m1"],"restart later the same day must preserve frozen learning order");
 
+// A newly eligible earlier-stage item must not jump ahead of an already planned later
+// stage. This protects the legacy activeLearningCards()[0] UI selector while the
+// frozen DailyPlan remains authoritative.
+const planMorning=date(2026,9,11,9);
+let mixed=core.normalizeData({cards:[
+  {id:"planned-v",stage:"visualize",stageEligibleOn:planMorning.toISOString(),inboxPending:false,createdAt:date(2026,8,1).toISOString()},
+  {id:"late-m",stage:"memorize1",stageEligibleOn:date(2026,9,11,17).toISOString(),inboxPending:false,createdAt:date(2026,8,2).toISOString()},
+]},planMorning);
+eq(mixed.dailyPlan.visualize,["planned-v"],"morning plan should contain the Visualize task");
+eq(mixed.dailyPlan.memorize,[],"future Memorize task must not enter morning plan");
+const frozenMixed=roundTrip(mixed.dailyPlan);
+mixed=core.normalizeData({...mixed,dailyPlan:frozenMixed},date(2026,9,11,18));
+assert(!mixed.dailyPlan.memorize.includes("late-m"),"late eligible Memorize must stay outside frozen plan");
+assert(mixed.cards[0].id==="planned-v","planned Visualize must remain ahead of newly eligible unplanned Memorize in legacy card order");
+
+// A planned same-day repair still belongs at the tail of the planned Review queue,
+// even though planned work as a whole stays ahead of deferred/unplanned work.
+const repairTime=date(2026,9,12,12);
+const repairPlan={
+  date:core.dayKey(repairTime),generatedAt:repairTime.toISOString(),planVersion:core.PLAN_VERSION,frozen:true,
+  noVocabularyDebt:true,review:["repair","normal"],memorize:[],visualize:[],apply:[],select:[],inbox:[],
+  reviewMode:"all",reviewCap:null,reviewDueTotal:2,reviewDeferredCount:0,selectGoal:3,selectedToday:[],remainingSelectSlots:3,
+};
+const repairSorted=core.normalizeData({dailyPlan:repairPlan,cards:[
+  {id:"repair",stage:"review",memoryState:"review_again",reviewAgainFailedOn:core.dayKey(repairTime),nextReviewAt:repairTime.toISOString(),createdAt:date(2026,8,1).toISOString()},
+  {id:"normal",stage:"review",memoryState:"reinforcing",nextReviewAt:repairTime.toISOString(),createdAt:date(2026,8,2).toISOString()},
+  {id:"deferred",stage:"review",memoryState:"reinforcing",nextReviewAt:repairTime.toISOString(),createdAt:date(2026,8,3).toISOString()},
+]},repairTime);
+eq(repairSorted.cards.slice(0,2).map(x=>x.id),["normal","repair"],"same-day repair must move to tail of planned Review while deferred work remains outside it");
+assert(repairSorted.cards[2].id==="deferred","deferred Review must stay behind every planned Review item");
+
 console.log("Runtime authority and restart regression checks passed.");
