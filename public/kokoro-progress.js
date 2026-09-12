@@ -19,7 +19,7 @@
 
   function settingsRow(){
     return Array.from(document.querySelectorAll(".setting-row")).find(row =>
-      clean(row.querySelector("h3")?.textContent).includes("本地自然发音")
+      clean(row.querySelector("h3")?.textContent).includes("自然发音")
     ) || null;
   }
 
@@ -27,32 +27,71 @@
     return settingsRow()?.querySelector(".setting-actions-inline") || null;
   }
 
+  function injectResponsiveStyle(){
+    if(document.getElementById("kokoro-settings-style")) return;
+    const style = document.createElement("style");
+    style.id = "kokoro-settings-style";
+    style.textContent = `
+      [data-kokoro-controls]{display:grid!important;grid-template-columns:minmax(260px,1fr) auto auto;gap:10px;align-items:end;width:min(680px,100%)}
+      [data-kokoro-controls] .field{min-width:0!important}
+      [data-kokoro-heading]{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:20px}
+      [data-kokoro-actions-button]{white-space:nowrap}
+      [data-kokoro-progress],[data-kokoro-error]{grid-column:1/-1}
+      @media(max-width:1100px){
+        [data-kokoro-controls]{grid-template-columns:1fr 1fr;width:100%}
+        [data-kokoro-controls] .field{grid-column:1/-1}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function ensureLayout(){
     const controls = controlsArea();
-    if(!controls || controls.dataset.kokoroEnhanced === "1") return controls;
-    controls.dataset.kokoroEnhanced = "1";
-    controls.style.columnGap = "10px";
-    controls.style.rowGap = "10px";
+    if(!controls) return null;
+    injectResponsiveStyle();
+    controls.dataset.kokoroControls = "1";
 
     const field = controls.querySelector(".field");
     const select = controls.querySelector("#tts-voice");
-    if(field && select && !controls.querySelector("[data-kokoro-voice-tools]")){
-      const tools = document.createElement("div");
-      tools.dataset.kokoroVoiceTools = "1";
-      tools.style.cssText = "display:flex;align-items:flex-end;gap:8px;flex:1 1 320px;min-width:280px;";
-      field.parentNode.insertBefore(tools, field);
-      tools.appendChild(field);
-      field.style.flex = "1 1 auto";
-      field.style.minWidth = "210px";
+    let pill = controls.querySelector(".pill");
+    let preview = controls.querySelector('[data-action="preview-kokoro-voice"]');
+    const prepare = controls.querySelector('[data-action="prepare-kokoro-tts"]');
 
-      const preview = document.createElement("button");
+    if(field && select){
+      let heading = field.querySelector("[data-kokoro-heading]");
+      if(!heading){
+        const originalLabel = field.querySelector("label");
+        heading = document.createElement("div");
+        heading.dataset.kokoroHeading = "1";
+        const label = document.createElement("span");
+        label.textContent = clean(originalLabel?.textContent) || "合成音色";
+        label.style.cssText = "font-size:12px;font-weight:800;color:#59677a";
+        heading.appendChild(label);
+        field.insertBefore(heading, select);
+        originalLabel?.remove();
+      }
+      if(pill && pill.parentElement !== heading){
+        heading.appendChild(pill);
+      }
+      if(pill){
+        pill.style.padding = "3px 7px";
+        pill.style.fontSize = "10px";
+        pill.style.fontWeight = "700";
+      }
+    }
+
+    if(!preview){
+      preview = document.createElement("button");
       preview.type = "button";
       preview.className = "btn";
       preview.dataset.action = "preview-kokoro-voice";
       preview.textContent = "试听音色";
-      preview.title = "播放一条短句试听当前合成音色";
-      tools.appendChild(preview);
+      preview.title = "试听当前选择的音色";
+      if(prepare) controls.insertBefore(preview, prepare); else controls.appendChild(preview);
     }
+
+    if(preview) preview.dataset.kokoroActionsButton = "1";
+    if(prepare) prepare.dataset.kokoroActionsButton = "1";
     return controls;
   }
 
@@ -67,14 +106,14 @@
     if(box) return box;
     box = document.createElement("div");
     box.dataset.kokoroProgress = "1";
-    box.style.cssText = "flex:0 0 100%;margin-top:2px;padding:10px 12px;border-radius:12px;background:rgba(120,140,132,.055);border:1px solid rgba(120,130,125,.12);box-sizing:border-box;";
+    box.style.cssText = "padding:10px 12px;border-radius:12px;background:rgba(120,140,132,.055);border:1px solid rgba(120,130,125,.12);box-sizing:border-box;";
     box.innerHTML = `
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:7px">
-        <span data-kokoro-progress-label style="font-size:13px;color:var(--muted)">正在准备自然语音模型</span>
-        <span data-kokoro-progress-percent style="font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums"></span>
+        <span data-kokoro-progress-label style="font-size:12px;color:var(--muted)">正在准备自然语音</span>
+        <span data-kokoro-progress-percent style="font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums"></span>
       </div>
       <progress data-kokoro-progress-bar max="100" value="0" style="display:block;width:100%;height:7px"></progress>
-      <div data-kokoro-progress-file style="font-size:12px;color:var(--muted);margin-top:6px;word-break:break-all"></div>`;
+      <div data-kokoro-progress-file style="font-size:11px;color:var(--muted);margin-top:6px;word-break:break-all"></div>`;
     controls.appendChild(box);
     return box;
   }
@@ -90,10 +129,10 @@
     if(!box){
       box = document.createElement("div");
       box.dataset.kokoroError = "1";
-      box.style.cssText = "flex:0 0 100%;padding:9px 11px;border-radius:10px;background:rgba(180,70,55,.08);color:#9b463b;font-size:12px;line-height:1.55;word-break:break-word;box-sizing:border-box;";
+      box.style.cssText = "padding:9px 11px;border-radius:10px;background:rgba(180,70,55,.08);color:#9b463b;font-size:12px;line-height:1.55;word-break:break-word;box-sizing:border-box;";
       controls.appendChild(box);
     }
-    box.textContent = clean(message) || "模型准备失败。请稍后重试。";
+    box.textContent = clean(message) || "自然语音准备失败，请稍后重试。";
   }
 
   function syncControls(tts){
@@ -108,23 +147,23 @@
       pill.classList.remove("green","red","amber");
       if(tts.status === "ready"){
         pill.classList.add("green");
-        pill.textContent = "本地模型已就绪";
+        pill.textContent = "● 已就绪";
       }else if(tts.status === "error"){
         pill.classList.add("red");
-        pill.textContent = "准备失败";
+        pill.textContent = "● 需重试";
       }else{
         pill.classList.add("amber");
-        pill.textContent = active ? "正在准备模型" : "首次使用自动准备";
+        pill.textContent = active ? "● 准备中" : "● 未准备";
       }
     }
 
     if(prepareButton){
       prepareButton.disabled = active;
-      prepareButton.textContent = tts.status === "ready" ? "重新检查" : tts.status === "error" ? "重新准备" : "准备语音模型";
+      prepareButton.textContent = tts.status === "ready" ? "重新检查" : tts.status === "error" ? "重新准备" : "准备语音";
     }
     if(previewButton){
       previewButton.disabled = active;
-      previewButton.title = active ? "语音模型正在准备" : "播放一条短句试听当前合成音色";
+      previewButton.title = active ? "自然语音正在准备" : "试听当前选择的音色";
     }
   }
 
@@ -147,17 +186,14 @@
       if(file) file.textContent = clean(tts.file) ? `正在处理：${clean(tts.file)}` : "";
       if(label){
         label.textContent = tts.status === "downloading"
-          ? "正在下载自然语音模型"
+          ? "正在下载自然语音"
           : progress > 0
-            ? "模型文件已下载，正在加载"
-            : "正在连接模型源并准备下载";
+            ? "下载完成，正在加载"
+            : "正在准备自然语音";
       }
       return;
     }
 
-    // The progress bar is a transient preparation affordance. Once preparation
-    // finishes (success or failure) it disappears so the Settings layout returns
-    // to its compact steady state.
     removeProgressUi();
     if(tts.status === "error") showErrorUi(tts.error);
     else removeErrorUi();
@@ -199,7 +235,7 @@
       if(tts) renderStatus(tts);
       if(!response.ok || !payload?.ok){
         const detail = clean(tts?.error);
-        const message = detail || clean(payload?.userError?.message) || clean(payload?.error) || "自然语音模型准备失败";
+        const message = detail || clean(payload?.userError?.message) || clean(payload?.error) || "自然语音准备失败";
         throw new Error(message);
       }
     }catch(err){
