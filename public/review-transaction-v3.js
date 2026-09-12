@@ -1,8 +1,12 @@
 (() => {
   "use strict";
 
+  const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before review-transaction-v3.js");
+
   const SESSION_KEY="lexiflow-review-session-v3";
   const previousFetch=window.fetch.bind(window);
+  const PENDING_GRACE_MS=30000;
 
   function endpointOf(input){
     try{return new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{return"";}
@@ -78,9 +82,7 @@
 
   function finalizePending(pending){
     const session=loadSession();
-    if(!session||session.date!==new Date().toLocaleDateString("en-CA")){
-      return;
-    }
+    if(!session||session.date!==core.dayKey(new Date()))return;
     const samePending=session.pendingCommit;
     if(!samePending||samePending.cardId!==pending.cardId||Number(samePending.expectedReviewCount||0)!==Number(pending.expectedReviewCount||0))return;
 
@@ -112,12 +114,23 @@
     saveSession(session);
   }
 
+  function pendingIsStale(pending){
+    const started=new Date(pending?.createdAt||0).getTime();
+    return Number.isFinite(started)&&Date.now()-started>PENDING_GRACE_MS;
+  }
+
   function reconcileFromData(data){
     const session=loadSession();
     const pending=session?.pendingCommit;
     if(!pending)return;
-    if(storageConfirms(data,pending))finalizePending(pending);
-    else clearUncommittedPending(pending);
+    if(storageConfirms(data,pending)){
+      finalizePending(pending);
+      return;
+    }
+    // A GET may race with the POST while the Review save is still in flight. Do not
+    // erase the recovery marker merely because that earlier snapshot has not observed
+    // the commit yet. Only abandon an unconfirmed marker after a generous grace period.
+    if(pendingIsStale(pending))clearUncommittedPending(pending);
   }
 
   window.fetch=async function lexiFlowReviewTransactionFetch(input,init={}){
