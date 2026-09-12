@@ -5,11 +5,19 @@ const vm=require("vm");
 function assert(condition,message){if(!condition)throw new Error(message);}
 function eq(actual,expected,message){const a=JSON.stringify(actual),e=JSON.stringify(expected);if(a!==e)throw new Error(`${message}\nexpected: ${e}\nactual:   ${a}`);}
 
-const source=fs.readFileSync(path.join(__dirname,"..","public","learning-core-v2.js"),"utf8");
+const root=path.join(__dirname,"..");
+const source=fs.readFileSync(path.join(root,"public","learning-core-v2.js"),"utf8");
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);vm.runInContext(source,sandbox,{filename:"learning-core-v2.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 assert(core,"learning core did not initialize");
+
+const indexHtml=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
+const policyIndex=indexHtml.indexOf("review-policy-v2.js");
+const reviewIndex=indexHtml.indexOf("review-v2.js");
+const visualIndex=indexHtml.indexOf("visualize-v2.js");
+assert(policyIndex>=0,"review-policy-v2.js must be loaded by index.html");
+assert(policyIndex>reviewIndex&&policyIndex<visualIndex,"Review policy controls must load after Review runtime and before later stage decorators");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
