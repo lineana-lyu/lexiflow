@@ -69,9 +69,9 @@ The only active Review execution path is:
 
 ### Learning-stage completion
 
-`stage-transition-v2.js` currently owns persisted completion for Select, Visualize and Apply. It intercepts the legacy UI controls before `app.js` can perform the old same-day transitions and delegates all cross-day gates to Learning Core.
+`stage-transition-v2.js` owns persisted completion for Select, Visualize and Apply and delegates all cross-day gates to Learning Core. The generic `app.js` handlers fail closed if those authoritative transitions are unavailable; `app.js` no longer contains its former generic `advanceStage()` mutation path.
 
-`memorize-v2.js` owns the two-round Memorize behavior and its persisted completion.
+`memorize-v2.js` owns both the two-round Memorize UI and persisted completion. It resolves the active card only through `LexiFlowStudyRenderer.currentCardId()`; `app.js` provides a passive Memorize host and no longer contains the old `stageMem1` / `stageMem2` renderers or `memory-rate` state transitions.
 
 ## 2. Removed runtime shims
 

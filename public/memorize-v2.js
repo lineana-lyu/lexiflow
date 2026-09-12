@@ -33,12 +33,10 @@
 
   function currentCard(){
     if(!data?.cards)return null;
-    const explicit=document.querySelector("[data-lexi-mem-word]")?.dataset.lexiMemWord;
-    const word=(explicit||document.querySelector(".target-word-text")?.textContent||"").trim().toLowerCase();
-    if(word){ const c=data.cards.find(x=>String(x.word||"").trim().toLowerCase()===word); if(c)return c; }
-    const zh=String(document.querySelector(".chinese-memory-prompt")?.textContent||"").trim();
-    if(zh)return data.cards.find(x=>["memorize1","memorize2"].includes(x.stage)&&String(x.meaningZh||"").trim()===zh)||null;
-    return null;
+    const activeId=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+    if(!activeId)return null;
+    const card=data.cards.find(item=>item.id===activeId)||null;
+    return card&&["memorize1","memorize2"].includes(card.stage)?card:null;
   }
 
   function legacyEnResult(card){
@@ -111,9 +109,8 @@
   }
 
   document.addEventListener("click",e=>{
-    const b=e.target?.closest?.("[data-m2]"); if(b){e.preventDefault();e.stopImmediatePropagation();void act(b);return;}
-    const legacy=e.target?.closest?.('[data-action="memory-rate"],[data-action="reveal"]');
-    if(legacy){const c=currentCard();if(c&&["memorize1","memorize2"].includes(c.stage)){e.preventDefault();e.stopImmediatePropagation();render();}}
+    const b=e.target?.closest?.("[data-m2]");
+    if(b){e.preventDefault();e.stopImmediatePropagation();void act(b);}
   },true);
   document.addEventListener("input",e=>{if(e.target?.id!=="lexi-m2-answer")return;const c=currentCard();if(!c)return;const s=session(c);s.draft=e.target.value;setSession(c.id,s);},true);
   document.addEventListener("keydown",e=>{if(e.target?.id==="lexi-m2-answer"&&e.key==="Enter"&&!e.isComposing){e.preventDefault();document.querySelector('[data-m2="check"]')?.click();}},true);

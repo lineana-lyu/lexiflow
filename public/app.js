@@ -827,8 +827,7 @@
   function renderStage(card){
     const stage=card.stage;
     if(stage==="select") return stageSelect(card);
-    if(stage==="memorize1") return stageMem1(card);
-    if(stage==="memorize2") return stageMem2(card);
+    if(stage==="memorize1"||stage==="memorize2") return `<div class="study-center" data-lexi-memorize-shell="${escapeHtml(card.id)}"><span class="prompt-small">正在准备双向记忆练习…</span></div>`;
     if(stage==="visualize") return stageVisual(card);
     if(stage==="apply") return stageApply(card);
     return `<div class="study-center"><strong class="prompt-big">当前学习阶段不可在这里打开</strong><p class="prompt-small">Review 由 Today Plan 的独立复习会话处理。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
@@ -843,55 +842,6 @@
       <div class="study-center" style="align-items:stretch;text-align:left">
         <div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
         <div class="rating-row"><button class="btn primary" data-action="complete-stage" data-next="memorize1">确认卡片，开始记忆</button></div>
-      </div>`;
-  }
-
-  function stageMem1(card){
-    return `${stageKicker("英 → 中")}
-      <div class="study-center">
-        ${wordIdentity(card,{size:"hero",showPos:true,center:true})}
-        <div class="prompt-small">先在脑中回忆中文释义，再查看答案。</div>
-        ${state.study.revealed?`
-          <div class="memory-answer-card">
-            <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
-            <div class="memory-example-section compact-example">
-              <div class="memory-example-label">例句</div>
-              ${sentenceExample(card.exampleEn,"memory-example-en")}
-              <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
-            </div>
-          </div>
-          <div class="rating-row">
-            <button class="btn" data-action="memory-rate" data-remembered="0">没记住</button>
-            <button class="btn primary" data-action="memory-rate" data-remembered="1">记住了</button>
-          </div>
-        `:`
-          <button class="btn primary" style="margin-top:22px" data-action="reveal">查看答案</button>
-        `}
-      </div>`;
-  }
-
-  function stageMem2(card){
-    return `${stageKicker("中 → 英")}
-      <div class="study-center">
-        <div class="prompt-big chinese-memory-prompt">${escapeHtml(card.meaningZh)}</div>
-        <div class="prompt-small">根据中文释义主动回忆英文单词。</div>
-
-        ${state.study.revealed?`
-          <div class="memory-answer-card word-answer">
-            ${wordIdentity(card,{size:"large",showPos:true,center:false})}
-            <div class="memory-example-section">
-              <div class="memory-example-label">例句</div>
-              ${sentenceExample(card.exampleEn,"memory-example-en")}
-              <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
-            </div>
-          </div>
-          <div class="rating-row">
-            <button class="btn" data-action="memory-rate" data-remembered="0">没记住</button>
-            <button class="btn primary" data-action="memory-rate" data-remembered="1">记住了</button>
-          </div>
-        `:`
-          <button class="btn primary" style="margin-top:22px" data-action="reveal">查看答案</button>
-        `}
       </div>`;
   }
 
@@ -1105,18 +1055,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         ${corrected?`<button class="text-action apply-undo" data-action="restore-original-apply">↶ 撤销 AI 修改</button>`:""}
         ${feedbackPanel}
       </div>`;
-  }
-
-  function advanceStage(card,next,meta={}){
-    card.stage=next; card.updatedAt=new Date().toISOString();
-    if(meta.remembered!==undefined){
-      card.memoryHistory=card.memoryHistory||[];
-      card.memoryHistory.push({stage:next==="memorize2"?"memorize1":"memorize2",remembered:meta.remembered,at:new Date().toISOString()});
-    }
-    recordActivity("stage-complete",card.id,{stage:next});
-    saveData();
-    state.study.revealed=false;state.study.feedback=null;
-    render();
   }
 
   function reviewPage(){
@@ -1905,13 +1843,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       return;
     }
     if(action==="complete-stage"){
-      const c=getCard(state.study.cardId);advanceStage(c,el.dataset.next);return;
-    }
-    if(action==="reveal"){state.study.revealed=true;render();return;}
-    if(action==="memory-rate"){
-      const c=getCard(state.study.cardId), remembered=el.dataset.remembered==="1";
-      if(c.stage==="memorize1") advanceStage(c,"memorize2",{remembered});
-      else advanceStage(c,"visualize",{remembered});
+      showNotice("学习阶段没有正常保存","Select 完成应由当前学习引擎写入明天的 Memorize 计划。本次不会使用旧的同日跳转逻辑。","warn");
       return;
     }
     if(action==="toggle-visual-scene"){
@@ -1981,11 +1913,8 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     return;
   }
   if(action==="finish-visual"){
-    const c=getCard(state.study.cardId);
-    const note=String(document.getElementById("visual-note")?.value??state.study.visualNote??"").trim();
-    c.visualNote=note;
-    c.visualSkipped=false;
-    advanceStage(c,"apply");return;
+    showNotice("学习阶段没有正常保存","Visualize 完成应由当前学习引擎写入明天的 Apply 计划。本次不会使用旧的同日跳转逻辑。","warn");
+    return;
   }
   if(action==="submit-apply"){
       if(!state.study||state.study.applySubmitting)return;

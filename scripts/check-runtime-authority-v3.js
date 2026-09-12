@@ -13,6 +13,7 @@ const studySession=read("public/study-session-v3.js");
 const studyResume=read("public/study-resume-v2.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
+const memorize=read("public/memorize-v2.js");
 const app=read("public/app.js");
 
 function before(a,b){
@@ -60,6 +61,13 @@ assert(reviewTransaction.includes("expectedReviewCount"),"Review transaction rec
 assert(stageTransition.includes("core.crossDayPatch"),"learning stage transitions must use Learning Core");
 assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");
 assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
+assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize must resolve the exact Study Session renderer card ID");
+assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
+assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not depend on legacy memory-rate controls");
+for(const legacy of ["function stageMem1(","function stageMem2(","function advanceStage("]){assert(!app.includes(legacy),`legacy learning-stage authority must be removed from app.js: ${legacy}`);}
+assert(!app.includes('if(action===\"memory-rate\")'),"app.js must not retain legacy Memorize rating authority");
+assert(!app.includes('if(action===\"reveal\")'),"app.js must not retain legacy Memorize reveal state");
+assert(app.includes("data-lexi-memorize-shell"),"app.js should expose only a passive Memorize render host");
 
 assert(studySession.includes("plannedLearningIds"),"Study Session V3 must build learning work from the frozen Today Plan");
 assert(studySession.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must call the explicit renderer bridge");
