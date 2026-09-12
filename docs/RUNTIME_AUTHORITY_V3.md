@@ -53,10 +53,12 @@ The session must not choose work through `activeLearningCards()[0]`, card insert
 The active stage renderers are:
 
 - `select-stage-v3.js` for Select;
-- `memorize-v2.js` for the one canonical Memorize stage; its two recall directions and optional second round are internal exercise state, not product stages;
+- `memorize-stage-v3.js` for the one canonical Memorize stage; its two recall directions and optional second round are internal exercise state, not product stages;
 - `visualize-stage-v3.js` for Visualize;
 - `apply-stage-v3.js` for Apply;
 - `review-session-v3.js` for Review.
+
+`memorize-stage-v3.js` intentionally keeps the localStorage key `lexiflow-memorize-v2` for upgrade compatibility, so an installed user can resume an in-progress Memorize round after the runtime module rename. The V2 file name itself is retired and must not return to the load chain.
 
 `study-drafts-v3.js` is draft recovery only. It restores Visualize and Apply text by explicit card ID and canonical stage, but it must not own active-session persistence, click the learning entry button, or auto-resume a study session. It intentionally keeps the existing `lexiflow-study-drafts-v2` storage key so installed users do not lose drafts merely because the runtime module was promoted to V3.
 
@@ -88,7 +90,7 @@ Question type is system-owned rather than a normal user setting. A normal attemp
 
 Normal Select, Visualize and Apply completion use deterministic same-StudyDay command IDs recorded on `stage-complete` activities. Retrying a committed command must resolve as already completed rather than creating a second completion record.
 
-`memorize-v2.js` owns both the two-round Memorize UI and persisted completion. It resolves the active card only through `LexiFlowStudyRenderer.currentCardId()` and validates the canonical `memorize` stage. Memorize completion also records a deterministic command ID and rejects double completion while persistence is in flight.
+`memorize-stage-v3.js` owns both the two-round Memorize UI and persisted completion. It resolves the active card only through `LexiFlowStudyRenderer.currentCardId()` and validates the canonical `memorize` stage. Memorize completion also records a deterministic command ID and rejects double completion while persistence is in flight.
 
 `initialMemoryWeak` records first-round recall quality, not the result of the reinforcement round. If either direction fails in round 1, the card remains marked initially weak even if round 2 succeeds. `finalRoundPassed` separately records whether the final reinforcement round succeeded.
 
@@ -128,6 +130,7 @@ The following obsolete runtime files have been removed from the working tree. Th
 - `public/review-session-state-v2.js`
 - `public/study-resume-v2.js`
 - `public/visualize-v2.js`
+- `public/memorize-v2.js`
 
 They must not be recreated as quick fixes. Missing study-entry behavior belongs in Study Session V3 or the narrow Study renderer bridge; missing stage UI belongs in the stage-specific V3 renderer/action modules; missing Review behavior belongs in Review Session V3, Review Transaction V3, or Learning Core.
 
@@ -172,8 +175,8 @@ They must not be recreated as quick fixes. Missing study-entry behavior belongs 
 
 `npm run check:learning` must use the V3 runtime checks. In particular:
 
-- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain.
-- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, promoted V3 draft/Visualize-action modules, and that removed shims stay absent.
+- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain, including absence of the legacy Memorize V2 file.
+- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, promoted V3 Memorize/draft/Visualize-action modules, and that removed shims stay absent.
 - `scripts/check-study-session-v3.js` verifies Study Session V3, exact card-ID rendering, pause/resume ownership and V3-only draft recovery.
 - `scripts/check-stage-renderers-v3.js` verifies the canonical five-stage surface plus Select/Visualize/Apply V3 renderers and learner-first behavior.
 - `scripts/check-review-session-v3.js` verifies Review session behavior, alternate-type repair and crash-safe preservation of repair type.
