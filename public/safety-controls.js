@@ -12,6 +12,7 @@
     "lexiflow-review-session-state-v2",
     "lexiflow-studyday-runtime-v2",
     "lexiflow-source-context-draft-v2",
+    "lexiflow-apply-quality-v3",
   ];
   let clearing=false;
 
