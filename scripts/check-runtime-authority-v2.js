@@ -42,6 +42,9 @@ assert(reviewTransition.includes("core.reviewSchedulePatch"),"Review transition 
 assert(reviewTransition.includes("window.fetch=async function lexiReviewTransitionFetch"),"Review transition must own the final learning-data persistence rewrite before legacy app");
 assert(reviewTransition.includes("Number(next.reviewCount||0)<=Number(prev.reviewCount||0)"),"Review transition must only rewrite a real new Review attempt");
 assert(reviewTransition.includes('if(quality==="again")failed=true'),"Review failure must trigger a queue rebuild for same-day repair");
+assert(reviewTransition.includes("authoritativeAttempts"),"Review transition must remember the authoritative result of the current attempt");
+assert(reviewTransition.includes("applyAuthority"),"duplicate legacy saves must re-apply the authoritative Review schedule");
+assert(reviewTransition.includes("nextCount===existingAuthority.reviewCount"),"duplicate writes for one Review attempt must be idempotent");
 assert(!reviewTransition.includes("event.preventDefault()"),"Review transition must not block the legacy UI cursor from advancing between cards");
 assert(!reviewTransition.includes("event.stopPropagation()"),"Review transition must not break continuous Review UI navigation");
 assert(!reviewTransition.includes('quality==="good"?3:1'),"Review transition must not reintroduce the legacy fixed +3/+1 scheduler");
@@ -139,20 +142,21 @@ data=core.normalizeData(roundTrip({
 eq(data.dailyPlan.review,["r1"],"restart later the same day must not append newly-due Review work");
 eq(data.dailyPlan.memorize,["m1"],"restart later the same day must preserve frozen learning order");
 
-// A newly eligible earlier-stage item must not jump ahead of an already planned later
-// stage. This protects the legacy activeLearningCards()[0] UI selector while the
-// frozen DailyPlan remains authoritative.
+// An eligible item introduced after the plan is frozen must not jump ahead of an
+// already planned later stage. Stage eligibility is day-granular, so this simulates
+// a same-day import/state refresh rather than a clock-time stage gate.
 const planMorning=date(2026,9,11,9);
 let mixed=core.normalizeData({cards:[
   {id:"planned-v",stage:"visualize",stageEligibleOn:planMorning.toISOString(),inboxPending:false,createdAt:date(2026,8,1).toISOString()},
-  {id:"late-m",stage:"memorize1",stageEligibleOn:date(2026,9,11,17).toISOString(),inboxPending:false,createdAt:date(2026,8,2).toISOString()},
 ]},planMorning);
 eq(mixed.dailyPlan.visualize,["planned-v"],"morning plan should contain the Visualize task");
-eq(mixed.dailyPlan.memorize,[],"future Memorize task must not enter morning plan");
 const frozenMixed=roundTrip(mixed.dailyPlan);
-mixed=core.normalizeData({...mixed,dailyPlan:frozenMixed},date(2026,9,11,18));
-assert(!mixed.dailyPlan.memorize.includes("late-m"),"late eligible Memorize must stay outside frozen plan");
-assert(mixed.cards[0].id==="planned-v","planned Visualize must remain ahead of newly eligible unplanned Memorize in legacy card order");
+mixed=core.normalizeData({...mixed,dailyPlan:frozenMixed,cards:[
+  ...mixed.cards,
+  {id:"late-m",stage:"memorize1",stageEligibleOn:planMorning.toISOString(),inboxPending:false,createdAt:date(2026,8,2).toISOString()},
+]},date(2026,9,11,18));
+assert(!mixed.dailyPlan.memorize.includes("late-m"),"same-day introduced Memorize must stay outside frozen plan");
+assert(mixed.cards[0].id==="planned-v","planned Visualize must remain ahead of unplanned Memorize in legacy card order");
 
 // A planned same-day repair still belongs at the tail of the planned Review queue,
 // even though planned work as a whole stays ahead of deferred/unplanned work.
