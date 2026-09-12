@@ -1,49 +1,32 @@
 (() => {
   "use strict";
 
-  const previousFetch = window.fetch.bind(window);
   const DICTIONARY_KEY_URL = "https://www.dictionaryapi.com/register/index";
   const CUSTOM_GOAL_KEY = "lexiflow-daily-goal-custom-v1";
+  const APP_ICON_URL = "./icon.png?v=20260911-icon3";
   let scheduled = false;
 
-  function endpointOf(input) {
-    try {
-      const raw = typeof input === "string" ? input : input?.url || "";
-      return new URL(raw, location.href).pathname;
-    } catch {
-      return "";
+  function applyAppIcon() {
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) {
+      favicon.type = "image/png";
+      favicon.href = APP_ICON_URL;
     }
-  }
 
-  function cloneJsonResponse(original, data) {
-    const headers = new Headers(original.headers || {});
-    headers.set("Content-Type", "application/json; charset=utf-8");
-    headers.delete("Content-Length");
-    return new Response(JSON.stringify(data), {
-      status: original.status,
-      statusText: original.statusText,
-      headers,
+    document.querySelectorAll(".brand .logo").forEach(logo => {
+      logo.classList.add("lexi-brand-icon");
+      logo.textContent = "";
+      let image = logo.querySelector("img.lexi-brand-icon-image");
+      if (!image) {
+        image = document.createElement("img");
+        image.className = "lexi-brand-icon-image";
+        image.alt = "LexiFlow";
+        image.draggable = false;
+        logo.appendChild(image);
+      }
+      image.src = APP_ICON_URL;
     });
   }
-
-  // New installs start with a 3-word daily goal. Existing users keep their saved goal.
-  window.fetch = async function lexiFlowProductFetch(input, init = {}) {
-    const response = await previousFetch(input, init);
-    const endpoint = endpointOf(input);
-    const method = String(init?.method || "GET").toUpperCase();
-    if (endpoint !== "/api/learning-data" || method !== "GET" || !response.ok) return response;
-
-    try {
-      const payload = await response.clone().json();
-      if (!payload?.hasStoredData && payload?.data) {
-        const settings = { ...(payload.data.settings || {}) };
-        if (!Number.isFinite(Number(settings.dailyGoal)) || Number(settings.dailyGoal) === 5) settings.dailyGoal = 3;
-        payload.data = { ...payload.data, settings };
-        return cloneJsonResponse(response, payload);
-      }
-    } catch {}
-    return response;
-  };
 
   function speakerSvg() {
     return `<svg class="lexi-speaker-svg" viewBox="0 0 28 28" aria-hidden="true">
@@ -188,8 +171,7 @@
       commit();
     }));
 
-    // Read the authoritative persisted value so custom values survive page rerenders.
-    previousFetch("/api/learning-data", { method: "GET", cache: "no-store" })
+    fetch("/api/learning-data", { method: "GET", cache: "no-store" })
       .then(response => response.ok ? response.json() : null)
       .then(payload => {
         const current = Number(payload?.data?.settings?.dailyGoal);
@@ -209,24 +191,13 @@
     decorateDailyGoal(list);
   }
 
-  function decorateInitialSceneLoading() {
-    document.querySelectorAll(".scene-generation-state").forEach(state => {
-      if (state.dataset.lexiSceneEmphasis === "1") return;
-      state.dataset.lexiSceneEmphasis = "1";
-      const strong = state.querySelector("strong");
-      const sub = state.querySelector("span:not(.runtime-spinner)");
-      if (strong) strong.textContent = "AI 正在构思联想场景";
-      if (sub) sub.textContent = "正在结合当前词义和例句生成一个具体画面。";
-    });
-  }
-
   function extractJobWord(pill) {
     const detail = pill.querySelector("div span")?.textContent || "";
     return detail.split("·")[0].trim();
   }
 
   function focusImageArea() {
-    const target = document.querySelector(".visual-image-canvas,.library-editor-image-panel");
+    const target = document.querySelector(".lexi-v3-visual-image,.library-editor-image-panel");
     if (!target) return false;
     target.scrollIntoView({ behavior: "smooth", block: "center" });
     target.classList.remove("lexi-image-focus-pulse");
@@ -254,9 +225,9 @@
   }
 
   function decorate() {
+    applyAppIcon();
     decorateSpeakers();
     decorateSettings();
-    decorateInitialSceneLoading();
   }
 
   function scheduleDecorate() {
