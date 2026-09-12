@@ -17,7 +17,7 @@ const studySurface=read("public/study-stage-surface-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
 const applyGuard=read("public/apply-guard-v3.js");
 const sourceContext=read("public/source-context-v3.js");
-const boundary=read("public/studyday-boundary-v2.js");
+const boundary=read("public/studyday-boundary-v3.js");
 const stageTransition=read("public/stage-transition-v2.js");
 const memorize=read("public/memorize-stage-v3.js");
 const safety=read("public/safety-controls.js");
@@ -30,6 +30,8 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
+before("learning-core-v2.js","studyday-boundary-v3.js");
+before("studyday-boundary-v3.js","stage-transition-v2.js");
 before("today-plan-v2.js","daily-plan-persistence-v3.js");
 before("daily-plan-persistence-v3.js","source-context-v3.js");
 before("stage-transition-v2.js","source-context-v3.js");
@@ -46,10 +48,11 @@ assert(index.includes('<script src="./source-context-v3.js"></script>'),"Source 
 assert(index.includes('<script src="./review-policy-v3.js"></script>'),"Review Policy V3 must be active");
 assert(index.includes('<script src="./apply-guard-v3.js"></script>'),"Apply Guard V3 must be active");
 assert(index.includes('<script src="./daily-plan-persistence-v3.js"></script>'),"DailyPlan Persistence V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js"]){
+assert(index.includes('<script src="./studyday-boundary-v3.js"></script>'),"StudyDay Boundary V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js"]){
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js","public/studyday-boundary-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
@@ -63,6 +66,10 @@ assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-wo
 assert(planPersistence.includes("LexiFlowDailyPlanPersistenceV3=Object.freeze"),"DailyPlan Persistence V3 must expose a narrow explicit bridge");
 assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 must identify persisted writes");
 assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
+assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay Boundary V3 must own the current runtime-day marker");
+assert(boundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay Boundary V3 must migrate the legacy runtime-day marker");
+assert(boundary.includes("localStorage.removeItem(LEGACY_RUNTIME_KEY)"),"StudyDay Boundary V3 must clean the legacy marker after migration");
+assert(boundary.includes("LexiFlowStudyDayBoundaryV3=Object.freeze"),"StudyDay Boundary V3 must expose a narrow diagnostics bridge");
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
