@@ -7,6 +7,7 @@
   const RUNTIME_KEY="lexiflow-studyday-runtime-v2";
   const MEMORIZE_KEY="lexiflow-memorize-v2";
   const ACTIVE_STUDY_KEY="lexiflow-study-active-v2";
+  const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3";
   const REVIEW_ATTEMPT_KEY="lexiflow-review-resume-v2";
   const REVIEW_SESSION_KEY="lexiflow-review-session-state-v2";
   const REVIEW_SESSION_V3_KEY="lexiflow-review-session-v3";
@@ -45,6 +46,7 @@
   function purgeTaskUiState(today){
     purgeMemorize(today);
     purgeSingle(ACTIVE_STUDY_KEY,today,value=>String(value?.date||"")||dayOf(value?.updatedAt));
+    purgeSingle(STUDY_SESSION_V3_KEY,today,value=>String(value?.date||""));
     purgeSingle(REVIEW_ATTEMPT_KEY,today,value=>String(value?.active?.date||"")||dayOf(value?.active?.updatedAt));
     purgeSingle(REVIEW_SESSION_KEY,today,value=>String(value?.date||""));
     purgeSingle(REVIEW_SESSION_V3_KEY,today,value=>String(value?.date||""));
