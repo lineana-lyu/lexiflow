@@ -85,7 +85,6 @@
       if(!prev)continue;
 
       const nextCount=Number(next.reviewCount||0);
-      const prevCount=Number(prev.reviewCount||0);
       const existingAuthority=authoritativeAttempts.get(next.id);
 
       // app.js currently calls saveData twice for one Review rating (recordActivity +
@@ -96,7 +95,7 @@
         applyAuthority(next,existingAuthority);
         continue;
       }
-      if(nextCount<=prevCount)continue;
+      if(Number(next.reviewCount||0)<=Number(prev.reviewCount||0))continue;
 
       const activity=latestReviewActivity(data,next.id);
       const quality=String(activity?.quality||pendingIntent?.quality||"");
