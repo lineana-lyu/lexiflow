@@ -54,10 +54,13 @@
       card.stage = "review";
       card.memoryState = "stable";
     }
+    if(card.stage === "memorize1" || card.stage === "memorize2"){
+      card.stage = "memorize";
+    }
 
-    // `learningStage` is the canonical domain stage. `stage` remains as a
-    // compatibility field while the last legacy app renderer still understands
-    // historical `memorize1` / `memorize2` values.
+    // `stage` and `learningStage` now expose the same canonical product stage.
+    // Historical memorize1/memorize2 values are accepted on read and collapsed
+    // without changing the learner's round/session data.
     card.learningStage = canonicalStage(card.stage);
 
     if(card.learningStage === "select" && card.inboxPending === undefined){
