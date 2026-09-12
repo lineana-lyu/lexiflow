@@ -11,7 +11,13 @@
     const d = input instanceof Date ? input : new Date(input);
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   };
+  const valueDayKey = value => {
+    const raw = String(value || "").trim();
+    if(/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+    return raw ? dayKey(raw) : "";
+  };
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `plan-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const setText = (node,text) => { if(node && node.textContent !== text) node.textContent = text; };
 
   function endpointOf(input){
     try{
@@ -46,7 +52,7 @@
 
   function eligibleToday(card){
     if(!card?.stageEligibleOn) return true;
-    return dayKey(card.stageEligibleOn) <= dayKey();
+    return valueDayKey(card.stageEligibleOn) <= dayKey();
   }
 
   function dueToday(card){
@@ -57,7 +63,7 @@
     const card = {...raw};
     if(card.stage === "select" && card.inboxPending === undefined){
       card.inboxPending = card.todaySelectedOn ? false : !card.selectedOn;
-      if(card.inboxPending && !card.inboxAddedOn) card.inboxAddedOn = dayKey(card.createdAt || new Date());
+      if(card.inboxPending && !card.inboxAddedOn) card.inboxAddedOn = valueDayKey(card.createdAt) || dayKey();
     }
     if(card.stage !== "select" && card.inboxPending === true) card.inboxPending = false;
     return card;
@@ -76,7 +82,7 @@
 
   function selectedTodayIds(cards){
     const today = dayKey();
-    return new Set(cards.filter(card => dayKey(card.todaySelectedOn || card.selectedOn || "1970-01-01") === today).map(card => card.id));
+    return new Set(cards.filter(card => valueDayKey(card.todaySelectedOn || card.selectedOn) === today).map(card => card.id));
   }
 
   function buildPlan(data){
@@ -201,11 +207,25 @@
     return "";
   }
 
+  function planSignature(plan){
+    return JSON.stringify({
+      date:plan.date,
+      review:plan.review,
+      memorize:plan.memorize,
+      visualize:plan.visualize,
+      apply:plan.apply,
+      select:plan.select,
+      inbox:plan.inbox,
+      goal:plan.selectGoal,
+      remaining:plan.remainingSelectSlots,
+    });
+  }
+
   function rowHtml(index,key,name,count,desc,next){
     return `<div class="lexi-plan-row ${next===key?"is-next":""}"><span class="lexi-plan-index">${index}</span><span class="lexi-plan-name">${name}</span><span class="lexi-plan-count">${count}</span><span class="lexi-plan-desc">${desc}</span></div>`;
   }
 
-  function homePlanHtml(){
+  function homePlanHtml(signature){
     const plan = latestData?.dailyPlan || buildPlan(latestData||{});
     const next = firstPlanStage(plan);
     const inbox = cardList(plan.inbox).slice(0,8);
@@ -222,44 +242,53 @@
     const selectedHtml = selected.length ? `<div class="lexi-selected-chips">${selected.map(card=>`<span class="lexi-selected-chip"><strong>${esc(card.word)}</strong><span>待确认</span><button type="button" data-tp-unpick="${esc(card.id)}" title="移回收集箱">×</button></span>`).join("")}</div>` : "";
     const inboxHtml = inbox.length ? inbox.map(card=>`<div class="lexi-inbox-item"><div><div class="lexi-inbox-word"><strong>${esc(card.word)}</strong><span>${esc(card.phonetic||"")}</span></div><p>${esc(card.meaningZh||"")}</p></div><button class="btn small" type="button" data-tp-pick="${esc(card.id)}" ${slots<=0?"disabled":""}>加入今天</button></div>`).join("") : `<div class="lexi-plan-empty">收集箱里暂时没有候选词。查到喜欢的词后先收进来，不必立刻学。</div>`;
 
-    return `<section class="lexi-today-plan" id="lexi-today-plan"><div class="lexi-today-head"><div><span class="lexi-today-kicker">TODAY PLAN</span><h2>今天只做当前该做的事</h2><p>顺序固定为 Review → Memorize → Visualize → Apply → Select。</p></div><span class="lexi-no-debt">不补昨天任务 · 每天重算</span></div><div class="lexi-plan-rows">${rows}</div>${selectedHtml}<div class="lexi-inbox" id="lexi-inbox"><div class="lexi-inbox-head"><strong>收集箱 · ${plan.inbox.length}</strong><span>${slots>0?`今天还可选 ${slots} 个`:`今天的 Select 目标已满`}</span></div><div class="lexi-inbox-list">${inboxHtml}</div></div></section>`;
+    return `<section class="lexi-today-plan" id="lexi-today-plan" data-signature="${esc(signature)}"><div class="lexi-today-head"><div><span class="lexi-today-kicker">TODAY PLAN</span><h2>今天只做当前该做的事</h2><p>顺序固定为 Review → Memorize → Visualize → Apply → Select。</p></div><span class="lexi-no-debt">不补昨天任务 · 每天重算</span></div><div class="lexi-plan-rows">${rows}</div>${selectedHtml}<div class="lexi-inbox" id="lexi-inbox"><div class="lexi-inbox-head"><strong>收集箱 · ${plan.inbox.length}</strong><span>${slots>0?`今天还可选 ${slots} 个`:`今天的 Select 目标已满`}</span></div><div class="lexi-inbox-list">${inboxHtml}</div></div></section>`;
   }
 
   function decorateHome(){
     if(!latestData) return;
     const title = Array.from(document.querySelectorAll("h1,h2")).find(node=>node.textContent.trim()==="今日学习");
     if(!title) return;
-    document.getElementById("lexi-today-plan")?.remove();
-    const stats = document.querySelector(".grid.cols-4");
-    if(stats) stats.insertAdjacentHTML("afterend",homePlanHtml());
-    else title.closest("header,.header")?.insertAdjacentHTML("afterend",homePlanHtml());
+    const plan = latestData.dailyPlan || buildPlan(latestData);
+    const signature = planSignature(plan);
+    const existing = document.getElementById("lexi-today-plan");
+    if(!existing || existing.dataset.signature !== signature){
+      const holder = document.createElement("div");
+      holder.innerHTML = homePlanHtml(signature);
+      const next = holder.firstElementChild;
+      if(existing) existing.replaceWith(next);
+      else{
+        const stats = document.querySelector(".grid.cols-4");
+        if(stats) stats.insertAdjacentElement("afterend",next);
+        else title.closest("header,.header")?.insertAdjacentElement("afterend",next);
+      }
+    }
 
-    const plan = latestData.dailyPlan;
-    const primary = document.querySelector('[data-action="continue-learning"],[data-action="start-review"]');
+    const primary = document.querySelector('[data-action="continue-learning"],[data-action="start-review"],[data-tp-primary="inbox"]');
     if(primary){
       delete primary.dataset.tpPrimary;
       primary.disabled = false;
       if(plan.review.length){
         primary.dataset.action = "start-review";
-        primary.textContent = `先复习 ${plan.review.length} 个到期词`;
+        setText(primary,`先复习 ${plan.review.length} 个到期词`);
       }else if(plan.memorize.length){
         primary.dataset.action = "continue-learning";
-        primary.textContent = `开始记忆 ${plan.memorize.length} 个词`;
+        setText(primary,`开始记忆 ${plan.memorize.length} 个词`);
       }else if(plan.visualize.length){
         primary.dataset.action = "continue-learning";
-        primary.textContent = `开始视觉联想 ${plan.visualize.length} 个词`;
+        setText(primary,`开始视觉联想 ${plan.visualize.length} 个词`);
       }else if(plan.apply.length){
         primary.dataset.action = "continue-learning";
-        primary.textContent = `开始造句 ${plan.apply.length} 个词`;
+        setText(primary,`开始造句 ${plan.apply.length} 个词`);
       }else if(plan.select.length){
         primary.dataset.action = "continue-learning";
-        primary.textContent = `确认今天的 ${plan.select.length} 个新词`;
+        setText(primary,`确认今天的 ${plan.select.length} 个新词`);
       }else if(plan.inbox.length && plan.remainingSelectSlots>0){
         primary.dataset.tpPrimary = "inbox";
-        primary.textContent = "从收集箱选择今天的词";
+        setText(primary,"从收集箱选择今天的词");
       }else{
         primary.disabled = true;
-        primary.textContent = "今天的计划已完成";
+        setText(primary,"今天的计划已完成");
       }
     }
 
@@ -267,36 +296,40 @@
       const text = label.textContent.trim();
       const card = label.closest(".card.stat");
       if(!card) return;
-      if(text === "学习中"){
+      if(text === "学习中" || text === "今日推进"){
         const count = plan.memorize.length+plan.visualize.length+plan.apply.length+plan.select.length;
-        label.textContent = "今日推进";
+        setText(label,"今日推进");
         const value = card.querySelector(".stat-value");
         const hint = card.querySelector(".stat-hint");
-        if(value) value.textContent = String(count);
-        if(hint) hint.textContent = "今天可推进的学习任务";
+        setText(value,String(count));
+        setText(hint,"今天可推进的学习任务");
       }
       if(text === "待复习"){
         const value = card.querySelector(".stat-value");
-        if(value) value.textContent = String(plan.review.length);
+        setText(value,String(plan.review.length));
       }
     });
 
     document.querySelectorAll('[data-route="add"]').forEach(button=>{
-      if(button.textContent.includes("添加单词")) button.textContent = button.textContent.replace("添加单词","收集单词");
+      if(button.textContent.includes("添加单词")) setText(button,button.textContent.replace("添加单词","收集单词"));
     });
   }
 
   function decorateAdd(){
     const save = document.querySelector('[data-action="save-card"].save-learning-card,[data-action="save-card"]');
-    if(save && !document.querySelector(".study-card-focus")){
-      save.textContent = "保存到收集箱";
+    if(save && !document.querySelector(".study-card-focus") && save.dataset.tpInboxCopy!=="1"){
+      save.dataset.tpInboxCopy="1";
+      setText(save,"保存到收集箱");
       save.title = "先收集候选词，之后再从 Today Select 中选择正式学习";
     }
     Array.from(document.querySelectorAll("h1,h2")).forEach(node=>{
-      if(node.textContent.trim()==="选词制卡") node.textContent="查词并收集";
+      if(node.textContent.trim()==="选词制卡") setText(node,"查词并收集");
     });
     document.querySelectorAll(".toast").forEach(node=>{
-      if(node.textContent.includes("卡片已保存，已进入学习流程")) node.textContent="已加入收集箱，之后从 Today Select 中选择正式学习";
+      if(node.textContent.includes("卡片已保存，已进入学习流程") && node.dataset.tpInboxCopy!=="1"){
+        node.dataset.tpInboxCopy="1";
+        setText(node,"已加入收集箱，之后从 Today Select 中选择正式学习");
+      }
     });
   }
 
@@ -306,7 +339,10 @@
       const card = cardById(row.dataset.libraryCard);
       if(!card?.inboxPending) return;
       const cells = row.querySelectorAll("td");
-      if(cells[4]) cells[4].innerHTML = '<span class="pill">收集箱</span>';
+      if(cells[4] && cells[4].dataset.tpInbox!=="1"){
+        cells[4].dataset.tpInbox="1";
+        cells[4].innerHTML = '<span class="pill">收集箱</span>';
+      }
     });
   }
 
