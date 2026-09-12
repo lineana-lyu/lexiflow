@@ -31,7 +31,7 @@ eq(core.STABLE_INTERVALS,[30,45,68,90],"stable ladder changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
 
 const indexHtml = fs.readFileSync(path.join(root,"public","index.html"),"utf8");
-const requiredOrder = ["learning-core-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","visualize-v2.js","apply-guard-v2.js"];
+const requiredOrder = ["learning-core-v2.js","stage-transition-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","visualize-v2.js","apply-guard-v2.js"];
 let previousIndex = -1;
 for(const file of requiredOrder){
   const index = indexHtml.indexOf(file);
@@ -48,12 +48,17 @@ assert(newInbox.inboxPending === true,"newly collected Select card must enter In
 const picked = core.normalizeCard({id:"b",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()},d1);
 assert(picked.inboxPending === false,"Today-selected card must leave Inbox");
 
+const legacyInitial = core.normalizeCard({id:"legacy",stage:"review",initialReviewPending:true,applyCompletedOn:"2026-09-01"},d1);
+assert(legacyInitial.initialReviewPending === false,"legacy initial-review UI flag must be retired");
+assert(dayDiff(d1,legacyInitial.nextReviewAt) === 1,"legacy initial Review must migrate to next-day active recall");
+
 const selectPatch = core.crossDayPatch({stage:"select"},{stage:"memorize1"},d1);
 assert(selectPatch && selectPatch.memoryState === "learning","Select -> Memorize must create learning gate");
 assert(dayDiff(d1,selectPatch.stageEligibleOn) === 1,"Memorize must open on next learning day");
 const applyPatch = core.crossDayPatch({stage:"apply"},{stage:"review"},d1);
 assert(dayDiff(d1,applyPatch.nextReviewAt) === 1,"first Review must be due one day after Apply");
 assert(applyPatch.reviewStep === 0,"first Review must start at step 0");
+assert(applyPatch.initialReviewPending === false,"Apply must not open legacy same-day initial Review");
 
 let patch = core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:0},"good",d1);
 assert(patch.reviewStep === 1 && dayDiff(d1,patch.nextReviewAt) === 3,"step 0 success must schedule +3d");
@@ -68,6 +73,10 @@ assert(patch.memoryState === "stable" && dayDiff(d1,patch.nextReviewAt) === 30,"
 patch = core.reviewSchedulePatch({memoryState:"stable",stableStep:0,reviewStep:4},"good",d1);
 assert(patch.stableStep === 1 && dayDiff(d1,patch.nextReviewAt) === 45,"Stable maintenance must advance 30 -> 45");
 
+const stableFail = core.reviewSchedulePatch({memoryState:"stable",stableStep:3,reviewStep:4},"again",d1);
+assert(stableFail.memoryState === "review_again","Stable failure must leave Stable immediately");
+assert(stableFail.stableStep === 0,"Stable failure must reset stable maintenance progression");
+
 const fail = core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:3},"again",d1);
 assert(fail.memoryState === "review_again" && fail.reviewAgainOriginStep === 3,"failed recall must enter Review Again");
 assert(dayDiff(d1,fail.nextReviewAt) === 0,"first failure must be eligible for same-day repair retest");
@@ -76,6 +85,13 @@ assert(sameDay.memoryState === "review_again" && dayDiff(d1,sameDay.nextReviewAt
 const nextDay = core.reviewSchedulePatch({memoryState:"review_again",reviewStep:3,reviewAgainOriginStep:3,reviewAgainFailedOn:"2026-09-01",sameDayRetestUsedOn:"2026-09-01"},"good",d2);
 assert(nextDay.memoryState === "reinforcing" && nextDay.reviewStep === 2,"next-day successful validation must recover one step lower");
 assert(dayDiff(d2,nextDay.nextReviewAt) === 7,"recovered step 2 must schedule +7d");
+
+const queueData = core.normalizeData({cards:[
+  {id:"repair-next",stage:"review",memoryState:"review_again",reviewAgainFailedOn:"2026-08-31",nextReviewAt:d1.toISOString(),createdAt:"2026-08-01T00:00:00Z"},
+  {id:"normal",stage:"review",memoryState:"reinforcing",nextReviewAt:d1.toISOString(),createdAt:"2026-07-01T00:00:00Z"},
+  {id:"repair-same",stage:"review",memoryState:"review_again",reviewAgainFailedOn:"2026-09-01",nextReviewAt:d1.toISOString(),createdAt:"2026-06-01T00:00:00Z"},
+]},d1);
+eq(queueData.dailyPlan.review,["repair-next","normal","repair-same"],"Review Again must validate next-day first and place same-day repair at queue tail");
 
 const plan = core.normalizeData({settings:{dailyGoal:3},cards:[
   {id:"r",stage:"review",nextReviewAt:d1.toISOString(),reviewStep:0,createdAt:d1.toISOString()},
