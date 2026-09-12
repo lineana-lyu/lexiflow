@@ -19,13 +19,15 @@ assert(policyIndex>=0,"review-policy-v2.js must be loaded by index.html");
 assert(policyIndex<visualIndex,"Review policy controls must load before later stage decorators");
 
 const policyUi=fs.readFileSync(path.join(root,"public","review-policy-v2.js"),"utf8");
-assert(policyUi.includes("复习与巩固"),"settings must describe this layer as Review & Reinforcement, not a second learning method");
+assert(policyUi.includes("复习与巩固"),"settings must describe this layer as Review & Reinforcement");
 assert(policyUi.includes("1 → 3 → 7 → 16 → 21"),"settings must explain the deterministic reinforcement ladder");
 assert(policyUi.includes("30 → 45 → 68 → 90"),"settings must explain Stable maintenance intervals");
 assert(policyUi.includes("下一学习日必须再次验证"),"settings must explain next-day validation after a first-recall failure");
-assert(policyUi.includes("高级设置"),"question type weighting must be hidden behind Advanced Settings by default");
-assert(policyUi.includes('advancedOpen = false'),"advanced review controls must default to collapsed");
 assert(policyUi.includes("跟随系统安排"),"default daily review load must be framed as following the system schedule");
+assert(!policyUi.includes("复习方式"),"review method customization must be removed from the normal settings surface");
+assert(!policyUi.includes("高级设置"),"question-type advanced settings must be removed from the settings surface");
+assert(!policyUi.includes("data-review-weight"),"question-type weights must no longer be user-editable");
+assert(!policyUi.includes("data-review-type"),"question-type toggles must no longer be user-editable");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
