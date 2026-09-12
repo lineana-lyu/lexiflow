@@ -14,7 +14,7 @@
 - `Review -> Memorize -> Visualize -> Apply -> Select` Today order;
 - No Vocabulary Debt DailyPlan construction;
 - canonical learning stages `Select -> Memorize -> Visualize -> Apply -> Review`;
-- compatibility normalization of historical `memorize1` / `memorize2` to canonical `memorize`;
+- compatibility reads of historical `memorize1` / `memorize2`, which are normalized to physical `stage: "memorize"` plus `learningStage: "memorize"` without discarding round/session fields;
 - stage eligibility and cross-day gates;
 - Review ladder `1 -> 3 -> 7 -> 16 -> 21`;
 - Stable maintenance `30 -> 45 -> 68 -> 90`;
@@ -48,7 +48,7 @@ The session must not choose work through `activeLearningCards()[0]`, card insert
 
 `startStudy(cardId)` has no no-argument fallback. A missing, Pending, Review or mastered card is rejected instead of silently opening another item. If the generic `continue-learning` handler is ever reached, it delegates back to `LexiFlowStudySessionV3.open()` rather than choosing a card itself.
 
-`study-stage-surface-v3.js` owns the canonical five-stage learning surface. It rewrites the visible progress rail to `Select / Memorize / Visualize / Apply / Review`, normalizes residual legacy labels, and replaces any legacy stage body with a passive loading host until the corresponding authoritative stage renderer appears. Missing V3 rendering therefore fails closed instead of leaving a legacy Select/Visualize/Apply implementation interactive.
+`study-stage-surface-v3.js` owns the canonical five-stage learning surface. It rewrites the visible progress rail to `Select / Memorize / Visualize / Apply / Review`, normalizes residual legacy labels, and replaces any legacy stage body with a passive loading host until the corresponding authoritative stage renderer appears. The stage body is visually hidden before this V3 authority handoff, so users cannot see or click the historical renderer during asynchronous data refresh. Missing V3 rendering therefore fails closed instead of leaving a legacy Select/Visualize/Apply implementation interactive.
 
 The active stage renderers are:
 
@@ -71,6 +71,8 @@ The only active Review execution path is:
 `DailyPlan.review -> review-transaction-v3.js -> review-session-v3.js -> Learning Core -> learning-data.json`
 
 `app.js` no longer contains a second Review queue, Review session renderer, +3/+1 scheduler, or same-day initial Review implementation. Its Review center is display-only and reads membership from the frozen DailyPlan; the generic `start-review` fallback delegates to `LexiFlowReviewSessionV3.open()` and fails closed if V3 is unavailable.
+
+`review-policy-v3.js` owns the user-facing Review load setting. It allows only `跟随系统安排 / 全部到期 / 自定义上限`; it does not expose question type, question weight, or a competing review algorithm. Changing the load policy does not mutate the already-frozen same-day Review membership and applies when a new StudyDay is built.
 
 `review-session-v3.js` owns:
 
@@ -134,8 +136,9 @@ The following obsolete runtime files have been removed from the working tree. Th
 - `public/visualize-v2.js`
 - `public/memorize-v2.js`
 - `public/source-context-v2.js`
+- `public/review-policy-v2.js`
 
-They must not be recreated as quick fixes. Missing study-entry behavior belongs in Study Session V3 or the narrow Study renderer bridge; missing stage UI belongs in the stage-specific V3 renderer/action modules; missing Review behavior belongs in Review Session V3, Review Transaction V3, or Learning Core.
+They must not be recreated as quick fixes. Missing study-entry behavior belongs in Study Session V3 or the narrow Study renderer bridge; missing stage UI belongs in the stage-specific V3 renderer/action modules; missing Review behavior belongs in Review Session V3, Review Transaction V3, Review Policy V3, or Learning Core.
 
 `studyday-boundary-v2.js` may temporarily clean old localStorage keys left by previous application versions. Cleaning migration residue does not reactivate the removed runtimes.
 
@@ -154,7 +157,7 @@ They must not be recreated as quick fixes. Missing study-entry behavior belongs 
 11. Select, Memorize, normal Visualize, Visualize Skip, normal Apply and Apply Skip must be safe against duplicate completion attempts.
 12. Apply Draft does not complete the stage; Apply Skip and normal Apply completion are different persisted outcomes.
 13. A dictionary reference example cannot be submitted verbatim as the learner's Apply sentence.
-14. Product-visible study stages are exactly Select, Memorize, Visualize, Apply and Review; `memorize1` / `memorize2` are compatibility-only storage values.
+14. Product-visible and normalized card stages are exactly Select, Memorize, Visualize, Apply and Review; historical `memorize1` / `memorize2` are accepted only as compatibility input and are collapsed to `memorize` without losing Memorize round/session fields.
 15. A missing V3 stage renderer must leave a passive fail-closed host, never an interactive legacy stage implementation.
 16. Visualize must start from the learner's own association; AI assistance may refine it only after explicit user action.
 17. Apply must start from the learner's own expression; AI feedback cannot silently replace the learner's sentence.
@@ -174,35 +177,37 @@ They must not be recreated as quick fixes. Missing study-entry behavior belongs 
 10. Duplicate clicks/writes must not increment Review twice.
 11. A crash after disk persistence but before cursor advance must resume after the committed item, not repeat or double-count it.
 12. A crash must not erase the failed question type needed to choose the alternate same-day repair cue.
+13. User Review settings may cap how many due cards enter a new day's frozen plan, but may not choose question type, alter the interval ladder, or mutate an already-frozen same-day queue.
 
 ## 5. Regression gates
 
 `npm run check:learning` must use the V3 runtime checks. In particular:
 
-- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain, including absence of the legacy Memorize and Source Context V2 files.
-- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, promoted V3 Memorize/draft/Visualize-action/Source Context modules, and that removed shims stay absent.
+- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain, physical canonical Memorize normalization, and absence of retired runtime files.
+- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, Review Policy V3, promoted V3 Memorize/draft/Visualize-action/Source Context modules, and that removed shims stay absent.
 - `scripts/check-study-session-v3.js` verifies Study Session V3, exact card-ID rendering, pause/resume ownership and V3-only draft recovery.
-- `scripts/check-stage-renderers-v3.js` verifies the canonical five-stage surface plus Select/Visualize/Apply V3 renderers and learner-first behavior.
+- `scripts/check-stage-renderers-v3.js` verifies the canonical five-stage surface, no legacy-stage flash, plus Select/Visualize/Apply V3 renderers and learner-first behavior.
+- `scripts/check-review-policy-v3.js` verifies the simplified Review load policy, deterministic review ladders, same-day freeze and no user-configurable question methods.
 - `scripts/check-review-session-v3.js` verifies Review session behavior, alternate-type repair and crash-safe preservation of repair type.
 - `scripts/check-review-transaction-v3.js` verifies crash-safe Review transaction recovery.
 - `scripts/check-apply-quality-v3.js` verifies progressive Apply checking and reference-example copy rejection.
 - `scripts/check-apply-actions-v3.js` verifies Apply Draft/Skip, Visualize Actions V3, exact card identity, canonical Source Context editing and fresh-user defaults.
 - `scripts/check-stage-commands-v3.js` verifies deterministic/idempotent stage commands and first-round Memorize weakness semantics.
 - `scripts/check-reset-v3.js` verifies persisted reset, learning-image cleanup and in-flight image invalidation.
-- `scripts/check-stage-model-v3.js` verifies canonical stage migration semantics.
-- existing StudyDay, Review policy and Advance Learning checks remain required.
+- `scripts/check-stage-model-v3.js` verifies canonical stage migration semantics and preservation of Memorize progress data.
+- existing StudyDay and Advance Learning checks remain required.
 
-A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, restores `activeLearningCards()[0]` as a Study entry fallback, recreates a second Review queue/scheduler inside `app.js`, exposes `memorize1` / `memorize2` as product stages, or allows a learning-stage completion to bypass its active authority is a regression.
+A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, restores `activeLearningCards()[0]` as a Study entry fallback, recreates a second Review queue/scheduler inside `app.js`, exposes `memorize1` / `memorize2` as normalized product stages, or allows a learning-stage completion to bypass its active authority is a regression.
 
 ## 6. Next cleanup boundary
 
-The active Study experience is now rendered by the stage-specific modules, with the old `app.js` stage bodies quarantined behind a passive V3 host. The historical stage rendering/interaction functions still physically exist inside the large `app.js` source and remain technical debt; they are no longer intended to be interactive runtime authority.
+The active Study experience is now rendered by the stage-specific modules, with the old `app.js` stage bodies quarantined behind a passive V3 host. Historical `memorize1` / `memorize2` values are also collapsed to canonical `memorize` during normalization. The historical stage rendering/interaction functions still physically exist inside the large `app.js` source and remain the largest technical debt; they are no longer intended to be interactive runtime authority.
 
 Safe sequence from here:
 
 1. keep DailyPlan, Study Session V3, Study Stage Surface V3, `LexiFlowStudyRenderer` and Learning Core contracts unchanged;
 2. physically remove legacy `stageSelect`, `stageVisual`, `stageApply`, six-stage stepper data, and their obsolete stage-specific handlers from `app.js` only after a whole-file parity edit can be performed safely;
 3. preserve generic shell/navigation, dictionary/ECDICT, TTS, library editing, Source Context V3 and service settings while shrinking `app.js`;
-4. consolidate persisted `stage` storage naming only after explicit data-migration tests prove old `memorize1` / `memorize2` installations load without loss;
+4. continue promoting remaining active support modules from legacy V2 names only when their behavior is already covered by V3 regression tests; do not perform cosmetic renames that weaken upgrade compatibility;
 5. do not rewrite dictionary, ECDICT, Kokoro TTS, AI image generation or local persistence as part of stage renderer cleanup;
 6. after source cleanup, run a real Windows Electron end-to-end click regression in addition to repository CI; current CI is not a substitute for GUI interaction testing.
