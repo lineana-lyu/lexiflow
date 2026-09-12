@@ -9,12 +9,14 @@ const exists=name=>fs.existsSync(path.join(root,name));
 const index=read("public/index.html");
 const source=read("public/learning-data-gateway-v3.js");
 
+assert(index.includes('<script src="./learning-core-v3.js"></script>'),"Learning Core V3 must be active");
+assert(!index.includes('<script src="./learning-core-v2.js"></script>'),"Learning Core V2 must not remain in the runtime load chain");
 assert(index.includes('<script src="./learning-data-gateway-v3.js"></script>'),"Learning Data Gateway V3 must be active");
 assert(!index.includes('<script src="./learning-engine-v2.js"></script>'),"Learning Engine V2 must not remain in the runtime load chain");
 assert(!exists("public/learning-engine-v2.js"),"Learning Engine V2 source must stay deleted after gateway promotion");
 assert(!index.includes('<script src="./legacy-data-fix.js"></script>'),"legacy data fetch shim must not remain in the runtime load chain");
 assert(!exists("public/legacy-data-fix.js"),"legacy data fetch shim must stay deleted after gateway consolidation");
-assert(index.indexOf("learning-core-v2.js")<index.indexOf("learning-data-gateway-v3.js"),"Learning Core must load before the V3 data gateway");
+assert(index.indexOf("learning-core-v3.js")<index.indexOf("learning-data-gateway-v3.js"),"Learning Core V3 must load before the V3 data gateway");
 assert(index.indexOf("learning-data-gateway-v3.js")<index.indexOf("studyday-boundary-v3.js"),"V3 data gateway must normalize learning data before downstream runtime modules");
 assert(source.includes('endpoint!=="/api/learning-data"'),"gateway must be scoped to the learning-data endpoint");
 assert(source.includes("core.normalizeData"),"gateway must normalize every learning dataset");
