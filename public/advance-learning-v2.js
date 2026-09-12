@@ -11,8 +11,8 @@
 
   const uid=()=>crypto.randomUUID?crypto.randomUUID():`advance-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-  const STAGE_LABELS={memorize1:"Memorize",memorize2:"Memorize",visualize:"Visualize",apply:"Apply"};
-  const STAGE_ORDER={memorize1:1,memorize2:1,visualize:2,apply:3};
+  const STAGE_LABELS={memorize:"Memorize",visualize:"Visualize",apply:"Apply"};
+  const STAGE_ORDER={memorize:1,visualize:2,apply:3};
 
   async function refresh(){
     if(refreshing)return data;
@@ -40,7 +40,8 @@
     return data.cards
       .filter(card=>{
         if(card?.inboxPending)return false;
-        if(!Object.prototype.hasOwnProperty.call(STAGE_LABELS,card?.stage))return false;
+        const stage=core.canonicalStage(card);
+        if(!Object.prototype.hasOwnProperty.call(STAGE_LABELS,stage))return false;
         if(!card.stageEligibleOn||core.valueDayKey(card.stageEligibleOn)<=today)return false;
         if(core.valueDayKey(card.earlyAllowanceUsedOn)===today||core.valueDayKey(card.lastEarlyStudiedOn)===today)return false;
         return true;
@@ -48,14 +49,15 @@
       .sort((a,b)=>{
         const eligible=core.valueDayKey(a.stageEligibleOn).localeCompare(core.valueDayKey(b.stageEligibleOn));
         if(eligible)return eligible;
-        const stage=(STAGE_ORDER[a.stage]||99)-(STAGE_ORDER[b.stage]||99);
+        const stage=(STAGE_ORDER[core.canonicalStage(a)]||99)-(STAGE_ORDER[core.canonicalStage(b)]||99);
         if(stage)return stage;
         return new Date(a.createdAt||0)-new Date(b.createdAt||0);
       });
   }
 
-  function stageBucket(stage){
-    if(stage==="memorize1"||stage==="memorize2")return"memorize";
+  function stageBucket(card){
+    const stage=core.canonicalStage(card);
+    if(stage==="memorize")return"memorize";
     if(stage==="visualize")return"visualize";
     if(stage==="apply")return"apply";
     return"";
@@ -81,8 +83,9 @@
     if(!candidate){existing?.remove();return;}
 
     const originalDay=core.valueDayKey(candidate.stageEligibleOn);
-    const label=STAGE_LABELS[candidate.stage]||"下一阶段";
-    const signature=`${plan.date}:${candidate.id}:${candidate.stage}:${originalDay}`;
+    const stage=core.canonicalStage(candidate);
+    const label=STAGE_LABELS[stage]||"下一阶段";
+    const signature=`${plan.date}:${candidate.id}:${stage}:${originalDay}`;
     if(existing?.dataset.signature===signature)return;
 
     const box=document.createElement("div");
@@ -109,7 +112,7 @@
       const candidate=candidateList(now).find(card=>card.id===cardId);
       if(!candidate)throw new Error("EARLY_CANDIDATE_NOT_AVAILABLE");
       const card=next.cards.find(item=>item.id===cardId);
-      const bucket=stageBucket(card?.stage);
+      const bucket=stageBucket(card);
       if(!card||!bucket)throw new Error("EARLY_STAGE_NOT_SUPPORTED");
 
       card.earlyOriginalStageEligibleOn=card.stageEligibleOn||null;
@@ -124,7 +127,7 @@
       if(!next.dailyPlan[bucket].includes(card.id))next.dailyPlan[bucket].push(card.id);
       next.activities=Array.isArray(next.activities)?next.activities:[];
       next.activities.push({
-        id:uid(),type:"early-learning-unlocked",cardId:card.id,stage:card.stage,
+        id:uid(),type:"early-learning-unlocked",cardId:card.id,stage:core.canonicalStage(card),
         originalStageEligibleOn:card.earlyOriginalStageEligibleOn,at:now.toISOString(),
       });
 
