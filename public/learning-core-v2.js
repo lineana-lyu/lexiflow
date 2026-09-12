@@ -31,7 +31,8 @@
   }
 
   function isDue(card, now = new Date()){
-    return card?.stage === "review" && card?.nextReviewAt && new Date(card.nextReviewAt).getTime() <= now.getTime();
+    if(card?.stage !== "review" || !card?.nextReviewAt) return false;
+    return valueDayKey(card.nextReviewAt) <= dayKey(now);
   }
 
   function normalizeCard(raw, now = new Date()){
