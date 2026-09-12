@@ -93,7 +93,8 @@
   async function complete(card,s){
     await refresh(); const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
     const r=s.results[s.round]||{}, weak=!(r.en===true&&r.zh===true), now=new Date();
-    c.stage="visualize";Object.assign(c,core.crossDayPatch({stage:"memorize2"},{stage:"visualize"},now)||{});c.memorizeRound=s.round;c.initialMemoryWeak=weak;c.updatedAt=now.toISOString();
+    const prev={...c,stage:"memorize2"};
+    c.stage="visualize";Object.assign(c,core.crossDayPatch(prev,{stage:"visualize"},now)||{});c.memorizeRound=s.round;c.initialMemoryWeak=weak;c.updatedAt=now.toISOString();
     c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[]; c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:r.en===true,zhToEn:r.zh===true,initialMemoryWeak:weak,at:now.toISOString()});
     data.activities=Array.isArray(data.activities)?data.activities:[]; data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:weak,at:now.toISOString()});
     await save(data); clearSession(card.id); location.reload();
