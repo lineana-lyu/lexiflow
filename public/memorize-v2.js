@@ -23,12 +23,12 @@
   async function refresh(){
     try{
       const r=await fetch("/api/learning-data",{cache:"no-store"});
-      if(r.ok){ const p=await r.json(); if(p?.data?.cards) data=p.data; }
+      if(r.ok){ const p=await r.json(); if(p?.data?.cards) data=core.normalizeData(p.data); }
     }catch{}
     return data;
   }
   async function save(next){
-    const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:next})});
+    const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:core.normalizeData(next)})});
     if(!r.ok) throw new Error("SAVE_FAILED");
   }
 
@@ -37,7 +37,7 @@
     const activeId=String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
     if(!activeId)return null;
     const card=data.cards.find(item=>item.id===activeId)||null;
-    return card&&["memorize1","memorize2"].includes(card.stage)?card:null;
+    return card&&core.canonicalStage(card)==="memorize"?card:null;
   }
 
   function commandId(cardId,now=new Date()){
@@ -47,16 +47,9 @@
     return Array.isArray(value?.activities)&&value.activities.some(item=>String(item.commandId||"")===id);
   }
 
-  function legacyEnResult(card){
-    const h=Array.isArray(card.memoryHistory)?card.memoryHistory:[];
-    for(let i=h.length-1;i>=0;i--)if(h[i]?.stage==="memorize1")return Boolean(h[i].remembered);
-    return null;
-  }
   function freshSession(card){
     const round=Math.max(1,Math.min(2,Number(card.memorizeRound||1)));
-    const s={round,direction:card.stage==="memorize2"?"zh-en":"en-zh",phase:"test",revealed:false,draft:"",checked:false,correct:null,results:{1:{en:null,zh:null},2:{en:null,zh:null}}};
-    if(card.stage==="memorize2")s.results[round].en=legacyEnResult(card);
-    return s;
+    return {round,direction:"en-zh",phase:"test",revealed:false,draft:"",checked:false,correct:null,results:{1:{en:null,zh:null},2:{en:null,zh:null}}};
   }
   function session(card){
     const saved=getSession(card.id), base=freshSession(card);
@@ -87,7 +80,7 @@
 
   function render(){
     const host=document.querySelector(".study-card-focus"); if(!host)return;
-    const card=currentCard(); if(!card||!["memorize1","memorize2"].includes(card.stage))return;
+    const card=currentCard(); if(!card||core.canonicalStage(card)!=="memorize")return;
     const s=session(card);
     const key=`${card.id}:${s.round}:${s.direction}:${s.phase}:${s.revealed?1:0}:${s.checked?1:0}:${s.correct===true?1:s.correct===false?0:"n"}`;
     if(host.dataset.lexiM2===key)return;
@@ -104,14 +97,15 @@
       const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
       const now=new Date(),cmd=commandId(c.id,now);
       if(commandCommitted(data,cmd)){clearSession(card.id);location.reload();return;}
-      if(!["memorize1","memorize2"].includes(c.stage)){clearSession(card.id);location.reload();return;}
+      if(core.canonicalStage(c)!=="memorize"){clearSession(card.id);location.reload();return;}
 
       const round1=s.results?.[1]||{}, final=s.results?.[s.round]||{};
       const initialWeak=!(round1.en===true&&round1.zh===true);
       const finalRoundPassed=final.en===true&&final.zh===true;
-      const prev={...c,stage:"memorize2"};
+      const prev={...c,learningStage:"memorize"};
       c.stage="visualize";
-      Object.assign(c,core.crossDayPatch(prev,{stage:"visualize"},now)||{});
+      c.learningStage="visualize";
+      Object.assign(c,core.crossDayPatch(prev,{stage:"visualize",learningStage:"visualize"},now)||{});
       c.memorizeRound=s.round;
       c.initialMemoryWeak=initialWeak;
       c.updatedAt=now.toISOString();
