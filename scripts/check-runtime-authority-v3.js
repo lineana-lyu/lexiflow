@@ -11,6 +11,7 @@ const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
 const reviewPolicy=read("public/review-policy-v3.js");
 const planPersistence=read("public/daily-plan-persistence-v3.js");
+const todayPlan=read("public/today-plan-v3.js");
 const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
@@ -32,7 +33,7 @@ function before(a,b){
 
 before("learning-core-v2.js","studyday-boundary-v3.js");
 before("studyday-boundary-v3.js","stage-transition-v2.js");
-before("today-plan-v2.js","daily-plan-persistence-v3.js");
+before("today-plan-v3.js","daily-plan-persistence-v3.js");
 before("daily-plan-persistence-v3.js","source-context-v3.js");
 before("stage-transition-v2.js","source-context-v3.js");
 before("source-context-v3.js","app.js");
@@ -49,10 +50,11 @@ assert(index.includes('<script src="./review-policy-v3.js"></script>'),"Review P
 assert(index.includes('<script src="./apply-guard-v3.js"></script>'),"Apply Guard V3 must be active");
 assert(index.includes('<script src="./daily-plan-persistence-v3.js"></script>'),"DailyPlan Persistence V3 must be active");
 assert(index.includes('<script src="./studyday-boundary-v3.js"></script>'),"StudyDay Boundary V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"]){
+assert(index.includes('<script src="./today-plan-v3.js"></script>'),"Today Plan V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js","today-plan-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js","public/studyday-boundary-v2.js"]){
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js","public/studyday-boundary-v2.js","public/today-plan-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
@@ -66,6 +68,10 @@ assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-wo
 assert(planPersistence.includes("LexiFlowDailyPlanPersistenceV3=Object.freeze"),"DailyPlan Persistence V3 must expose a narrow explicit bridge");
 assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 must identify persisted writes");
 assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
+assert(todayPlan.includes("LexiFlowTodayPlanV3=Object.freeze"),"Today Plan V3 must expose a narrow explicit bridge");
+assert(todayPlan.includes('todayPlanAuthority:"v3"'),"Today Plan V3 must identify its writes");
+assert(!todayPlan.includes("window.fetch =")&&!todayPlan.includes("window.fetch="),"Today Plan V3 must not mutate global fetch");
+assert(todayPlan.includes("selectFromPending")&&todayPlan.includes("moveBackToPending"),"Today Plan V3 must explicitly own Pending ↔ Today selection");
 assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay Boundary V3 must own the current runtime-day marker");
 assert(boundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay Boundary V3 must migrate the legacy runtime-day marker");
 assert(boundary.includes("localStorage.removeItem(LEGACY_RUNTIME_KEY)"),"StudyDay Boundary V3 must clean the legacy marker after migration");
