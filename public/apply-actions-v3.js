@@ -6,6 +6,7 @@
 
   let queued=false;
   let saving=false;
+  let restoring=false;
   let skipArmedUntil=0;
 
   const uid=()=>crypto.randomUUID?crypto.randomUUID():`apply-action-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -48,6 +49,21 @@
   function pauseAndReturn(){
     window.LexiFlowStudySessionV3?.pause?.();
     setTimeout(()=>location.reload(),100);
+  }
+
+  async function restoreDurableDraft(){
+    const input=document.getElementById("apply-text");
+    if(!input||String(input.value||"").trim()||restoring)return;
+    restoring=true;
+    try{
+      const data=await loadData();
+      const card=currentApplyCard(data);
+      const draft=String(card?.applyDraft||"");
+      if(!draft||String(input.value||"").trim())return;
+      input.value=draft;
+      input.dispatchEvent(new Event("input",{bubbles:true}));
+    }catch{}
+    finally{restoring=false;}
   }
 
   async function saveDraft(button){
@@ -127,6 +143,7 @@
   function decorate(){
     const stage=document.querySelector(".apply-learning-stage");
     if(!stage)return;
+    void restoreDurableDraft();
     if(stage.querySelector("[data-apply-actions-v3]"))return;
     const bar=document.createElement("div");
     bar.dataset.applyActionsV3="1";
