@@ -82,7 +82,7 @@
       advanced.dataset.settingsAdvanced = "1";
       advanced.style.cssText = "border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;";
       advanced.innerHTML = `<summary style="cursor:pointer;padding:16px 17px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center"><span><strong style="font-size:14px">高级设置</strong><span style="display:block;margin-top:4px;color:var(--muted);font-size:11px">一般无需调整</span></span><span style="color:var(--muted);font-size:12px">展开</span></summary><div data-settings-advanced-body></div>`;
-      const dataRows = rows().filter(row => ["导出学习数据","导入学习数据","清空学习数据","清除所有学习数据"].includes(clean(row.querySelector("h3")?.textContent)));
+      const dataRows = rows().filter(row => ["导出学习数据","导入学习数据","清空学习数据","清除所有学习数据","清除所有学习数据 · 高风险"].includes(clean(row.querySelector("h3")?.textContent)));
       if(dataRows[0]) list.insertBefore(advanced, dataRows[0]); else list.appendChild(advanced);
     }
     const body = advanced.querySelector("[data-settings-advanced-body]");
@@ -97,13 +97,8 @@
   function polishDataLabels(){
     const exportRow = rowByTitle("导出学习数据");
     const importRow = rowByTitle("导入学习数据");
-    const clearRow = rowByTitle("清空学习数据") || rowByTitle("清除所有学习数据");
     if(exportRow) setText(firstDescription(exportRow),"备份单词卡、学习进度和复习记录。");
     if(importRow) setText(firstDescription(importRow),"从此前导出的备份恢复学习数据。");
-    if(clearRow){
-      setText(clearRow.querySelector("h3"),"清除所有学习数据");
-      setText(firstDescription(clearRow),"永久删除当前设备上的全部单词卡、进度、复习记录和统计。");
-    }
   }
 
   function enhance(){
