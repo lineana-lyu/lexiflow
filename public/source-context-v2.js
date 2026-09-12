@@ -5,6 +5,7 @@
   const DRAFT_KEY = "lexiflow-source-context-draft-v2";
   let latestData = null;
   let scheduled = false;
+  let activeLibraryCardId = "";
   const sourceMap = new Map();
 
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -51,6 +52,7 @@
       sourceTitle:String(card?.sourceTitle||""),
       sourceContext:String(card?.sourceContext||""),
       sourceCapturedAt:String(card?.sourceCapturedAt||""),
+      sourceUpdatedAt:String(card?.sourceUpdatedAt||""),
     };
   }
   function hasSource(fields){
@@ -75,10 +77,11 @@
         for(const card of body.data.cards){
           const remembered=sourceMap.get(card.id);
           if(remembered){
-            if(!card.sourceType)card.sourceType=remembered.sourceType;
-            if(!card.sourceTitle)card.sourceTitle=remembered.sourceTitle;
-            if(!card.sourceContext)card.sourceContext=remembered.sourceContext;
-            if(!card.sourceCapturedAt)card.sourceCapturedAt=remembered.sourceCapturedAt;
+            card.sourceType=remembered.sourceType;
+            card.sourceTitle=remembered.sourceTitle;
+            card.sourceContext=remembered.sourceContext;
+            card.sourceCapturedAt=remembered.sourceCapturedAt;
+            card.sourceUpdatedAt=remembered.sourceUpdatedAt;
           }
           if(!known.has(card.id)&&card.stage==="select"){
             const fields={
@@ -86,11 +89,13 @@
               sourceTitle:String(draft.sourceTitle||"").trim(),
               sourceContext:String(draft.sourceContext||"").trim(),
               sourceCapturedAt:new Date().toISOString(),
+              sourceUpdatedAt:"",
             };
             card.sourceType=fields.sourceType;
             card.sourceTitle=fields.sourceTitle;
             card.sourceContext=fields.sourceContext;
             card.sourceCapturedAt=fields.sourceCapturedAt;
+            card.sourceUpdatedAt=fields.sourceUpdatedAt;
             sourceMap.set(card.id,fields);
             attachedNew=true;
           }
@@ -133,6 +138,7 @@
       .lexi-source-box{margin:14px 0;padding:16px;border:1px solid var(--line);border-radius:18px;background:rgba(120,140,132,.035)}
       .lexi-source-box-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}.lexi-source-box-head strong{font-size:14px}.lexi-source-box-head span{font-size:12px;color:var(--muted);line-height:1.5;text-align:right}
       .lexi-source-grid{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(220px,1.3fr);gap:10px}.lexi-source-grid .field{margin:0}.lexi-source-context-field{grid-column:1/-1}.lexi-source-box textarea{min-height:84px}.lexi-source-reminder{margin:10px 0 16px;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:rgba(120,140,132,.045);font-size:12px;line-height:1.65;color:var(--muted)}.lexi-source-reminder strong{display:block;color:var(--text);font-size:12px;margin-bottom:2px}.lexi-source-tag{display:inline-flex;margin-right:6px;padding:3px 7px;border-radius:999px;border:1px solid var(--line);font-size:11px;color:var(--muted)}
+      .lexi-library-source-editor{margin-top:18px;padding-top:18px;border-top:1px solid var(--line-soft,var(--line))}.lexi-library-source-editor h3{margin:0 0 4px;font-size:14px}.lexi-library-source-editor>p{margin:0 0 12px;color:var(--muted);font-size:11px;line-height:1.55}
       @media(max-width:720px){.lexi-source-grid{grid-template-columns:1fr}.lexi-source-context-field{grid-column:auto}.lexi-source-box-head{flex-direction:column}.lexi-source-box-head span{text-align:left}}
     `;document.head.appendChild(style);
   }
@@ -183,16 +189,76 @@
     if(kicker)kicker.insertAdjacentHTML("afterend",html);else host.insertAdjacentHTML("afterbegin",html);
   }
 
+  function libraryCard(){
+    if(!activeLibraryCardId||!Array.isArray(latestData?.cards))return null;
+    return latestData.cards.find(card=>String(card.id)===String(activeLibraryCardId))||null;
+  }
+
+  function librarySourceHtml(card){
+    const fields=sourceMap.get(card.id)||sourceFields(card);
+    const type=String(fields.sourceType||"other");
+    return `<div class="lexi-library-source-editor" data-library-source-editor="${esc(card.id)}"><h3>最初语境</h3><p>可以修正来源和当时的原句；不会改变学习阶段或复习时间。</p><div class="lexi-source-grid"><div class="field"><label>来源</label><select class="input" id="library-source-type">${Object.entries(labels).map(([key,label])=>`<option value="${key}" ${key===type?"selected":""}>${label}</option>`).join("")}</select></div><div class="field"><label>来源名称</label><input class="input" id="library-source-title" value="${esc(fields.sourceTitle||"")}" placeholder="例如：一本书、一个视频、一场对话" /></div><div class="field lexi-source-context-field"><label>当时的原句 / 场景</label><textarea class="textarea" id="library-source-context" placeholder="记录你第一次真正遇到这个词时的语境">${esc(fields.sourceContext||"")}</textarea></div></div></div>`;
+  }
+
+  function decorateLibraryEditor(){
+    const sentence=document.getElementById("library-edit-user-sentence");
+    if(!sentence)return;
+    const card=libraryCard();
+    if(!card)return;
+    const existing=document.querySelector("[data-library-source-editor]");
+    if(existing?.dataset.librarySourceEditor===String(card.id))return;
+    existing?.remove();
+    const holder=document.createElement("div");holder.innerHTML=librarySourceHtml(card);
+    const block=holder.firstElementChild;
+    const section=sentence.closest(".library-editor-copy-card");
+    if(section)section.appendChild(block);
+  }
+
+  function captureLibrarySourceDraft(){
+    const card=libraryCard();
+    if(!card)return;
+    const type=document.getElementById("library-source-type");
+    const title=document.getElementById("library-source-title");
+    const context=document.getElementById("library-source-context");
+    if(!type&&!title&&!context)return;
+    const previous=sourceMap.get(card.id)||sourceFields(card);
+    sourceMap.set(card.id,{
+      ...previous,
+      sourceType:String(type?.value||"other"),
+      sourceTitle:String(title?.value||"").trim(),
+      sourceContext:String(context?.value||"").trim(),
+      sourceCapturedAt:String(previous.sourceCapturedAt||card.sourceCapturedAt||new Date().toISOString()),
+      sourceUpdatedAt:new Date().toISOString(),
+    });
+  }
+
   function persistDraftFromUi(){
     const type=document.getElementById("lexi-source-type"),title=document.getElementById("lexi-source-title"),context=document.getElementById("lexi-source-context");
     if(!type&&!title&&!context)return;
     saveDraft({sourceType:String(type?.value||"other"),sourceTitle:String(title?.value||""),sourceContext:String(context?.value||"")});
   }
 
+  document.addEventListener("click",event=>{
+    const opener=event.target?.closest?.('[data-action="open-library-editor"][data-card-id],[data-library-card]');
+    if(opener){
+      activeLibraryCardId=String(opener.dataset.cardId||opener.dataset.libraryCard||"");
+      return;
+    }
+    const save=event.target?.closest?.('[data-action="save-library-card"]');
+    if(save)captureLibrarySourceDraft();
+    const back=event.target?.closest?.('[data-action="library-edit-back"]');
+    if(back)activeLibraryCardId="";
+  },true);
+
+  document.addEventListener("keydown",event=>{
+    const row=event.target?.closest?.("[data-library-card]");
+    if(row&&(event.key==="Enter"||event.key===" "))activeLibraryCardId=String(row.dataset.libraryCard||"");
+  },true);
+
   document.addEventListener("input",event=>{if(["lexi-source-title","lexi-source-context"].includes(event.target?.id))persistDraftFromUi();},true);
   document.addEventListener("change",event=>{if(event.target?.id==="lexi-source-type")persistDraftFromUi();},true);
 
-  function decorate(){injectStyle();decorateAdd();decorateStudy();}
+  function decorate(){injectStyle();decorateAdd();decorateStudy();decorateLibraryEditor();}
   function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});}
   function start(){const app=document.getElementById("app");if(!app)return;injectStyle();void refresh().then(decorate);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
