@@ -9,6 +9,7 @@ const exists=name=>fs.existsSync(path.join(root,name));
 const index=read("public/index.html");
 const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
+const reviewPolicy=read("public/review-policy-v3.js");
 const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
@@ -33,17 +34,22 @@ before("app.js","study-stage-surface-v3.js");
 before("study-stage-surface-v3.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 before("review-transaction-v3.js","review-session-v3.js");
+before("apply-actions-v3.js","review-policy-v3.js");
+before("review-policy-v3.js","visualize-actions-v3.js");
 assert(index.includes('<script src="./memorize-stage-v3.js"></script>'),"Memorize Stage V3 must be active");
 assert(index.includes('<script src="./source-context-v3.js"></script>'),"Source Context V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js"]){
+assert(index.includes('<script src="./review-policy-v3.js"></script>'),"Review Policy V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js"]){
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
 assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
+assert(reviewPolicy.includes("复习与巩固"),"Review Policy V3 must expose the simplified Review & Reinforcement settings surface");
+assert(!reviewPolicy.includes("复习方式")&&!reviewPolicy.includes("data-review-type"),"Review Policy V3 must not restore user-configurable question methods");
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
