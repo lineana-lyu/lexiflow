@@ -71,18 +71,18 @@ The only active Review execution path is:
 
 `memorize-v2.js` owns the two-round Memorize behavior and its persisted completion.
 
-## 2. Runtime-retired files
+## 2. Removed runtime shims
 
-The following files remain in repository source/history for rollback and comparison only, but **must not be loaded by `public/index.html`**:
+The following obsolete runtime files have been removed from the working tree. Their prior implementations remain available through Git history if rollback or comparison is ever needed:
 
 - `public/study-entry-v3.js`
 - `public/review-transition-v2.js`
 - `public/review-v2.js`
 - `public/review-session-state-v2.js`
 
-Do not re-add them to the runtime as a quick fix. Any missing study-entry behavior must be implemented in Study Session V3 or the narrow Study renderer bridge; any missing Review behavior must be implemented in Review Session V3, Review Transaction V3, or Learning Core.
+They must not be recreated as quick fixes. Any missing study-entry behavior belongs in Study Session V3 or the narrow Study renderer bridge; any missing Review behavior belongs in Review Session V3, Review Transaction V3, or Learning Core.
 
-Legacy localStorage keys may still be cleaned by `studyday-boundary-v2.js` during migration. Cleaning old residue does not make the old runtime active.
+`studyday-boundary-v2.js` may temporarily clean old localStorage keys left by previous application versions. Cleaning migration residue does not reactivate the removed runtimes.
 
 ## 3. Study invariants
 
@@ -115,13 +115,13 @@ Legacy localStorage keys may still be cleaned by `studyday-boundary-v2.js` durin
 `npm run check:learning` must use the V3 runtime checks. In particular:
 
 - `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain.
-- `scripts/check-runtime-authority-v3.js` verifies the active authority map and explicit Study renderer bridge.
+- `scripts/check-runtime-authority-v3.js` verifies the active authority map, explicit Study renderer bridge, and that removed shims stay absent.
 - `scripts/check-study-session-v3.js` verifies Study Session V3, explicit card-ID rendering, pause/resume ownership and that the old Study Entry guard is absent from runtime.
 - `scripts/check-review-session-v3.js` verifies Review session behavior.
 - `scripts/check-review-transaction-v3.js` verifies crash-safe Review transaction recovery.
 - existing StudyDay, Review policy, Advance Learning and Apply checks remain required.
 
-A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.
+A change that restores a removed study/review shim, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.
 
 ## 6. Next cleanup boundary
 
