@@ -8,12 +8,13 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const index=read("public/index.html");
 const quality=read("public/apply-quality-v3.js");
 const guard=read("public/apply-guard-v3.js");
-const feedbackFixes=read("public/feedback-fixes.js");
 const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
 assert(index.includes("apply-guard-v3.js"),"Apply Guard V3 must load in index.html");
+assert(!index.includes("feedback-fixes.js"),"retired feedback compatibility shim must not return to runtime");
+assert(!fs.existsSync(path.join(root,"public","feedback-fixes.js")),"retired feedback compatibility shim must stay deleted");
 assert(!index.includes('<script src="./apply-guard-v2.js"></script>'),"legacy Apply Guard V2 must not execute beside V3");
 assert(index.indexOf("apply-quality-v3.js")<index.indexOf("stage-transition-v3.js"),"Apply quality capture gate must register before authoritative stage completion");
 assert(quality.includes("correctionHeldBack:true"),"early failed Apply rounds must hold back the full correction");
@@ -35,7 +36,6 @@ assert(!guard.includes('document.querySelector(".apply-word-hero .target-word-te
 assert(guard.includes("event.stopImmediatePropagation()"),"invalid final Apply attempts must fail closed before stage completion");
 assert(transition.includes('stageTransitionAuthority:"v3"'),"approved Apply completion must persist through Stage Transition V3");
 
-assert(!feedbackFixes.includes("optionalSuggestion"),"legacy feedback compatibility must not downgrade required corrections into optional polish");
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
 
