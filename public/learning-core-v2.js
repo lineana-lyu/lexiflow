@@ -197,20 +197,12 @@
     const frozenToday = previousPlan?.date === dayKey(now) && previousPlan?.frozen;
     const order = frozenToday ? planIndexMap(previousPlan) : new Map();
     cards.sort((a,b)=>{
-      // A frozen StudyDay is a commitment: work that becomes eligible later today
-      // must not jump in front of tasks that were already in the plan. This also
-      // quarantines legacy activeLearningCards()[0] selection without changing UI.
       if(frozenToday){
         const aPlanned = order.has(a.id), bPlanned = order.has(b.id);
         if(aPlanned !== bPlanned) return aPlanned ? -1 : 1;
       }
-
-      // Within the frozen plan, semantic priority still matters. In particular a
-      // same-day Review Again repair keeps priority 70, so it moves behind the
-      // remaining normal Review items instead of returning to its original slot.
       const diff = learningPriority(a, now)-learningPriority(b, now);
       if(diff) return diff;
-
       const ai = order.has(a.id) ? order.get(a.id) : Number.MAX_SAFE_INTEGER;
       const bi = order.has(b.id) ? order.get(b.id) : Number.MAX_SAFE_INTEGER;
       if(ai !== bi) return ai-bi;
@@ -221,20 +213,31 @@
     return data;
   }
 
+  function earlyCompletionPatch(prev, today){
+    if(valueDayKey(prev?.earlyStudyOn) !== today) return {};
+    return {
+      lastEarlyStudiedOn:today,
+      earlyStudyOn:null,
+      earlyStudyAt:null,
+      earlyOriginalStageEligibleOn:null,
+    };
+  }
+
   function crossDayPatch(prev, next, now = new Date()){
     if(!prev || !next) return null;
     const today = dayKey(now);
+    const early = earlyCompletionPatch(prev,today);
     if(prev.stage === "select" && next.stage === "memorize1"){
-      return {stageEligibleOn:addDaysIso(now,1),selectedOn:today,memoryState:"learning",memorizeRound:1,inboxPending:false};
+      return {stageEligibleOn:addDaysIso(now,1),selectedOn:today,memoryState:"learning",memorizeRound:1,inboxPending:false,...early};
     }
     if(prev.stage === "memorize2" && next.stage === "visualize"){
-      return {stageEligibleOn:addDaysIso(now,1),memorizeCompletedOn:today,memoryState:"learning"};
+      return {stageEligibleOn:addDaysIso(now,1),memorizeCompletedOn:today,memoryState:"learning",...early};
     }
     if(prev.stage === "visualize" && next.stage === "apply"){
-      return {stageEligibleOn:addDaysIso(now,1),visualizeCompletedOn:today,memoryState:"learning"};
+      return {stageEligibleOn:addDaysIso(now,1),visualizeCompletedOn:today,memoryState:"learning",...early};
     }
     if(prev.stage === "apply" && next.stage === "review"){
-      return {stageEligibleOn:addDaysIso(now,1),applyCompletedOn:today,memoryState:"reinforcing",reviewStep:0,stableStep:0,nextReviewAt:addDaysIso(now,1),initialReviewPending:false};
+      return {stageEligibleOn:addDaysIso(now,1),applyCompletedOn:today,memoryState:"reinforcing",reviewStep:0,stableStep:0,nextReviewAt:addDaysIso(now,1),initialReviewPending:false,...early};
     }
     return null;
   }
