@@ -14,9 +14,11 @@ assert(core,"learning core did not initialize");
 
 const indexHtml=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const policyIndex=indexHtml.indexOf("review-policy-v2.js");
-const visualIndex=indexHtml.indexOf("visualize-v2.js");
+const visualIndex=indexHtml.indexOf("visualize-actions-v3.js");
 assert(policyIndex>=0,"review-policy-v2.js must be loaded by index.html");
+assert(visualIndex>=0,"visualize-actions-v3.js must be loaded by index.html");
 assert(policyIndex<visualIndex,"Review policy controls must load before later stage decorators");
+assert(!indexHtml.includes('<script src="./visualize-v2.js"></script>'),"retired Visualize V2 actions must not return to runtime");
 
 const policyUi=fs.readFileSync(path.join(root,"public","review-policy-v2.js"),"utf8");
 assert(policyUi.includes("复习与巩固"),"settings must describe this layer as Review & Reinforcement");
