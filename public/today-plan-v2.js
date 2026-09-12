@@ -133,67 +133,49 @@
     const title=Array.from(document.querySelectorAll("h1,h2")).find(node=>node.textContent.trim()==="今日学习");
     if(!title)return;
     const plan=latestData.dailyPlan||core.buildDailyPlan(latestData), signature=planSignature(plan), existing=document.getElementById("lexi-today-plan");
-
-    const stats=document.querySelector(".grid.cols-4");
-    if(stats)stats.classList.add("lexi-home-legacy-summary");
-    const oldToday=document.querySelector(".today-card");
-    if(oldToday)oldToday.classList.add("lexi-home-legacy-summary");
-
+    const stats=document.querySelector(".grid.cols-4");if(stats)stats.classList.add("lexi-home-legacy-summary");
+    const oldToday=document.querySelector(".today-card");if(oldToday)oldToday.classList.add("lexi-home-legacy-summary");
     if(!existing||existing.dataset.signature!==signature){
       const holder=document.createElement("div");holder.innerHTML=homePlanHtml(signature);const next=holder.firstElementChild;
-      if(existing)existing.replaceWith(next);
-      else{
-        const head=title.closest(".page-head")||title.closest("header,.header");
-        if(head)head.insertAdjacentElement("afterend",next);else title.insertAdjacentElement("afterend",next);
-      }
+      if(existing)existing.replaceWith(next);else{const head=title.closest(".page-head")||title.closest("header,.header");if(head)head.insertAdjacentElement("afterend",next);else title.insertAdjacentElement("afterend",next);}
     }
-    document.querySelectorAll('[data-route="add"]').forEach(button=>{if(button.textContent.includes("添加单词"))setText(button,button.textContent.replace("添加单词","添加单词"));});
   }
 
   function decorateAdd(){
     const save=document.querySelector('[data-action="save-card"].save-learning-card,[data-action="save-card"]');
-    if(save&&!document.querySelector(".study-card-focus")){
-      setText(save,"保存到单词库");save.title="保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";
-    }
+    if(save&&!document.querySelector(".study-card-focus")){setText(save,"保存到单词库");save.title="保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";}
     Array.from(document.querySelectorAll("h1,h2")).forEach(node=>{if(["选词制卡","查词并收集"].includes(node.textContent.trim()))setText(node,"查词并添加");});
-    document.querySelectorAll(".toast").forEach(node=>{
-      if(node.textContent.includes("卡片已保存")||node.textContent.includes("已加入收集箱"))setText(node,"已保存到单词库 · 待学习");
-    });
+    document.querySelectorAll(".toast").forEach(node=>{if(node.textContent.includes("卡片已保存")||node.textContent.includes("已加入收集箱"))setText(node,"已保存到单词库 · 待学习");});
   }
 
   function libraryCounts(){
     const cards=latestData?.cards||[];
-    return {
-      all:cards.length,
-      pending:cards.filter(card=>card.stage==="select"&&card.inboxPending===true).length,
-      learning:cards.filter(card=>!(card.stage==="select"&&card.inboxPending===true)&&card.memoryState!=="stable").length,
-      stable:cards.filter(card=>card.memoryState==="stable").length,
-    };
+    return {all:cards.length,pending:cards.filter(card=>card.stage==="select"&&card.inboxPending===true).length,learning:cards.filter(card=>!(card.stage==="select"&&card.inboxPending===true)&&card.memoryState!=="stable").length,stable:cards.filter(card=>card.memoryState==="stable").length};
   }
   function cardGroup(card){
     if(card?.stage==="select"&&card?.inboxPending===true)return "pending";
     if(card?.memoryState==="stable")return "stable";
     return "learning";
   }
-  function filterHtml(){
-    const counts=libraryCounts();
+  function libraryBarSignature(counts,slots){return JSON.stringify({filter:libraryFilter,counts,slots});}
+  function filterHtml(signature,counts){
     const options=[["all","全部"],["pending","待学习"],["learning","学习中"],["stable","长期稳定"]];
-    return `<div class="lexi-library-filter" data-library-filter-bar>${options.map(([key,label])=>`<button type="button" data-library-filter="${key}" class="${libraryFilter===key?"is-active":""}">${label}<span>${counts[key]}</span></button>`).join("")}<span class="lexi-library-pending-note">“待学习”就是已保存、尚未加入 Today 的单词</span></div>`;
+    return `<div class="lexi-library-filter" data-library-filter-bar data-library-filter-signature="${esc(signature)}">${options.map(([key,label])=>`<button type="button" data-library-filter="${key}" class="${libraryFilter===key?"is-active":""}">${label}<span>${counts[key]}</span></button>`).join("")}<span class="lexi-library-pending-note">“待学习”就是已保存、尚未加入 Today 的单词</span></div>`;
   }
   function decorateLibrary(){
     if(!latestData)return;
-    const title=Array.from(document.querySelectorAll("h1,h2")).find(node=>node.textContent.trim()==="单词库");
-    if(!title)return;
-    const search=document.querySelector(".search-row");
-    let bar=document.querySelector("[data-library-filter-bar]");
-    if(!bar){const holder=document.createElement("div");holder.innerHTML=filterHtml();bar=holder.firstElementChild;if(search)search.insertAdjacentElement("afterend",bar);}
-    else{const holder=document.createElement("div");holder.innerHTML=filterHtml();bar.replaceWith(holder.firstElementChild);bar=holder.firstElementChild;}
+    const title=Array.from(document.querySelectorAll("h1,h2")).find(node=>node.textContent.trim()==="单词库");if(!title)return;
+    const plan=latestData.dailyPlan||core.buildDailyPlan(latestData), slots=Number(plan.remainingSelectSlots||0), counts=libraryCounts(), signature=libraryBarSignature(counts,slots);
+    const search=document.querySelector(".search-row");let bar=document.querySelector("[data-library-filter-bar]");
+    if(!bar||bar.dataset.libraryFilterSignature!==signature){const holder=document.createElement("div");holder.innerHTML=filterHtml(signature,counts);const next=holder.firstElementChild;if(bar)bar.replaceWith(next);else if(search)search.insertAdjacentElement("afterend",next);bar=next;}
 
-    const plan=latestData.dailyPlan||core.buildDailyPlan(latestData), slots=Number(plan.remainingSelectSlots||0);
     document.querySelectorAll("[data-library-card]").forEach(row=>{
       const card=cardById(row.dataset.libraryCard);if(!card)return;
-      const group=cardGroup(card), cells=row.querySelectorAll("td"), show=libraryFilter==="all"||libraryFilter===group;
-      row.hidden=!show;
+      const group=cardGroup(card), show=libraryFilter==="all"||libraryFilter===group;
+      const stateSig=JSON.stringify({group,show,slots,stage:card.stage,inbox:card.inboxPending===true,memory:card.memoryState});
+      if(row.dataset.tpLibraryState===stateSig)return;
+      row.dataset.tpLibraryState=stateSig;row.hidden=!show;
+      const cells=row.querySelectorAll("td");
       if(cells[4]){
         if(group==="pending")cells[4].innerHTML='<span class="pill">待学习</span>';
         else if(card.stage==="select"&&!card.inboxPending)cells[4].innerHTML='<span class="pill blue">今日待确认</span>';
@@ -233,8 +215,7 @@
 
   function decorate(){injectStyle();decorateHome();decorateAdd();decorateLibrary();}
   document.addEventListener("click",event=>{
-    const filter=event.target?.closest?.("[data-library-filter]");
-    if(filter){event.preventDefault();event.stopImmediatePropagation();libraryFilter=filter.dataset.libraryFilter||"all";decorateLibrary();return;}
+    const filter=event.target?.closest?.("[data-library-filter]");if(filter){event.preventDefault();event.stopImmediatePropagation();libraryFilter=filter.dataset.libraryFilter||"all";decorateLibrary();return;}
     const pendingRoute=event.target?.closest?.("[data-tp-library-pending]");if(pendingRoute)libraryFilter="pending";
     const pick=event.target?.closest?.("[data-tp-pick]");if(pick){event.preventDefault();event.stopImmediatePropagation();void selectFromPending(pick.dataset.tpPick);return;}
     const unpick=event.target?.closest?.("[data-tp-unpick]");if(unpick){event.preventDefault();event.stopImmediatePropagation();void moveBackToPending(unpick.dataset.tpUnpick);return;}
