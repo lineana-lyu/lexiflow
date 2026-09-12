@@ -15,7 +15,7 @@
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();
-    return payload?.data||null;
+    return payload?.data?core.normalizeData(payload.data):null;
   }
 
   async function persist(data){
@@ -34,7 +34,8 @@
   function currentApplyCard(data){
     const id=currentCardId();
     if(!id||!Array.isArray(data?.cards))return null;
-    return data.cards.find(card=>String(card.id)===id&&card.stage==="apply")||null;
+    const card=data.cards.find(item=>String(item.id)===id)||null;
+    return card&&core.canonicalStage(card)==="apply"?card:null;
   }
 
   function currentDraft(card){
@@ -135,8 +136,9 @@
       card.applySkipped=true;
       card.applySkippedOn=core.dayKey(now);
       card.stage="review";
+      card.learningStage="review";
       card.initialReviewPending=false;
-      Object.assign(card,core.crossDayPatch(prev,{stage:"review"},now)||{});
+      Object.assign(card,core.crossDayPatch(prev,{stage:"review",learningStage:"review"},now)||{});
       card.updatedAt=now.toISOString();
       appendActivity(data,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),commandId});
       await persist(data);
