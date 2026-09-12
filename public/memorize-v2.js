@@ -6,6 +6,7 @@
   const KEY = "lexiflow-memorize-v2";
   let data = null;
   let queued = false;
+  let saving = false;
 
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `mem-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -37,6 +38,13 @@
     if(!activeId)return null;
     const card=data.cards.find(item=>item.id===activeId)||null;
     return card&&["memorize1","memorize2"].includes(card.stage)?card:null;
+  }
+
+  function commandId(cardId,now=new Date()){
+    return `stage:${core.dayKey(now)}:${String(cardId)}:memorize`;
+  }
+  function commandCommitted(value,id){
+    return Array.isArray(value?.activities)&&value.activities.some(item=>String(item.commandId||"")===id);
   }
 
   function legacyEnResult(card){
@@ -89,18 +97,42 @@
   }
 
   async function complete(card,s){
-    await refresh(); const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
-    const r=s.results[s.round]||{}, weak=!(r.en===true&&r.zh===true), now=new Date();
-    const prev={...c,stage:"memorize2"};
-    c.stage="visualize";Object.assign(c,core.crossDayPatch(prev,{stage:"visualize"},now)||{});c.memorizeRound=s.round;c.initialMemoryWeak=weak;c.updatedAt=now.toISOString();
-    c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[]; c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:r.en===true,zhToEn:r.zh===true,initialMemoryWeak:weak,at:now.toISOString()});
-    data.activities=Array.isArray(data.activities)?data.activities:[]; data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:weak,at:now.toISOString()});
-    await save(data); clearSession(card.id); location.reload();
+    if(saving)return;
+    saving=true;
+    try{
+      await refresh();
+      const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
+      const now=new Date(),cmd=commandId(c.id,now);
+      if(commandCommitted(data,cmd)){clearSession(card.id);location.reload();return;}
+      if(!["memorize1","memorize2"].includes(c.stage)){clearSession(card.id);location.reload();return;}
+
+      const round1=s.results?.[1]||{}, final=s.results?.[s.round]||{};
+      const initialWeak=!(round1.en===true&&round1.zh===true);
+      const finalRoundPassed=final.en===true&&final.zh===true;
+      const prev={...c,stage:"memorize2"};
+      c.stage="visualize";
+      Object.assign(c,core.crossDayPatch(prev,{stage:"visualize"},now)||{});
+      c.memorizeRound=s.round;
+      c.initialMemoryWeak=initialWeak;
+      c.updatedAt=now.toISOString();
+      c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[];
+      c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:final.en===true,zhToEn:final.zh===true,initialMemoryWeak:initialWeak,finalRoundPassed,at:now.toISOString()});
+      data.activities=Array.isArray(data.activities)?data.activities:[];
+      data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:initialWeak,finalRoundPassed,commandId:cmd,at:now.toISOString()});
+      await save(data);
+      clearSession(card.id);
+      location.reload();
+    }catch(err){
+      console.error("memorize completion failed",err);
+      saving=false;
+      window.alert("记忆阶段没有保存成功，请重试。当前这一轮的答案仍保留在本机。");
+    }
   }
 
   async function act(btn){
     const card=currentCard(); if(!card)return; const s=session(card), a=btn.dataset.m2;
     if(a==="speak"){ try{if(typeof window.LexiFlowNaturalTts?.play==="function"&&await window.LexiFlowNaturalTts.play(card.word))return;}catch{}; try{const u=new SpeechSynthesisUtterance(card.word);u.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(u);}catch{}; return; }
+    if(saving)return;
     if(a==="reveal"){s.revealed=true;setSession(card.id,s);render();return;}
     if(a==="rate"){s.results[s.round].en=btn.dataset.ok==="1";s.direction="zh-en";s.revealed=false;s.draft="";s.checked=false;s.correct=null;setSession(card.id,s);render();return;}
     if(a==="check"){const input=document.getElementById("lexi-m2-answer"),v=String(input?.value||s.draft||"").trim();if(!v){input?.focus();return;}s.draft=v;s.checked=true;s.correct=norm(v)===norm(card.word);s.results[s.round].zh=s.correct;setSession(card.id,s);render();return;}
