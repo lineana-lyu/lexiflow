@@ -1,0 +1,29 @@
+const fs=require("fs");
+const path=require("path");
+
+function assert(condition,message){if(!condition)throw new Error(message);}
+const root=path.join(__dirname,"..");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+
+const index=read("public/index.html");
+const source=read("public/review-session-v3.js");
+const transition=read("public/review-transition-v2.js");
+const boundary=read("public/studyday-boundary-v2.js");
+
+assert(index.includes("review-session-v3.js"),"Review Session V3 must be loaded by index.html");
+assert(index.indexOf("app.js")<index.indexOf("review-session-v3.js"),"Review V3 should attach after the legacy app has rendered while still using capture-phase click authority");
+assert(source.includes("plan.review.filter"),"Review V3 must derive its queue from frozen DailyPlan.review");
+assert(source.includes("plan.frozen!==true"),"Review V3 must require a frozen Today plan");
+assert(source.includes("core.reviewSchedulePatch"),"Review V3 must delegate memory transitions to Learning Core");
+assert(source.includes('body:JSON.stringify({data:normalized,reviewAuthority:"v3"})'),"Review V3 writes must identify themselves as Core-authoritative");
+assert(source.includes('event.target?.closest?.(\'[data-action="start-review"]\')'),"Review V3 must intercept the existing Review entry point");
+assert(source.includes("event.stopImmediatePropagation()"),"Review V3 must prevent legacy startReview from building a dueCards queue");
+assert(source.includes("repairTail"),"Review V3 must keep failed normal recalls for one same-day repair tail");
+assert(source.includes("reviewCount proves this exact attempt already committed"),"Review V3 must document restart-safe attempt idempotency");
+assert(source.includes("session.paused=true"),"explicit Review exit must preserve a resumable paused session");
+assert(source.includes("if(Number(card.reviewCount||0)<=baseline)"),"resume must not double-commit an already persisted Review attempt");
+assert(!source.includes("dueCards()"),"Review V3 must never rebuild its queue from every due card");
+assert(transition.includes('body?.reviewAuthority==="v3"'),"legacy Review transition must bypass V3 authoritative writes");
+assert(boundary.includes("lexiflow-review-session-v3"),"StudyDay boundary must expire Review V3 UI/session state");
+
+console.log("Review Session V3 contract checks passed.");
