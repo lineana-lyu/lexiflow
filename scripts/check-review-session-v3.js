@@ -9,7 +9,7 @@ const exists=name=>fs.existsSync(path.join(root,name));
 const index=read("public/index.html");
 const source=read("public/review-session-v3.js");
 const transaction=read("public/review-transaction-v3.js");
-const boundary=read("public/studyday-boundary-v2.js");
+const boundary=read("public/studyday-boundary-v3.js");
 const app=read("public/app.js");
 
 assert(index.includes("review-session-v3.js"),"Review Session V3 must be loaded by index.html");
@@ -36,6 +36,8 @@ assert(source.includes("if(Number(card.reviewCount||0)<=baseline)"),"resume must
 assert(!source.includes("dueCards()"),"Review V3 must never rebuild its queue from every due card");
 assert(transaction.includes("pendingCommit"),"Review V3 crash recovery must remain delegated to Review Transaction V3");
 assert(!exists("public/review-transition-v2.js"),"retired Review transition shim must stay deleted");
-assert(boundary.includes("lexiflow-review-session-v3"),"StudyDay boundary must expire Review V3 UI/session state");
+assert(!exists("public/studyday-boundary-v2.js"),"retired StudyDay Boundary V2 must stay deleted");
+assert(boundary.includes("lexiflow-review-session-v3"),"StudyDay Boundary V3 must expire Review V3 UI/session state");
+assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"Review recovery must be guarded by the V3 StudyDay boundary");
 
 console.log("Review Session V3 contract checks passed.");
