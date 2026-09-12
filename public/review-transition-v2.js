@@ -75,6 +75,10 @@
   }
 
   function transformReviewMutations(body){
+    if(body?.reviewAuthority==="v3"){
+      pendingIntent=null;
+      return{body,failed:false};
+    }
     if(!body?.data||!Array.isArray(body.data.cards)||!snapshot?.cards)return{body,failed:false};
     const data=body.data;
     let failed=false;
@@ -151,10 +155,9 @@
     return response;
   };
 
-  // The legacy app may still advance its in-memory Review cursor, but the persisted
-  // interval/state is rewritten here from Learning Core before it reaches storage.
-  // This keeps a seamless multi-card Review session without giving legacy +3/+1 logic
-  // authority over Review Again or Stable scheduling.
+  // Legacy Review remains as a fallback path. Review Session V3 marks its own writes
+  // with reviewAuthority="v3", so those Core-authored transitions pass through here
+  // untouched while old app.js saves are still corrected and deduplicated.
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.('[data-action="review-rate"],[data-action="initial-review-rate"]');
     if(!button)return;
