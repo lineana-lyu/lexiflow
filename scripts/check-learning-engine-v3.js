@@ -27,7 +27,7 @@ assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memor
 
 const index=read("public/index.html");
 const runtimeOrder=[
-  "learning-core-v2.js","studyday-boundary-v2.js","stage-transition-v2.js","learning-engine-v2.js",
+  "learning-core-v2.js","studyday-boundary-v3.js","stage-transition-v2.js","learning-engine-v2.js",
   "today-plan-v2.js","daily-plan-persistence-v3.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
   "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
   "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"
@@ -39,9 +39,9 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js"]){
+for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"]){
   assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
-  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
 }
 
 const sourceContext=read("public/source-context-v3.js");
@@ -53,6 +53,9 @@ assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-wo
 const planPersistence=read("public/daily-plan-persistence-v3.js");
 assert(!planPersistence.includes("window.fetch="),"DailyPlan persistence must be explicit rather than a global fetch side effect");
 assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan persistence writes must identify V3 authority");
+const studyDayBoundary=read("public/studyday-boundary-v3.js");
+assert(studyDayBoundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay boundary must own the V3 runtime-day marker");
+assert(studyDayBoundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay boundary must migrate the prior runtime-day marker");
 
 const todayUi=read("public/today-plan-v2.js");
 assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
