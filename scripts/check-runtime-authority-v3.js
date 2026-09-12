@@ -10,7 +10,9 @@ const index=read("public/index.html");
 const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
 const studySession=read("public/study-session-v3.js");
-const studyResume=read("public/study-resume-v2.js");
+const studyDrafts=read("public/study-drafts-v3.js");
+const studySurface=read("public/study-stage-surface-v3.js");
+const visualActions=read("public/visualize-actions-v3.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
 const memorize=read("public/memorize-v2.js");
@@ -25,17 +27,17 @@ function before(a,b){
 }
 
 before("stage-transition-v2.js","app.js");
-before("app.js","study-session-v3.js");
+before("app.js","study-stage-surface-v3.js");
+before("study-stage-surface-v3.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 before("review-transaction-v3.js","review-session-v3.js");
 assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 guard must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"legacy Review transition shim must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy Review V2 UI must be retired from the runtime load chain");
 assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy Review V2 session state must be retired from the runtime load chain");
-assert(!exists("public/study-entry-v3.js"),"retired Study Entry V3 file must stay deleted; use git history for rollback");
-assert(!exists("public/review-transition-v2.js"),"retired Review transition shim must stay deleted");
-assert(!exists("public/review-v2.js"),"retired Review V2 UI file must stay deleted");
-assert(!exists("public/review-session-state-v2.js"),"retired Review V2 session-state file must stay deleted");
+assert(!index.includes('<script src="./study-resume-v2.js"></script>'),"legacy-named Study Resume V2 must be retired from runtime");
+assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy-named Visualize V2 actions must be retired from runtime");
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js"]){assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);}
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
@@ -73,6 +75,8 @@ assert(!app.includes('if(action===\"memory-rate\")'),"app.js must not retain leg
 assert(!app.includes('if(action===\"reveal\")'),"app.js must not retain legacy Memorize reveal state");
 assert(app.includes("data-lexi-memorize-shell"),"app.js should expose only a passive Memorize render host");
 
+assert(studySurface.includes("data-study-stage-host-v3"),"Study Surface V3 must quarantine legacy stage bodies while authoritative renderers load");
+assert(studySurface.includes("const ROOTS=Object.freeze"),"Study Surface V3 must recognize the active stage renderer roots");
 assert(studySession.includes("plannedLearningIds"),"Study Session V3 must build learning work from the frozen Today Plan");
 assert(studySession.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must call the explicit renderer bridge");
 assert(studySession.includes("view.openCard(card.id)"),"Study Session V3 must open the exact planned card ID");
@@ -84,8 +88,11 @@ assert(!studySession.includes("activeLearningCards()[0]"),"Study Session V3 must
 assert(app.includes("window.LexiFlowStudyRenderer=Object.freeze"),"app.js must expose only a narrow Study renderer bridge");
 assert(!app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"app renderer must not fall back to legacy queue selection");
 assert(app.includes("window.LexiFlowStudySessionV3?.open"),"legacy button handler must delegate to Study Session V3 instead of choosing work itself");
-assert(!studyResume.includes("resumeIfNeeded"),"draft recovery must not compete with Study Session V3 for auto-resume");
-assert(!studyResume.includes("setActive("),"draft recovery must not persist a second active-study authority");
+assert(!studyDrafts.includes("resumeIfNeeded"),"draft recovery must not compete with Study Session V3 for auto-resume");
+assert(!studyDrafts.includes("setActive("),"draft recovery must not persist a second active-study authority");
+assert(studyDrafts.includes("core.canonicalStage(card)"),"Study Drafts V3 must bind recovery to the canonical stage model");
+assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize Actions V3 must use canonical stage identity");
+assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize Actions V3 must own the explicit skip action marker");
 
 assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
 assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
