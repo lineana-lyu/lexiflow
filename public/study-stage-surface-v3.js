@@ -115,6 +115,7 @@
     queued=true;
     requestAnimationFrame(async()=>{
       queued=false;
+      decorateLegacyBadges();
       await refresh();
       decorate();
     });
@@ -124,6 +125,7 @@
     injectStyle();
     const app=document.getElementById("app");
     if(!app)return;
+    decorateLegacyBadges();
     void refresh().then(decorate);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
   }
