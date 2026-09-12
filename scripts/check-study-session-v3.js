@@ -26,15 +26,21 @@ assert(session.includes('const KEY="lexiflow-study-session-v3"'),"Study Session 
 assert(session.includes('const LEARNING_KEYS=["memorize","visualize","apply","select"]'),"Study Session V3 must preserve Today learning-stage order after Review");
 assert(session.includes("plannedLearningIds"),"Study Session V3 must derive its queue from the frozen DailyPlan");
 assert(session.includes("current.review")&&session.includes("return[]"),"Study Session V3 must refuse learning while Today Review remains");
-assert(session.includes("legacyFirstActiveId"),"transitional renderer compatibility must fail closed if legacy selection disagrees with DailyPlan");
+assert(session.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must use the explicit renderer bridge");
+assert(session.includes("view.openCard(card.id)"),"Study Session V3 must open the exact planned card ID");
+assert(!session.includes("legacyFirstActiveId"),"Study Session V3 must not consult the legacy first-active queue");
 assert(session.includes("event.stopImmediatePropagation()"),"Study Session V3 must intercept the old continue-learning authority before app.js");
 assert(session.includes("pauseSession"),"Study Session V3 must distinguish user exit from crash/restart resume");
 assert(session.includes("maybeResume"),"Study Session V3 must resume an unpaused same-day session after reload");
 assert(session.includes("window.LexiFlowStudySessionV3"),"Study Session V3 must expose a narrow runtime control surface");
 assert(!session.includes("activeLearningCards()[0]"),"Study Session V3 must never choose work from the legacy activeLearningCards queue");
 
-assert(app.includes("function startStudy(cardId)"),"legacy renderer must retain explicit-card rendering support during extraction");
-assert(app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"renderer extraction assumption changed unexpectedly");
+assert(app.includes("function startStudy(cardId)"),"renderer must retain explicit-card rendering support");
+assert(app.includes("window.LexiFlowStudyRenderer=Object.freeze"),"app renderer must expose a narrow explicit-card bridge");
+assert(app.includes("openCard(cardId){return startStudy"),"renderer bridge must call startStudy with a card ID");
+assert(!app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"renderer must not fall back to the legacy active-learning queue");
+assert(!app.includes('if(action==="continue-learning"){startStudy();return;}'),"legacy continue-learning must not invoke a no-argument renderer path");
+assert(app.includes("window.LexiFlowStudySessionV3?.open"),"legacy continue-learning handler must delegate to Study Session V3 if it is reached");
 
 assert(!resume.includes("resumeIfNeeded"),"study-resume-v2 must no longer own session auto-resume");
 assert(!resume.includes("setActive("),"study-resume-v2 must no longer persist a competing active-session authority");
