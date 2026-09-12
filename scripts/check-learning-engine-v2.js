@@ -32,7 +32,7 @@ eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today or
 assert(core.PLAN_VERSION === 2,"DailyPlan contract version changed unexpectedly");
 
 const indexHtml = fs.readFileSync(path.join(root,"public","index.html"),"utf8");
-const requiredOrder = ["learning-core-v2.js","stage-transition-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","visualize-v2.js","apply-guard-v2.js"];
+const requiredOrder = ["learning-core-v2.js","stage-transition-v2.js","learning-engine-v2.js","today-plan-v2.js","source-context-v2.js","app.js","memorize-v2.js","study-resume-v2.js","review-v2.js","review-session-state-v2.js","visualize-v2.js","apply-guard-v2.js"];
 let previousIndex = -1;
 for(const file of requiredOrder){
   const index = indexHtml.indexOf(file);
