@@ -3,7 +3,8 @@
 
   const KEY="lexiflow-review-resume-v2";
   const previousFetch=window.fetch.bind(window);
-  let data=null, queued=false, autoResuming=false;
+  const core=window.LexiFlowLearningCore;
+  let data=null, queued=false, autoResuming=false, leavingDeferred=false;
 
   function parseBody(init){if(!init||typeof init.body!=="string")return null;try{return JSON.parse(init.body);}catch{return null;}}
   window.fetch=async function lexiReviewFetch(input,init={}){
@@ -27,6 +28,7 @@
   const load=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"?x:{};}catch{return {};}};
   const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x));}catch{}};
   const clear=()=>{try{localStorage.removeItem(KEY);}catch{}};
+  const today=()=>core?.dayKey?core.dayKey(new Date()):new Date().toISOString().slice(0,10);
 
   async function refresh(){
     try{const r=await previousFetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}
@@ -40,15 +42,56 @@
     return data.cards.find(x=>String(x.word||"").trim().toLowerCase()===word)||null;
   }
 
-  function typeFor(card){
-    const modes=(card.imageData||card.imageUrl)?["en-zh","zh-en","image-en"]:["en-zh","zh-en"];
-    return modes[Number(card.reviewCount||0)%modes.length];
+  function typeSettings(card){
+    const settings=data?.settings||{};
+    const enabled={enZh:true,zhEn:true,imageEn:true,...(settings.reviewTypes||{})};
+    const weights={enZh:30,zhEn:50,imageEn:20,...(settings.reviewTypeWeights||{})};
+    const options=[];
+    if(enabled.enZh!==false)options.push({type:"en-zh",weight:Math.max(1,Number(weights.enZh)||30)});
+    if(enabled.zhEn!==false)options.push({type:"zh-en",weight:Math.max(1,Number(weights.zhEn)||50)});
+    if(enabled.imageEn!==false&&(card.imageData||card.imageUrl))options.push({type:"image-en",weight:Math.max(1,Number(weights.imageEn)||20)});
+    if(!options.length)options.push({type:"zh-en",weight:1});
+    return options;
   }
 
+  function hashSeed(value){
+    let h=2166136261;
+    for(const ch of String(value||"")){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}
+    return h>>>0;
+  }
+
+  function typeFor(card){
+    const options=typeSettings(card);
+    const total=options.reduce((sum,item)=>sum+item.weight,0);
+    let target=hashSeed(`${card.id}:${Number(card.reviewCount||0)}`)%total;
+    for(const item of options){if(target<item.weight)return item.type;target-=item.weight;}
+    return options[0].type;
+  }
+
+  function typeAvailable(card,type){return typeSettings(card).some(item=>item.type===type);}
+
   function activeFor(card){
-    const type=typeFor(card), stored=load().active;
-    if(stored&&stored.cardId===card.id&&Number(stored.reviewCount)===Number(card.reviewCount||0)&&stored.type===type)return stored;
-    const next={cardId:card.id,reviewCount:Number(card.reviewCount||0),type,revealed:false,draft:"",checked:false,correct:null};save({active:next});return next;
+    const stored=load().active;
+    if(stored&&stored.cardId===card.id&&Number(stored.reviewCount)===Number(card.reviewCount||0)&&typeAvailable(card,stored.type))return stored;
+    const next={cardId:card.id,reviewCount:Number(card.reviewCount||0),type:typeFor(card),revealed:false,draft:"",checked:false,correct:null};save({active:next});return next;
+  }
+
+  function plannedToday(card){
+    const plan=data?.dailyPlan;
+    if(!plan||plan.date!==today()||plan.frozen!==true||!Array.isArray(plan.review))return true;
+    return plan.review.includes(card.id);
+  }
+
+  function exitDeferredCard(card){
+    if(!card||plannedToday(card)||leavingDeferred)return false;
+    leavingDeferred=true;
+    clear();
+    requestAnimationFrame(()=>{
+      const exit=Array.from(document.querySelectorAll('[data-route="review"]')).find(node=>/退出复习/.test(node.textContent||""))||document.querySelector('[data-route="review"]');
+      if(exit)exit.click();else location.reload();
+      setTimeout(()=>{leavingDeferred=false;},250);
+    });
+    return true;
   }
 
   function injectStyle(){
@@ -65,6 +108,7 @@
     injectStyle();
     const host=document.querySelector(".review-depth-stage .study-card");if(!host)return;
     const card=currentCard();if(!card)return;
+    if(exitDeferredCard(card))return;
     const a=activeFor(card), key=`${card.id}:${card.reviewCount}:${a.type}`;if(host.dataset.lexiR2===key)return;host.dataset.lexiR2=key;
     const center=host.querySelector(".study-center");if(!center)return;
     host.querySelector(".lexi-r2")?.remove();host.querySelector(".lexi-r2-badge")?.remove();
@@ -108,7 +152,7 @@
   function resumeIfNeeded(){
     const a=load().active;if(!a||autoResuming||document.querySelector(".review-depth-stage"))return;
     const home=Array.from(document.querySelectorAll("h1,h2")).some(x=>x.textContent.trim()==="今日学习");if(!home)return;
-    const card=data?.cards?.find(x=>x.id===a.cardId);if(!card||card.stage!=="review"||!card.nextReviewAt||new Date(card.nextReviewAt).getTime()>Date.now()){clear();return;}
+    const card=data?.cards?.find(x=>x.id===a.cardId);if(!card||card.stage!=="review"||!card.nextReviewAt||new Date(card.nextReviewAt).getTime()>Date.now()||!plannedToday(card)){clear();return;}
     const button=document.querySelector('[data-action="start-review"]');if(button){autoResuming=true;setTimeout(()=>{button.click();autoResuming=false;},120);}
   }
 
