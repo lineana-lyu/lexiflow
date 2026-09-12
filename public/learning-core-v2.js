@@ -5,6 +5,7 @@
   const STABLE_INTERVALS = Object.freeze([30, 45, 68, 90]);
   const TODAY_ORDER = Object.freeze(["review", "memorize", "visualize", "apply", "select"]);
   const PLAN_VERSION = 2;
+  const REVIEW_INTELLIGENT_CAP = 20;
 
   function dayKey(input = new Date()){
     const d = input instanceof Date ? input : new Date(input);
@@ -98,6 +99,22 @@
     };
   }
 
+  function reviewPolicy(settings = {}){
+    const raw = String(settings.reviewMode || "intelligent").toLowerCase();
+    const mode = ["intelligent","all","custom"].includes(raw) ? raw : "intelligent";
+    if(mode === "all") return {mode,cap:null};
+    if(mode === "custom"){
+      const value = Math.round(Number(settings.reviewCustomCap));
+      return {mode,cap:Math.max(1,Math.min(200,Number.isFinite(value)?value:20))};
+    }
+    return {mode:"intelligent",cap:REVIEW_INTELLIGENT_CAP};
+  }
+
+  function applyReviewPolicy(ids, policy){
+    if(policy.cap === null) return [...ids];
+    return ids.slice(0,policy.cap);
+  }
+
   function keepFrozenOrder(previousIds, currentIds){
     const current = new Set(currentIds || []);
     return (previousIds || []).filter(id => current.has(id));
@@ -121,8 +138,11 @@
     const buckets = currentBuckets(cards, now);
     const previous = data?.dailyPlan;
     const sameDayFrozen = previous?.frozen === true && previous?.planVersion === PLAN_VERSION && previous?.date === dayKey(now);
+    const policy = sameDayFrozen
+      ? {mode:previous.reviewMode || "intelligent",cap:previous.reviewCap === null ? null : Number(previous.reviewCap ?? REVIEW_INTELLIGENT_CAP)}
+      : reviewPolicy(data?.settings || {});
 
-    let review = buckets.review;
+    let review = applyReviewPolicy(buckets.review,policy);
     let memorize = buckets.memorize;
     let visualize = buckets.visualize;
     let apply = buckets.apply;
@@ -148,6 +168,10 @@
       apply,
       select,
       inbox: buckets.inbox,
+      reviewMode: policy.mode,
+      reviewCap: policy.cap,
+      reviewDueTotal: buckets.review.length,
+      reviewDeferredCount: Math.max(0,buckets.review.length-review.length),
       selectGoal: goal,
       selectedToday: Array.from(selectedIds),
       remainingSelectSlots: Math.max(0, goal-selectedIds.size),
@@ -170,8 +194,15 @@
     if(!raw || !Array.isArray(raw.cards)) return raw;
     const cards = raw.cards.map(card => normalizeCard(card, now));
     const previousPlan = raw.dailyPlan;
-    const order = previousPlan?.date === dayKey(now) && previousPlan?.frozen ? planIndexMap(previousPlan) : new Map();
+    const frozenToday = previousPlan?.date === dayKey(now) && previousPlan?.frozen;
+    const order = frozenToday ? planIndexMap(previousPlan) : new Map();
+    const plannedReview = new Set(frozenToday ? (previousPlan.review || []) : []);
     cards.sort((a,b)=>{
+      const aDue = isDue(a,now), bDue = isDue(b,now);
+      if(aDue && bDue && plannedReview.size){
+        const aPlanned = plannedReview.has(a.id), bPlanned = plannedReview.has(b.id);
+        if(aPlanned !== bPlanned) return aPlanned ? -1 : 1;
+      }
       const diff = learningPriority(a, now)-learningPriority(b, now);
       if(diff) return diff;
       const ai = order.has(a.id) ? order.get(a.id) : Number.MAX_SAFE_INTEGER;
@@ -245,6 +276,7 @@
     STABLE_INTERVALS,
     TODAY_ORDER,
     PLAN_VERSION,
+    REVIEW_INTELLIGENT_CAP,
     dayKey,
     valueDayKey,
     addDaysIso,
@@ -252,6 +284,7 @@
     isDue,
     normalizeCard,
     learningPriority,
+    reviewPolicy,
     buildDailyPlan,
     normalizeData,
     crossDayPatch,
