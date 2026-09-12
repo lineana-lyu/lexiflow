@@ -7,11 +7,13 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const exists=name=>fs.existsSync(path.join(root,name));
 
 const index=read("public/index.html");
+const gateway=read("public/learning-data-gateway-v3.js");
 const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
 const reviewPolicy=read("public/review-policy-v3.js");
 const planPersistence=read("public/daily-plan-persistence-v3.js");
 const todayPlan=read("public/today-plan-v3.js");
+const advance=read("public/advance-learning-v3.js");
 const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
@@ -19,7 +21,7 @@ const visualActions=read("public/visualize-actions-v3.js");
 const applyGuard=read("public/apply-guard-v3.js");
 const sourceContext=read("public/source-context-v3.js");
 const boundary=read("public/studyday-boundary-v3.js");
-const stageTransition=read("public/stage-transition-v2.js");
+const stageTransition=read("public/stage-transition-v3.js");
 const memorize=read("public/memorize-stage-v3.js");
 const safety=read("public/safety-controls.js");
 const app=read("public/app.js");
@@ -31,11 +33,13 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
-before("learning-core-v2.js","studyday-boundary-v3.js");
-before("studyday-boundary-v3.js","stage-transition-v2.js");
+before("learning-core-v2.js","learning-data-gateway-v3.js");
+before("learning-data-gateway-v3.js","studyday-boundary-v3.js");
+before("studyday-boundary-v3.js","stage-transition-v3.js");
+before("stage-transition-v3.js","today-plan-v3.js");
 before("today-plan-v3.js","daily-plan-persistence-v3.js");
-before("daily-plan-persistence-v3.js","source-context-v3.js");
-before("stage-transition-v2.js","source-context-v3.js");
+before("daily-plan-persistence-v3.js","advance-learning-v3.js");
+before("advance-learning-v3.js","source-context-v3.js");
 before("source-context-v3.js","app.js");
 before("app.js","study-stage-surface-v3.js");
 before("study-stage-surface-v3.js","study-session-v3.js");
@@ -44,19 +48,23 @@ before("review-transaction-v3.js","review-session-v3.js");
 before("apply-actions-v3.js","review-policy-v3.js");
 before("review-policy-v3.js","visualize-actions-v3.js");
 before("visualize-actions-v3.js","apply-guard-v3.js");
-assert(index.includes('<script src="./memorize-stage-v3.js"></script>'),"Memorize Stage V3 must be active");
-assert(index.includes('<script src="./source-context-v3.js"></script>'),"Source Context V3 must be active");
-assert(index.includes('<script src="./review-policy-v3.js"></script>'),"Review Policy V3 must be active");
-assert(index.includes('<script src="./apply-guard-v3.js"></script>'),"Apply Guard V3 must be active");
-assert(index.includes('<script src="./daily-plan-persistence-v3.js"></script>'),"DailyPlan Persistence V3 must be active");
-assert(index.includes('<script src="./studyday-boundary-v3.js"></script>'),"StudyDay Boundary V3 must be active");
-assert(index.includes('<script src="./today-plan-v3.js"></script>'),"Today Plan V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js","today-plan-v2.js"]){
+
+for(const active of ["learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js","today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","study-stage-surface-v3.js","study-session-v3.js","select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js","apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"]){
+  assert(index.includes(`<script src="./${active}"></script>`),`${active} must be active`);
+}
+
+for(const retiredScript of ["learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js","public/studyday-boundary-v2.js","public/today-plan-v2.js"]){
+for(const retired of ["public/learning-engine-v2.js","public/legacy-data-fix.js","public/studyday-boundary-v2.js","public/stage-transition-v2.js","public/today-plan-v2.js","public/daily-plan-persistence-v2.js","public/advance-learning-v2.js","public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
+
+assert(gateway.includes("LexiFlowLearningDataGatewayV3=Object.freeze"),"Learning Data Gateway V3 must expose a narrow bridge");
+assert(gateway.includes("core.normalizeData")&&gateway.includes("core.crossDayPatch"),"Learning Data Gateway V3 must normalize data and preserve cross-day guards");
+assert(gateway.includes("repairLegacyMeanings"),"legacy safe meaning repair must live inside the V3 data gateway");
+assert(!gateway.includes("/api/ai/visual-scene"),"Learning Data Gateway V3 must not own stage AI behavior");
+
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
 assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
@@ -65,6 +73,7 @@ assert(!reviewPolicy.includes("复习方式")&&!reviewPolicy.includes("data-revi
 assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit current card identity");
 assert(applyGuard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 must validate canonical Apply stage identity");
 assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer card identity from rendered word text");
+
 assert(planPersistence.includes("LexiFlowDailyPlanPersistenceV3=Object.freeze"),"DailyPlan Persistence V3 must expose a narrow explicit bridge");
 assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 must identify persisted writes");
 assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
@@ -72,6 +81,10 @@ assert(todayPlan.includes("LexiFlowTodayPlanV3=Object.freeze"),"Today Plan V3 mu
 assert(todayPlan.includes('todayPlanAuthority:"v3"'),"Today Plan V3 must identify its writes");
 assert(!todayPlan.includes("window.fetch =")&&!todayPlan.includes("window.fetch="),"Today Plan V3 must not mutate global fetch");
 assert(todayPlan.includes("selectFromPending")&&todayPlan.includes("moveBackToPending"),"Today Plan V3 must explicitly own Pending ↔ Today selection");
+assert(advance.includes("LexiFlowAdvanceLearningV3=Object.freeze"),"Advance Learning V3 must expose a narrow explicit bridge");
+assert(advance.includes('advanceLearningAuthority:"v3"'),"Advance Learning V3 must identify persisted writes");
+assert(!advance.includes('return"review"'),"Advance Learning V3 must never unlock Review early");
+
 assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay Boundary V3 must own the current runtime-day marker");
 assert(boundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay Boundary V3 must migrate the legacy runtime-day marker");
 assert(boundary.includes("localStorage.removeItem(LEGACY_RUNTIME_KEY)"),"StudyDay Boundary V3 must clean the legacy marker after migration");
@@ -100,11 +113,16 @@ assert(reviewTransaction.includes('authority==="review-session-v3"'),"Review tra
 assert(reviewTransaction.includes("expectedReviewCount"),"Review transaction recovery must be reviewCount-idempotent");
 
 assert(stageTransition.includes("core.crossDayPatch"),"learning stage transitions must use Learning Core");
+assert(stageTransition.includes('stageTransitionAuthority:"v3"'),"normal stage writes must identify Stage Transition V3 authority");
+assert(stageTransition.includes('authority:"stage-transition-v3"'),"normal stage activity history must identify Stage Transition V3 authority");
 assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");
 assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
 assert(stageTransition.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"stage completion must resolve the exact Study Session card ID");
 assert(!stageTransition.includes("cardForDom"),"stage completion must not infer the card by DOM word text");
 assert(stageTransition.includes("resync(button)"),"failed stage identity resolution must resync instead of silently repeating the same confirmation");
+assert(stageTransition.includes('card.stage="memorize"')&&!stageTransition.includes('card.stage="memorize1"'),"Select completion must write canonical Memorize directly");
+assert(stageTransition.includes("LexiFlowStageTransitionV3=Object.freeze"),"Stage Transition V3 must expose a narrow bridge");
+
 assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize Stage V3 must resolve the exact Study Session renderer card ID");
 assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical Memorize stage");
 assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
