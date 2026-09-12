@@ -96,6 +96,17 @@
     document.head.appendChild(style);
   }
 
+  function syncLegacyHeaderCounter(progress){
+    const head=document.querySelector(".page-head");
+    if(!head)return;
+    const candidates=Array.from(head.querySelectorAll("span,small,div,p,strong"));
+    const counter=candidates.find(node=>!node.children.length&&/^\s*\d+\s*\/\s*\d+\s*$/.test(String(node.textContent||"")));
+    if(counter){
+      counter.textContent=`${progress.current} / ${progress.total}`;
+      counter.title="按今天冻结的 Review 计划计数";
+    }
+  }
+
   function decorate(){
     injectStyle();
     const stage=document.querySelector(".review-depth-stage");
@@ -111,6 +122,7 @@
     }
     row.classList.toggle("is-repair",p.repair);
     row.innerHTML=`<strong>${p.repair?"当天修复复测":"本轮主动回忆"}</strong><span>${p.current} / ${p.total}</span>`;
+    syncLegacyHeaderCounter(p);
   }
 
   function maybeClearCompleted(){
