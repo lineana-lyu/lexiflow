@@ -5,10 +5,9 @@
   if(!core) throw new Error("LexiFlowLearningCore must load before learning-engine-v2.js");
 
   const nativeFetch = window.fetch.bind(window);
-  const {REVIEW_INTERVALS, STABLE_INTERVALS, normalizeData, eligibleToday, isDue, crossDayPatch, reviewSchedulePatch} = core;
+  const {REVIEW_INTERVALS, STABLE_INTERVALS, normalizeData, eligibleToday, crossDayPatch, reviewSchedulePatch} = core;
   const VISUAL_SENTINEL = "__LEXIFLOW_USER_ASSOCIATION_REQUIRED__";
   let latestLearningData = null;
-  let reloadTimer = null;
 
   function endpointOf(input){
     try{
@@ -54,6 +53,8 @@
     return latestLearningData?.cards?.find(card=>card.id===cardId) || null;
   }
 
+  // Safety net for imported/legacy writes. Normal Review interactions are owned by
+  // review-transition-v2.js; this only guarantees old writes cannot reintroduce +3/+1.
   function applyReviewSchedule(nextData, nextCard){
     const prev = findPreviousCard(nextCard.id);
     if(!prev) return;
@@ -125,11 +126,6 @@
       const payload = await response.json();
       if(payload?.data) latestLearningData = normalizeData(payload.data);
     }catch{}
-  }
-
-  function scheduleReload(delay=450){
-    clearTimeout(reloadTimer);
-    reloadTimer = setTimeout(()=>location.reload(), delay);
   }
 
   function currentStudyWord(){
@@ -221,23 +217,12 @@
   document.addEventListener("click", event=>{
     const button = event.target?.closest?.("[data-action]");
     if(!button) return;
-    const action = button.dataset.action;
-
-    if(action === "continue-learning"){
-      const eligible = latestLearningData?.cards?.filter(card=>["select","memorize1","memorize2","visualize","apply"].includes(card.stage) && !card.inboxPending && eligibleToday(card)) || [];
-      if(!eligible.length){
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        return;
-      }
+    if(button.dataset.action !== "continue-learning") return;
+    const eligible = latestLearningData?.cards?.filter(card=>["select","memorize1","memorize2","visualize","apply"].includes(card.stage) && !card.inboxPending && eligibleToday(card)) || [];
+    if(!eligible.length){
+      event.preventDefault();
+      event.stopImmediatePropagation();
     }
-
-    if(action === "complete-stage" && button.dataset.next === "memorize1") scheduleReload();
-    if(action === "memory-rate" && currentCard()?.stage === "memorize2") scheduleReload();
-    if(action === "finish-visual") scheduleReload();
-    if(action === "pass-apply") scheduleReload(700);
-    if(action === "initial-review-rate") scheduleReload(650);
-    if(action === "review-rate" && button.dataset.quality === "again") scheduleReload(650);
   }, true);
 
   document.addEventListener("input", event=>{
