@@ -8,7 +8,6 @@
   const LEARNING_KEYS=["memorize","visualize","apply","select"];
   let data=null;
   let busy=false;
-  let bypassOnce=false;
   let queued=false;
   let autoOpening=false;
 
@@ -95,9 +94,9 @@
     return session;
   }
 
-  function legacyFirstActiveId(){
-    const card=(data?.cards||[]).find(item=>item.initialReviewPending||(item.stage!=="review"&&item.stage!=="mastered"));
-    return card?.id||"";
+  function renderer(){
+    const value=window.LexiFlowStudyRenderer;
+    return value&&typeof value.openCard==="function"?value:null;
   }
 
   function currentStudyWord(){
@@ -110,8 +109,8 @@
   }
 
   function currentStudyCardId(){
-    const session=loadSession();
-    if(!validSession(session))return"";
+    const explicit=String(renderer()?.currentCardId?.()||"");
+    if(explicit)return explicit;
     const word=currentStudyWord();
     if(!word)return"";
     const card=(data?.cards||[]).find(item=>normalizeWord(item.word)===word);
@@ -138,31 +137,20 @@
     const opened=cardById(actual);
     showGuard(
       "学习卡片与 Today Plan 不一致",
-      `Today Plan 计划的是 ${expected?.word||"当前任务"}，但旧页面渲染器打开了 ${opened?.word||"其它任务"}。本次会话已停止。`
+      `Today Plan 计划的是 ${expected?.word||"当前任务"}，但页面渲染的是 ${opened?.word||"其它任务"}。本次会话已停止。`
     );
   }
 
-  function primaryButton(){return document.querySelector('[data-action="continue-learning"]');}
-
-  function invokeLegacyRenderer(session){
+  function invokeRenderer(session){
     const card=cardById(session.activeCardId);
     if(!card)return false;
-
-    // app.js already supports startStudy(cardId), but that function is still private to
-    // the legacy renderer. Until the renderer is extracted, Core sorting guarantees the
-    // planned card is the first active item; fail closed if that invariant is broken.
-    const legacyId=legacyFirstActiveId();
-    if(legacyId!==card.id){
-      showGuard(
-        "学习队列发生冲突",
-        `Today Plan 下一项是 ${card.word}，但旧页面渲染器准备打开另一张卡片。LexiFlow 不会用旧队列覆盖 Today Plan。`
-      );
+    const view=renderer();
+    if(!view){
+      showGuard("学习渲染器还没有准备好","Today Plan 已确定下一张卡，但当前页面渲染器尚不可用。请重新同步后再试。");
       return false;
     }
-
-    const button=primaryButton();
-    if(!button||button.disabled){
-      showGuard("学习入口暂时不可用","Today Plan 有学习任务，但当前页面没有可用的学习入口。请重新同步后再试。");
+    if(typeof view.hasCard==="function"&&!view.hasCard(card.id)){
+      showGuard("学习卡片暂时不可用",`Today Plan 计划的是 ${card.word}，但渲染器当前没有这张卡。LexiFlow 不会自动改学其它词。`);
       return false;
     }
 
@@ -170,8 +158,12 @@
     session.paused=false;
     session.activeBucket=bucketForCard(card);
     saveSession(session);
-    bypassOnce=true;
-    button.click();
+
+    const opened=view.openCard(card.id);
+    if(opened===false){
+      showGuard("学习卡片没有打开",`Today Plan 计划的是 ${card.word}，但渲染器拒绝了这张卡。不会退回旧学习队列。`);
+      return false;
+    }
     requestAnimationFrame(()=>requestAnimationFrame(verifyRendered));
     return true;
   }
@@ -197,7 +189,7 @@
       }
       session.paused=false;
       saveSession(session);
-      invokeLegacyRenderer(session);
+      invokeRenderer(session);
     }catch(err){
       console.error("Study Session V3 open failed",err);
       showGuard("学习数据暂时无法读取","这次没有进入学习，也不会自动算作完成。请重新同步后再试。");
@@ -227,7 +219,6 @@
 
     const button=event.target?.closest?.('[data-action="continue-learning"]');
     if(button){
-      if(bypassOnce){bypassOnce=false;return;}
       event.preventDefault();
       event.stopImmediatePropagation();
       void openSession({resume:true});
