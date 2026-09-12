@@ -51,7 +51,7 @@ assert(!reviewTransition.includes('quality==="good"?3:1'),"Review transition mus
 
 const stageTransition=read("public/stage-transition-v2.js");
 assert(stageTransition.includes("core.crossDayPatch"),"Stage transition must delegate cross-day gates to Learning Core");
-assert(stageTransition.includes('card.initialReviewPending = false'),"Apply completion must retire legacy same-day initial Review");
+assert(/card\.initialReviewPending\s*=\s*false/.test(stageTransition),"Apply completion must retire legacy same-day initial Review");
 
 const memorize=read("public/memorize-v2.js");
 const visualize=read("public/visualize-v2.js");
@@ -73,8 +73,6 @@ assert(boundary.includes("lexiflow-review-session-state-v2"),"StudyDay boundary 
 assert(boundary.includes("location.reload()"),"an app left open across midnight must rebuild the new StudyDay");
 assert(!boundary.includes("lexiflow-study-drafts-v2"),"cross-day boundary must not erase user Visualize/Apply drafts");
 
-// Full first-learning path survives persistence/restart boundaries without opening the
-// next stage on the same day.
 const d1=date(2026,9,1), d2=date(2026,9,2), d3=date(2026,9,3), d4=date(2026,9,4), d5=date(2026,9,5);
 let card={id:"word",stage:"select",inboxPending:false,todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()};
 Object.assign(card,core.crossDayPatch({stage:"select"},{stage:"memorize1"},d1));
@@ -100,8 +98,6 @@ assert(diffDays(d4,card.nextReviewAt)===1,"first active Review must be scheduled
 assert(core.isDue(card,d4)===false,"first Review must not be due on Apply day");
 assert(core.isDue(card,d5)===true,"first Review must be due next day after restart");
 
-// A failed normal recall -> same-day repair -> mandatory next-day validation must
-// survive serialization without accidentally graduating the interval.
 const fail=core.reviewSchedulePatch({...card,memoryState:"reinforcing",reviewStep:2},"again",d5);
 let failed=roundTrip({...card,...fail,memoryState:fail.memoryState,reviewStep:2});
 assert(failed.memoryState==="review_again","failed recall must enter Review Again");
@@ -119,8 +115,6 @@ assert(recovered.memoryState==="reinforcing","next-day validation may return the
 assert(recovered.reviewStep===1,"recovery must step back from failed step 2 to step 1");
 assert(diffDays(d6,recovered.nextReviewAt)===3,"recovered step 1 must use the +3d interval");
 
-// Frozen StudyDay membership/order survives a JSON persistence cycle. Completing a
-// planned item may remove it, but newly-due work must not be appended silently.
 const morning=date(2026,9,10,9);
 let data=core.normalizeData({settings:{dailyGoal:3},cards:[
   {id:"r1",stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:date(2026,9,10,8).toISOString(),createdAt:date(2026,8,1).toISOString()},
@@ -134,17 +128,11 @@ const evening=date(2026,9,10,18);
 data=core.normalizeData(roundTrip({
   ...data,
   dailyPlan:frozenPlan,
-  cards:[
-    ...data.cards,
-    {id:"late",stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:date(2026,9,10,17).toISOString(),createdAt:date(2026,8,3).toISOString()},
-  ],
+  cards:[...data.cards,{id:"late",stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:date(2026,9,10,17).toISOString(),createdAt:date(2026,8,3).toISOString()}],
 }),evening);
 eq(data.dailyPlan.review,["r1"],"restart later the same day must not append newly-due Review work");
 eq(data.dailyPlan.memorize,["m1"],"restart later the same day must preserve frozen learning order");
 
-// An eligible item introduced after the plan is frozen must not jump ahead of an
-// already planned later stage. Stage eligibility is day-granular, so this simulates
-// a same-day import/state refresh rather than a clock-time stage gate.
 const planMorning=date(2026,9,11,9);
 let mixed=core.normalizeData({cards:[
   {id:"planned-v",stage:"visualize",stageEligibleOn:planMorning.toISOString(),inboxPending:false,createdAt:date(2026,8,1).toISOString()},
@@ -158,8 +146,6 @@ mixed=core.normalizeData({...mixed,dailyPlan:frozenMixed,cards:[
 assert(!mixed.dailyPlan.memorize.includes("late-m"),"same-day introduced Memorize must stay outside frozen plan");
 assert(mixed.cards[0].id==="planned-v","planned Visualize must remain ahead of unplanned Memorize in legacy card order");
 
-// A planned same-day repair still belongs at the tail of the planned Review queue,
-// even though planned work as a whole stays ahead of deferred/unplanned work.
 const repairTime=date(2026,9,12,12);
 const repairPlan={
   date:core.dayKey(repairTime),generatedAt:repairTime.toISOString(),planVersion:core.PLAN_VERSION,frozen:true,
