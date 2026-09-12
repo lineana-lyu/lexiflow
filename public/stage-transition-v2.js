@@ -48,14 +48,20 @@
     if(!response.ok)throw new Error("SAVE_FAILED");
   }
 
-  function domWord(){
-    return normalize(document.querySelector(".study-card-focus .target-word-text,.apply-word-hero .target-word-text,.apply-word-hero strong,.word-title")?.textContent||"");
+  function currentStudyCardId(){
+    return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
   }
 
-  function cardForDom(data,expectedStage){
-    const word=domWord();
-    if(!word||!Array.isArray(data?.cards))return null;
-    return data.cards.find(card=>normalize(card.word)===word&&(!expectedStage||card.stage===expectedStage))||null;
+  function currentStudyCard(data,expectedStage){
+    const id=currentStudyCardId();
+    if(!id||!Array.isArray(data?.cards))return null;
+    const card=data.cards.find(item=>String(item.id)===id)||null;
+    if(!card)return null;
+    return !expectedStage||card.stage===expectedStage?card:null;
+  }
+
+  function domWord(){
+    return normalize(document.querySelector(".study-card-focus .target-word-text,.apply-word-hero .target-word-text,.apply-word-hero strong,.word-title")?.textContent||"");
   }
 
   function appendActivity(data,cardId,stage,extra={}){
@@ -70,9 +76,17 @@
     if(text)button.textContent=text;
   }
 
+  function resync(button){
+    if(button){
+      button.disabled=true;
+      button.textContent="正在重新同步…";
+    }
+    setTimeout(()=>location.reload(),80);
+  }
+
   async function completeSelect(button){
     const data=await loadData();
-    const card=cardForDom(data,"select");
+    const card=currentStudyCard(data,"select");
     if(!card||card.inboxPending)return false;
     const now=new Date(), prev={...card};
     card.stage="memorize1";
@@ -87,7 +101,7 @@
 
   async function completeVisualize(button){
     const data=await loadData();
-    const card=cardForDom(data,"visualize");
+    const card=currentStudyCard(data,"visualize");
     if(!card)return false;
     const hasImage=Boolean(card.imageData||card.imageUrl);
     if(!hasImage)return false;
@@ -107,7 +121,7 @@
 
   async function completeApply(button){
     const data=await loadData();
-    const card=cardForDom(data,"apply");
+    const card=currentStudyCard(data,"apply");
     if(!card)return false;
     const sentence=String(document.getElementById("apply-text")?.value||card.userSentence||"").trim();
     if(!sentence||containsChinese(sentence)||!usesTarget(sentence,card.word))return false;
@@ -130,12 +144,14 @@
     if(saving)return;
     saving=true;
     try{
-      if(kind==="select")await completeSelect(button);
-      if(kind==="visualize")await completeVisualize(button);
-      if(kind==="apply")await completeApply(button);
+      let completed=false;
+      if(kind==="select")completed=await completeSelect(button);
+      if(kind==="visualize")completed=await completeVisualize(button);
+      if(kind==="apply")completed=await completeApply(button);
+      if(!completed)resync(button);
     }catch(err){
       console.error("stage transition failed",err);
-      if(button){button.disabled=false;delete button.dataset.lexiTransitionSaving;}
+      if(button){button.disabled=false;delete button.dataset.lexiTransitionSaving;button.textContent="状态未保存，请重试";}
     }finally{saving=false;}
   }
 
