@@ -12,6 +12,7 @@ function diffDays(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
 
 const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const exists=name=>fs.existsSync(path.join(root,name));
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);
 vm.runInContext(read("public/learning-core-v2.js"),sandbox,{filename:"learning-core-v2.js"});
@@ -28,7 +29,7 @@ const index=read("public/index.html");
 const runtimeOrder=[
   "learning-core-v2.js","studyday-boundary-v2.js","stage-transition-v2.js","learning-engine-v2.js",
   "today-plan-v2.js","daily-plan-persistence-v2.js","source-context-v2.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
-  "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-v2.js","study-drafts-v3.js",
+  "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
   "apply-actions-v3.js","review-policy-v2.js","visualize-actions-v3.js","apply-guard-v2.js"
 ];
 let previous=-1;
@@ -38,7 +39,10 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js"]){assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);}
+for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js"]){
+  assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
+  if(retired==="memorize-v2.js")assert(!exists(`public/${retired}`),`${retired} must stay deleted after Memorize Stage V3 promotion`);
+}
 
 const todayUi=read("public/today-plan-v2.js");
 assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
