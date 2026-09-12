@@ -48,6 +48,7 @@ assert(todayUi.includes('class="lexi-today-progress"'),"Today progress must be i
 assert(todayUi.includes('data-library-filter="${key}"'),"Word Library must own the pending/learning/stable filters");
 assert(todayUi.includes("待学习"),"collected words must be presented as Pending inside Word Library");
 assert(!todayUi.includes('id="lexi-inbox"'),"Home must not expose a separate Inbox panel");
+assert(todayUi.includes("next.dailyPlan.initialTaskIds=next.dailyPlan.initialTaskIds.filter"),"moving a selected word back to Pending must remove it from the frozen progress denominator rather than count it as completed");
 
 const d1=date(2026,9,1), d2=date(2026,9,2);
 const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISOString()},d1);
