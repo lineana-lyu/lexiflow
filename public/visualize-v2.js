@@ -1,8 +1,8 @@
 (() => {
   "use strict";
+  const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before visualize-v2.js");
   let data=null,queued=false,saving=false;
-  const dayKey=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-  const tomorrowIso=()=>{const d=new Date();d.setHours(12,0,0,0);d.setDate(d.getDate()+1);return d.toISOString();};
   const uid=()=>crypto.randomUUID?crypto.randomUUID():`visual-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
   async function refresh(){try{const r=await fetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}return data;}
@@ -23,11 +23,11 @@
   async function skip(){
     if(saving)return;saving=true;
     try{
-      await refresh();const c=card();if(!c)return;const note=String(document.getElementById("visual-note")?.value||"").trim();
-      c.visualNote=note;c.visualSkipped=true;c.stage="apply";c.stageEligibleOn=tomorrowIso();c.visualizeCompletedOn=dayKey();c.memoryState="learning";c.updatedAt=new Date().toISOString();
-      data.activities=Array.isArray(data.activities)?data.activities:[];data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"visualize",skipped:true,at:new Date().toISOString()});
+      await refresh();const c=card();if(!c)return;const note=String(document.getElementById("visual-note")?.value||"").trim();const now=new Date();
+      c.visualNote=note;c.visualSkipped=true;c.stage="apply";Object.assign(c,core.crossDayPatch({stage:"visualize"},{stage:"apply"},now)||{});c.updatedAt=now.toISOString();
+      data.activities=Array.isArray(data.activities)?data.activities:[];data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"visualize",skipped:true,at:now.toISOString()});
       await save(data);location.reload();
-    }catch{saving=false;}
+    }catch(err){console.error("visualize skip failed",err);saving=false;}
   }
 
   document.addEventListener("click",e=>{const b=e.target?.closest?.('[data-v2="skip-visual"]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();void skip();},true);
