@@ -12,14 +12,15 @@ function date(y,m,d,h=12){ return new Date(y,m-1,d,h,0,0,0); }
 function diffDays(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
 
 const root=path.join(__dirname,"..");
-const coreSource=fs.readFileSync(path.join(root,"public","learning-core-v2.js"),"utf8");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const coreSource=read("public/learning-core-v2.js");
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);
 vm.runInContext(coreSource,sandbox,{filename:"learning-core-v2.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 assert(core,"learning core did not initialize");
 
-const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
+const index=read("public/index.html");
 function before(a,b){
   const ai=index.indexOf(a), bi=index.indexOf(b);
   assert(ai>=0,`${a} missing from index.html`);
@@ -33,15 +34,26 @@ before("learning-engine-v2.js","app.js");
 before("today-plan-v2.js","app.js");
 before("daily-plan-persistence-v2.js","app.js");
 
-const reviewTransition=fs.readFileSync(path.join(root,"public","review-transition-v2.js"),"utf8");
+const reviewTransition=read("public/review-transition-v2.js");
 assert(reviewTransition.includes("core.reviewSchedulePatch"),"Review transition must delegate interval logic to Learning Core");
 assert(reviewTransition.includes('type:"review"'),"Review transition must persist a review activity");
 assert(reviewTransition.includes("event.stopPropagation()"),"Review transition must prevent legacy target handlers from owning Review mutations");
 assert(!reviewTransition.includes('quality==="good"?3:1'),"Review transition must not reintroduce the legacy fixed +3/+1 scheduler");
 
-const stageTransition=fs.readFileSync(path.join(root,"public","stage-transition-v2.js"),"utf8");
+const stageTransition=read("public/stage-transition-v2.js");
 assert(stageTransition.includes("core.crossDayPatch"),"Stage transition must delegate cross-day gates to Learning Core");
 assert(stageTransition.includes('card.initialReviewPending = false'),"Apply completion must retire legacy same-day initial Review");
+
+const memorize=read("public/memorize-v2.js");
+const visualize=read("public/visualize-v2.js");
+const reviewUi=read("public/review-v2.js");
+const engine=read("public/learning-engine-v2.js");
+assert(memorize.includes("core.crossDayPatch"),"Memorize completion must use the central cross-day gate");
+assert(!memorize.includes("tomorrowIso"),"Memorize must not own a duplicate next-day scheduler");
+assert(visualize.includes("core.crossDayPatch"),"Visualize skip must use the central cross-day gate");
+assert(!visualize.includes("tomorrowIso"),"Visualize must not own a duplicate next-day scheduler");
+assert(!reviewUi.includes("window.fetch="),"Review UI must not maintain a separate learning-data fetch mutation layer");
+assert(!engine.includes("scheduleReload"),"Learning Engine must not duplicate stage modules' reload orchestration");
 
 // Full first-learning path survives persistence/restart boundaries without opening the
 // next stage on the same day.
