@@ -21,7 +21,8 @@ assert(core,"learning core did not initialize");
 eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"Review ladder changed unexpectedly");
 eq(core.STABLE_INTERVALS,[30,45,68,90],"Stable ladder changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
-assert(core.PLAN_VERSION===3,"DailyPlan version must include frozen task-progress metadata");
+assert(core.PLAN_VERSION===4,"DailyPlan version must include the canonical learning-stage model");
+assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memorize2")==="memorize","legacy Memorize stages must collapse to one canonical stage");
 
 const index=read("public/index.html");
 const runtimeOrder=[
@@ -55,9 +56,13 @@ const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISO
 assert(collected.inboxPending===true,"newly collected cards must enter internal pending state");
 const selected=core.normalizeCard({id:"picked",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()},d1);
 assert(selected.inboxPending===false,"Today-selected cards must leave internal pending state");
+const legacyMem=core.normalizeCard({id:"legacy-m",stage:"memorize2",createdAt:d1.toISOString()},d1);
+assert(legacyMem.learningStage==="memorize","legacy persisted memorize2 cards must expose one canonical Memorize domain stage");
 
-const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize1"},d1);
+const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize"},d1);
 assert(diffDays(d1,selectPatch.stageEligibleOn)===1,"Select -> Memorize must wait until next StudyDay");
+const memorizePatch=core.crossDayPatch({stage:"memorize2"},{stage:"visualize"},d1);
+assert(diffDays(d1,memorizePatch.stageEligibleOn)===1,"legacy Memorize -> Visualize must use the canonical cross-day gate");
 const applyPatch=core.crossDayPatch({stage:"apply"},{stage:"review"},d1);
 assert(applyPatch.initialReviewPending===false,"Apply must not open same-day initial Review");
 assert(diffDays(d1,applyPatch.nextReviewAt)===1,"first Review must be scheduled for next StudyDay");
@@ -99,6 +104,7 @@ const data=core.normalizeData({settings:{dailyGoal:3},cards:[
 ]},morning);
 assert(core.firstPlanStage(data.dailyPlan)==="review","Review must remain first in Today Plan");
 eq([data.dailyPlan.review.length,data.dailyPlan.memorize.length,data.dailyPlan.visualize.length,data.dailyPlan.apply.length,data.dailyPlan.select.length],[1,1,1,1,1],"Today Plan stage buckets are incorrect");
+assert(data.cards.find(card=>card.id==="m").learningStage==="memorize","Today data must expose canonical Memorize even for a legacy storage stage");
 assert(data.dailyPlan.noVocabularyDebt===true,"DailyPlan must preserve No Vocabulary Debt");
 assert(data.dailyPlan.taskTotal===5&&data.dailyPlan.taskRemaining===5&&data.dailyPlan.taskCompleted===0,"new frozen plan must capture its initial task total");
 
