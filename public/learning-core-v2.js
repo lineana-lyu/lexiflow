@@ -4,7 +4,7 @@
   const REVIEW_INTERVALS = Object.freeze([1, 3, 7, 16, 21]);
   const STABLE_INTERVALS = Object.freeze([30, 45, 68, 90]);
   const TODAY_ORDER = Object.freeze(["review", "memorize", "visualize", "apply", "select"]);
-  const PLAN_VERSION = 3;
+  const PLAN_VERSION = 4;
   const REVIEW_INTELLIGENT_CAP = 20;
 
   function dayKey(input = new Date()){
@@ -25,20 +25,27 @@
     return d.toISOString();
   }
 
+  function canonicalStage(value){
+    const raw = String(value && typeof value === "object" ? (value.learningStage || value.stage || "") : (value || "")).trim().toLowerCase();
+    if(raw === "memorize" || raw === "memorize1" || raw === "memorize2") return "memorize";
+    if(raw === "mastered") return "review";
+    return raw;
+  }
+
   function eligibleToday(card, now = new Date()){
     if(!card?.stageEligibleOn) return true;
     return valueDayKey(card.stageEligibleOn) <= dayKey(now);
   }
 
   function isDue(card, now = new Date()){
-    if(card?.stage !== "review" || !card?.nextReviewAt) return false;
+    if(canonicalStage(card) !== "review" || !card?.nextReviewAt) return false;
     return valueDayKey(card.nextReviewAt) <= dayKey(now);
   }
 
   function normalizeCard(raw, now = new Date()){
     const card = {...raw};
     if(!card.memoryState){
-      card.memoryState = card.stage === "review" ? "reinforcing" : card.stage === "mastered" ? "stable" : "learning";
+      card.memoryState = canonicalStage(card) === "review" ? "reinforcing" : card.stage === "mastered" ? "stable" : "learning";
     }
     if(!Number.isFinite(Number(card.reviewStep))) card.reviewStep = 0;
     if(!Number.isFinite(Number(card.stableStep))) card.stableStep = 0;
@@ -48,13 +55,18 @@
       card.memoryState = "stable";
     }
 
-    if(card.stage === "select" && card.inboxPending === undefined){
+    // `learningStage` is the canonical domain stage. `stage` remains as a
+    // compatibility field while the last legacy app renderer still understands
+    // historical `memorize1` / `memorize2` values.
+    card.learningStage = canonicalStage(card.stage);
+
+    if(card.learningStage === "select" && card.inboxPending === undefined){
       card.inboxPending = card.todaySelectedOn ? false : !card.selectedOn;
       if(card.inboxPending && !card.inboxAddedOn) card.inboxAddedOn = valueDayKey(card.createdAt) || dayKey(now);
     }
-    if(card.stage !== "select" && card.inboxPending === true) card.inboxPending = false;
+    if(card.learningStage !== "select" && card.inboxPending === true) card.inboxPending = false;
 
-    if(card.stage === "review" && card.initialReviewPending){
+    if(card.learningStage === "review" && card.initialReviewPending){
       card.initialReviewPending = false;
       if(!card.nextReviewAt){
         const base = card.applyCompletedOn && !Number.isNaN(new Date(card.applyCompletedOn).getTime())
@@ -77,10 +89,11 @@
       return -1;
     }
     if(!eligibleToday(card, now)) return 90;
-    if(card?.stage === "memorize1" || card?.stage === "memorize2") return 1;
-    if(card?.stage === "visualize") return 2;
-    if(card?.stage === "apply") return 3;
-    if(card?.stage === "select") return 4;
+    const stage = canonicalStage(card);
+    if(stage === "memorize") return 1;
+    if(stage === "visualize") return 2;
+    if(stage === "apply") return 3;
+    if(stage === "select") return 4;
     return 80;
   }
 
@@ -92,11 +105,11 @@
   function currentBuckets(cards, now){
     return {
       review: cards.filter(card => isDue(card, now)).map(card => card.id),
-      memorize: cards.filter(card => !card.inboxPending && (card.stage === "memorize1" || card.stage === "memorize2") && eligibleToday(card, now)).map(card => card.id),
-      visualize: cards.filter(card => !card.inboxPending && card.stage === "visualize" && eligibleToday(card, now)).map(card => card.id),
-      apply: cards.filter(card => !card.inboxPending && card.stage === "apply" && eligibleToday(card, now)).map(card => card.id),
-      select: cards.filter(card => card.stage === "select" && card.inboxPending === false && eligibleToday(card, now)).map(card => card.id),
-      inbox: cards.filter(card => card.stage === "select" && card.inboxPending === true).map(card => card.id),
+      memorize: cards.filter(card => !card.inboxPending && canonicalStage(card) === "memorize" && eligibleToday(card, now)).map(card => card.id),
+      visualize: cards.filter(card => !card.inboxPending && canonicalStage(card) === "visualize" && eligibleToday(card, now)).map(card => card.id),
+      apply: cards.filter(card => !card.inboxPending && canonicalStage(card) === "apply" && eligibleToday(card, now)).map(card => card.id),
+      select: cards.filter(card => canonicalStage(card) === "select" && card.inboxPending === false && eligibleToday(card, now)).map(card => card.id),
+      inbox: cards.filter(card => canonicalStage(card) === "select" && card.inboxPending === true).map(card => card.id),
     };
   }
 
@@ -249,16 +262,18 @@
     if(!prev || !next) return null;
     const today = dayKey(now);
     const early = earlyCompletionPatch(prev,today);
-    if(prev.stage === "select" && next.stage === "memorize1"){
+    const prevStage = canonicalStage(prev);
+    const nextStage = canonicalStage(next);
+    if(prevStage === "select" && nextStage === "memorize"){
       return {stageEligibleOn:addDaysIso(now,1),selectedOn:today,memoryState:"learning",memorizeRound:1,inboxPending:false,...early};
     }
-    if(prev.stage === "memorize2" && next.stage === "visualize"){
+    if(prevStage === "memorize" && nextStage === "visualize"){
       return {stageEligibleOn:addDaysIso(now,1),memorizeCompletedOn:today,memoryState:"learning",...early};
     }
-    if(prev.stage === "visualize" && next.stage === "apply"){
+    if(prevStage === "visualize" && nextStage === "apply"){
       return {stageEligibleOn:addDaysIso(now,1),visualizeCompletedOn:today,memoryState:"learning",...early};
     }
-    if(prev.stage === "apply" && next.stage === "review"){
+    if(prevStage === "apply" && nextStage === "review"){
       return {stageEligibleOn:addDaysIso(now,1),applyCompletedOn:today,memoryState:"reinforcing",reviewStep:0,stableStep:0,nextReviewAt:addDaysIso(now,1),initialReviewPending:false,...early};
     }
     return null;
@@ -311,6 +326,7 @@
     dayKey,
     valueDayKey,
     addDaysIso,
+    canonicalStage,
     eligibleToday,
     isDue,
     normalizeCard,
