@@ -12,6 +12,7 @@ const studySession=read("public/study-session-v3.js");
 const studyResume=read("public/study-resume-v2.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
+const app=read("public/app.js");
 
 function before(a,b){
   const ai=index.indexOf(a),bi=index.indexOf(b);
@@ -46,11 +47,16 @@ assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'
 assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
 
 assert(studySession.includes("plannedLearningIds"),"Study Session V3 must build learning work from the frozen Today Plan");
-assert(studySession.includes("legacyFirstActiveId"),"Study Session V3 must fail closed while the old renderer is still transitional");
+assert(studySession.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must call the explicit renderer bridge");
+assert(studySession.includes("view.openCard(card.id)"),"Study Session V3 must open the exact planned card ID");
+assert(!studySession.includes("legacyFirstActiveId"),"Study Session V3 must not consult a legacy first-active selector");
 assert(studySession.includes("event.stopImmediatePropagation()"),"Study Session V3 must intercept the old continue-learning authority");
 assert(studySession.includes("pauseSession"),"Study Session V3 must own user pause semantics");
 assert(studySession.includes("maybeResume"),"Study Session V3 must own same-day crash/reload resume");
 assert(!studySession.includes("activeLearningCards()[0]"),"Study Session V3 must not select work through the old active-learning queue");
+assert(app.includes("window.LexiFlowStudyRenderer=Object.freeze"),"app.js must expose only a narrow Study renderer bridge");
+assert(!app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"app renderer must not fall back to legacy queue selection");
+assert(app.includes("window.LexiFlowStudySessionV3?.open"),"legacy button handler must delegate to Study Session V3 instead of choosing work itself");
 assert(!studyResume.includes("resumeIfNeeded"),"draft recovery must not compete with Study Session V3 for auto-resume");
 assert(!studyResume.includes("setActive("),"draft recovery must not persist a second active-study authority");
 
