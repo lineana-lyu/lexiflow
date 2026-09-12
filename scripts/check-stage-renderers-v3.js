@@ -10,7 +10,7 @@ const surface=read("public/study-stage-surface-v3.js");
 const select=read("public/select-stage-v3.js");
 const visual=read("public/visualize-stage-v3.js");
 const apply=read("public/apply-stage-v3.js");
-const visualSupport=read("public/visualize-v2.js");
+const visualActions=read("public/visualize-actions-v3.js");
 const applyActions=read("public/apply-actions-v3.js");
 
 function before(a,b){
@@ -26,7 +26,8 @@ before("study-stage-surface-v3.js","select-stage-v3.js");
 before("select-stage-v3.js","visualize-stage-v3.js");
 before("visualize-stage-v3.js","apply-stage-v3.js");
 before("apply-stage-v3.js","apply-actions-v3.js");
-before("visualize-stage-v3.js","visualize-v2.js");
+before("visualize-stage-v3.js","visualize-actions-v3.js");
+assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy Visualize V2 action shim must not remain in the runtime load chain");
 
 assert(surface.includes('["select","选词确认"]')&&surface.includes('["memorize","记忆"]')&&surface.includes('["review","复习巩固"]'),"study surface must expose five canonical product stages");
 assert(!surface.includes('memorize1')&&!surface.includes('memorize2'),"study surface must not expose legacy Memorize sub-stages");
@@ -57,7 +58,8 @@ assert(apply.includes('data-action="pass-apply"'),"Apply completion must still d
 assert(apply.includes('fetch("/api/ai/practice-prompt"'),"Apply Stage V3 must own optional prompt refresh");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 
-assert(visualSupport.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip support must follow canonical stage identity");
+assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip support must follow canonical stage identity");
+assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize skip support must expose only the V3 action marker");
 assert(applyActions.includes('core.canonicalStage(card)==="apply"'),"Apply Draft/Skip support must follow canonical stage identity");
 
 console.log("Stage Renderer V3 checks passed.");
