@@ -4,10 +4,11 @@ const path=require("path");
 function assert(condition,message){if(!condition)throw new Error(message);}
 const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const exists=name=>fs.existsSync(path.join(root,name));
 
 const index=read("public/index.html");
 const session=read("public/study-session-v3.js");
-const resume=read("public/study-resume-v2.js");
+const drafts=read("public/study-drafts-v3.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const app=read("public/app.js");
 
@@ -21,6 +22,7 @@ function before(a,b){
 before("app.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 guard must not run beside Study Session V3");
+assert(!index.includes('<script src="./study-resume-v2.js"></script>'),"legacy-named Study Resume V2 must not remain in the runtime load chain");
 
 assert(session.includes('const KEY="lexiflow-study-session-v3"'),"Study Session V3 must persist an exact same-day session");
 assert(session.includes('const LEARNING_KEYS=["memorize","visualize","apply","select"]'),"Study Session V3 must preserve Today learning-stage order after Review");
@@ -42,13 +44,14 @@ assert(!app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"rendere
 assert(!app.includes('if(action==="continue-learning"){startStudy();return;}'),"legacy continue-learning must not invoke a no-argument renderer path");
 assert(app.includes("window.LexiFlowStudySessionV3?.open"),"legacy continue-learning handler must delegate to Study Session V3 if it is reached");
 
-assert(!resume.includes("resumeIfNeeded"),"study-resume-v2 must no longer own session auto-resume");
-assert(!resume.includes("setActive("),"study-resume-v2 must no longer persist a competing active-session authority");
-assert(!resume.includes('[data-action="continue-learning"]'),"draft recovery must not click the learning entry button");
-assert(resume.includes("lexiflow-study-drafts-v2"),"Visualize/Apply draft recovery must remain active");
-assert(resume.includes("core.canonicalStage(card)"),"draft recovery must follow the canonical stage model rather than raw legacy stage names");
-assert(resume.includes('stage==="visualize"')&&resume.includes('stage==="apply"'),"draft recovery must remain scoped to Visualize and Apply only");
-assert(!resume.includes('card.stage==="visualize"')&&!resume.includes('card.stage==="apply"'),"draft recovery must not regress to raw stage comparisons");
+assert(!drafts.includes("resumeIfNeeded"),"study-drafts-v3 must not own session auto-resume");
+assert(!drafts.includes("setActive("),"study-drafts-v3 must not persist a competing active-session authority");
+assert(!drafts.includes('[data-action="continue-learning"]'),"draft recovery must not click the learning entry button");
+assert(drafts.includes("lexiflow-study-drafts-v2"),"V3 draft recovery must retain the existing durable draft key for migration continuity");
+assert(drafts.includes("core.canonicalStage(card)"),"draft recovery must follow the canonical stage model rather than raw legacy stage names");
+assert(drafts.includes('stage==="visualize"')&&drafts.includes('stage==="apply"'),"draft recovery must remain scoped to Visualize and Apply only");
+assert(!drafts.includes('card.stage==="visualize"')&&!drafts.includes('card.stage==="apply"'),"draft recovery must not regress to raw stage comparisons");
+assert(!exists("public/study-resume-v2.js"),"retired Study Resume V2 source must stay deleted after V3 draft migration");
 
 assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
 assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
