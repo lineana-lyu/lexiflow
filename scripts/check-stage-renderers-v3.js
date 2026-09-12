@@ -21,7 +21,8 @@ function before(a,b){
 }
 
 before("app.js","study-stage-surface-v3.js");
-before("app.js","select-stage-v3.js");
+before("study-stage-surface-v3.js","study-session-v3.js");
+before("study-stage-surface-v3.js","select-stage-v3.js");
 before("select-stage-v3.js","visualize-stage-v3.js");
 before("visualize-stage-v3.js","apply-stage-v3.js");
 before("apply-stage-v3.js","apply-actions-v3.js");
@@ -30,6 +31,11 @@ before("visualize-stage-v3.js","visualize-v2.js");
 assert(surface.includes('["select","选词确认"]')&&surface.includes('["memorize","记忆"]')&&surface.includes('["review","复习巩固"]'),"study surface must expose five canonical product stages");
 assert(!surface.includes('memorize1')&&!surface.includes('memorize2'),"study surface must not expose legacy Memorize sub-stages");
 assert(surface.includes("core.canonicalStage(card)"),"study surface must label stages from the canonical domain stage");
+assert(surface.includes("const ROOTS=Object.freeze"),"study surface must know the authoritative V3 renderer roots");
+assert(surface.includes("data-study-stage-host-v3"),"study surface must replace the legacy stage body with a passive host while a V3 renderer loads");
+assert(surface.includes("不会回退到旧学习流程"),"passive study host must explicitly fail closed rather than expose legacy stage UI");
+assert(surface.includes("window.LexiFlowStudyStageSurfaceV3=Object.freeze"),"study surface must expose only a narrow canonical-stage descriptor");
+assert(surface.includes('text==="英→中"||text==="中→英"'),"legacy Memorize labels must be normalized on residual shell surfaces");
 
 assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to explicit Study Session card identity");
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize renderer must bind to explicit Study Session card identity");
