@@ -62,6 +62,8 @@ The active stage renderers are:
 
 `study-drafts-v3.js` is draft recovery only. It restores Visualize and Apply text by explicit card ID and canonical stage, but it must not own active-session persistence, click the learning entry button, or auto-resume a study session. It intentionally keeps the existing `lexiflow-study-drafts-v2` storage key so installed users do not lose drafts merely because the runtime module was promoted to V3.
 
+`source-context-v3.js` owns optional source-context capture, preservation, study reminders and Word Library editing. It binds study reminders to the explicit rendered card ID and branches on `core.canonicalStage(card)`, never raw legacy Memorize sub-stage names. It intentionally retains `lexiflow-source-context-draft-v2` so an unsaved source-context draft survives an application upgrade.
+
 ### Review execution
 
 The only active Review execution path is:
@@ -131,6 +133,7 @@ The following obsolete runtime files have been removed from the working tree. Th
 - `public/study-resume-v2.js`
 - `public/visualize-v2.js`
 - `public/memorize-v2.js`
+- `public/source-context-v2.js`
 
 They must not be recreated as quick fixes. Missing study-entry behavior belongs in Study Session V3 or the narrow Study renderer bridge; missing stage UI belongs in the stage-specific V3 renderer/action modules; missing Review behavior belongs in Review Session V3, Review Transaction V3, or Learning Core.
 
@@ -155,6 +158,7 @@ They must not be recreated as quick fixes. Missing study-entry behavior belongs 
 15. A missing V3 stage renderer must leave a passive fail-closed host, never an interactive legacy stage implementation.
 16. Visualize must start from the learner's own association; AI assistance may refine it only after explicit user action.
 17. Apply must start from the learner's own expression; AI feedback cannot silently replace the learner's sentence.
+18. Source-context reminders and preservation must bind to the explicit card ID and canonical stage, not rendered word text or raw Memorize compatibility values.
 
 ## 4. Review invariants
 
@@ -175,14 +179,14 @@ They must not be recreated as quick fixes. Missing study-entry behavior belongs 
 
 `npm run check:learning` must use the V3 runtime checks. In particular:
 
-- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain, including absence of the legacy Memorize V2 file.
-- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, promoted V3 Memorize/draft/Visualize-action modules, and that removed shims stay absent.
+- `scripts/check-learning-engine-v3.js` verifies the central learning contract and active V3 load chain, including absence of the legacy Memorize and Source Context V2 files.
+- `scripts/check-runtime-authority-v3.js` verifies the active authority map, passive stage host, explicit Study renderer bridge, promoted V3 Memorize/draft/Visualize-action/Source Context modules, and that removed shims stay absent.
 - `scripts/check-study-session-v3.js` verifies Study Session V3, exact card-ID rendering, pause/resume ownership and V3-only draft recovery.
 - `scripts/check-stage-renderers-v3.js` verifies the canonical five-stage surface plus Select/Visualize/Apply V3 renderers and learner-first behavior.
 - `scripts/check-review-session-v3.js` verifies Review session behavior, alternate-type repair and crash-safe preservation of repair type.
 - `scripts/check-review-transaction-v3.js` verifies crash-safe Review transaction recovery.
 - `scripts/check-apply-quality-v3.js` verifies progressive Apply checking and reference-example copy rejection.
-- `scripts/check-apply-actions-v3.js` verifies Apply Draft/Skip, Visualize Actions V3, exact card identity, source editing and fresh-user defaults.
+- `scripts/check-apply-actions-v3.js` verifies Apply Draft/Skip, Visualize Actions V3, exact card identity, canonical Source Context editing and fresh-user defaults.
 - `scripts/check-stage-commands-v3.js` verifies deterministic/idempotent stage commands and first-round Memorize weakness semantics.
 - `scripts/check-reset-v3.js` verifies persisted reset, learning-image cleanup and in-flight image invalidation.
 - `scripts/check-stage-model-v3.js` verifies canonical stage migration semantics.
@@ -198,8 +202,7 @@ Safe sequence from here:
 
 1. keep DailyPlan, Study Session V3, Study Stage Surface V3, `LexiFlowStudyRenderer` and Learning Core contracts unchanged;
 2. physically remove legacy `stageSelect`, `stageVisual`, `stageApply`, six-stage stepper data, and their obsolete stage-specific handlers from `app.js` only after a whole-file parity edit can be performed safely;
-3. preserve generic shell/navigation, dictionary/ECDICT, TTS, library editing, source context and service settings while shrinking `app.js`;
-4. migrate remaining support modules such as source-context stage branching to `core.canonicalStage()` before deleting compatibility assumptions;
-5. consolidate persisted `stage` storage naming only after explicit data-migration tests prove old `memorize1` / `memorize2` installations load without loss;
-6. do not rewrite dictionary, ECDICT, Kokoro TTS, AI image generation or local persistence as part of stage renderer cleanup;
-7. after source cleanup, run a real Windows Electron end-to-end click regression in addition to repository CI; current CI is not a substitute for GUI interaction testing.
+3. preserve generic shell/navigation, dictionary/ECDICT, TTS, library editing, Source Context V3 and service settings while shrinking `app.js`;
+4. consolidate persisted `stage` storage naming only after explicit data-migration tests prove old `memorize1` / `memorize2` installations load without loss;
+5. do not rewrite dictionary, ECDICT, Kokoro TTS, AI image generation or local persistence as part of stage renderer cleanup;
+6. after source cleanup, run a real Windows Electron end-to-end click regression in addition to repository CI; current CI is not a substitute for GUI interaction testing.
