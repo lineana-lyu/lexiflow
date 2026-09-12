@@ -46,6 +46,9 @@ assert(!resume.includes("resumeIfNeeded"),"study-resume-v2 must no longer own se
 assert(!resume.includes("setActive("),"study-resume-v2 must no longer persist a competing active-session authority");
 assert(!resume.includes('[data-action="continue-learning"]'),"draft recovery must not click the learning entry button");
 assert(resume.includes("lexiflow-study-drafts-v2"),"Visualize/Apply draft recovery must remain active");
+assert(resume.includes("core.canonicalStage(card)"),"draft recovery must follow the canonical stage model rather than raw legacy stage names");
+assert(resume.includes('stage==="visualize"')&&resume.includes('stage==="apply"'),"draft recovery must remain scoped to Visualize and Apply only");
+assert(!resume.includes('card.stage==="visualize"')&&!resume.includes('card.stage==="apply"'),"draft recovery must not regress to raw stage comparisons");
 
 assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
 assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
