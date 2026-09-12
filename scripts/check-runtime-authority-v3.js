@@ -15,7 +15,7 @@ const studySurface=read("public/study-stage-surface-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
-const memorize=read("public/memorize-v2.js");
+const memorize=read("public/memorize-stage-v3.js");
 const safety=read("public/safety-controls.js");
 const app=read("public/app.js");
 
@@ -31,13 +31,13 @@ before("app.js","study-stage-surface-v3.js");
 before("study-stage-surface-v3.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 before("review-transaction-v3.js","review-session-v3.js");
-assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 guard must be retired from the runtime load chain");
-assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"legacy Review transition shim must be retired from the runtime load chain");
-assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy Review V2 UI must be retired from the runtime load chain");
-assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy Review V2 session state must be retired from the runtime load chain");
-assert(!index.includes('<script src="./study-resume-v2.js"></script>'),"legacy-named Study Resume V2 must be retired from runtime");
-assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy-named Visualize V2 actions must be retired from runtime");
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js"]){assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);}
+assert(index.includes('<script src="./memorize-stage-v3.js"></script>'),"Memorize Stage V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js"]){
+  assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
+}
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js"]){
+  assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
+}
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
@@ -67,7 +67,8 @@ assert(stageTransition.includes("card.initialReviewPending=false"),"Apply comple
 assert(stageTransition.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"stage completion must resolve the exact Study Session card ID");
 assert(!stageTransition.includes("cardForDom"),"stage completion must not infer the card by DOM word text");
 assert(stageTransition.includes("resync(button)"),"failed stage identity resolution must resync instead of silently repeating the same confirmation");
-assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize must resolve the exact Study Session renderer card ID");
+assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize Stage V3 must resolve the exact Study Session renderer card ID");
+assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical Memorize stage");
 assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
 assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not depend on legacy memory-rate controls");
 for(const legacy of ["function stageMem1(","function stageMem2(","function advanceStage("]){assert(!app.includes(legacy),`legacy learning-stage authority must be removed from app.js: ${legacy}`);}
