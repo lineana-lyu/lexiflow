@@ -9,18 +9,19 @@ const index=read("public/index.html");
 const quality=read("public/apply-quality-v3.js");
 const guard=read("public/apply-guard-v3.js");
 const feedbackFixes=read("public/feedback-fixes.js");
+const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
 assert(index.includes("apply-guard-v3.js"),"Apply Guard V3 must load in index.html");
 assert(!index.includes('<script src="./apply-guard-v2.js"></script>'),"legacy Apply Guard V2 must not execute beside V3");
-assert(index.indexOf("apply-quality-v3.js")<index.indexOf("stage-transition-v2.js"),"Apply quality capture gate must register before authoritative stage completion");
+assert(index.indexOf("apply-quality-v3.js")<index.indexOf("stage-transition-v3.js"),"Apply quality capture gate must register before authoritative stage completion");
 assert(quality.includes("correctionHeldBack:true"),"early failed Apply rounds must hold back the full correction");
 assert(quality.includes("round>=3"),"full correction may appear only from the third failed revision round");
 assert(quality.includes("lastFailedInput"),"re-submitting the exact same sentence must not consume another feedback round");
 assert(quality.includes("originalPass"),"gate must distinguish an approved original sentence from an approved correction");
 assert(quality.includes("suggestionPass"),"an adopted AI correction may pass only when that correction was approved");
-assert(quality.includes("event.stopImmediatePropagation()"),"unapproved Apply completion must stop before stage-transition-v2");
+assert(quality.includes("event.stopImmediatePropagation()"),"unapproved Apply completion must stop before Stage Transition V3");
 assert(quality.includes("你修改了句子，需要重新检查后再继续"),"editing after an audit must invalidate the previous approval");
 assert(quality.includes("isReferenceExampleCopy"),"Apply must deterministically detect exact copies of the dictionary example");
 assert(quality.includes('[data-action="submit-apply"]'),"copied examples must be stopped before an unnecessary AI check");
@@ -32,6 +33,7 @@ assert(guard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 mus
 assert(guard.includes("uses(value,card.word)"),"Apply Guard V3 must validate the target word from card data");
 assert(!guard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer target identity from rendered word text");
 assert(guard.includes("event.stopImmediatePropagation()"),"invalid final Apply attempts must fail closed before stage completion");
+assert(transition.includes('stageTransitionAuthority:"v3"'),"approved Apply completion must persist through Stage Transition V3");
 
 assert(!feedbackFixes.includes("optionalSuggestion"),"legacy feedback compatibility must not downgrade required corrections into optional polish");
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
