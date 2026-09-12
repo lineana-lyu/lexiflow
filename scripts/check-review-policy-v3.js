@@ -6,9 +6,9 @@ function assert(condition,message){if(!condition)throw new Error(message);}
 function eq(actual,expected,message){const a=JSON.stringify(actual),e=JSON.stringify(expected);if(a!==e)throw new Error(`${message}\nexpected: ${e}\nactual:   ${a}`);}
 
 const root=path.join(__dirname,"..");
-const source=fs.readFileSync(path.join(root,"public","learning-core-v2.js"),"utf8");
+const source=fs.readFileSync(path.join(root,"public","learning-core-v3.js"),"utf8");
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
-vm.createContext(sandbox);vm.runInContext(source,sandbox,{filename:"learning-core-v2.js"});
+vm.createContext(sandbox);vm.runInContext(source,sandbox,{filename:"learning-core-v3.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 assert(core,"learning core did not initialize");
 
