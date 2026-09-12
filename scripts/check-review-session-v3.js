@@ -26,7 +26,7 @@ assert(!app.includes("function startReview("),"legacy app Review queue builder m
 assert(!app.includes("function rateReview("),"legacy +3/+1 Review scheduler must be removed");
 assert(!app.includes("function reviewSessionPage("),"legacy app Review session renderer must be removed");
 assert(source.includes("repairTail"),"Review V3 must keep failed normal recalls for one same-day repair tail");
-assert(source.includes("reviewCount proves this exact attempt already committed"),"Review V3 must document restart-safe attempt idempotency");
+assert(source.includes("const baseline=Number(active?.reviewCount??card.reviewCount??0)"),"Review V3 must capture the persisted reviewCount baseline for restart-safe idempotency");
 assert(source.includes("session.paused=true"),"explicit Review exit must preserve a resumable paused session");
 assert(source.includes("if(Number(card.reviewCount||0)<=baseline)"),"resume must not double-commit an already persisted Review attempt");
 assert(!source.includes("dueCards()"),"Review V3 must never rebuild its queue from every due card");
