@@ -1,4 +1,38 @@
-/* Product UX refinements: speaker, settings consolidation, manual goal, clearer AI states. */
+/* Product UX refinements: brand, speaker, settings consolidation, manual goal. */
+
+/* Canonical brand icon surface. */
+.brand .logo.lexi-brand-icon{
+  position:relative;
+  width:42px!important;
+  height:42px!important;
+  flex:0 0 42px!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  border-radius:13px!important;
+  background-color:transparent!important;
+  background-image:url("./icon.png?v=20260911-icon3")!important;
+  background-position:center!important;
+  background-size:contain!important;
+  background-repeat:no-repeat!important;
+  box-shadow:0 6px 18px rgba(75,98,84,.08)!important;
+  color:transparent!important;
+  font-size:0!important;
+}
+.brand .logo.lexi-brand-icon::before,
+.brand .logo.lexi-brand-icon::after{content:none!important;display:none!important}
+.brand .logo.lexi-brand-icon img,
+.brand .logo.lexi-brand-icon .lexi-brand-icon-image{
+  position:absolute!important;
+  inset:0!important;
+  z-index:2!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
 
 /* Speaker icon inspired by the supplied cyan/purple reference, recolored to LexiFlow. */
 .lexi-speaker-button{
@@ -80,21 +114,7 @@
 .goal-step{width:31px;height:31px;border:0;border-radius:9px;background:rgba(255,255,255,.85);color:#617066;font-size:16px;cursor:pointer;box-shadow:0 1px 5px rgba(54,71,60,.05);transition:transform .15s ease,background .18s ease}
 .goal-step:hover{background:#fff}.goal-step:active{transform:scale(.94)}
 
-/* Initial AI scene generation should be obvious the moment the stage opens. */
-.scene-generation-state{
-  position:relative;overflow:hidden;
-  min-height:82px!important;padding:14px 14px!important;margin:4px 0 10px!important;
-  align-items:center!important;
-  background:linear-gradient(135deg,rgba(237,247,242,.96),rgba(241,246,252,.90),rgba(249,244,239,.80))!important;
-  border:1px solid rgba(120,150,133,.13)!important;
-  box-shadow:0 10px 28px rgba(57,82,66,.055)!important
-}
-.scene-generation-state::after{content:"";position:absolute;inset:-30% auto -30% -32%;width:30%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);transform:skewX(-10deg);animation:lexi-scene-sheen 2.5s ease-in-out infinite;pointer-events:none}
-.scene-generation-state .runtime-spinner{width:28px!important;height:28px!important;border:0!important;background:conic-gradient(from 10deg,rgba(123,158,139,.10),rgba(108,141,178,.46),rgba(203,163,139,.32),rgba(123,158,139,.10));-webkit-mask:radial-gradient(circle,#0000 53%,#000 55%);mask:radial-gradient(circle,#0000 53%,#000 55%);animation:runtime-spin 1.05s linear infinite!important}
-.scene-generation-state strong{font-size:13.5px!important;color:#435249!important}.scene-generation-state span:not(.runtime-spinner){font-size:10.8px!important;color:#89958d!important}
-@keyframes lexi-scene-sheen{0%,18%{transform:translateX(-170%) skewX(-10deg);opacity:0}48%{opacity:.55}68%{transform:translateX(520%) skewX(-10deg);opacity:0}100%{transform:translateX(520%) skewX(-10deg);opacity:0}}
-
-/* Background image job is now an entry point, not a passive notification. */
+/* Background image job is an entry point, not a passive notification. */
 .runtime-image-job-pill{pointer-events:auto!important;cursor:pointer!important;transition:box-shadow .18s ease,border-color .18s ease,background .18s ease,transform .16s ease!important}
 .runtime-image-job-pill:hover{border-color:rgba(111,143,125,.20)!important;background:rgba(255,255,255,.94)!important;box-shadow:0 20px 52px rgba(40,54,45,.15),inset 0 1px 0 rgba(255,255,255,.96)!important}
 .runtime-image-job-pill:active{transform:translateX(-50%) scale(.985)!important}
@@ -103,4 +123,4 @@
 
 @media(max-width:900px){.ai-unified-controls .codex-runtime-grid{grid-template-columns:1fr 1fr}.ai-unified-controls .codex-runtime-grid>.btn{grid-column:1/-1;justify-self:start}}
 @media(max-width:620px){.ai-unified-head,.ai-unified-image-row{display:grid}.ai-unified-status .setting-actions-inline{justify-content:flex-start}.ai-unified-controls .codex-runtime-grid{grid-template-columns:1fr}.ai-unified-controls .codex-runtime-grid>.btn{grid-column:auto}.daily-goal-editor{width:max-content}}
-@media(prefers-reduced-motion:reduce){.lexi-speaker-playing::before,.is-unified-speaking::before,.lexi-speaker-playing .lexi-speaker-wave,.is-unified-speaking .lexi-speaker-wave,.lexi-speaker-playing .lexi-speaker-aura,.is-unified-speaking .lexi-speaker-aura,.scene-generation-state::after{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.lexi-speaker-playing::before,.is-unified-speaking::before,.lexi-speaker-playing .lexi-speaker-wave,.is-unified-speaking .lexi-speaker-wave,.lexi-speaker-playing .lexi-speaker-aura,.is-unified-speaking .lexi-speaker-aura{animation:none!important}}
