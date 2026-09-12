@@ -26,6 +26,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.12.0'
+      - name: Align patch anchor
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/apply-legacy-review-cleanup-v3.py')
+          s=p.read_text(encoding='utf-8')
+          old='A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.'
+          current='A change that restores a removed study/review shim, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.'
+          if old not in s:
+              raise SystemExit('expected patch anchor missing')
+          p.write_text(s.replace(old,current,1),encoding='utf-8')
+          PY
       - name: Apply cleanup
         run: python3 scripts/apply-legacy-review-cleanup-v3.py
       - name: Verify repository
