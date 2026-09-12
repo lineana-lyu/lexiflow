@@ -8,9 +8,9 @@ function dayDiff(a,b){return Math.round((new Date(b)-new Date(a))/86400000);}
 const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const exists=name=>fs.existsSync(path.join(root,name));
-const coreSource=read("public/learning-core-v2.js");
+const coreSource=read("public/learning-core-v3.js");
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
-vm.createContext(sandbox);vm.runInContext(coreSource,sandbox,{filename:"learning-core-v2.js"});
+vm.createContext(sandbox);vm.runInContext(coreSource,sandbox,{filename:"learning-core-v3.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 assert(core,"learning core did not initialize");
 
@@ -41,7 +41,7 @@ assert(!moduleSource.includes('.querySelector(".lexi-inbox")'),"Advance Learning
 assert(moduleSource.includes("LexiFlowAdvanceLearningV3=Object.freeze"),"Advance Learning V3 must expose a narrow explicit bridge");
 
 const index=read("public/index.html");
-const coreIndex=index.indexOf("learning-core-v2.js");
+const coreIndex=index.indexOf("learning-core-v3.js");
 const todayIndex=index.indexOf("today-plan-v3.js");
 const advanceIndex=index.indexOf("advance-learning-v3.js");
 const appIndex=index.indexOf("app.js");
