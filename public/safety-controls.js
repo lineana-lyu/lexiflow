@@ -1,14 +1,23 @@
 (() => {
   "use strict";
 
+  const RESET_KEYS=[
+    "lexiflow-standalone-mvp-v1",
+    "lexiflow-study-session-v3",
+    "lexiflow-review-session-v3",
+    "lexiflow-memorize-v2",
+    "lexiflow-study-drafts-v2",
+    "lexiflow-study-active-v2",
+    "lexiflow-review-resume-v2",
+    "lexiflow-review-session-state-v2",
+    "lexiflow-studyday-runtime-v2",
+    "lexiflow-source-context-draft-v2",
+  ];
+  let clearing=false;
+
   function strengthenResetEntry(){
     const trigger=document.querySelector('[data-action="confirm-reset"]');
     if(!trigger||trigger.dataset.safetyEnhanced==="1")return;
-
-    // Mark the freshly rendered node before mutating its children. The observer
-    // watches childList changes, so rewriting textContent without this guard
-    // would observe its own mutations forever and lock the renderer as soon as
-    // the Settings page is mounted.
     trigger.dataset.safetyEnhanced="1";
     trigger.textContent="清除所有学习数据";
     trigger.classList.add("danger");
@@ -16,7 +25,7 @@
     const title=row?.querySelector("h3");
     const description=row?.querySelector("p");
     if(title&&title.textContent!=="清除所有学习数据 · 高风险") title.textContent="清除所有学习数据 · 高风险";
-    const descriptionText="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。建议先导出 JSON 备份。";
+    const descriptionText="永久删除全部单词卡、学习进度、复习记录、造句和统计数据。应用设置会保留。";
     if(description&&description.textContent!==descriptionText) description.textContent=descriptionText;
   }
 
@@ -28,14 +37,77 @@
     if(!title||!action||action.dataset.safetyEnhanced==="1")return;
     if(!title.textContent.includes("清空")&&!title.textContent.includes("高风险操作"))return;
 
-    // Same rule for the confirmation modal: decorate each rendered DOM node once.
     action.dataset.safetyEnhanced="1";
-    const titleText="高风险操作：清空全部学习数据";
-    if(title.textContent!==titleText) title.textContent=titleText;
+    title.textContent="高风险操作：清空全部学习数据";
     const p=modal.querySelector("p");
-    const message='将永久删除全部单词卡、学习进度、复习记录、造句和统计数据。<strong>此操作无法撤销，也无法从 LexiFlow 恢复。</strong><br><br>建议先导出 JSON 备份。点击下方按钮后，还需要输入“清空”进行二次确认。';
-    if(p&&p.innerHTML!==message) p.innerHTML=message;
-    if(action.textContent!=="永久清空全部数据") action.textContent="永久清空全部数据";
+    if(p)p.innerHTML='将永久删除全部单词卡、学习进度、复习记录、造句和统计数据。<strong>此操作无法撤销。</strong><br><br>应用设置会保留；如需备份，请先导出 JSON。';
+    action.textContent="永久清空全部数据";
+  }
+
+  function apiUrl(path){
+    return location.protocol==="file:"?`http://127.0.0.1:4177${path}`:path;
+  }
+
+  async function readLearningData(){
+    const response=await fetch(apiUrl("/api/learning-data"),{cache:"no-store"});
+    if(!response.ok)throw new Error(`LOAD_FAILED_${response.status}`);
+    const payload=await response.json();
+    return payload?.data||{};
+  }
+
+  function freshLearningData(previous={}){
+    return {
+      version:Number(previous.version)||1,
+      cards:[],
+      activities:[],
+      settings:{...(previous.settings||{})},
+      createdAt:new Date().toISOString(),
+    };
+  }
+
+  async function writeLearningData(data){
+    const response=await fetch(apiUrl("/api/learning-data"),{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({data}),
+    });
+    if(!response.ok)throw new Error(`SAVE_FAILED_${response.status}`);
+    return response.json().catch(()=>({}));
+  }
+
+  function clearLocalLearningState(){
+    for(const key of RESET_KEYS){
+      try{localStorage.removeItem(key);}catch{}
+    }
+  }
+
+  async function verifiedReset(button){
+    if(clearing)return;
+    clearing=true;
+    const original=button.textContent;
+    button.disabled=true;
+    button.textContent="正在清除…";
+    try{
+      const previous=await readLearningData();
+      const fresh=freshLearningData(previous);
+      await writeLearningData(fresh);
+      await new Promise(resolve=>setTimeout(resolve,120));
+      await writeLearningData(fresh);
+      const verified=await readLearningData();
+      if((verified.cards||[]).length!==0||(verified.activities||[]).length!==0){
+        throw new Error("RESET_VERIFICATION_FAILED");
+      }
+      clearLocalLearningState();
+      button.textContent="已清除";
+      setTimeout(()=>location.reload(),120);
+    }catch(err){
+      console.error("learning data reset failed",err);
+      button.disabled=false;
+      button.textContent=original;
+      window.alert("学习数据没有清除成功。请保持 LexiFlow 本地服务运行后重试；现有数据没有被标记为已清除。");
+    }finally{
+      clearing=false;
+    }
   }
 
   function refresh(){strengthenResetEntry();strengthenResetModal();}
@@ -45,11 +117,8 @@
 
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.('[data-action="reset-data"]');
-    if(!button||button.dataset.safetyConfirmed==="1")return;
+    if(!button)return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
-    const answer=window.prompt("这是不可恢复的高风险操作。\n\n将删除所有学习数据。若已确认，请输入：清空");
-    if(answer!=="清空")return;
-    button.dataset.safetyConfirmed="1";
-    setTimeout(()=>button.click(),0);
+    void verifiedReset(button);
   },true);
 })();
