@@ -33,7 +33,7 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
-before("learning-core-v2.js","learning-data-gateway-v3.js");
+before("learning-core-v3.js","learning-data-gateway-v3.js");
 before("learning-data-gateway-v3.js","studyday-boundary-v3.js");
 before("studyday-boundary-v3.js","stage-transition-v3.js");
 before("stage-transition-v3.js","today-plan-v3.js");
@@ -49,14 +49,14 @@ before("apply-actions-v3.js","review-policy-v3.js");
 before("review-policy-v3.js","visualize-actions-v3.js");
 before("visualize-actions-v3.js","apply-guard-v3.js");
 
-for(const active of ["learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js","today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","study-stage-surface-v3.js","study-session-v3.js","select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js","apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"]){
+for(const active of ["learning-core-v3.js","learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js","today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","study-stage-surface-v3.js","study-session-v3.js","select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js","apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"]){
   assert(index.includes(`<script src="./${active}"></script>`),`${active} must be active`);
 }
 
-for(const retiredScript of ["learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
+for(const retiredScript of ["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/learning-engine-v2.js","public/legacy-data-fix.js","public/studyday-boundary-v2.js","public/stage-transition-v2.js","public/today-plan-v2.js","public/daily-plan-persistence-v2.js","public/advance-learning-v2.js","public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js"]){
+for(const retired of ["public/learning-core-v2.js","public/learning-engine-v2.js","public/legacy-data-fix.js","public/studyday-boundary-v2.js","public/stage-transition-v2.js","public/today-plan-v2.js","public/daily-plan-persistence-v2.js","public/advance-learning-v2.js","public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
 
