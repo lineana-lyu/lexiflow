@@ -2,25 +2,9 @@
   "use strict";
 
   const KEY="lexiflow-review-resume-v2";
-  const previousFetch=window.fetch.bind(window);
   const core=window.LexiFlowLearningCore;
+  if(!core)throw new Error("LexiFlowLearningCore must load before review-v2.js");
   let data=null, queued=false, autoResuming=false, leavingDeferred=false;
-
-  function parseBody(init){if(!init||typeof init.body!=="string")return null;try{return JSON.parse(init.body);}catch{return null;}}
-  window.fetch=async function lexiReviewFetch(input,init={}){
-    let path="";try{path=new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{}
-    const method=String(init?.method||"GET").toUpperCase();
-    if(path==="/api/learning-data"&&method==="POST"){
-      const body=parseBody(init);
-      if(body?.data?.cards){
-        for(const card of body.data.cards){
-          if(card?.stage==="review"&&card.initialReviewPending&&Number(card.reviewCount||0)>0)card.initialReviewPending=false;
-        }
-        init={...init,headers:{"Content-Type":"application/json",...(init.headers||{})},body:JSON.stringify(body)};
-      }
-    }
-    return previousFetch(input,init);
-  };
 
   const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const norm=v=>String(v||"").trim().toLowerCase().replace(/[’‘]/g,"'").replace(/^[\s.,!?;:()\[\]{}"']+|[\s.,!?;:()\[\]{}"']+$/g,"").replace(/\s+/g," ");
@@ -28,10 +12,10 @@
   const load=()=>{try{const x=JSON.parse(localStorage.getItem(KEY)||"{}");return x&&typeof x==="object"?x:{};}catch{return {};}};
   const save=x=>{try{localStorage.setItem(KEY,JSON.stringify(x));}catch{}};
   const clear=()=>{try{localStorage.removeItem(KEY);}catch{}};
-  const today=()=>core?.dayKey?core.dayKey(new Date()):new Date().toISOString().slice(0,10);
+  const today=()=>core.dayKey(new Date());
 
   async function refresh(){
-    try{const r=await previousFetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}
+    try{const r=await fetch("/api/learning-data",{cache:"no-store"});if(r.ok){const p=await r.json();if(p?.data?.cards)data=p.data;}}catch{}
   }
 
   function currentCard(){
