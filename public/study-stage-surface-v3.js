@@ -48,6 +48,8 @@
     const style=document.createElement("style");
     style.id="lexi-stage-surface-v3-style";
     style.textContent=`
+      .study-card-focus:not([data-stage-host-v3]){visibility:hidden}
+      .study-card-focus[data-stage-host-v3]{visibility:visible}
       .study-card-focus [data-study-stage-host-v3]{min-height:460px;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px}
       .study-card-focus [data-study-stage-host-v3] strong{display:block;color:var(--text);font-size:16px;margin-bottom:6px}
     `;
@@ -74,10 +76,10 @@
     const stage=core.canonicalStage(card);
     const root=ROOTS[stage];
     if(!root)return;
-    if(host.querySelector(root))return;
     const signature=`${card.id}:${stage}`;
-    if(host.dataset.stageHostV3===signature&&host.querySelector('[data-study-stage-host-v3]'))return;
     host.dataset.stageHostV3=signature;
+    if(host.querySelector(root))return;
+    if(host.querySelector('[data-study-stage-host-v3]'))return;
     host.innerHTML=`<div data-study-stage-host-v3="${stage}"><div><strong>正在准备 ${LABELS[stage]||stage}</strong><span>学习内容由当前阶段模块加载，不会回退到旧学习流程。</span></div></div>`;
   }
 
@@ -93,7 +95,7 @@
   function decorateLegacyBadges(){
     document.querySelectorAll(".pill").forEach(node=>{
       const text=String(node.textContent||"").trim();
-      if(text==="英→中"||text==="中→英")node.textContent="记忆中";
+      if(text==="英→中"||text==="中→英"||text==="memorize")node.textContent="记忆中";
       else if(text==="选词确认")node.textContent="待确认";
       else if(text==="造句")node.textContent="造句应用";
       else if(text==="已掌握")node.textContent="长期稳定";
