@@ -15,7 +15,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const exists=name=>fs.existsSync(path.join(root,name));
 const sandbox={window:{},console,Date,setTimeout,clearTimeout};
 vm.createContext(sandbox);
-vm.runInContext(read("public/learning-core-v2.js"),sandbox,{filename:"learning-core-v2.js"});
+vm.runInContext(read("public/learning-core-v3.js"),sandbox,{filename:"learning-core-v3.js"});
 const core=sandbox.window.LexiFlowLearningCore;
 assert(core,"learning core did not initialize");
 
@@ -27,7 +27,7 @@ assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memor
 
 const index=read("public/index.html");
 const runtimeOrder=[
-  "learning-core-v2.js","learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js",
+  "learning-core-v3.js","learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js",
   "today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
   "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
   "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"
@@ -39,9 +39,9 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
+for(const retired of ["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
   assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
-  if(["learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+  if(["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
 }
 
 const gateway=read("public/learning-data-gateway-v3.js");
