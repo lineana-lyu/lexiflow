@@ -30,9 +30,25 @@
     document.querySelectorAll('[data-action="save-card"]').forEach(button => {
       if (!button.disabled) button.textContent = "保存到学习计划";
     });
+
     document.querySelectorAll('[data-action="complete-stage"][data-next="memorize1"]').forEach(button => {
       button.textContent = "确认这个词义，明天开始记忆";
       button.title = "确认后今天不继续背诵，Memorize 会在下一个学习日开放";
+    });
+
+    document.querySelectorAll('[data-action="finish-visual"]').forEach(button => {
+      if (!button.disabled) button.textContent = "完成联想，明天开始造句";
+      button.title = "完成后今天不继续造句，Apply 会在下一个学习日开放";
+    });
+
+    document.querySelectorAll('[data-action="pass-apply"]').forEach(button => {
+      if (!button.disabled) button.textContent = "确认这句话，明天开始复习";
+      button.title = "确认后今天不进入复习，首次 Review 会在下一个学习日开放";
+    });
+
+    document.querySelectorAll('[data-lexi-visual-skip]').forEach(button => {
+      button.textContent = "暂不生成图片，明天开始造句";
+      button.title = "跳过图片也算完成 Visualize；Apply 会在下一个学习日开放";
     });
   }
 
