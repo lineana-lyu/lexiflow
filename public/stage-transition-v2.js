@@ -60,10 +60,6 @@
     return !expectedStage||card.stage===expectedStage?card:null;
   }
 
-  function domWord(){
-    return normalize(document.querySelector(".study-card-focus .target-word-text,.apply-word-hero .target-word-text,.apply-word-hero strong,.word-title")?.textContent||"");
-  }
-
   function appendActivity(data,cardId,stage,extra={}){
     data.activities=Array.isArray(data.activities)?data.activities:[];
     data.activities.push({id:uid(),type:"stage-complete",cardId,stage,at:new Date().toISOString(),...extra});
@@ -123,17 +119,19 @@
     const data=await loadData();
     const card=currentStudyCard(data,"apply");
     if(!card)return false;
-    const sentence=String(document.getElementById("apply-text")?.value||card.userSentence||"").trim();
+    const sentence=String(document.getElementById("apply-text")?.value||card.applyDraft||card.userSentence||"").trim();
     if(!sentence||containsChinese(sentence)||!usesTarget(sentence,card.word))return false;
 
     const now=new Date(), prev={...card};
     card.userSentence=sentence;
     card.finalSentence=sentence;
+    card.applyDraft="";
+    card.applySkipped=false;
     card.stage="review";
     card.initialReviewPending=false;
     Object.assign(card,core.crossDayPatch(prev,{stage:"review"},now)||{});
     card.updatedAt=now.toISOString();
-    appendActivity(data,card.id,"apply",{sentence});
+    appendActivity(data,card.id,"apply",{sentence,skipped:false});
     busy(button,"已完成 · 明天首次复习");
     await persist(data);
     location.reload();
@@ -170,8 +168,6 @@
     }
 
     if(button.matches('[data-action="pass-apply"]')){
-      const text=String(document.getElementById("apply-text")?.value||"").trim(), word=domWord();
-      if(!text||containsChinese(text)||!usesTarget(text,word))return;
       event.preventDefault();event.stopImmediatePropagation();void handle(button,"apply");
     }
   },true);
