@@ -30,7 +30,7 @@ const runtimeOrder=[
   "learning-core-v2.js","studyday-boundary-v2.js","stage-transition-v2.js","learning-engine-v2.js",
   "today-plan-v2.js","daily-plan-persistence-v2.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
   "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
-  "apply-actions-v3.js","review-policy-v2.js","visualize-actions-v3.js","apply-guard-v2.js"
+  "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v2.js"
 ];
 let previous=-1;
 for(const file of runtimeOrder){
@@ -39,9 +39,9 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js"]){
+for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js"]){
   assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
-  if(["memorize-v2.js","source-context-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
 }
 
 const sourceContext=read("public/source-context-v3.js");
@@ -61,8 +61,9 @@ const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISO
 assert(collected.inboxPending===true,"newly collected cards must enter internal pending state");
 const selected=core.normalizeCard({id:"picked",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()},d1);
 assert(selected.inboxPending===false,"Today-selected cards must leave internal pending state");
-const legacyMem=core.normalizeCard({id:"legacy-m",stage:"memorize2",createdAt:d1.toISOString()},d1);
-assert(legacyMem.learningStage==="memorize","legacy persisted memorize2 cards must expose one canonical Memorize domain stage");
+const legacyMem=core.normalizeCard({id:"legacy-m",stage:"memorize2",memorizeRound:2,createdAt:d1.toISOString()},d1);
+assert(legacyMem.stage==="memorize"&&legacyMem.learningStage==="memorize","legacy persisted memorize2 cards must physically expose one canonical Memorize stage");
+assert(legacyMem.memorizeRound===2,"canonical stage normalization must preserve Memorize round progress");
 
 const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize"},d1);
 assert(diffDays(d1,selectPatch.stageEligibleOn)===1,"Select -> Memorize must wait until next StudyDay");
@@ -109,7 +110,7 @@ const data=core.normalizeData({settings:{dailyGoal:3},cards:[
 ]},morning);
 assert(core.firstPlanStage(data.dailyPlan)==="review","Review must remain first in Today Plan");
 eq([data.dailyPlan.review.length,data.dailyPlan.memorize.length,data.dailyPlan.visualize.length,data.dailyPlan.apply.length,data.dailyPlan.select.length],[1,1,1,1,1],"Today Plan stage buckets are incorrect");
-assert(data.cards.find(card=>card.id==="m").learningStage==="memorize","Today data must expose canonical Memorize even for a legacy storage stage");
+assert(data.cards.find(card=>card.id==="m").stage==="memorize"&&data.cards.find(card=>card.id==="m").learningStage==="memorize","Today data must physically expose canonical Memorize even for legacy storage input");
 assert(data.dailyPlan.noVocabularyDebt===true,"DailyPlan must preserve No Vocabulary Debt");
 assert(data.dailyPlan.taskTotal===5&&data.dailyPlan.taskRemaining===5&&data.dailyPlan.taskCompleted===0,"new frozen plan must capture its initial task total");
 
