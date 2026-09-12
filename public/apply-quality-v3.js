@@ -4,11 +4,19 @@
   const STORAGE_KEY="lexiflow-apply-quality-v3";
   const previousFetch=window.fetch.bind(window);
   let latestAudit=null;
+  let latestData=null;
   let queued=false;
 
   const normalize=value=>String(value||"").trim();
   const lower=value=>normalize(value).toLowerCase();
   const hasChinese=value=>/[\u3400-\u9fff]/.test(String(value||""));
+  const copyNorm=value=>normalize(value)
+    .toLowerCase()
+    .replace(/[’‘]/g,"'")
+    .replace(/[“”]/g,'"')
+    .replace(/[.,!?;:()[\]{}"']/g," ")
+    .replace(/\s+/g," ")
+    .trim();
 
   function endpointOf(input){
     try{return new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{return"";}
@@ -32,6 +40,21 @@
   }
   function saveStore(store){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store));}catch{}}
   function keyOf(word,meaning){return `${lower(word)}|${normalize(meaning)}`;}
+
+  function currentCardId(){
+    return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
+  }
+  function currentCard(){
+    const id=currentCardId();
+    if(!id||!Array.isArray(latestData?.cards))return null;
+    return latestData.cards.find(card=>String(card.id)===id)||null;
+  }
+  function currentSentence(){return normalize(document.getElementById("apply-text")?.value||"");}
+  function isReferenceExampleCopy(){
+    const sentence=copyNorm(currentSentence());
+    const example=copyNorm(currentCard()?.exampleEn||"");
+    return Boolean(sentence&&example&&sentence===example);
+  }
 
   function recordAudit(body,feedback){
     const word=normalize(body?.word),meaning=normalize(body?.meaningZh),sentence=normalize(body?.sentence);
@@ -98,8 +121,23 @@
   }
 
   window.fetch=async function lexiFlowApplyQualityFetch(input,init={}){
+    const endpoint=endpointOf(input),method=String(init?.method||"GET").toUpperCase();
     const response=await previousFetch(input,init);
-    if(endpointOf(input)!=="/api/ai/text"||!response.ok)return response;
+
+    if(endpoint==="/api/learning-data"&&response.ok){
+      try{
+        if(method==="GET"){
+          const payload=await response.clone().json();
+          if(payload?.data)latestData=payload.data;
+        }else if(method==="POST"){
+          const body=parseBody(init);
+          if(body?.data)latestData=body.data;
+        }
+      }catch{}
+      return response;
+    }
+
+    if(endpoint!=="/api/ai/text"||!response.ok)return response;
     const body=parseBody(init);
     if(!body?.sentence)return response;
     try{
@@ -117,7 +155,6 @@
     const span=Array.from(hero.children).find(node=>node.tagName==="SPAN");
     return normalize(span?.textContent||"");
   }
-  function currentSentence(){return normalize(document.getElementById("apply-text")?.value||"");}
 
   function auditForCurrent(){
     const word=currentWord(),meaning=currentMeaning();
@@ -128,6 +165,7 @@
 
   function qualityState(){
     const sentence=currentSentence();
+    if(isReferenceExampleCopy())return{allowed:false,message:"这句话和词典参考例句相同。Apply 的目标是把单词用到你自己的表达里，请换一个真实场景再写一句。",referenceCopy:true};
     const audit=auditForCurrent();
     if(!sentence)return{allowed:false,message:"先写一句英文，并完成 AI 检查。"};
     if(!audit)return{allowed:false,message:"先点击“检查表达”，通过检查后再进入复习。"};
@@ -172,11 +210,16 @@
     if(state.allowed)warning("");
   }
 
-  // This listener is loaded before stage-transition-v2.js so it is the first capture
-  // gate for Apply completion. A sentence cannot graduate merely because it contains
-  // the target word; it must be the audited original or an AI correction that itself
-  // passed the server's grammar/sense/collocation check.
   document.addEventListener("click",event=>{
+    const submit=event.target?.closest?.('[data-action="submit-apply"]');
+    if(submit&&isReferenceExampleCopy()){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      warning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");
+      document.getElementById("apply-text")?.focus();
+      return;
+    }
+
     const button=event.target?.closest?.('[data-action="pass-apply"]');
     if(!button)return;
     const state=qualityState();
