@@ -1,0 +1,39 @@
+name: Legacy Review Cleanup
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-legacy-review-cleanup-v3.js
+      - .github/workflows/legacy-review-cleanup.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Apply cleanup
+        run: node scripts/apply-legacy-review-cleanup-v3.js
+      - name: Verify repository
+        run: npm run check
+      - name: Commit cleanup and remove one-shot files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/app.js public/review-session-v3.js scripts/check-runtime-authority-v3.js scripts/check-review-session-v3.js docs/RUNTIME_AUTHORITY_V3.md
+          git rm scripts/apply-legacy-review-cleanup-v3.js .github/workflows/legacy-review-cleanup.yml
+          git commit -m "refactor: remove legacy Review authority from app"
+          git push origin HEAD:feat/v7-airy-luminous-ui
