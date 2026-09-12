@@ -196,15 +196,21 @@
     const previousPlan = raw.dailyPlan;
     const frozenToday = previousPlan?.date === dayKey(now) && previousPlan?.frozen;
     const order = frozenToday ? planIndexMap(previousPlan) : new Map();
-    const plannedReview = new Set(frozenToday ? (previousPlan.review || []) : []);
     cards.sort((a,b)=>{
-      const aDue = isDue(a,now), bDue = isDue(b,now);
-      if(aDue && bDue && plannedReview.size){
-        const aPlanned = plannedReview.has(a.id), bPlanned = plannedReview.has(b.id);
+      // A frozen StudyDay is a commitment: work that becomes eligible later today
+      // must not jump in front of tasks that were already in the plan. This also
+      // quarantines legacy activeLearningCards()[0] selection without changing UI.
+      if(frozenToday){
+        const aPlanned = order.has(a.id), bPlanned = order.has(b.id);
         if(aPlanned !== bPlanned) return aPlanned ? -1 : 1;
       }
+
+      // Within the frozen plan, semantic priority still matters. In particular a
+      // same-day Review Again repair keeps priority 70, so it moves behind the
+      // remaining normal Review items instead of returning to its original slot.
       const diff = learningPriority(a, now)-learningPriority(b, now);
       if(diff) return diff;
+
       const ai = order.has(a.id) ? order.get(a.id) : Number.MAX_SAFE_INTEGER;
       const bi = order.has(b.id) ? order.get(b.id) : Number.MAX_SAFE_INTEGER;
       if(ai !== bi) return ai-bi;
