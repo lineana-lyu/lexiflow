@@ -717,8 +717,15 @@
   }
 
   function startStudy(cardId){
-    const card=cardId?getCard(cardId):activeLearningCards()[0];
-    if(!card){toast("当前没有首次学习任务");state.route="home";render();return;}
+    const explicitId=String(cardId||"").trim();
+    const card=explicitId?getCard(explicitId):null;
+    if(!card){toast("当前没有可打开的学习任务");state.route="home";render();return false;}
+    if(card.inboxPending||card.stage==="review"||card.stage==="mastered"){
+      toast("这张卡片当前不能进入首次学习");
+      state.route="home";
+      render();
+      return false;
+    }
     state.study={
       cardId:card.id,
       revealed:false,
@@ -740,7 +747,16 @@
     state.visualSceneExpanded=Boolean(card.visualNote);
     render();
     void ensureCardPronunciation(card);
+    return true;
   }
+
+  // Narrow rendering bridge for Study Session V3. The renderer may display one
+  // explicit card, but it does not choose Today membership, ordering or timing.
+  window.LexiFlowStudyRenderer=Object.freeze({
+    openCard(cardId){return startStudy(String(cardId||""));},
+    currentCardId(){return state.route==="study"?String(state.study?.cardId||""):"";},
+    hasCard(cardId){return Boolean(getCard(String(cardId||"")));}
+  });
 
   function studyPage(){
     const s=state.study, card=s&&getCard(s.cardId);
@@ -1965,7 +1981,11 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
       const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       state.data.cards.unshift(card);recordActivity("card-created",card.id);saveData();toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
-    if(action==="continue-learning"){startStudy();return;}
+    if(action==="continue-learning"){
+      if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}
+      showNotice("学习会话还没有准备好","Today Plan 会决定下一张学习卡。请稍后重试，不会自动打开旧队列。","warn");
+      return;
+    }
     if(action==="complete-stage"){
       const c=getCard(state.study.cardId);advanceStage(c,el.dataset.next);return;
     }
