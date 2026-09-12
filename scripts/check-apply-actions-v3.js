@@ -23,14 +23,20 @@ assert(apply.includes('skipped:true'),"Apply skip activity must be distinguishab
 assert(apply.includes("core.crossDayPatch"),"Apply skip must use the same deterministic cross-day transition authority");
 assert(apply.includes("LexiFlowStudySessionV3?.pause"),"saving a draft must pause the resumable Study Session");
 assert(apply.includes("再次点击确认跳过"),"Apply skip must require an explicit second confirmation click");
+assert(apply.includes("skipCommandId"),"Apply skip must carry a deterministic command id");
+assert(apply.includes("commandCommitted"),"Apply skip must be safe to retry without double completion");
 
 assert(transition.includes("currentStudyCardId"),"stage transitions must resolve the exact rendered card ID");
 assert(!transition.includes("function domWord("),"stage transitions must not infer Apply identity from DOM word text");
 assert(transition.includes('card.applySkipped=false'),"successful Apply completion must clear a previous skip marker");
 assert(transition.includes('card.applyDraft=""'),"successful Apply completion must clear the durable draft field");
+assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must use deterministic command ids");
+assert(transition.includes("commandCommitted"),"stage completion must explicitly tolerate a retried command");
+assert(transition.includes("copyNorm(card.exampleEn"),"authoritative Apply completion must independently reject a copied reference example");
 
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip must bind to the exact study card ID");
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
+assert(visual.includes("visualize-skip"),"Visualize skip must have its own idempotent command id");
 assert(source.includes("LexiFlowStudyRenderer?.currentCardId"),"source reminders must bind to the exact study card ID");
 assert(!source.includes("trim().toLowerCase()===word"),"source reminders must not resolve the learning card by word text");
 assert(source.includes("data-library-source-editor"),"Word Library editor must expose editable source context");
