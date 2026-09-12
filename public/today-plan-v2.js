@@ -208,6 +208,9 @@
       await refresh();const next=core.normalizeData(JSON.parse(JSON.stringify(latestData||{}))), card=next.cards.find(item=>item.id===id);
       if(!card||card.stage!=="select"||card.inboxPending)return;
       const now=new Date();card.inboxPending=true;card.todaySelectedOn=null;card.stageEligibleOn=null;card.inboxSelectedAt=null;card.updatedAt=now.toISOString();
+      if(next.dailyPlan?.date===core.dayKey(now)&&Array.isArray(next.dailyPlan.initialTaskIds)){
+        next.dailyPlan.initialTaskIds=next.dailyPlan.initialTaskIds.filter(taskId=>taskId!==card.id);
+      }
       next.activities=Array.isArray(next.activities)?next.activities:[];next.activities.push({id:uid(),type:"library-unselected",cardId:card.id,at:now.toISOString()});
       await persist(next);location.reload();
     }finally{saving=false;}
