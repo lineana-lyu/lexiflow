@@ -23,8 +23,8 @@
   async function skip(){
     if(saving)return;saving=true;
     try{
-      await refresh();const c=card();if(!c)return;const note=String(document.getElementById("visual-note")?.value||"").trim();const now=new Date();
-      c.visualNote=note;c.visualSkipped=true;c.stage="apply";Object.assign(c,core.crossDayPatch({stage:"visualize"},{stage:"apply"},now)||{});c.updatedAt=now.toISOString();
+      await refresh();const c=card();if(!c)return;const note=String(document.getElementById("visual-note")?.value||"").trim();const now=new Date(),prev={...c};
+      c.visualNote=note;c.visualSkipped=true;c.stage="apply";Object.assign(c,core.crossDayPatch(prev,{stage:"apply"},now)||{});c.updatedAt=now.toISOString();
       data.activities=Array.isArray(data.activities)?data.activities:[];data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"visualize",skipped:true,at:now.toISOString()});
       await save(data);location.reload();
     }catch(err){console.error("visualize skip failed",err);saving=false;}
