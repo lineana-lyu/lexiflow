@@ -13,6 +13,7 @@ const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
+const sourceContext=read("public/source-context-v3.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
 const memorize=read("public/memorize-stage-v3.js");
@@ -26,18 +27,23 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
-before("stage-transition-v2.js","app.js");
+before("stage-transition-v2.js","source-context-v3.js");
+before("source-context-v3.js","app.js");
 before("app.js","study-stage-surface-v3.js");
 before("study-stage-surface-v3.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 before("review-transaction-v3.js","review-session-v3.js");
 assert(index.includes('<script src="./memorize-stage-v3.js"></script>'),"Memorize Stage V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js"]){
+assert(index.includes('<script src="./source-context-v3.js"></script>'),"Source Context V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js"]){
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
+assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
+assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
+assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
