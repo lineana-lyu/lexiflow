@@ -10,6 +10,7 @@ const index=read("public/index.html");
 const reviewSession=read("public/review-session-v3.js");
 const reviewTransaction=read("public/review-transaction-v3.js");
 const reviewPolicy=read("public/review-policy-v3.js");
+const planPersistence=read("public/daily-plan-persistence-v3.js");
 const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
@@ -29,6 +30,8 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
+before("today-plan-v2.js","daily-plan-persistence-v3.js");
+before("daily-plan-persistence-v3.js","source-context-v3.js");
 before("stage-transition-v2.js","source-context-v3.js");
 before("source-context-v3.js","app.js");
 before("app.js","study-stage-surface-v3.js");
@@ -42,10 +45,11 @@ assert(index.includes('<script src="./memorize-stage-v3.js"></script>'),"Memoriz
 assert(index.includes('<script src="./source-context-v3.js"></script>'),"Source Context V3 must be active");
 assert(index.includes('<script src="./review-policy-v3.js"></script>'),"Review Policy V3 must be active");
 assert(index.includes('<script src="./apply-guard-v3.js"></script>'),"Apply Guard V3 must be active");
-for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
+assert(index.includes('<script src="./daily-plan-persistence-v3.js"></script>'),"DailyPlan Persistence V3 must be active");
+for(const retiredScript of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js"]){
   assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
 }
-for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js"]){
+for(const retired of ["public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js","public/daily-plan-persistence-v2.js"]){
   assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
 }
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
@@ -56,6 +60,9 @@ assert(!reviewPolicy.includes("复习方式")&&!reviewPolicy.includes("data-revi
 assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit current card identity");
 assert(applyGuard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 must validate canonical Apply stage identity");
 assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer card identity from rendered word text");
+assert(planPersistence.includes("LexiFlowDailyPlanPersistenceV3=Object.freeze"),"DailyPlan Persistence V3 must expose a narrow explicit bridge");
+assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 must identify persisted writes");
+assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
 
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
