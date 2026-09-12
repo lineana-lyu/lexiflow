@@ -27,6 +27,8 @@ function before(a,b){
   assert(bi>=0,`${b} missing from index.html`);
   assert(ai<bi,`${a} must load before ${b}`);
 }
+before("learning-core-v2.js","studyday-boundary-v2.js");
+before("studyday-boundary-v2.js","app.js");
 before("learning-core-v2.js","stage-transition-v2.js");
 before("stage-transition-v2.js","app.js");
 before("review-transition-v2.js","app.js");
@@ -48,12 +50,20 @@ const memorize=read("public/memorize-v2.js");
 const visualize=read("public/visualize-v2.js");
 const reviewUi=read("public/review-v2.js");
 const engine=read("public/learning-engine-v2.js");
+const boundary=read("public/studyday-boundary-v2.js");
 assert(memorize.includes("core.crossDayPatch"),"Memorize completion must use the central cross-day gate");
 assert(!memorize.includes("tomorrowIso"),"Memorize must not own a duplicate next-day scheduler");
 assert(visualize.includes("core.crossDayPatch"),"Visualize skip must use the central cross-day gate");
 assert(!visualize.includes("tomorrowIso"),"Visualize must not own a duplicate next-day scheduler");
 assert(!reviewUi.includes("window.fetch="),"Review UI must not maintain a separate learning-data fetch mutation layer");
+assert(reviewUi.includes("stored.date===today()"),"Review attempt UI state must be scoped to one StudyDay");
 assert(!engine.includes("scheduleReload"),"Learning Engine must not duplicate stage modules' reload orchestration");
+assert(boundary.includes("lexiflow-memorize-v2"),"StudyDay boundary must expire Memorize task UI state");
+assert(boundary.includes("lexiflow-study-active-v2"),"StudyDay boundary must expire active study resume state");
+assert(boundary.includes("lexiflow-review-resume-v2"),"StudyDay boundary must expire Review attempt UI state");
+assert(boundary.includes("lexiflow-review-session-state-v2"),"StudyDay boundary must expire Review session cursor state");
+assert(boundary.includes("location.reload()"),"an app left open across midnight must rebuild the new StudyDay");
+assert(!boundary.includes("lexiflow-study-drafts-v2"),"cross-day boundary must not erase user Visualize/Apply drafts");
 
 // Full first-learning path survives persistence/restart boundaries without opening the
 // next stage on the same day.
