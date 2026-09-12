@@ -277,7 +277,7 @@
         const recovered = Math.max(0, origin-1);
         return {memoryState:"reinforcing",reviewStep:recovered,stableStep:0,reviewAgainNeedsNextDay:false,nextReviewAt:addDaysIso(now,REVIEW_INTERVALS[recovered])};
       }
-      return {memoryState:"review_again",stableStep:0,reviewAgainFailedOn:today,sameDayRetestUsedOn:today,reviewAgainNeedsNextDay:true,nextReviewAt:now.toISOString()};
+      return {memoryState:"review_again",stableStep:0,reviewAgainFailedOn:today,sameDayRetestUsedOn:null,reviewAgainNeedsNextDay:true,nextReviewAt:addDaysIso(now,1)};
     }
 
     if(quality !== "good"){
