@@ -35,8 +35,10 @@ assert(surface.includes("core.canonicalStage(card)"),"study surface must label s
 assert(surface.includes("const ROOTS=Object.freeze"),"study surface must know the authoritative V3 renderer roots");
 assert(surface.includes("data-study-stage-host-v3"),"study surface must replace the legacy stage body with a passive host while a V3 renderer loads");
 assert(surface.includes("不会回退到旧学习流程"),"passive study host must explicitly fail closed rather than expose legacy stage UI");
+assert(surface.includes('.study-card-focus:not([data-stage-host-v3]){visibility:hidden}'),"legacy stage body must stay visually hidden before the V3 host is established");
+assert(surface.includes('.study-card-focus[data-stage-host-v3]{visibility:visible}'),"V3 stage host must become visible only after authority handoff");
 assert(surface.includes("window.LexiFlowStudyStageSurfaceV3=Object.freeze"),"study surface must expose only a narrow canonical-stage descriptor");
-assert(surface.includes('text==="英→中"||text==="中→英"'),"legacy Memorize labels must be normalized on residual shell surfaces");
+assert(surface.includes('text==="英→中"||text==="中→英"||text==="memorize"'),"legacy and canonical Memorize labels must normalize to the same product label on residual shell surfaces");
 
 assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to explicit Study Session card identity");
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize renderer must bind to explicit Study Session card identity");
