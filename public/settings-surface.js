@@ -18,7 +18,7 @@
     root.querySelector('[data-action="refresh-provider"]')?.remove();
     const banner = root.querySelector(".settings-security-banner");
     if(banner){
-      setText(banner,"连接凭据只保存在当前设备；学习内容不会发送给词典服务。");
+      setText(banner,"服务凭据只保存在当前设备。");
       if(banner.style.fontSize !== "12px") banner.style.fontSize = "12px";
     }
   }
