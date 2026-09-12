@@ -75,6 +75,15 @@ const repaired=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d1);
 assert(repaired.memoryState==="review_again"&&diffDays(d1,repaired.nextReviewAt)===1,"same-day repair success must still require next-day validation");
 const recovered=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d2);
 assert(recovered.memoryState==="reinforcing"&&recovered.reviewStep===2,"next-day validation must recover one step lower");
+const validationFailed=core.reviewSchedulePatch({...failed,reviewStep:3},"again",d2);
+assert(validationFailed.memoryState==="review_again","failed next-day validation must remain Review Again");
+assert(diffDays(d2,validationFailed.nextReviewAt)===1,"failed next-day validation must wait until the next StudyDay, not create another same-day repair loop");
+
+const reviewUi=read("public/review-session-v3.js");
+assert(reviewUi.includes('kind==="scheduled"||kind==="stable-maintenance"'),"only a normal scheduled first-recall failure may create the one same-day repair tail");
+assert(reviewUi.includes("没记住，明天再验证"),"next-day validation failure copy must not promise another same-day repair");
+assert(!reviewUi.includes("settings.reviewTypes"),"Review question types must be system-owned after removing the user-facing review-method setting");
+assert(!reviewUi.includes("settings.reviewTypeWeights"),"Review question weights must be system-owned after removing the user-facing review-method setting");
 
 const morning=date(2026,9,10,8);
 const noon=date(2026,9,10,12);
