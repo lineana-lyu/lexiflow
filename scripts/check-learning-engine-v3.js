@@ -25,7 +25,7 @@ eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today or
 const index=read("public/index.html");
 const runtimeOrder=[
   "learning-core-v2.js","studyday-boundary-v2.js","stage-transition-v2.js","learning-engine-v2.js",
-  "today-plan-v2.js","daily-plan-persistence-v2.js","source-context-v2.js","app.js","study-entry-v3.js",
+  "today-plan-v2.js","daily-plan-persistence-v2.js","source-context-v2.js","app.js","study-session-v3.js",
   "review-transaction-v3.js","review-session-v3.js","memorize-v2.js","study-resume-v2.js",
   "review-policy-v2.js","visualize-v2.js","apply-guard-v2.js"
 ];
@@ -36,6 +36,7 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
+assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 must not execute beside Study Session V3");
 assert(!index.includes('<script src="./review-transition-v2.js"></script>'),"legacy review-transition-v2.js must not execute in the V3 runtime");
 assert(!index.includes('<script src="./review-v2.js"></script>'),"legacy review-v2.js must not execute in the V3 runtime");
 assert(!index.includes('<script src="./review-session-state-v2.js"></script>'),"legacy review-session-state-v2.js must not execute in the V3 runtime");
