@@ -87,7 +87,11 @@
   function render(){
     const host=document.querySelector(".study-card-focus"); if(!host)return;
     const card=currentCard(); if(!card||!["memorize1","memorize2"].includes(card.stage))return;
-    const s=session(card); host.innerHTML=`<div class="lexi-m2" data-lexi-mem-word="${esc(card.word)}">${html(card,s)}<div style="margin-top:24px;text-align:center;color:var(--muted);font-size:12px">本轮进度保存在本机，退出后会从这里继续。</div></div>`;
+    const s=session(card);
+    const key=`${card.id}:${s.round}:${s.direction}:${s.phase}:${s.revealed?1:0}:${s.checked?1:0}:${s.correct===true?1:s.correct===false?0:"n"}`;
+    if(host.dataset.lexiM2===key)return;
+    host.dataset.lexiM2=key;
+    host.innerHTML=`<div class="lexi-m2" data-lexi-mem-word="${esc(card.word)}">${html(card,s)}<div style="margin-top:24px;text-align:center;color:var(--muted);font-size:12px">本轮进度保存在本机，退出后会从这里继续。</div></div>`;
     if(s.direction==="zh-en"&&!s.checked)requestAnimationFrame(()=>document.getElementById("lexi-m2-answer")?.focus());
   }
 
