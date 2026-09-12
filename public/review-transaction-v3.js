@@ -48,6 +48,7 @@
     return {
       cardId,
       quality:String(activity.quality||""),
+      questionType:String(activity.questionType||session.active?.type||""),
       phase:session.phase==="repair"?"repair":"normal",
       cursor:Number(session.cursor||0),
       repairCursor:Number(session.repairCursor||0),
@@ -89,6 +90,8 @@
     if(pending.quality==="again"&&!pending.wasRepair){
       session.repairTail=Array.isArray(session.repairTail)?session.repairTail:[];
       if(!session.repairTail.includes(pending.cardId))session.repairTail.push(pending.cardId);
+      session.repairTypeByCard=session.repairTypeByCard&&typeof session.repairTypeByCard==="object"?session.repairTypeByCard:{};
+      session.repairTypeByCard[pending.cardId]=String(pending.questionType||"");
     }
 
     if(pending.phase==="repair"){
@@ -127,9 +130,6 @@
       finalizePending(pending);
       return;
     }
-    // A GET may race with the POST while the Review save is still in flight. Do not
-    // erase the recovery marker merely because that earlier snapshot has not observed
-    // the commit yet. Only abandon an unconfirmed marker after a generous grace period.
     if(pendingIsStale(pending))clearUncommittedPending(pending);
   }
 
