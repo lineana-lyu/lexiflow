@@ -28,7 +28,7 @@ assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memor
 const index=read("public/index.html");
 const runtimeOrder=[
   "learning-core-v2.js","studyday-boundary-v3.js","stage-transition-v2.js","learning-engine-v2.js",
-  "today-plan-v2.js","daily-plan-persistence-v3.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
+  "today-plan-v3.js","daily-plan-persistence-v3.js","source-context-v3.js","app.js","study-stage-surface-v3.js","study-session-v3.js",
   "select-stage-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
   "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"
 ];
@@ -39,9 +39,9 @@ for(const file of runtimeOrder){
   assert(i>previous,`${file} is loaded out of order in public/index.html`);
   previous=i;
 }
-for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"]){
+for(const retired of ["study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js","today-plan-v2.js"]){
   assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
-  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+  if(["memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js","daily-plan-persistence-v2.js","studyday-boundary-v2.js","today-plan-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
 }
 
 const sourceContext=read("public/source-context-v3.js");
@@ -57,13 +57,15 @@ const studyDayBoundary=read("public/studyday-boundary-v3.js");
 assert(studyDayBoundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay boundary must own the V3 runtime-day marker");
 assert(studyDayBoundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay boundary must migrate the prior runtime-day marker");
 
-const todayUi=read("public/today-plan-v2.js");
+const todayUi=read("public/today-plan-v3.js");
 assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
 assert(todayUi.includes('class="lexi-today-progress"'),"Today progress must be integrated into the compact Today card");
 assert(todayUi.includes('data-library-filter="${key}"'),"Word Library must own the pending/learning/stable filters");
 assert(todayUi.includes("待学习"),"collected words must be presented as Pending inside Word Library");
 assert(!todayUi.includes('id="lexi-inbox"'),"Home must not expose a separate Inbox panel");
 assert(todayUi.includes("next.dailyPlan.initialTaskIds=next.dailyPlan.initialTaskIds.filter"),"moving a selected word back to Pending must remove it from the frozen progress denominator rather than count it as completed");
+assert(todayUi.includes('todayPlanAuthority:"v3"'),"Today Plan writes must identify V3 authority");
+assert(!todayUi.includes("window.fetch =")&&!todayUi.includes("window.fetch="),"Today Plan V3 must not rewrite global fetch");
 
 const d1=date(2026,9,1), d2=date(2026,9,2);
 const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISOString()},d1);
