@@ -5,7 +5,7 @@
   if(!core) throw new Error("LexiFlowLearningCore must load before learning-engine-v2.js");
 
   const nativeFetch = window.fetch.bind(window);
-  const {REVIEW_INTERVALS, STABLE_INTERVALS, normalizeData, eligibleToday, crossDayPatch, reviewSchedulePatch} = core;
+  const {REVIEW_INTERVALS, STABLE_INTERVALS, normalizeData, eligibleToday, crossDayPatch} = core;
   const VISUAL_SENTINEL = "__LEXIFLOW_USER_ASSOCIATION_REQUIRED__";
   let latestLearningData = null;
 
@@ -40,28 +40,8 @@
     };
   }
 
-  function latestReviewActivity(data, cardId){
-    const list = Array.isArray(data?.activities) ? data.activities : [];
-    for(let i=list.length-1;i>=0;i--){
-      const item = list[i];
-      if(item?.type === "review" && item?.cardId === cardId) return item;
-    }
-    return null;
-  }
-
   function findPreviousCard(cardId){
     return latestLearningData?.cards?.find(card=>card.id===cardId) || null;
-  }
-
-  // Safety net for imported/legacy writes. Normal Review interactions are owned by
-  // review-transition-v2.js; this only guarantees old writes cannot reintroduce +3/+1.
-  function applyReviewSchedule(nextData, nextCard){
-    const prev = findPreviousCard(nextCard.id);
-    if(!prev) return;
-    if(Number(nextCard.reviewCount||0) <= Number(prev.reviewCount||0)) return;
-    const activity = latestReviewActivity(nextData, nextCard.id);
-    const patch = reviewSchedulePatch(prev, String(activity?.quality || ""), new Date());
-    if(patch) Object.assign(nextCard, patch);
   }
 
   function applyCrossDayGate(prev, next){
@@ -75,7 +55,6 @@
     for(const card of data.cards){
       const prev = findPreviousCard(card.id);
       applyCrossDayGate(prev, card);
-      applyReviewSchedule(data, card);
     }
     data.dailyPlan = core.buildDailyPlan(data);
     latestLearningData = JSON.parse(JSON.stringify(data));
