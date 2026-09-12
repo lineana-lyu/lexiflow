@@ -43,7 +43,16 @@
 
   function appendActivity(data,cardId,type,extra={}){
     data.activities=Array.isArray(data.activities)?data.activities:[];
+    if(extra.commandId&&data.activities.some(item=>String(item.commandId||"")===extra.commandId))return;
     data.activities.push({id:uid(),type,cardId,at:new Date().toISOString(),...extra});
+  }
+
+  function skipCommandId(cardId,now=new Date()){
+    return `stage:${core.dayKey(now)}:${String(cardId)}:apply-skip`;
+  }
+
+  function commandCommitted(data,commandId){
+    return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===commandId);
   }
 
   function pauseAndReturn(){
@@ -115,9 +124,13 @@
     button.textContent="正在跳过…";
     try{
       const data=await loadData();
+      const id=currentCardId();
+      if(!id)throw new Error("APPLY_CARD_NOT_FOUND");
+      const now=new Date(),commandId=skipCommandId(id,now);
+      if(commandCommitted(data,commandId)){location.reload();return;}
       const card=currentApplyCard(data);
       if(!card)throw new Error("APPLY_CARD_NOT_FOUND");
-      const now=new Date(),prev={...card},draft=currentDraft(card);
+      const prev={...card},draft=currentDraft(card);
       card.applyDraft=draft;
       card.applySkipped=true;
       card.applySkippedOn=core.dayKey(now);
@@ -125,7 +138,7 @@
       card.initialReviewPending=false;
       Object.assign(card,core.crossDayPatch(prev,{stage:"review"},now)||{});
       card.updatedAt=now.toISOString();
-      appendActivity(data,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft)});
+      appendActivity(data,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),commandId});
       await persist(data);
       button.textContent="已跳过 · 明天首次复习";
       setTimeout(()=>location.reload(),100);
