@@ -14,10 +14,18 @@ assert(core,"learning core did not initialize");
 
 const indexHtml=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const policyIndex=indexHtml.indexOf("review-policy-v2.js");
-const reviewIndex=indexHtml.indexOf("review-v2.js");
 const visualIndex=indexHtml.indexOf("visualize-v2.js");
 assert(policyIndex>=0,"review-policy-v2.js must be loaded by index.html");
-assert(policyIndex>reviewIndex&&policyIndex<visualIndex,"Review policy controls must load after Review runtime and before later stage decorators");
+assert(policyIndex<visualIndex,"Review policy controls must load before later stage decorators");
+
+const policyUi=fs.readFileSync(path.join(root,"public","review-policy-v2.js"),"utf8");
+assert(policyUi.includes("复习与巩固"),"settings must describe this layer as Review & Reinforcement, not a second learning method");
+assert(policyUi.includes("1 → 3 → 7 → 16 → 21"),"settings must explain the deterministic reinforcement ladder");
+assert(policyUi.includes("30 → 45 → 68 → 90"),"settings must explain Stable maintenance intervals");
+assert(policyUi.includes("下一学习日必须再次验证"),"settings must explain next-day validation after a first-recall failure");
+assert(policyUi.includes("高级设置"),"question type weighting must be hidden behind Advanced Settings by default");
+assert(policyUi.includes('advancedOpen = false'),"advanced review controls must default to collapsed");
+assert(policyUi.includes("跟随系统安排"),"default daily review load must be framed as following the system schedule");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
@@ -50,7 +58,7 @@ assert(changedNextDay.dailyPlan.reviewMode==="all"&&changedNextDay.dailyPlan.rev
 const planned=new Set(frozen.review);
 const sorted=changedSameDay.cards.filter(card=>card.stage==="review");
 const firstDeferred=sorted.findIndex(card=>!planned.has(card.id));
-assert(firstDeferred===7,"planned Review items must sort before deferred due items so legacy queue cannot consume extras first");
+assert(firstDeferred===7,"planned Review items must sort before deferred due items so runtime cannot consume extras first");
 assert(sorted.slice(0,7).every(card=>planned.has(card.id)),"first Review cards must all belong to the frozen plan");
 
 assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:0}).cap===1,"custom Review cap must clamp to at least 1");
