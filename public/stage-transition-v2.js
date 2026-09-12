@@ -10,6 +10,12 @@
   const normalize = value => String(value || "").trim().toLowerCase();
   const containsChinese = value => /[\u3400-\u9fff]/.test(String(value || ""));
   const escapeRe = value => String(value || "").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  const copyNorm = value => normalize(value)
+    .replace(/[’‘]/g,"'")
+    .replace(/[“”]/g,'"')
+    .replace(/[.,!?;:()[\]{}"']/g," ")
+    .replace(/\s+/g," ")
+    .trim();
 
   function targetForms(word){
     const w = normalize(word);
@@ -52,16 +58,23 @@
     return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
   }
 
-  function currentStudyCard(data,expectedStage){
+  function currentStudyCard(data){
     const id=currentStudyCardId();
     if(!id||!Array.isArray(data?.cards))return null;
-    const card=data.cards.find(item=>String(item.id)===id)||null;
-    if(!card)return null;
-    return !expectedStage||card.stage===expectedStage?card:null;
+    return data.cards.find(item=>String(item.id)===id)||null;
+  }
+
+  function stageCommandId(cardId,stage,now=new Date()){
+    return `stage:${core.dayKey(now)}:${String(cardId)}:${String(stage)}`;
+  }
+
+  function commandCommitted(data,commandId){
+    return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===commandId);
   }
 
   function appendActivity(data,cardId,stage,extra={}){
     data.activities=Array.isArray(data.activities)?data.activities:[];
+    if(extra.commandId&&commandCommitted(data,extra.commandId))return;
     data.activities.push({id:uid(),type:"stage-complete",cardId,stage,at:new Date().toISOString(),...extra});
   }
 
@@ -80,15 +93,31 @@
     setTimeout(()=>location.reload(),80);
   }
 
+  function applyWarning(message){
+    const composer=document.querySelector(".apply-composer");
+    if(!composer)return;
+    let box=document.querySelector(".lexi-apply-transition-warning");
+    if(!box){
+      box=document.createElement("div");
+      box.className="lexi-apply-transition-warning";
+      box.style.cssText="margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(120,140,132,.04);color:var(--muted);font-size:13px;line-height:1.6";
+      composer.insertAdjacentElement("afterend",box);
+    }
+    box.textContent=message;
+  }
+
   async function completeSelect(button){
     const data=await loadData();
-    const card=currentStudyCard(data,"select");
-    if(!card||card.inboxPending)return false;
-    const now=new Date(), prev={...card};
+    const card=currentStudyCard(data);
+    if(!card)return false;
+    const now=new Date(),commandId=stageCommandId(card.id,"select",now);
+    if(commandCommitted(data,commandId)){busy(button,"已确认 · 明天开始记忆");setTimeout(()=>location.reload(),80);return true;}
+    if(card.stage!=="select"||card.inboxPending)return false;
+    const prev={...card};
     card.stage="memorize1";
     Object.assign(card,core.crossDayPatch(prev,{stage:"memorize1"},now)||{});
     card.updatedAt=now.toISOString();
-    appendActivity(data,card.id,"select");
+    appendActivity(data,card.id,"select",{commandId});
     busy(button,"已确认 · 明天开始记忆");
     await persist(data);
     location.reload();
@@ -97,18 +126,21 @@
 
   async function completeVisualize(button){
     const data=await loadData();
-    const card=currentStudyCard(data,"visualize");
+    const card=currentStudyCard(data);
     if(!card)return false;
+    const now=new Date(),commandId=stageCommandId(card.id,"visualize",now);
+    if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天开始造句");setTimeout(()=>location.reload(),80);return true;}
+    if(card.stage!=="visualize")return false;
     const hasImage=Boolean(card.imageData||card.imageUrl);
     if(!hasImage)return false;
-    const now=new Date(), prev={...card};
+    const prev={...card};
     const note=String(document.getElementById("visual-note")?.value||card.visualNote||"").trim();
     card.visualNote=note;
     card.visualSkipped=false;
     card.stage="apply";
     Object.assign(card,core.crossDayPatch(prev,{stage:"apply"},now)||{});
     card.updatedAt=now.toISOString();
-    appendActivity(data,card.id,"visualize",{skipped:false});
+    appendActivity(data,card.id,"visualize",{skipped:false,commandId});
     busy(button,"已完成 · 明天开始造句");
     await persist(data);
     location.reload();
@@ -117,21 +149,30 @@
 
   async function completeApply(button){
     const data=await loadData();
-    const card=currentStudyCard(data,"apply");
+    const card=currentStudyCard(data);
     if(!card)return false;
+    const now=new Date(),commandId=stageCommandId(card.id,"apply",now);
+    if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天首次复习");setTimeout(()=>location.reload(),80);return true;}
+    if(card.stage!=="apply")return false;
     const sentence=String(document.getElementById("apply-text")?.value||card.applyDraft||card.userSentence||"").trim();
     if(!sentence||containsChinese(sentence)||!usesTarget(sentence,card.word))return false;
+    if(copyNorm(sentence)&&copyNorm(sentence)===copyNorm(card.exampleEn||"")){
+      applyWarning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");
+      return "blocked";
+    }
 
-    const now=new Date(), prev={...card};
+    const prev={...card};
     card.userSentence=sentence;
     card.finalSentence=sentence;
     card.applyDraft="";
+    card.applyDraftSavedAt="";
     card.applySkipped=false;
+    card.applySkippedOn="";
     card.stage="review";
     card.initialReviewPending=false;
     Object.assign(card,core.crossDayPatch(prev,{stage:"review"},now)||{});
     card.updatedAt=now.toISOString();
-    appendActivity(data,card.id,"apply",{sentence,skipped:false});
+    appendActivity(data,card.id,"apply",{sentence,skipped:false,commandId});
     busy(button,"已完成 · 明天首次复习");
     await persist(data);
     location.reload();
@@ -146,6 +187,7 @@
       if(kind==="select")completed=await completeSelect(button);
       if(kind==="visualize")completed=await completeVisualize(button);
       if(kind==="apply")completed=await completeApply(button);
+      if(completed==="blocked")return;
       if(!completed)resync(button);
     }catch(err){
       console.error("stage transition failed",err);
