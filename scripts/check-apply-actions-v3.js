@@ -7,7 +7,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const index=read("public/index.html");
 const apply=read("public/apply-actions-v3.js");
-const transition=read("public/stage-transition-v2.js");
+const transition=read("public/stage-transition-v3.js");
 const visual=read("public/visualize-actions-v3.js");
 const source=read("public/source-context-v3.js");
 const fresh=read("public/new-user-defaults-v3.js");
@@ -26,13 +26,15 @@ assert(apply.includes("再次点击确认跳过"),"Apply skip must require an ex
 assert(apply.includes("skipCommandId"),"Apply skip must carry a deterministic command id");
 assert(apply.includes("commandCommitted"),"Apply skip must be safe to retry without double completion");
 
-assert(transition.includes("currentStudyCardId"),"stage transitions must resolve the exact rendered card ID");
-assert(!transition.includes("function domWord("),"stage transitions must not infer Apply identity from DOM word text");
+assert(transition.includes("currentStudyCardId"),"Stage Transition V3 must resolve the exact rendered card ID");
+assert(!transition.includes("function domWord("),"Stage Transition V3 must not infer Apply identity from DOM word text");
 assert(transition.includes('card.applySkipped=false'),"successful Apply completion must clear a previous skip marker");
 assert(transition.includes('card.applyDraft=""'),"successful Apply completion must clear the durable draft field");
 assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must use deterministic command ids");
 assert(transition.includes("commandCommitted"),"stage completion must explicitly tolerate a retried command");
 assert(transition.includes("copyNorm(card.exampleEn"),"authoritative Apply completion must independently reject a copied reference example");
+assert(transition.includes('stageTransitionAuthority:"v3"'),"normal Apply completion must persist through Stage Transition V3");
+assert(transition.includes('authority:"stage-transition-v3"'),"normal Apply completion history must identify Stage Transition V3 authority");
 
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip must bind to the exact study card ID");
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
