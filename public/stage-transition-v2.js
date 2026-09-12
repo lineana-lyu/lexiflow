@@ -93,7 +93,7 @@
 
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.("button,[data-action]");if(!button)return;
-    if(button.matches('[data-action="complete-stage"][data-next="memorize1"]')){event.preventDefault();event.stopImmediatePropagation();void handle(button,"select");return;}
+    if(button.matches('[data-action="complete-stage"][data-next="memorize"],[data-action="complete-stage"][data-next="memorize1"]')){event.preventDefault();event.stopImmediatePropagation();void handle(button,"select");return;}
     if(button.matches('[data-action="finish-visual"]')){const hasImage=Boolean(document.querySelector(".visual-image-canvas img,.visual-image img,.generated-visual-image"));if(!hasImage&&button.disabled)return;event.preventDefault();event.stopImmediatePropagation();void handle(button,"visualize");return;}
     if(button.matches('[data-action="pass-apply"]')){event.preventDefault();event.stopImmediatePropagation();void handle(button,"apply");}
   },true);
