@@ -14,6 +14,7 @@ const studyResume=read("public/study-resume-v2.js");
 const boundary=read("public/studyday-boundary-v2.js");
 const stageTransition=read("public/stage-transition-v2.js");
 const memorize=read("public/memorize-v2.js");
+const safety=read("public/safety-controls.js");
 const app=read("public/app.js");
 
 function before(a,b){
@@ -61,6 +62,9 @@ assert(reviewTransaction.includes("expectedReviewCount"),"Review transaction rec
 assert(stageTransition.includes("core.crossDayPatch"),"learning stage transitions must use Learning Core");
 assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");
 assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
+assert(stageTransition.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"stage completion must resolve the exact Study Session card ID");
+assert(!stageTransition.includes("cardForDom"),"stage completion must not infer the card by DOM word text");
+assert(stageTransition.includes("resync(button)"),"failed stage identity resolution must resync instead of silently repeating the same confirmation");
 assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize must resolve the exact Study Session renderer card ID");
 assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
 assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not depend on legacy memory-rate controls");
@@ -89,5 +93,12 @@ assert(boundary.includes('const REVIEW_SESSION_V3_KEY="lexiflow-review-session-v
 assert(boundary.includes("purgeSingle(REVIEW_SESSION_V3_KEY"),"StudyDay boundary must expire stale V3 Review sessions");
 assert(boundary.includes('const REVIEW_SESSION_KEY="lexiflow-review-session-state-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review session residue during migration");
 assert(boundary.includes('const REVIEW_ATTEMPT_KEY="lexiflow-review-resume-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review attempt residue during migration");
+
+assert(safety.includes("verifiedReset"),"clear-data control must own a verified reset flow");
+assert(safety.includes('method:"POST"'),"clear-data flow must write an empty learning dataset to persistent storage");
+assert(safety.includes("RESET_VERIFICATION_FAILED"),"clear-data flow must verify persistent storage before reporting success");
+assert(safety.includes("lexiflow-study-session-v3"),"clear-data flow must remove Study Session local residue");
+assert(safety.includes("lexiflow-review-session-v3"),"clear-data flow must remove Review Session local residue");
+assert(!safety.includes("window.prompt"),"clear-data flow should use the visible confirmation modal rather than a fragile prompt-only action");
 
 console.log("Runtime Authority V3 checks passed.");
