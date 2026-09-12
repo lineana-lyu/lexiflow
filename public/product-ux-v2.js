@@ -26,8 +26,19 @@
     });
   }
 
+  function decorateLearningCopy() {
+    document.querySelectorAll('[data-action="save-card"]').forEach(button => {
+      if (!button.disabled) button.textContent = "保存到学习计划";
+    });
+    document.querySelectorAll('[data-action="complete-stage"][data-next="memorize1"]').forEach(button => {
+      button.textContent = "确认这个词义，明天开始记忆";
+      button.title = "确认后今天不继续背诵，Memorize 会在下一个学习日开放";
+    });
+  }
+
   function decorate() {
     applyAppIcon();
+    decorateLearningCopy();
   }
 
   function schedule() {
