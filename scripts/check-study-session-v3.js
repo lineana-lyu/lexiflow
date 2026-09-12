@@ -9,7 +9,7 @@ const exists=name=>fs.existsSync(path.join(root,name));
 const index=read("public/index.html");
 const session=read("public/study-session-v3.js");
 const drafts=read("public/study-drafts-v3.js");
-const boundary=read("public/studyday-boundary-v2.js");
+const boundary=read("public/studyday-boundary-v3.js");
 const app=read("public/app.js");
 
 function before(a,b){
@@ -23,6 +23,8 @@ before("app.js","study-session-v3.js");
 before("study-session-v3.js","review-transaction-v3.js");
 assert(!index.includes('<script src="./study-entry-v3.js"></script>'),"legacy Study Entry V3 guard must not run beside Study Session V3");
 assert(!index.includes('<script src="./study-resume-v2.js"></script>'),"legacy-named Study Resume V2 must not remain in the runtime load chain");
+assert(index.includes('<script src="./studyday-boundary-v3.js"></script>'),"Study Session V3 must run behind StudyDay Boundary V3");
+assert(!index.includes('<script src="./studyday-boundary-v2.js"></script>'),"StudyDay Boundary V2 must not return to runtime");
 
 assert(session.includes('const KEY="lexiflow-study-session-v3"'),"Study Session V3 must persist an exact same-day session");
 assert(session.includes('const LEARNING_KEYS=["memorize","visualize","apply","select"]'),"Study Session V3 must preserve Today learning-stage order after Review");
@@ -52,8 +54,10 @@ assert(drafts.includes("core.canonicalStage(card)"),"draft recovery must follow 
 assert(drafts.includes('stage==="visualize"')&&drafts.includes('stage==="apply"'),"draft recovery must remain scoped to Visualize and Apply only");
 assert(!drafts.includes('card.stage==="visualize"')&&!drafts.includes('card.stage==="apply"'),"draft recovery must not regress to raw stage comparisons");
 assert(!exists("public/study-resume-v2.js"),"retired Study Resume V2 source must stay deleted after V3 draft migration");
+assert(!exists("public/studyday-boundary-v2.js"),"retired StudyDay Boundary V2 source must stay deleted");
 
-assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
-assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
+assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay Boundary V3 must know the Study Session V3 key");
+assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay Boundary V3 must expire stale Study Session V3 state");
+assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"Study Session recovery must use the V3 StudyDay marker");
 
 console.log("Study Session V3 checks passed.");
