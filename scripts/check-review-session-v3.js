@@ -10,6 +10,7 @@ const index=read("public/index.html");
 const source=read("public/review-session-v3.js");
 const transaction=read("public/review-transaction-v3.js");
 const boundary=read("public/studyday-boundary-v2.js");
+const app=read("public/app.js");
 
 assert(index.includes("review-session-v3.js"),"Review Session V3 must be loaded by index.html");
 assert(index.indexOf("app.js")<index.indexOf("review-session-v3.js"),"Review V3 should attach after the app shell while retaining capture-phase entry authority");
@@ -18,7 +19,12 @@ assert(source.includes("plan.frozen!==true"),"Review V3 must require a frozen To
 assert(source.includes("core.reviewSchedulePatch"),"Review V3 must delegate memory transitions to Learning Core");
 assert(source.includes('body:JSON.stringify({data:normalized,reviewAuthority:"v3"})'),"Review V3 writes must identify themselves as Core-authoritative");
 assert(source.includes('event.target?.closest?.(\'[data-action="start-review"]\')'),"Review V3 must intercept the existing Review entry point");
-assert(source.includes("event.stopImmediatePropagation()"),"Review V3 must prevent app.js startReview from building a dueCards queue");
+assert(source.includes("event.stopImmediatePropagation()"),"Review V3 must own Review entry before generic app handlers run");
+assert(source.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review V3 must expose a narrow open bridge");
+assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app fallback must delegate Review entry back to V3");
+assert(!app.includes("function startReview("),"legacy app Review queue builder must be removed");
+assert(!app.includes("function rateReview("),"legacy +3/+1 Review scheduler must be removed");
+assert(!app.includes("function reviewSessionPage("),"legacy app Review session renderer must be removed");
 assert(source.includes("repairTail"),"Review V3 must keep failed normal recalls for one same-day repair tail");
 assert(source.includes("reviewCount proves this exact attempt already committed"),"Review V3 must document restart-safe attempt idempotency");
 assert(source.includes("session.paused=true"),"explicit Review exit must preserve a resumable paused session");

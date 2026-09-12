@@ -363,6 +363,11 @@
     requestAnimationFrame(()=>{renderQueued=false;maybeResume();});
   }
 
+  window.LexiFlowReviewSessionV3=Object.freeze({
+    open(){return openSession({resume:true});},
+    restart(){return openSession({resume:false});}
+  });
+
   function start(){
     injectStyle();
     const app=document.getElementById("app");

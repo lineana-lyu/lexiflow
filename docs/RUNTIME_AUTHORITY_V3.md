@@ -54,6 +54,8 @@ The only active Review execution path is:
 
 `DailyPlan.review -> review-transaction-v3.js -> review-session-v3.js -> Learning Core -> learning-data.json`
 
+`app.js` no longer contains a second Review queue, Review session renderer, +3/+1 scheduler, or same-day initial Review implementation. Its Review center is display-only and reads membership from the frozen DailyPlan; the generic `start-review` fallback delegates to `LexiFlowReviewSessionV3.open()` and fails closed if V3 is unavailable.
+
 `review-session-v3.js` owns:
 
 - the frozen Review queue;
@@ -121,7 +123,7 @@ They must not be recreated as quick fixes. Any missing study-entry behavior belo
 - `scripts/check-review-transaction-v3.js` verifies crash-safe Review transaction recovery.
 - existing StudyDay, Review policy, Advance Learning and Apply checks remain required.
 
-A change that restores a removed study/review shim, restores no-argument `startStudy()`, or restores `activeLearningCards()[0]` as a Study entry fallback is a regression.
+A change that passes syntax checks but re-loads a retired study/review script, restores no-argument `startStudy()`, restores `activeLearningCards()[0]` as a Study entry fallback, or recreates a second Review queue/scheduler inside `app.js` is a regression.
 
 ## 6. Next cleanup boundary
 

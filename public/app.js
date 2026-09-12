@@ -81,8 +81,6 @@
     selectedSenseId: null,
     addDraft: null,
     study: null,
-    reviewQueue: [],
-    reviewIndex: 0,
     librarySearch: "",
     libraryEditor: null,
     lookupStatus: "idle",
@@ -430,13 +428,18 @@
 
   function getCard(id){ return state.data.cards.find(c=>c.id===id); }
 
-  function dueCards(){
-    const now=Date.now();
-    return state.data.cards.filter(c => c.stage==="review" && c.nextReviewAt && new Date(c.nextReviewAt).getTime()<=now);
+  function currentDailyPlan(){
+    const plan=state.data.dailyPlan;
+    if(plan?.frozen===true&&plan.date===todayKey())return plan;
+    const core=window.LexiFlowLearningCore;
+    return typeof core?.buildDailyPlan==="function"?core.buildDailyPlan(state.data,new Date()):null;
   }
 
-  function activeLearningCards(){
-    return state.data.cards.filter(c=>c.initialReviewPending || (c.stage!=="review" && c.stage!=="mastered"));
+  function planCards(key){
+    const plan=currentDailyPlan();
+    if(!plan||!Array.isArray(plan[key]))return [];
+    const byId=new Map(state.data.cards.map(card=>[card.id,card]));
+    return plan[key].map(id=>byId.get(id)).filter(Boolean);
   }
 
   function todayActivities(){
@@ -448,42 +451,48 @@
     return new Set(todayActivities().filter(a=>["stage-complete","review"].includes(a.type)).map(a=>a.cardId)).size;
   }
 
-  function streak(){
-    const days = new Set(state.data.activities.map(a=>todayKey(new Date(a.at))));
-    let count=0, d=new Date();
-    while(days.has(todayKey(d))){count++; d=addDays(d,-1);}
-    return count;
+  function stableCount(){
+    return state.data.cards.filter(card=>card.memoryState==="stable").length;
   }
 
   function progressPercent(){
-    const goal=state.data.settings.dailyGoal||5;
-    return Math.min(100,Math.round((uniqueLearnedToday()/goal)*100));
+    const plan=currentDailyPlan();
+    const goal=Number(plan?.selectGoal||state.data.settings.dailyGoal||3);
+    return Math.min(100,Math.round((uniqueLearnedToday()/Math.max(1,goal))*100));
   }
 
   function homePage(){
-    const due=dueCards().length;
-    const active=activeLearningCards().length;
+    const plan=currentDailyPlan();
+    const review=Array.isArray(plan?.review)?plan.review.length:0;
+    const learning=["memorize","visualize","apply","select"].reduce((sum,key)=>sum+(Array.isArray(plan?.[key])?plan[key].length:0),0);
     const cards=state.data.cards.length;
-    const learned=state.data.cards.filter(c=>c.stage==="review"||c.stage==="mastered").length;
     const today=uniqueLearnedToday();
-    const goal=state.data.settings.dailyGoal||5;
-    const primary = active ? `<button class="btn primary" data-action="continue-learning">继续学习</button>`
-      : due ? `<button class="btn primary" data-action="start-review">开始复习</button>`
-      : `<button class="btn primary" data-route="add">添加第一个单词</button>`;
+    const goal=Number(plan?.selectGoal||state.data.settings.dailyGoal||3);
+    const stable=stableCount();
+    const inbox=Array.isArray(plan?.inbox)?plan.inbox.length:state.data.cards.filter(card=>card.inboxPending).length;
+    const primary=review
+      ? `<button class="btn primary" data-action="start-review">开始复习</button>`
+      : learning
+        ? `<button class="btn primary" data-action="continue-learning">继续学习</button>`
+        : inbox&&Number(plan?.remainingSelectSlots||0)>0
+          ? `<button class="btn primary" data-route="add">继续收集单词</button>`
+          : cards===0
+            ? `<button class="btn primary" data-route="add">添加第一个单词</button>`
+            : `<button class="btn primary" disabled>今天的计划已完成</button>`;
     return shell(
       header("","今日学习","",`<button class="btn" data-route="add">＋ 添加单词</button>`)
       + `<div class="grid cols-4">
-        <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">目标词数</div></div>
-        <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${due}</div><div class="stat-hint">到期卡片</div></div>
-        <div class="card stat"><div class="stat-label">学习中</div><div class="stat-value">${active}</div><div class="stat-hint">尚未完成首次学习</div></div>
-        <div class="card stat"><div class="stat-label">连续学习</div><div class="stat-value">${streak()}<span style="font-size:14px;color:var(--muted)"> 天</span></div><div class="stat-hint">按本地日期计算</div></div>
+        <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">今日推进记录</div></div>
+        <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${review}</div><div class="stat-hint">Today Plan 已安排</div></div>
+        <div class="card stat"><div class="stat-label">学习中</div><div class="stat-value">${learning}</div><div class="stat-hint">今天可推进的学习任务</div></div>
+        <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stable}</div><div class="stat-hint">已进入长期维护复习</div></div>
       </div>
       <div class="section card today-card">
         <div>
           <div class="eyebrow">今日进度</div>
-          <h2>${cards===0?"从一个单词开始":active?"继续今天的学习":"今天的学习已准备好"}</h2>
-          <p>${cards===0?"先添加一个真正想记住的词，再通过主动回忆、视觉联想、造句和复习逐步巩固。":active?`还有 ${active} 个单词处于首次学习流程中。`:(due?`有 ${due} 个单词已经到期，建议现在复习。`:"当前没有到期任务，可以继续添加新词。")}</p>
-          <div style="margin-top:16px"><div class="progress-track"><div class="progress-bar" style="width:${progressPercent()}%"></div></div><div class="stat-hint" style="margin-top:7px">今日进度 ${today}/${goal}</div></div>
+          <h2>${cards===0?"从一个单词开始":review?"先完成今天的复习":learning?"继续今天的学习":"今天的计划已完成"}</h2>
+          <p>${cards===0?"先收集一个真正想学会并会用的词。":review?`Today Plan 安排了 ${review} 个复习词，完成后再进入新学习。`:learning?`今天还有 ${learning} 个学习任务，按 Memorize → Visualize → Apply → Select 推进。`:"没有补昨天任务，也不会制造词汇债；明天会按当前状态重新生成计划。"}</p>
+          <div style="margin-top:16px"><div class="progress-track"><div class="progress-bar" style="width:${progressPercent()}%"></div></div><div class="stat-hint" style="margin-top:7px">今日推进 ${today}/${goal}</div></div>
         </div>
         <div class="today-actions">${primary}<button class="btn" data-route="library">查看单词库</button></div>
       </div>
@@ -822,8 +831,7 @@
     if(stage==="memorize2") return stageMem2(card);
     if(stage==="visualize") return stageVisual(card);
     if(stage==="apply") return stageApply(card);
-    if(stage==="review" && card.initialReviewPending) return stageInitialReview(card);
-    return `<div class="study-center"><strong class="prompt-big">首次学习已完成</strong><p class="prompt-small">这张卡片已经进入复习队列。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
+    return `<div class="study-center"><strong class="prompt-big">当前学习阶段不可在这里打开</strong><p class="prompt-small">Review 由 Today Plan 的独立复习会话处理。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
   }
 
   function stageTop(card,kicker){
@@ -1051,28 +1059,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     </div>`;
 }
 
-  function stageInitialReview(card){
-    return `${stageKicker("首次复习 · 主动回忆")}
-      <div class="study-center">
-        ${wordIdentity(card,{size:"hero",showPos:true,center:true})}
-        <div class="prompt-small">先回忆中文释义，再查看答案。</div>
-        ${state.study?.revealed?`
-          <div class="memory-answer-card">
-            <div class="memory-answer-meaning">${escapeHtml(card.meaningZh)}</div>
-            <div class="memory-example-section compact-example">
-              <div class="memory-example-label">例句</div>
-              ${sentenceExample(card.exampleEn,"memory-example-en")}
-              <div class="memory-example-zh">${escapeHtml(card.exampleZh)}</div>
-            </div>
-          </div>
-          <div class="rating-row">
-            <button class="btn" data-action="initial-review-rate" data-quality="again">没记住 · 明天再复习</button>
-            <button class="btn primary" data-action="initial-review-rate" data-quality="good">记住了 · 3 天后复习</button>
-          </div>
-        `:`<button class="btn primary" style="margin-top:22px" data-action="initial-review-reveal">查看答案</button>`}
-      </div>`;
-  }
-
   function localFeedback(text,word){
     const t=text.trim();
     const tips=[];
@@ -1133,79 +1119,22 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     render();
   }
 
-  function enterInitialReview(card){
-    card.stage="review";
-    card.initialReviewPending=true;
-    card.nextReviewAt=null;
-    card.updatedAt=new Date().toISOString();
-    recordActivity("stage-complete",card.id,{stage:"initial-review-ready"});
-    saveData();
-    state.study.revealed=false;
-    state.study.feedback=null;
-    render();
-  }
-
-  function finishInitialReview(card, quality){
-    const now=new Date();
-    card.stage="review";
-    card.initialReviewPending=false;
-    card.reviewCount=(card.reviewCount||0)+1;
-    card.lastReviewedAt=now.toISOString();
-    card.nextReviewAt=addDays(now, quality==="good"?3:1).toISOString();
-    card.updatedAt=now.toISOString();
-    recordActivity("review",card.id,{quality,kind:"initial"});
-    saveData();
-    toast("首次复习完成，已加入后续复习计划");
-    state.study=null;state.route="home";render();
-  }
-
   function reviewPage(){
-    const due=dueCards();
+    const plan=currentDailyPlan();
+    const due=planCards("review");
+    const stable=stableCount();
+    const reviewMode=String(plan?.reviewMode||"intelligent");
+    const modeLabel=reviewMode==="all"?"全部到期":reviewMode==="custom"?`自定义上限 ${plan?.reviewCap||""}`:"智能安排";
     return shell(
-      header("LEXIFLOW · REVIEW","复习中心","",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
+      header("LEXIFLOW · REVIEW","复习中心","只处理 Today Plan 已冻结的 Review 队列。",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
       + `<div class="grid cols-3">
-        <div class="card stat"><div class="stat-label">今日到期</div><div class="stat-value">${due.length}</div><div class="stat-hint">现在可以复习</div></div>
-        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有复习记录</div></div>
-        <div class="card stat"><div class="stat-label">已进入复习</div><div class="stat-value">${state.data.cards.filter(c=>c.stage==="review").length}</div><div class="stat-hint">首次学习已完成</div></div>
+        <div class="card stat"><div class="stat-label">今日复习</div><div class="stat-value">${due.length}</div><div class="stat-hint">Today Plan 已安排</div></div>
+        <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有主动回忆记录</div></div>
+        <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stable}</div><div class="stat-hint">${escapeHtml(modeLabel)}</div></div>
       </div>
-      <div class="section card pad">${due.length?`<div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>中文释义</th><th>复习次数</th><th>到期时间</th></tr></thead><tbody>${due.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic))}</div></td><td>${escapeHtml(c.meaningZh)}</td><td>${c.reviewCount||0}</td><td>${new Date(c.nextReviewAt).toLocaleString()}</td></tr>`).join("")}</tbody></table></div>`
-      :`<div class="empty"><div class="empty-icon">✓</div><strong>暂时没有到期复习</strong><span>完成首次学习后，卡片会自动进入复习队列。</span></div>`}</div>`
+      <div class="section card pad">${due.length?`<div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>中文释义</th><th>复习次数</th><th>计划日期</th></tr></thead><tbody>${due.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic))}</div></td><td>${escapeHtml(c.meaningZh)}</td><td>${c.reviewCount||0}</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td></tr>`).join("")}</tbody></table></div>`
+      :`<div class="empty"><div class="empty-icon">✓</div><strong>今天没有安排复习</strong><span>复习只从当天冻结的 Today Plan 进入；没有补作业，也不会形成词汇债。</span></div>`}</div>`
     );
-  }
-
-  function startReview(){
-    const due=dueCards();
-    if(!due.length){toast("当前没有到期复习");return;}
-    state.reviewQueue=due.map(c=>c.id);state.reviewIndex=0;state.route="review-session";state.study={revealed:false};render();
-  }
-
-  function reviewSessionPage(){
-    const id=state.reviewQueue[state.reviewIndex], card=getCard(id);
-    if(!card){state.route="review";return render();}
-    if(!card.phonetic && !state.pronunciationHydration[card.id]){setTimeout(()=>void ensureCardPronunciation(card),0);}
-    return shell(
-      header("","复习会话",`${state.reviewIndex+1} / ${state.reviewQueue.length}`,`<button class="btn" data-route="review">退出复习</button>`)
-      + `<div class="review-depth-stage"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card"><div class="study-kicker">主动回忆</div><div class="study-center">
-        ${wordIdentity(card,{size:"hero",showPos:true,center:true})}<div class="prompt-small">先回忆中文释义，再查看答案。</div>
-        ${state.study?.revealed?`<div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
-        <div class="rating-row"><button class="btn" data-action="review-rate" data-quality="again">没记住 · 明天再复习</button><button class="btn primary" data-action="review-rate" data-quality="good">记住了 · 3 天后复习</button></div>`
-        :`<button class="btn primary" style="margin-top:22px" data-action="review-reveal">查看答案</button>`}
-      </div></div></div></div>`
-    );
-  }
-
-  function rateReview(card,quality){
-    const now=new Date();
-    card.reviewCount=(card.reviewCount||0)+1;
-    card.lastReviewedAt=now.toISOString();
-    card.nextReviewAt=addDays(now,quality==="good"?3:1).toISOString();
-    card.updatedAt=now.toISOString();
-    recordActivity("review",card.id,{quality,kind:"scheduled"});
-    saveData();
-    state.reviewIndex++;
-    if(state.reviewIndex>=state.reviewQueue.length){toast("本轮复习完成");state.route="review";state.study=null;}
-    else state.study={revealed:false};
-    render();
   }
 
   function libraryPage(){
@@ -1368,7 +1297,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         <div class="card stat"><div class="stat-label">总词数</div><div class="stat-value">${state.data.cards.length}</div><div class="stat-hint">已保存卡片</div></div>
         <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${reviews}</div><div class="stat-hint">复习次数</div></div>
         <div class="card stat"><div class="stat-label">复习记住率</div><div class="stat-value">${reviews?Math.round(remembered/reviews*100):0}<span style="font-size:14px;color:var(--muted)">%</span></div><div class="stat-hint">按自评结果计算</div></div>
-        <div class="card stat"><div class="stat-label">连续学习</div><div class="stat-value">${streak()}<span style="font-size:14px;color:var(--muted)"> 天</span></div><div class="stat-hint">按连续学习天数计算</div></div>
+        <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stableCount()}</div><div class="stat-hint">已进入长期维护复习</div></div>
       </div>
       <div class="section card pad"><div class="section-title"><div><h2>最近 7 天学习量</h2><p>按发生过学习或复习的不同单词数统计。</p></div></div><div class="chart">${last7.map(x=>`<div class="bar-wrap"><div class="bar-value">${x.count}</div><div class="bar" style="height:${Math.round(x.count/max*120)+4}px"></div><div class="bar-label">${x.label}</div></div>`).join("")}</div></div>`
     );
@@ -1524,16 +1453,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
         order:stageIndex(card.stage)
       };
     }
-    if(state.route==="review-session"){
-      const cardId=state.reviewQueue[state.reviewIndex];
-      const card=cardId&&getCard(cardId);
-      if(!card)return null;
-      return {
-        key:`review:${state.reviewIndex}:${card.id}`,
-        cardId:card.id,
-        order:state.reviewIndex
-      };
-    }
     return null;
   }
 
@@ -1561,7 +1480,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     else if(state.route==="add") html=addPage();
     else if(state.route==="study") html=studyPage();
     else if(state.route==="review") html=reviewPage();
-    else if(state.route==="review-session") html=reviewSessionPage();
     else if(state.route==="library") html=libraryPage();
     else if(state.route==="library-edit") html=libraryEditPage();
     else if(state.route==="stats") html=statsPage();
@@ -1591,7 +1509,7 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{
       state.route=el.dataset.route;
       if(state.route!=="library-edit") state.libraryEditor=null;
-      if(state.route!=="study"&&state.route!=="review-session") state.study=null;
+      if(state.route!=="study") state.study=null;
       render();
     }));
 
@@ -2146,37 +2064,13 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     }
 
     if(action==="pass-apply"){
-      const c=getCard(state.study.cardId);
-      const latest=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
-      const reviewed=Boolean(state.study.feedback && state.study.applyReviewedText===latest);
-
-      if(!latest){toast("请先写一句话");return;}
-      if(!reviewed){
-        showNotice("请先检查句子","先让 AI 给出一次反馈，再决定采用建议、继续修改，或保留原句进入下一步。","warn");
-        return;
-      }
-
-      state.study.applyText=latest;
-      c.userSentence=latest;
-      c.updatedAt=new Date().toISOString();
-      saveData();
-      enterInitialReview(c);
+      showNotice("学习阶段没有正常保存","Apply 完成应由当前学习引擎写入明天的 Review 计划。本次不会退回旧的同日首次复习流程，请稍后重试。","warn");
       return;
     }
-    if(action==="initial-review-reveal"){
-      if(state.study) state.study.revealed=true;
-      render();
+    if(action==="start-review"){
+      if(window.LexiFlowReviewSessionV3?.open){void window.LexiFlowReviewSessionV3.open();return;}
+      showNotice("复习会话还没有准备好","Today Plan 会决定本次 Review 队列。请稍后重试，不会自动退回旧复习算法。","warn");
       return;
-    }
-    if(action==="initial-review-rate"){
-      const c=state.study?.cardId?getCard(state.study.cardId):null;
-      if(c&&c.initialReviewPending) finishInitialReview(c,el.dataset.quality);
-      return;
-    }
-    if(action==="start-review"){startReview();return;}
-    if(action==="review-reveal"){state.study={...(state.study||{}),revealed:true};render();return;}
-    if(action==="review-rate"){
-      const c=getCard(state.reviewQueue[state.reviewIndex]);rateReview(c,el.dataset.quality);return;
     }
     if(action==="refresh-provider"){refreshProviderStatus(false);return;}
     if(action==="save-dictionary-key"){

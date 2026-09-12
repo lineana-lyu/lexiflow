@@ -41,6 +41,16 @@ assert(reviewSession.includes("plannedQueue()"),"Review Session V3 must derive i
 assert(reviewSession.includes("repairTail"),"Review Session V3 must own the same-day repair tail");
 assert(reviewSession.includes('data-r3="rate"'),"Review Session V3 must own rating actions rather than legacy review-rate buttons");
 assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session V3 must not depend on legacy review-rate controls");
+assert(reviewSession.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review Session V3 must expose a narrow runtime bridge");
+assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app Review entry fallback must delegate to Review Session V3");
+for(const legacy of ["function startReview(","function reviewSessionPage(","function rateReview(","function stageInitialReview(","function enterInitialReview(","function finishInitialReview("]){assert(!app.includes(legacy),`legacy Review implementation must be removed from app.js: ${legacy}`);}
+assert(!app.includes("reviewQueue"),"app.js must not keep a second Review queue");
+assert(!app.includes("reviewIndex"),"app.js must not keep a second Review cursor");
+assert(!app.includes("initial-review-rate"),"legacy initial Review controls must be removed");
+assert(!app.includes("function dueCards("),"app shell must not rebuild Review membership outside DailyPlan");
+assert(app.includes("function currentDailyPlan()"),"app shell must read the frozen Today Plan for fallback rendering");
+assert(!app.includes("function streak("),"streak logic must stay removed from the V1 product surface");
+assert(!app.includes("连续学习"),"streak copy must stay removed from app.js");
 
 assert(reviewTransaction.includes("pendingCommit"),"Review transaction layer must persist an in-flight commit marker");
 assert(reviewTransaction.includes("storageConfirms"),"Review transaction layer must verify persistence before cursor recovery");
