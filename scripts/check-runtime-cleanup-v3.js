@@ -8,6 +8,7 @@ const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");
 const productCss=fs.readFileSync(path.join(root,"public","product-ux.css"),"utf8");
 const runtime=fs.readFileSync(path.join(root,"public","runtime-fixes.js"),"utf8");
 const transport=fs.readFileSync(path.join(root,"public","transport-fixes.js"),"utf8");
+const gateway=fs.readFileSync(path.join(root,"public","learning-data-gateway-v3.js"),"utf8");
 const sourceContext=fs.readFileSync(path.join(root,"public","source-context-v3.js"),"utf8");
 const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
 
@@ -66,10 +67,14 @@ assert(!transport.includes("const hiddenForStudy = visualStageVisible &&"),"tran
 assert(transport.includes("已保存到当前单词卡草稿"),"transport success copy must describe generated images as durable drafts until Visualize is explicitly completed");
 assert(!transport.includes("可以继续编辑或进入下一步"),"transport must not claim the user can leave Visualize while image persistence is still in flight");
 
+assert(gateway.includes("registerOutgoingMutator")&&gateway.includes("registerAfterPersist"),"Learning Data Gateway V3 must own explicit feature persistence extension points");
 assert(sourceContext.includes("function syncFromGateway()"),"Source Context V3 must reuse the canonical learning-data snapshot");
 assert(sourceContext.includes("requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();})"),"Source Context DOM mutations must decorate from the gateway snapshot without a GET");
 assert(!sourceContext.includes("requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();})"),"Source Context must not refetch learning data on every DOM mutation");
 assert(sourceContext.includes('window.addEventListener("lexiflow:today-plan-data",schedule)'),"Source Context must resync after authoritative Today data changes");
+assert(!sourceContext.includes("window.fetch =")&&!sourceContext.includes("window.fetch="),"Source Context V3 must not rewrite global fetch after gateway hook consolidation");
+assert(sourceContext.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context V3 must preserve source metadata through the gateway outgoing hook");
+assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Source Context V3 must clear source draft state only after successful persistence");
 
 assert(!(pkg.scripts?.check||"").includes("public/feedback-fixes.js"),"package check must not retain the removed feedback shim");
 assert(!(pkg.scripts?.check||"").includes("public/product-ux-v2.js"),"package check must not retain Product UX V2");
