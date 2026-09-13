@@ -4,11 +4,11 @@
 
 Dictionary Payload Bridge V3 checks passed.
 Expression query V4 checks passed
-(node:2735) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:2731) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 
 LexiFlow 本地服务已启动
-地址: http://127.0.0.1:34736
+地址: http://127.0.0.1:34732
 
 LexiFlow dictionary: Core local (1 words / 2 zh aliases)
 LexiFlow lookup [ECDICT] ?ms: resolve
@@ -20,13 +20,21 @@ User surface V4 checks passed.
 > lexiflow@0.8.5 check:learning
 > node scripts/check-learning-engine-v3.js && node scripts/check-learning-journey-v3.js && node scripts/check-learning-data-gateway-v3.js && node scripts/check-studyday-due-v3.js && node scripts/check-studyday-boundary-v3.js && node scripts/check-review-policy-v3.js && node scripts/check-daily-plan-persistence-v3.js && node scripts/check-today-plan-v3.js && node scripts/check-runtime-authority-v3.js && node scripts/check-runtime-cleanup-v3.js && node scripts/check-ai-assist-v3.js && node scripts/check-advance-learning-v3.js && node scripts/check-review-session-v3.js && node scripts/check-review-transaction-v3.js && node scripts/check-study-session-v3.js && node scripts/check-select-stage-v3.js && node scripts/check-stage-renderers-v3.js && node scripts/check-apply-quality-v3.js && node scripts/check-apply-actions-v3.js && node scripts/check-stage-commands-v3.js && node scripts/check-reset-v3.js && node scripts/check-stage-model-v3.js
 
-/home/runner/work/lexiflow/lexiflow/scripts/check-learning-engine-v3.js:5
+Learning Engine V3 runtime contract checks passed.
+Learning Journey V3 end-to-end deterministic checks passed.
+Learning Data Gateway V3 checks passed.
+StudyDay Review due V3 checks passed.
+StudyDay Boundary V3 checks passed.
+Review workload V4 checks passed.
+DailyPlan Persistence V3 checks passed.
+Today Plan V3 checks passed.
+/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:4
 function assert(condition,message){ if(!condition) throw new Error(message); }
                                                    ^
 
-Error: next-day validation failure copy must not promise another same-day repair
-    at assert (/home/runner/work/lexiflow/lexiflow/scripts/check-learning-engine-v3.js:5:58)
-    at Object.<anonymous> (/home/runner/work/lexiflow/lexiflow/scripts/check-learning-engine-v3.js:127:1)
+Error: Review workload surface must expose Review V4 load adaptation
+    at assert (/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:4:58)
+    at Object.<anonymous> (/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:72:1)
     at Module._compile (node:internal/modules/cjs/loader:1565:14)
     at Object..js (node:internal/modules/cjs/loader:1708:10)
     at Module.load (node:internal/modules/cjs/loader:1318:32)
