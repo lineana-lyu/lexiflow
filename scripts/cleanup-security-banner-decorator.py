@@ -33,10 +33,15 @@ ux_path.write_text(ux,encoding="utf-8")
 
 check_path=Path("scripts/check-runtime-authority-v3.js")
 check=check_path.read_text(encoding="utf-8")
+old_copy='assert(app.includes("服务凭据只保存在当前设备。"),"Settings base surface must own the final credential privacy copy");'
+new_copy='assert(app.includes("连接信息只保存在当前设备")&&app.includes("settings-security-icon"),"Settings base surface must own the final credential privacy banner markup");'
+if check.count(old_copy)!=1:
+    raise SystemExit("old credential privacy contract not uniquely found")
+check=check.replace(old_copy,new_copy,1)
+
 anchor='assert(productUx.includes("decorateDailyGoal")&&productUx.includes("decorateSecurityBanner"),"product-ux must retain active Settings enhancements");'
 replacement='''assert(productUx.includes("decorateDailyGoal"),"product-ux must retain the active daily-goal enhancement");
-assert(!productUx.includes("decorateSecurityBanner"),"product-ux must not re-decorate the Settings security banner once app.js owns final markup");
-assert(app.includes("连接信息只保存在当前设备")&&app.includes("settings-security-icon"),"app.js must own the final Settings security banner markup");'''
+assert(!productUx.includes("decorateSecurityBanner"),"product-ux must not re-decorate the Settings security banner once app.js owns final markup");'''
 if check.count(anchor)!=1:
     raise SystemExit("product-ux active Settings contract anchor not uniquely found")
 check=check.replace(anchor,replacement,1)
