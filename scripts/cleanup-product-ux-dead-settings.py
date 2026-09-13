@@ -32,10 +32,10 @@ for retired in [
     "DICTIONARY_KEY_URL",
     "decorateDictionarySettings",
     "mergeAiSettings",
-    "英语词典",
-    "AI 服务",
-    "模型与思考强度",
-    "图片生成",
+    'rowByTitle(list, "英语词典")',
+    'rowByTitle(list, "AI 服务")',
+    'rowByTitle(list, "模型与思考强度")',
+    'rowByTitle(list, "图片生成")',
     "ai-unified-setting",
 ]:
     if retired in text:
