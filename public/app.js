@@ -926,17 +926,9 @@
     const status=state.providerStatus;
     const dict=status?.dictionary;
     const codex=status?.codex;
-    const runtime=codex?.runtimeTest||{};
     const tts=status?.tts||{};
     const selectedModel=codex?.selectedModel||"";
     const selectedEffort=codex?.selectedReasoningEffort||"";
-
-    const runtimePill =
-      runtime.status==="passed"
-        ? `<span class="pill green">✓ 连接正常</span>`
-        : runtime.status==="failed"
-          ? `<span class="pill red">× 连接异常</span>`
-          : `<span class="pill amber">未检查</span>`;
 
     return shell(
       header(
@@ -960,28 +952,18 @@
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:310px;flex:1">
-            <h3>AI 服务</h3>
-            <p>${status?.serviceUnavailable?"本地 AI 服务尚未连接，请通过启动脚本打开 LexiFlow。":codex?.cliAvailable?`已连接${codex?.effectiveModel?` · ${escapeHtml(codex.effectiveModel)}`:""}`:"当前未连接到可用的 AI 服务。"}</p>
-            ${runtime.message?`<p>最近状态：${escapeHtml(runtime.message)}</p>`:""}
-            <details class="advanced-diagnostics">
-              <summary>高级诊断</summary>
-              <div class="advanced-diagnostics-body">
-                <p>本机 Codex：${codex?.cliAvailable?"可用":"不可用"}${codex?.version?` · ${escapeHtml(codex.version)}`:""}</p>
-                <p>本机认证：${codex?.authFound?"已检测":"未检测"}</p>
-                <p>默认模型：${escapeHtml(codex?.model||"跟随 Codex 配置")}</p>
-              </div>
-            </details>
+            <h3>AI 辅助</h3>
+            <p>用于造句反馈、联想场景和图片生成。</p>
           </div>
           <div class="setting-actions-inline">
-            <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"AI 已连接":"AI 未连接"}</span>
-            ${runtimePill}
-            <button class="btn" data-action="test-codex-text">检查连接</button>
+            <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"已连接":"未连接"}</span>
+            ${codex?.cliAvailable?"":`<button class="btn" data-action="test-codex-text">重新连接</button>`}
           </div>
         </div>
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:260px">
-            <h3>模型与思考强度</h3>
+            <h3>AI 高级配置</h3>
             
           </div>
           <div class="codex-runtime-grid">
@@ -1007,14 +989,6 @@
             </div>
             <button class="btn primary" data-action="save-codex-runtime">保存 AI 配置</button>
           </div>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <h3>图片生成</h3>
-            <p>视觉联想阶段复用上面的模型/思考强度和同一套 Codex 认证。图片能力取决于当前 AI 环境和所选模型；生成失败时可以上传本地图或直接跳过。</p>
-          </div>
-          <span class="pill ${codex?.cliAvailable?"amber":"red"}">${codex?.cliAvailable?"可用":"当前不可用"}</span>
         </div>
 
         <div class="setting-row">

@@ -139,6 +139,10 @@ assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membersh
 assert(!app.includes("const DICTIONARY ="),"app.js must not carry the retired in-memory demo dictionary");
 assert(!app.includes("Merriam-Webster Learner's Dictionary"),"app.js base Settings surface must not present the optional online fallback as the primary dictionary");
 assert(app.includes("基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。"),"app.js base Settings copy must describe local-first dictionary behavior");
+for(const retiredSettingsSurface of ["<h3>AI 服务</h3>","<h3>模型与思考强度</h3>","<h3>图片生成</h3>","advanced-diagnostics"]){
+  assert(!app.includes(retiredSettingsSurface),`app.js base Settings surface must not retain a runtime-removed legacy block: ${retiredSettingsSurface}`);
+}
+assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 高级配置</h3>"),"app.js base Settings surface must match the current product labels");
 assert(app.includes('api("/api/dictionary/lookup"'),"front-end lookup must use the dictionary service boundary");
 for(const legacyStage of ["memorize1","memorize2","mastered"]){
   assert(!app.includes(legacyStage),`app.js must not expose a historical product stage: ${legacyStage}`);
