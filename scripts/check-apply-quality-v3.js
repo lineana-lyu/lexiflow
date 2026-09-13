@@ -7,6 +7,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const index=read("public/index.html");
 const quality=read("public/apply-quality-v3.js");
+const applyStage=read("public/apply-stage-v3.js");
 const guard=read("public/apply-guard-v3.js");
 const transport=read("public/transport-fixes.js");
 const transition=read("public/stage-transition-v3.js");
@@ -18,7 +19,13 @@ assert(!index.includes("feedback-fixes.js"),"retired feedback compatibility shim
 assert(!fs.existsSync(path.join(root,"public","feedback-fixes.js")),"retired feedback compatibility shim must stay deleted");
 assert(!index.includes('<script src="./apply-guard-v2.js"></script>'),"legacy Apply Guard V2 must not execute beside V3");
 assert(index.indexOf("apply-quality-v3.js")<index.indexOf("stage-transition-v3.js"),"Apply quality capture gate must register before authoritative stage completion");
+assert(index.indexOf("apply-quality-v3.js")<index.indexOf("apply-stage-v3.js"),"Apply Quality bridge must load before Apply Stage consumes AI feedback");
 assert(quality.includes("correctionHeldBack:true"),"early failed Apply rounds must hold back the full correction");
+assert(quality.includes("LexiFlowApplyQualityV3=Object.freeze")&&quality.includes("processFeedback(payload,body)"),"Apply Quality must expose a narrow explicit feedback-processing bridge");
+assert(!quality.includes("window.fetch=")&&!quality.includes("window.fetch ="),"Apply Quality must not wrap global fetch after Apply Stage adopts the explicit bridge");
+assert(!quality.includes("/api/learning-data"),"Apply Quality must use the Learning Data Gateway snapshot instead of observing learning-data transport");
+assert(quality.includes("registerAfterPersist?.(()=>schedule())"),"Apply Quality must redraw from Gateway-confirmed persistence events");
+assert(applyStage.includes('fetch("/api/ai/text"')&&applyStage.includes("LexiFlowApplyQualityV3?.processFeedback?."),"Apply Stage must own the AI request and explicitly pass its response through Apply Quality before interpretation");
 assert(quality.includes("round>=3"),"full correction may appear only from the third failed revision round");
 assert(quality.includes("lastFailedInput"),"re-submitting the exact same sentence must not consume another feedback round");
 assert(quality.includes("originalPass"),"gate must distinguish an approved original sentence from an approved correction");

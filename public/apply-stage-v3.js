@@ -145,7 +145,9 @@
     try{
       const response=await fetch("/api/ai/text",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word:card.word,meaningZh:card.meaningZh,sentence:text})});
       if(!response.ok)throw new Error("APPLY_AI_FAILED");
-      const payload=await response.json();const fb=payload.feedback||{};const suggestion=norm(fb.suggestion);const inputLanguage=fb.inputLanguage==="zh"||/[\u3400-\u9fff]/.test(text)?"zh":"en";
+      const rawPayload=await response.json();
+      const payload=window.LexiFlowApplyQualityV3?.processFeedback?.(rawPayload,{word:card.word,meaningZh:card.meaningZh,sentence:text})||rawPayload;
+      const fb=payload.feedback||{};const suggestion=norm(fb.suggestion);const inputLanguage=fb.inputLanguage==="zh"||/[\u3400-\u9fff]/.test(text)?"zh":"en";
       const keyword=norm(fb.keyword||card.word)||card.word;const candidate=suggestion||text;const keywordOk=usesTarget(candidate,keyword)||usesTarget(candidate,card.word);
       const candidateApproved=fb.approved!==false&&fb.level==="good"&&keywordOk&&!(inputLanguage==="zh"&&!suggestion);
       s.approved=Boolean(inputLanguage==="en"&&!suggestion&&candidateApproved);

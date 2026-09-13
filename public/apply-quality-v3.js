@@ -2,7 +2,6 @@
   "use strict";
 
   const STORAGE_KEY="lexiflow-apply-quality-v3";
-  const previousFetch=window.fetch.bind(window);
   let latestAudit=null;
   let latestData=null;
   let queued=false;
@@ -17,20 +16,6 @@
     .replace(/[.,!?;:()[\]{}"']/g," ")
     .replace(/\s+/g," ")
     .trim();
-
-  function endpointOf(input){
-    try{return new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{return"";}
-  }
-  function parseBody(init){
-    if(!init||typeof init.body!=="string")return null;
-    try{return JSON.parse(init.body);}catch{return null;}
-  }
-  function jsonResponse(original,payload){
-    const headers=new Headers(original.headers||{});
-    headers.set("Content-Type","application/json; charset=utf-8");
-    headers.delete("Content-Length");
-    return new Response(JSON.stringify(payload),{status:original.status,statusText:original.statusText,headers});
-  }
 
   function loadStore(){
     try{
@@ -128,31 +113,9 @@
     };
   }
 
-  window.fetch=async function lexiFlowApplyQualityFetch(input,init={}){
-    const endpoint=endpointOf(input),method=String(init?.method||"GET").toUpperCase();
-    const response=await previousFetch(input,init);
-
-    if(endpoint==="/api/learning-data"&&response.ok){
-      try{
-        if(method==="GET"){
-          const payload=await response.clone().json();
-          if(payload?.data)latestData=payload.data;
-        }else if(method==="POST"){
-          const body=parseBody(init);
-          if(body?.data)latestData=body.data;
-        }
-      }catch{}
-      return response;
-    }
-
-    if(endpoint!=="/api/ai/text"||!response.ok)return response;
-    const body=parseBody(init);
-    if(!body?.sentence)return response;
-    try{
-      const payload=await response.clone().json();
-      return jsonResponse(response,progressiveFeedback(payload,body));
-    }catch{return response;}
-  };
+  window.LexiFlowApplyQualityV3=Object.freeze({
+    processFeedback(payload,body){return progressiveFeedback(payload,body);},
+  });
 
   function auditForCurrent(){
     const card=currentCard();
@@ -249,6 +212,7 @@
     syncFromGateway();
     decorate();
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.LexiFlowLearningDataGatewayV3?.registerAfterPersist?.(()=>schedule());
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
