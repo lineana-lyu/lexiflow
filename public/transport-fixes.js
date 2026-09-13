@@ -89,67 +89,6 @@
     return data;
   }
 
-  function normalizeSentence(value) {
-    return String(value || "")
-      .toLowerCase()
-      .replace(/[“”‘’'"`]/g, "")
-      .replace(/[.,!?;:，。！？；：()（）\[\]{}]/g, "")
-      .replace(/\s+/g, " ")
-      .trim();
-  }
-
-  function levenshtein(a, b) {
-    const s = String(a || ""), t = String(b || "");
-    if (!s.length) return t.length;
-    if (!t.length) return s.length;
-    const prev = Array.from({ length: t.length + 1 }, (_, i) => i);
-    const next = new Array(t.length + 1);
-    for (let i = 1; i <= s.length; i++) {
-      next[0] = i;
-      for (let j = 1; j <= t.length; j++) {
-        const cost = s[i - 1] === t[j - 1] ? 0 : 1;
-        next[j] = Math.min(next[j - 1] + 1, prev[j] + 1, prev[j - 1] + cost);
-      }
-      for (let j = 0; j <= t.length; j++) prev[j] = next[j];
-    }
-    return prev[t.length];
-  }
-
-  function sentenceSimilarity(a, b) {
-    const aa = normalizeSentence(a), bb = normalizeSentence(b);
-    if (!aa || !bb) return 0;
-    if (aa === bb) return 1;
-    const maxLen = Math.max(aa.length, bb.length);
-    return maxLen ? 1 - levenshtein(aa, bb) / maxLen : 1;
-  }
-
-  function softenNearIdenticalSentenceFeedback(data, body) {
-    const feedback = data?.feedback;
-    const original = String(body?.sentence || "").trim();
-    const suggestion = String(feedback?.suggestion || "").trim();
-    if (!feedback || !original || !suggestion || hasChinese(original)) return data;
-
-    const score = sentenceSimilarity(original, suggestion);
-    const normalizedSame = normalizeSentence(original) === normalizeSentence(suggestion);
-    const tinyEdit = score >= 0.94;
-    if (!normalizedSame && !tinyEdit) return data;
-    if (feedback.approved === false || feedback.level !== "good") return data;
-
-    return {
-      ...data,
-      feedback: {
-        ...feedback,
-        approved: true,
-        level: "good",
-        title: "表达正确，可以直接继续",
-        suggestion: "",
-        tips: [`可选润色：${suggestion}`],
-        optionalSuggestion: suggestion,
-        originalSimilarity: Number(score.toFixed(3)),
-      },
-    };
-  }
-
   function voiceScore(voice) {
     const lang = String(voice?.lang || "").toLowerCase();
     const name = String(voice?.name || "").toLowerCase();
@@ -416,17 +355,6 @@
       try {
         const data = await response.clone().json();
         return jsonResponse(response.status, normalizeSmartSearch(data, body.query), response);
-      } catch {
-        return response;
-      }
-    }
-
-    if (endpoint === "/api/ai/text" && body?.sentence) {
-      const response = await nativeFetch(input, init);
-      if (!response.ok) return response;
-      try {
-        const data = await response.clone().json();
-        return jsonResponse(response.status, softenNearIdenticalSentenceFeedback(data, body), response);
       } catch {
         return response;
       }
