@@ -28,7 +28,17 @@
     }catch{}
   }
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();

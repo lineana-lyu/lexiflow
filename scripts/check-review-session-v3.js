@@ -15,6 +15,8 @@ const app=read("public/app.js");
 assert(index.includes("review-session-v3.js"),"Review Session V3 must be loaded by index.html");
 assert(index.indexOf("app.js")<index.indexOf("review-session-v3.js"),"Review V3 should attach after the app shell while retaining capture-phase entry authority");
 assert(source.includes("plan.review.filter"),"Review V3 must derive its queue from frozen DailyPlan.review");
+assert(source.includes("function syncFromGateway()")&&source.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review Session V3 must reuse the persistence-confirmed Gateway snapshot before network fallback");
+assert(source.includes("if(!force&&syncFromGateway())return data;"),"Review Session V3 must avoid a redundant learning-data GET when the Gateway already has current data");
 assert(source.includes("plan.frozen!==true"),"Review V3 must require a frozen Today plan");
 assert(source.includes("core.reviewSchedulePatch"),"Review V3 must delegate memory transitions to Learning Core");
 assert(source.includes('body:JSON.stringify({data:normalized,reviewAuthority:"v3"})'),"Review V3 writes must identify themselves as Core-authoritative");

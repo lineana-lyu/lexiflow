@@ -29,6 +29,8 @@ assert(!index.includes('<script src="./studyday-boundary-v2.js"></script>'),"Stu
 assert(session.includes('const KEY="lexiflow-study-session-v3"'),"Study Session V3 must persist an exact same-day session");
 assert(session.includes('const LEARNING_KEYS=["memorize","visualize","apply","select"]'),"Study Session V3 must preserve Today learning-stage order after Review");
 assert(session.includes("plannedLearningIds"),"Study Session V3 must derive its queue from the frozen DailyPlan");
+assert(session.includes("function syncFromGateway()")&&session.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Study Session V3 must reuse the persistence-confirmed Gateway snapshot before network fallback");
+assert(session.includes("if(!force&&syncFromGateway())return data;"),"Study Session V3 must avoid a redundant learning-data GET when the Gateway already has current data");
 assert(session.includes("current.review")&&session.includes("return[]"),"Study Session V3 must refuse learning while Today Review remains");
 assert(session.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must use the explicit renderer bridge");
 assert(session.includes("view.openCard(card.id)"),"Study Session V3 must open the exact planned card ID");

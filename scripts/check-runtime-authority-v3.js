@@ -93,6 +93,8 @@ assert(boundary.includes("LexiFlowStudyDayBoundaryV3=Object.freeze"),"StudyDay B
 assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
 assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
 assert(reviewSession.includes("plannedQueue()"),"Review Session V3 must derive its queue from DailyPlan.review");
+assert(reviewSession.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review Session V3 reads must prefer the canonical Gateway snapshot");
+assert(studySession.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Study Session V3 reads must prefer the canonical Gateway snapshot");
 assert(reviewSession.includes("repairTail"),"Review Session V3 must own the same-day repair tail");
 assert(reviewSession.includes('data-r3="rate"'),"Review Session V3 must own rating actions rather than legacy review-rate buttons");
 assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session V3 must not depend on legacy review-rate controls");
