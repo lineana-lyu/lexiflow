@@ -45,9 +45,9 @@
       body:JSON.stringify({data:normalized,todayPlanAuthority:"v3",reason:String(reason||"")})
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
-    latestData=normalized;
+    if(!syncFromGateway())latestData=normalized;
     try{window.dispatchEvent(new CustomEvent("lexiflow:today-plan-data",{detail:{reason:String(reason||"")}}));}catch{}
-    return normalized;
+    return latestData;
   }
 
   function cardById(id){return latestData?.cards?.find(card=>card.id===id)||null;}

@@ -20,6 +20,7 @@ assert(source.includes("if(!force&&syncFromGateway())return data;"),"Review Sess
 assert(source.includes("plan.frozen!==true"),"Review V3 must require a frozen Today plan");
 assert(source.includes("core.reviewSchedulePatch"),"Review V3 must delegate memory transitions to Learning Core");
 assert(source.includes('body:JSON.stringify({data:normalized,reviewAuthority:"v3"})'),"Review V3 writes must identify themselves as Core-authoritative");
+assert(source.includes("if(!syncFromGateway())data=normalized;"),"Review V3 must continue from the Gateway-confirmed persisted snapshot after a successful write");
 assert(source.includes('event.target?.closest?.(\'[data-action="start-review"]\')'),"Review V3 must intercept the existing Review entry point");
 assert(source.includes("event.stopImmediatePropagation()"),"Review V3 must own Review entry before generic app handlers run");
 assert(source.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review V3 must expose a narrow open bridge");

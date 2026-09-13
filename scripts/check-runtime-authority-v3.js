@@ -79,6 +79,8 @@ assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistenc
 assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
 assert(todayPlan.includes("LexiFlowTodayPlanV3=Object.freeze"),"Today Plan V3 must expose a narrow explicit bridge");
 assert(todayPlan.includes('todayPlanAuthority:"v3"'),"Today Plan V3 must identify its writes");
+assert(todayPlan.includes("if(!syncFromGateway())latestData=normalized;"),"Today Plan V3 local state must follow the Gateway-confirmed write result");
+assert(reviewSession.includes("if(!syncFromGateway())data=normalized;"),"Review Session V3 local state must follow the Gateway-confirmed write result");
 assert(!todayPlan.includes("window.fetch =")&&!todayPlan.includes("window.fetch="),"Today Plan V3 must not mutate global fetch");
 assert(todayPlan.includes("selectFromPending")&&todayPlan.includes("moveBackToPending"),"Today Plan V3 must explicitly own Pending ↔ Today selection");
 assert(advance.includes("LexiFlowAdvanceLearningV3=Object.freeze"),"Advance Learning V3 must expose a narrow explicit bridge");

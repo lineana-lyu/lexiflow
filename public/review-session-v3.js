@@ -54,7 +54,7 @@
       body:JSON.stringify({data:normalized,reviewAuthority:"v3"}),
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
-    data=normalized;
+    if(!syncFromGateway())data=normalized;
   }
 
   function cardById(id){return data?.cards?.find(card=>card.id===id)||null;}

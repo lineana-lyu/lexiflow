@@ -14,6 +14,7 @@ assert(!index.includes('<script src="./today-plan-v2.js"></script>'),"Today Plan
 assert(!exists("public/today-plan-v2.js"),"Today Plan V2 source must stay deleted after V3 promotion");
 assert(source.includes("LexiFlowTodayPlanV3=Object.freeze"),"Today Plan V3 must expose a narrow explicit bridge");
 assert(source.includes('todayPlanAuthority:"v3"'),"Today Plan writes must identify V3 authority");
+assert(source.includes("if(!syncFromGateway())latestData=normalized;"),"Today Plan V3 must redraw from the Gateway-confirmed persisted snapshot after a successful write");
 assert(!source.includes("window.fetch =")&&!source.includes("window.fetch="),"Today Plan V3 must not rewrite global fetch");
 assert(!source.includes("response.clone().json"),"Today Plan V3 must not proxy arbitrary learning-data responses");
 assert(source.includes('if(!count)return ""'),"Today card must hide zero-count task rows");
