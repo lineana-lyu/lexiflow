@@ -13,7 +13,8 @@ if old not in text:
 path.write_text(text.replace(old,new,1),encoding='utf-8')
 
 # Runtime authority: Review V4 remains Core-owned, but its non-configurable
-# workload policy must not be injected into Settings.
+# workload policy must not be injected into Settings or exposed as engineering
+# vocabulary on the Review page.
 path=ROOT/'scripts'/'check-runtime-authority-v3.js'
 text=path.read_text(encoding='utf-8')
 old='''assert(reviewPolicy.includes("复习与学习负荷"),"Review workload surface must expose Review V4 load adaptation");
@@ -24,5 +25,11 @@ assert(reviewPolicy.includes("function syncFromGateway")&&reviewPolicy.includes(
 assert(!reviewPolicy.includes("data-review-mode")&&!reviewPolicy.includes("review-custom-cap")&&!reviewPolicy.includes("persistSettings"),"Review V4 must not restore manual daily Review caps or a second settings writer");'''
 if old not in text:
     raise SystemExit('runtime authority review-policy anchor not found')
-path.write_text(text.replace(old,new,1),encoding='utf-8')
+text=text.replace(old,new,1)
+old='assert(app.includes("自适应负荷")&&app.includes("关键复习不截断"),"app Review page must describe the active V4 workload policy");'
+new='assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截断"),"app Review page must not expose internal Review workload terminology");\nassert(app.includes("系统会自动安排今天真正需要巩固的词")&&app.includes("你不需要手动管理复习日期"),"app Review page must explain automatic scheduling in learner-facing language");'
+if old not in text:
+    raise SystemExit('runtime authority app-review-copy anchor not found')
+text=text.replace(old,new,1)
+path.write_text(text,encoding='utf-8')
 print('user-facing Review contracts aligned')
