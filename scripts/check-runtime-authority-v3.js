@@ -18,6 +18,7 @@ const studySession=read("public/study-session-v3.js");
 const studyDrafts=read("public/study-drafts-v3.js");
 const studySurface=read("public/study-stage-surface-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
+const applyActions=read("public/apply-actions-v3.js");
 const applyGuard=read("public/apply-guard-v3.js");
 const sourceContext=read("public/source-context-v3.js");
 const boundary=read("public/studyday-boundary-v3.js");
@@ -129,6 +130,9 @@ assert(stageTransition.includes('card.stage="memorize"')&&!stageTransition.inclu
 assert(stageTransition.includes("LexiFlowStageTransitionV3=Object.freeze"),"Stage Transition V3 must expose a narrow bridge");
 
 assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize Stage V3 must resolve the exact Study Session renderer card ID");
+assert(memorize.includes("if(!syncFromGateway())data=normalized;"),"Memorize Stage V3 local state must follow the Gateway-confirmed write result");
+assert(visualActions.includes("if(!syncFromGateway())data=normalized;"),"Visualize Actions V3 local state must follow the Gateway-confirmed write result");
+assert(applyActions.includes("if(!syncFromGateway())data=normalized;"),"Apply Actions V3 local state must follow the Gateway-confirmed write result");
 assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical Memorize stage");
 assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
 assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not depend on legacy memory-rate controls");

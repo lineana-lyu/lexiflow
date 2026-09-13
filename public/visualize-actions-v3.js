@@ -31,7 +31,7 @@
     const normalized=core.normalizeData(next);
     const response=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized,visualizeActionsAuthority:"v3"})});
     if(!response.ok)throw new Error("SAVE_FAILED");
-    data=normalized;
+    if(!syncFromGateway())data=normalized;
   }
 
   function currentCardId(){return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");}

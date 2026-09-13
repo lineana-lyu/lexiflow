@@ -34,6 +34,9 @@ assert(memorize.includes("commandId:cmd"),"Memorize completion activity must per
 assert(memorize.includes("const initialWeak=!(round1.en===true&&round1.zh===true)"),"initialMemoryWeak must reflect first-round recall, not a successful reinforcement round");
 assert(memorize.includes("finalRoundPassed"),"Memorize history must distinguish initial weakness from final reinforcement outcome");
 assert(memorize.includes("if(saving)return"),"Memorize UI must reject double completion clicks while persistence is in flight");
+assert(memorize.includes("if(!syncFromGateway())data=normalized;"),"Memorize must continue from the Gateway-confirmed persisted snapshot after a successful stage write");
+assert(visualize.includes("if(!syncFromGateway())data=normalized;"),"Visualize actions must continue from the Gateway-confirmed persisted snapshot after a successful write");
+assert(apply.includes("if(!syncFromGateway())data=normalized;"),"Apply actions must continue from the Gateway-confirmed persisted snapshot after a successful write");
 assert(memorize.includes('core.canonicalStage(c)!=="memorize"'),"Memorize completion must validate the canonical stage before writing");
 
 assert(visualize.includes('beginStageWrite?.(id,"visualize",now)'),"Visualize skip must use the same exclusive stage-write scope as normal completion");

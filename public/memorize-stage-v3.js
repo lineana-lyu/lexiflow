@@ -42,7 +42,7 @@
     const normalized=core.normalizeData(next);
     const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized,memorizeStageAuthority:"v3"})});
     if(!r.ok) throw new Error("SAVE_FAILED");
-    data=normalized;
+    if(!syncFromGateway())data=normalized;
   }
 
   function currentCard(){

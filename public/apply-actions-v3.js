@@ -38,7 +38,7 @@
       body:JSON.stringify({data:normalized,applyActionsAuthority:"v3"}),
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
-    data=normalized;
+    if(!syncFromGateway())data=normalized;
   }
 
   function currentCardId(){
