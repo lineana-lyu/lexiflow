@@ -804,28 +804,12 @@
     </div>`;
   }
 
-  function stageKicker(label){
-    return `<div class="study-kicker">${label}</div>`;
-  }
-
   function renderStageRail(card){
     return `<div class="study-stepper" data-study-stepper-v3-host="${escapeHtml(card.id)}"></div>`;
   }
 
   function renderStage(card){
     return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
-  }
-
-  function stageTop(card,kicker){
-    return `${stageKicker(kicker)}${wordIdentity(card,{size:"medium",showPos:true,center:false})}`;
-  }
-
-  function stageSelect(card){
-    return `${stageTop(card,"选词确认")}
-      <div class="study-center" style="align-items:stretch;text-align:left">
-        <div class="answer-box"><strong>${escapeHtml(card.meaningZh)}</strong>${sentenceExample(card.exampleEn,"answer-example-en")}<p>${escapeHtml(card.exampleZh)}</p></div>
-        <div class="rating-row"><button class="btn primary" data-action="complete-stage" data-next="memorize1">确认卡片，开始记忆</button></div>
-      </div>`;
   }
 
 const visualProgressTimers=new Map();
@@ -871,127 +855,6 @@ function visualSceneNeedsRefresh(scene,word){
   return /(写着|标着|印着|标签|招牌|logo|LOGO|屏幕文字|文字为|字样)/.test(value);
 }
 
-async function ensureVisualSceneSuggestion(card,refresh=false){
-  if(!card||!state.study||state.study.cardId!==card.id)return;
-  if(!refresh&&card.visualSceneSuggestion?.scene&&card.practicePrompt?.question)return;
-  if(state.study.visualSceneLoading)return;
-  const cardId=card.id;
-  const previousSuggestedScene=String(card.visualSceneSuggestion?.scene||"");
-  const previous=String(state.study.visualNote||previousSuggestedScene||"");
-  const draftFollowedSuggestion=!state.study.visualSceneDirty||normalizeSearchText(state.study.visualNote)===normalizeSearchText(previousSuggestedScene);
-  state.study.visualSceneLoading=true;
-  state.study.visualSceneRefreshing=Boolean(refresh);
-  render();
-  try{
-    const payload=await api("/api/ai/visual-scene",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:refresh?previous:""}});
-    const latest=getCard(cardId);
-    if(!latest)return;
-    const nextScene=String(payload.assist?.scene||"").trim();
-    latest.visualSceneSuggestion={scene:nextScene,cue:String(payload.assist?.cue||"").trim()};
-    if(payload.assist?.practiceQuestion)latest.practicePrompt={question:String(payload.assist.practiceQuestion).trim()};
-    if(state.study?.cardId===cardId&&nextScene&&draftFollowedSuggestion){
-      state.study.visualNote=nextScene;
-      state.study.visualSceneDirty=false;
-      if(refresh&&visualSceneNeedsRefresh(previous,card.word)) latest.visualNote=nextScene;
-    }
-    latest.updatedAt=new Date().toISOString();
-    saveData();
-  }catch{
-    const latest=getCard(cardId);
-    if(latest&&!latest.visualSceneSuggestion?.scene)latest.visualSceneSuggestion={scene:`把“${latest.meaningZh}”放进一个你熟悉、具体的生活场景。`,cue:`${latest.word} → ${latest.meaningZh}`};
-    if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
-    if(state.study?.cardId===cardId&&!state.study.visualSceneDirty&&!state.study.visualNote&&latest?.visualSceneSuggestion?.scene){
-      state.study.visualNote=latest.visualSceneSuggestion.scene;
-    }
-  }finally{
-    if(state.study?.cardId===cardId){
-      state.study.visualSceneLoading=false;
-      state.study.visualSceneRefreshing=false;
-      render();
-    }
-  }
-}
-
-  async function ensurePracticePrompt(card,refresh=false){
-    if(!card||!state.study||state.study.cardId!==card.id)return;
-    if(!refresh&&card.practicePrompt?.question)return;
-    if(state.study.practicePromptLoading)return;
-    const cardId=card.id;
-    const previous=String(card.practicePrompt?.question||"");
-    state.study.practicePromptLoading=true;
-    render();
-    try{
-      const payload=await api("/api/ai/practice-prompt",{method:"POST",body:{word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,previousQuestion:refresh?previous:""}});
-      const latest=getCard(cardId);
-      if(!latest)return;
-      latest.practicePrompt={question:String(payload.prompt?.question||"").trim()};
-      latest.updatedAt=new Date().toISOString();
-      saveData();
-    }catch{
-      const latest=getCard(cardId);
-      if(latest&&!latest.practicePrompt?.question)latest.practicePrompt={question:`你在什么情况下会用到“${latest.meaningZh}”？`};
-    }finally{
-      if(state.study?.cardId===cardId){state.study.practicePromptLoading=false;render();}
-    }
-  }
-
-  function stageVisual(card){
-  const currentScene=String(state.study.visualNote||"").trim();
-  const generation=card.imageGeneration||{status:"idle",message:"",code:"",startedAt:"",phase:""};
-  const hasImage=Boolean(card.imageData||card.imageUrl);
-  const generating=Boolean(state.study.imageGenerating||generation.status==="generating");
-  const scene=String(card.visualSceneSuggestion?.scene||"").trim();
-  const cue=String(card.visualSceneSuggestion?.cue||"").trim();
-  const sceneLoading=Boolean(state.study.visualSceneLoading);
-  const sceneRefreshing=Boolean(state.study.visualSceneRefreshing);
-  const sceneDraft=String(currentScene||scene||"").trim();
-  const progress=visualProgressMeta(generation.phase||"waiting");
-
-  const riskyStoredScene=visualSceneNeedsRefresh(scene,card.word);
-  const riskyDraftScene=scene&&normalizeSearchText(sceneDraft)===normalizeSearchText(scene)&&visualSceneNeedsRefresh(sceneDraft,card.word);
-  if((!scene||!card.practicePrompt?.question||riskyStoredScene||riskyDraftScene)&&!sceneLoading){setTimeout(()=>void ensureVisualSceneSuggestion(card,riskyStoredScene||riskyDraftScene),0);}
-
-  const imageArea=hasImage
-    ? `<img class="visual-memory-image" data-card-id="${escapeHtml(card.id)}" src="${card.imageData||card.imageUrl}" alt="${escapeHtml(card.word)} 的联想图" />`
-    : `<div class="visual-canvas-empty"><strong>${generating?progress.title:"联想图会显示在这里"}</strong><span>${generating?"生成完成后会自动更新":"先确认右侧场景，再生成图片"}</span></div>`;
-
-  const progressSteps=["准备","提交","等待","持续生成"];
-  const progressStrip=generating?`<div class="visual-progress-strip">${progressSteps.map((label,index)=>`<span class="${index<progress.index?"done":index===progress.index?"active":""}">${index<progress.index?"✓":index+1}<em>${label}</em></span>`).join("")}</div>`:"";
-
-  return `${stageKicker("视觉联想")}
-    <div class="visual-learning-stage">
-      <div class="learning-stage-heading">
-        <div><span class="learning-stage-index">04 / 06</span><h2>用画面记住 ${escapeHtml(card.word)}</h2></div>
-        <div class="learning-stage-meta">${escapeHtml(card.meaningZh)} · ${escapeHtml(card.pos||"")}</div>
-      </div>
-
-      <div class="visual-workspace">
-        <div class="visual-image-canvas ${hasImage?"has-image":""} ${generating?"is-generating":""}">
-          ${imageArea}
-          ${generating?`<div class="visual-generating-overlay"><span class="mini-spinner"></span><strong>${escapeHtml(progress.title)}</strong><small>${escapeHtml(progress.detail)}</small>${progressStrip}</div>`:""}
-        </div>
-        <aside class="scene-panel ${sceneLoading?"is-loading":""}">
-          <div class="scene-panel-label"><span>联想场景</span><small>${generating?"生成中已锁定":"可编辑"}</small></div>
-          ${sceneLoading&&!sceneDraft?`<div class="scene-loading"><span class="mini-spinner"></span><span>正在准备场景…</span></div>`:`<textarea class="scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="修改这个场景，生成图片时会按这里的内容来。">${escapeHtml(sceneDraft)}</textarea>`}
-          ${cue?`<div class="scene-cue">记忆提示 · ${escapeHtml(cue)}</div>`:""}
-          <button class="text-action scene-refresh-action" data-action="refresh-visual-scene" ${sceneLoading||generating?"disabled":""}>${sceneLoading?`<span class="mini-spinner"></span>${sceneRefreshing?"正在更换…":"正在准备…"}`:"换一个场景"}</button>
-        </aside>
-      </div>
-
-      ${generation.status==="error"?`<div class="visual-status-inline error"><span>这次没有生成成功，可以重试或上传自己的图片。</span></div>`:""}
-
-      <div class="visual-command-bar">
-        <button class="btn primary visual-primary-action" data-action="generate-visual" ${generating||!sceneDraft?"disabled":""}>${generating?"生成中…":hasImage?"重新生成":"生成联想图"}</button>
-        <label class="text-action upload-text-action" for="visual-file" ${generating?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.5\"":""}>上传图片</label>
-      </div>
-      <input id="visual-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
-
-      <div class="learning-stage-footer single-action">
-        <button class="btn primary" data-action="finish-visual">下一步</button>
-      </div>
-    </div>`;
-}
-
   function localFeedback(text,word){
     const t=text.trim();
     const tips=[];
@@ -1002,42 +865,6 @@ async function ensureVisualSceneSuggestion(card,refresh=false){
     if(!/[.!?]$/.test(t)) tips.push("建议在句末加入标点。");
     if(t[0] && t[0]!==t[0].toUpperCase()) tips.push("英文句子通常以大写字母开头。");
     return tips.length?{level:"warn",title:"本地反馈：可以再改一改",tips}:{level:"good",title:"本地反馈：句子结构基本完整",tips:["目标词已使用。","句子长度和基本格式完整。"]};
-  }
-
-  function stageApply(card){
-    const fb=state.study.feedback;
-    const current=String(state.study.applyText||"").trim();
-    const checked=Boolean(state.study.applyApproved && state.study.applyLastCheckedText===current);
-    const chinese=containsChinese(current);
-    const missingKeyword=Boolean(current && !chinese && !sentenceUsesTargetWord(current,card.word));
-    const corrected=Boolean(state.study.originalApplyText && state.study.originalApplyText.trim()!==current);
-    const keyword=String(fb?.keyword||card.word||"").trim();
-    const suggestion=String(fb?.suggestion||"").trim();
-    const question=String(card.practicePrompt?.question||"").trim();
-    const promptLoading=Boolean(state.study.practicePromptLoading);
-
-    if(!question&&!promptLoading){setTimeout(()=>void ensurePracticePrompt(card,false),0);}
-
-    let feedbackPanel="";
-    if(state.study.applySubmitting){
-      feedbackPanel=`<div class="ai-feedback-panel pending"><div class="ai-feedback-head"><div><small>正在检查</small><strong>${chinese?"正在把你的意思转成自然英文":"正在检查用词和表达"}</strong></div></div><div class="ai-feedback-progress"><i></i></div></div>`;
-    }else if(fb&&suggestion){
-      feedbackPanel=`<div class="ai-feedback-panel ${fb.suggestionApproved?"good":"warn"}"><div class="ai-feedback-head"><div><small>${fb.inputLanguage==="zh"?"英文表达":"修改建议"}</small><strong>${escapeHtml(fb.title||"可以这样表达")}</strong></div></div><div class="ai-suggestion-sentence">${sentenceExample(suggestion,"example-en",keyword)}</div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn primary" data-action="adopt-ai-sentence" ${fb.suggestionApproved?"":"disabled"}>采用建议</button><button class="btn" data-action="pass-apply">保留原句，继续首次复习</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
-    }else if(fb&&checked){
-      feedbackPanel=`<div class="ai-feedback-panel good"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"表达自然，可以直接使用")}</strong></div><span class="ai-keyword-chip">${escapeHtml(keyword)}</span></div>${sentenceExample(current,"example-en",keyword)}<div class="ai-feedback-actions"><button class="btn primary" data-action="pass-apply">继续首次复习</button></div></div>`;
-    }else if(fb){
-      feedbackPanel=`<div class="ai-feedback-panel warn"><div class="ai-feedback-head"><div><small>检查结果</small><strong>${escapeHtml(fb.title||"这句话还需要调整")}</strong></div></div>${(fb.tips||[]).length?`<div class="ai-feedback-notes">${(fb.tips||[]).map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}<div class="ai-feedback-actions"><button class="btn" data-action="pass-apply">保留原句，继续首次复习</button><button class="text-action" data-action="edit-apply">继续修改</button></div></div>`;
-    }
-
-    return `${stageKicker("造句应用")}
-      <div class="apply-learning-stage">
-        <div class="apply-word-hero">${wordIdentity(card,{size:"large",showPos:true,center:true})}<span>${escapeHtml(card.meaningZh)}</span></div>
-        <div class="ai-practice-prompt"><span class="ai-spark">✦</span><div><small>AI 给你一个话题</small><strong>${escapeHtml(question||(promptLoading?"正在想一个更具体的问题…":`你在什么情况下会用到“${card.meaningZh}”？`))}</strong></div><button class="text-action scene-refresh-action" data-action="refresh-practice-prompt" ${promptLoading||state.study.applySubmitting?"disabled":""}>${promptLoading?`<span class="mini-spinner"></span>正在换一个…`:"换一个"}</button></div>
-        <div class="apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，写你真正想表达的话…">${escapeHtml(state.study.applyText||"")}</textarea><div class="apply-composer-bottom"><span>Enter 发送 · Shift + Enter 换行</span><button class="btn primary" data-action="submit-apply" ${state.study.applySubmitting||!current?"disabled":""}>${state.study.applySubmitting?"AI 正在处理…":"检查句子"}</button></div></div>
-        <div id="apply-keyword-warning" class="apply-keyword-warning" ${missingKeyword?"":"hidden"}>还没有用到目标词 “${escapeHtml(card.word)}”，AI 会尝试帮你自然地放进句子里。</div>
-        ${corrected?`<button class="text-action apply-undo" data-action="restore-original-apply">↶ 撤销 AI 修改</button>`:""}
-        ${feedbackPanel}
-      </div>`;
   }
 
   function reviewPage(){
