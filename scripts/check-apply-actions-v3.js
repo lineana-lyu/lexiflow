@@ -9,6 +9,7 @@ const index=read("public/index.html");
 const apply=read("public/apply-actions-v3.js");
 const transition=read("public/stage-transition-v3.js");
 const visual=read("public/visualize-actions-v3.js");
+const drafts=read("public/study-drafts-v3.js");
 const source=read("public/source-context-v3.js");
 const fresh=read("public/new-user-defaults-v3.js");
 
@@ -25,6 +26,9 @@ assert(apply.includes("LexiFlowStudySessionV3?.pause"),"saving a draft must paus
 assert(apply.includes("再次点击确认跳过"),"Apply skip must require an explicit second confirmation click");
 assert(apply.includes("skipCommandId"),"Apply skip must carry a deterministic command id");
 assert(apply.includes("commandCommitted"),"Apply skip must be safe to retry without double completion");
+assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply Actions V3 must reuse the learning-data gateway snapshot for decoration/draft restore");
+assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Apply action decoration must not GET learning data on every DOM mutation");
+assert(apply.includes('applyActionsAuthority:"v3"'),"Apply action writes must declare their V3 authority");
 
 assert(transition.includes("currentStudyCardId"),"Stage Transition V3 must resolve the exact rendered card ID");
 assert(!transition.includes("function domWord("),"Stage Transition V3 must not infer Apply identity from DOM word text");
@@ -40,6 +44,15 @@ assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip m
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
 assert(visual.includes("visualize-skip"),"Visualize skip must have its own idempotent command id");
 assert(visual.includes('data-visual-actions-v3="skip"'),"Visualize skip must be owned by the V3 action surface");
+assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize Actions V3 must reuse the learning-data gateway snapshot for decoration");
+assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Visualize action decoration must not GET learning data on every DOM mutation");
+assert(visual.includes('visualizeActionsAuthority:"v3"'),"Visualize skip writes must declare their V3 authority");
+assert(!visual.includes("footer.querySelector('[data-visual-actions-v3=\"skip\"]')?.remove();"),"Visualize skip decoration must not delete/recreate the same button on every mutation");
+
+assert(drafts.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Study Drafts V3 must restore/cleanup against the gateway snapshot");
+assert(drafts.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Study Drafts V3 must not GET learning data on every DOM mutation");
+assert(!drafts.includes("requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});"),"Study Drafts V3 must not restore mutation-driven network refreshes");
+
 assert(source.includes("LexiFlowStudyRenderer?.currentCardId"),"source reminders must bind to the exact study card ID");
 assert(source.includes("core.canonicalStage(card)"),"Source Context V3 must branch on canonical learning stages");
 assert(!source.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
