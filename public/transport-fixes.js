@@ -193,6 +193,10 @@
     }
   }
 
+  function visualStudyVisible() {
+    return Boolean(document.querySelector(".lexi-v3-visual,.visual-learning-stage"));
+  }
+
   function renderImageJobIndicator(force = false) {
     let pill = document.querySelector(".runtime-image-job-pill");
     if (!activeImageJob) {
@@ -201,9 +205,9 @@
       return;
     }
 
-    const visualStageVisible = Boolean(document.querySelector(".visual-learning-stage"));
+    const visualStageVisible = visualStudyVisible();
     const status = String(activeImageJob.status || "running");
-    const hiddenForStudy = visualStageVisible && (status === "queued" || status === "running");
+    const hiddenForStudy = visualStageVisible;
     const key = `${activeImageJob.id}|${status}|${activeImageJob.word || ""}|${hiddenForStudy ? 1 : 0}`;
     if (!force && key === lastIndicatorKey) return;
     lastIndicatorKey = key;
@@ -224,13 +228,13 @@
     const word = String(activeImageJob.word || "联想图");
     if (status === "succeeded") {
       pill.className = "runtime-image-job-pill success";
-      pill.innerHTML = `<span class="runtime-job-check">✓</span><div><strong>联想图已完成</strong><span>${escapeHtml(word)} · 已自动保存到单词卡</span></div>`;
+      pill.innerHTML = `<span class="runtime-job-check">✓</span><div><strong>联想图已完成</strong><span>${escapeHtml(word)} · 已保存到当前单词卡草稿</span></div>`;
     } else if (status === "failed") {
       pill.className = "runtime-image-job-pill error";
       pill.innerHTML = `<span class="runtime-job-mark">!</span><div><strong>联想图没有生成成功</strong><span>${escapeHtml(word)} · 可以稍后重试或上传图片</span></div>`;
     } else {
       pill.className = "runtime-image-job-pill running";
-      pill.innerHTML = `<span class="runtime-job-spinner"></span><div><strong>${status === "queued" ? "联想图正在排队" : "联想图正在后台生成"}</strong><span>${escapeHtml(word)} · 可以继续编辑或进入下一步</span></div>`;
+      pill.innerHTML = `<span class="runtime-job-spinner"></span><div><strong>${status === "queued" ? "联想图正在排队" : "联想图正在后台生成"}</strong><span>${escapeHtml(word)} · 完成后会自动更新到当前单词卡</span></div>`;
     }
   }
 
@@ -371,13 +375,13 @@
     const app = document.getElementById("app");
     if (!app) return;
     const observer = new MutationObserver(() => {
-      const visible = Boolean(document.querySelector(".visual-learning-stage"));
+      const visible = visualStudyVisible();
       if (visible === lastVisualStageVisible) return;
       lastVisualStageVisible = visible;
       renderImageJobIndicator(true);
     });
     observer.observe(app, { childList: true, subtree: false });
-    lastVisualStageVisible = Boolean(document.querySelector(".visual-learning-stage"));
+    lastVisualStageVisible = visualStudyVisible();
   }
 
   if (document.readyState === "loading") {
