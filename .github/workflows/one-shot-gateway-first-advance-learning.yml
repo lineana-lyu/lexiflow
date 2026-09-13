@@ -6,6 +6,7 @@ on:
       - feat/v7-airy-luminous-ui
     paths:
       - .github/workflows/one-shot-gateway-first-advance-learning.yml
+      - scripts/gateway-first-advance-learning.py
 
 permissions:
   contents: write
