@@ -6,6 +6,7 @@
   const inFlight = new Map();
   const pronunciationInFlight = new Map();
   const activeHydrations = new Map();
+  const DICTIONARY_PAYLOAD_ENDPOINTS = new Set(["/api/search/smart","/api/dictionary/lookup"]);
   const API_ORIGIN = location.protocol === "file:" ? "http://127.0.0.1:4177" : "";
 
   function clean(value) { return String(value || "").trim(); }
@@ -20,13 +21,6 @@
       .replace(/\s*\[\s*[=≈~]\s*[^\]]+\]\s*$/u, "")
       .replace(/\s+/g, " ")
       .trim();
-  }
-
-  function requestPath(input) {
-    try {
-      const raw = typeof input === "string" ? input : input?.url || "";
-      return new URL(raw, location.href).pathname;
-    } catch { return ""; }
   }
 
   function isLocalDictionaryPayload(payload) {
@@ -200,8 +194,6 @@
         for (const sense of result.senses || []) {
           const item = byId.get(clean(sense.id));
           if (!item) continue;
-          // Existing dictionary English takes precedence. Enrichment may only fill
-          // it when the dictionary did not provide one in the first place.
           if (!clean(sense.exampleEn) && clean(item.exampleEn)) sense.exampleEn = sanitizeExample(item.exampleEn);
           if (!clean(sense.exampleZh) && clean(item.exampleZh)) sense.exampleZh = clean(item.exampleZh);
           sense.exampleSource = clean(item.source) || "enriched";
@@ -225,20 +217,21 @@
     try { await work; } finally { if(activeHydrations.get(wordKey)===work) activeHydrations.delete(wordKey); }
   }
 
-  window.fetch = async function lexiFlowExampleAwareFetch(input, init) {
-    const response = await nativeFetch(input, init);
-    const pathname = requestPath(input);
-    if (!new Set(["/api/search/smart","/api/dictionary/lookup"]).has(pathname)) return response;
-    return new Proxy(response, {
-      get(target, prop) {
-        if(prop === "json") return async()=>{
-          const payload=await target.json();
-          if(isLocalDictionaryPayload(payload)) { void hydrateResult(payload.result); void hydratePronunciation(payload.result); }
-          return payload;
-        };
-        const value=Reflect.get(target,prop,target);
-        return typeof value === "function" ? value.bind(target) : value;
-      },
-    });
-  };
+  function processDictionaryPayload(pathname, payload) {
+    if (!DICTIONARY_PAYLOAD_ENDPOINTS.has(String(pathname || ""))) return payload;
+    if (isLocalDictionaryPayload(payload)) {
+      void hydrateResult(payload.result);
+      void hydratePronunciation(payload.result);
+    }
+    return payload;
+  }
+
+  const transport = window.LexiFlowTransportV3;
+  if (transport?.registerDictionaryPayloadObserver) {
+    transport.registerDictionaryPayloadObserver(processDictionaryPayload);
+  } else {
+    console.warn("LexiFlow Example Hydration disabled: transport dictionary observer bridge is unavailable");
+  }
+
+  window.LexiFlowExampleHydration = Object.freeze({ processDictionaryPayload });
 })();
