@@ -63,15 +63,6 @@
     }
   };
 
-  const STAGES = [
-    ["select","选词确认"],
-    ["memorize1","英 → 中"],
-    ["memorize2","中 → 英"],
-    ["visualize","视觉联想"],
-    ["apply","造句应用"],
-    ["review","首次复习"]
-  ];
-
   const state = {
     route: "home",
     data: defaultData(),
@@ -817,20 +808,12 @@
     return `<div class="study-kicker">${label}</div>`;
   }
 
-  function stageIndex(stage){ return STAGES.findIndex(([key])=>key===stage); }
-
   function renderStageRail(card){
-    const idx=stageIndex(card.stage);
-    return `<div class="study-stepper">${STAGES.map(([k,label],i)=>`<div class="study-stepper-item ${i<idx?"done":i===idx?"active":""}"><span class="study-stepper-dot">${i<idx?"✓":i+1}</span><span>${label}</span></div>${i<STAGES.length-1?`<i class="study-stepper-line ${i<idx?"done":""}"></i>`:""}`).join("")}</div>`;
+    return `<div class="study-stepper" data-study-stepper-v3-host="${escapeHtml(card.id)}"></div>`;
   }
 
   function renderStage(card){
-    const stage=card.stage;
-    if(stage==="select") return stageSelect(card);
-    if(stage==="memorize1"||stage==="memorize2") return `<div class="study-center" data-lexi-memorize-shell="${escapeHtml(card.id)}"><span class="prompt-small">正在准备双向记忆练习…</span></div>`;
-    if(stage==="visualize") return stageVisual(card);
-    if(stage==="apply") return stageApply(card);
-    return `<div class="study-center"><strong class="prompt-big">当前学习阶段不可在这里打开</strong><p class="prompt-small">Review 由 Today Plan 的独立复习会话处理。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
+    return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
   }
 
   function stageTop(card,kicker){

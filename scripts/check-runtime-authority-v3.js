@@ -130,7 +130,10 @@ assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not de
 for(const legacy of ["function stageMem1(","function stageMem2(","function advanceStage("]){assert(!app.includes(legacy),`legacy learning-stage authority must be removed from app.js: ${legacy}`);}
 assert(!app.includes('if(action===\"memory-rate\")'),"app.js must not retain legacy Memorize rating authority");
 assert(!app.includes('if(action===\"reveal\")'),"app.js must not retain legacy Memorize reveal state");
-assert(app.includes("data-lexi-memorize-shell"),"app.js should expose only a passive Memorize render host");
+assert(app.includes("data-study-stepper-v3-host"),"app.js must expose only the generic V3 progress host");
+assert(app.includes("data-study-stage-host-v3"),"app.js must expose only the generic V3 stage render host");
+assert(!app.includes("const STAGES = ["),"app.js must not retain a parallel legacy stage model");
+assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVisual(card)")&&!app.includes("return stageApply(card)"),"app.js must not dispatch into retired stage renderers");
 
 assert(studySurface.includes("data-study-stage-host-v3"),"Study Surface V3 must quarantine legacy stage bodies while authoritative renderers load");
 assert(studySurface.includes("const ROOTS=Object.freeze"),"Study Surface V3 must recognize the active stage renderer roots");
