@@ -34,4 +34,13 @@ assert old_ai_test in text, "AI test handler missing"
 text = text.replace(old_ai_test, new_ai_test, 1)
 
 path.write_text(text, encoding="utf-8")
-print("settings status V4 migration applied")
+
+contract_path = Path("scripts/check-runtime-authority-v3.js")
+contract = contract_path.read_text(encoding="utf-8")
+old_contract = 'assert(app.includes("基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。"),"app.js base Settings copy must describe local-first dictionary behavior");'
+new_contract = '''assert(app.includes("本地 Core + ECDICT 负责快速查词；在线词典只用于真人发音和例句增强。"),"Settings must explain the actual local-first dictionary architecture");\nassert(app.includes("dictMaskedKey")&&app.includes("在线密钥已保存")&&app.includes("本地词典已就绪"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");\nassert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在验证在线词典…")&&app.includes("在线增强验证失败"),"dictionary verification state must stay visibly persisted on the Settings page");\nassert(app.includes("CLI 已检测")&&app.includes("未检测到登录")&&app.includes("runtimeTest")&&app.includes("fastTextTransport"),"AI Settings must distinguish CLI, auth, real runtime verification, and fast transport state");\nassert(app.includes("正在发起真实 AI 请求…")&&app.includes("运行连接已验证")&&app.includes("运行连接失败"),"AI connection checks must have visible checking/success/failure states rather than toast-only feedback");'''
+assert old_contract in contract, "old Settings authority contract missing"
+contract = contract.replace(old_contract, new_contract, 1)
+contract_path.write_text(contract, encoding="utf-8")
+
+print("settings status V4 migration and authority contract applied")
