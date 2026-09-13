@@ -16,6 +16,9 @@ assert(select.includes('core.canonicalStage(card)==="select"'),"Select renderer 
 assert(select.includes('data-next="memorize"'),"Select UI must expose canonical Memorize as the next product stage");
 assert(select.includes("LexiFlowNaturalTts?.play"),"Select renderer must preserve pronunciation support");
 assert(!select.includes("activeLearningCards"),"Select renderer must never choose its own learning card");
+assert(select.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Select renderer must reuse the learning-data gateway snapshot");
+assert(select.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Select DOM mutations must redraw from memory instead of GETing learning data");
+assert(!select.includes("requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});"),"Select renderer must not restore mutation-driven learning-data GETs");
 assert(transition.includes('data-next="memorize"'),"authoritative Select transition must accept the canonical next-stage control");
 assert(transition.includes('card.stage="memorize"')&&!transition.includes('card.stage="memorize1"'),"authoritative Select transition must persist canonical Memorize directly");
 assert(transition.includes('stageTransitionAuthority:"v3"'),"Select transition write must identify Stage Transition V3 authority");
