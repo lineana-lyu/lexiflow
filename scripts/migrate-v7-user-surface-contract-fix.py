@@ -54,5 +54,10 @@ new='assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 模型</h3>
 if old not in text:
     raise SystemExit('runtime authority AI label anchor not found')
 text=text.replace(old,new,1)
+old='assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。首次准备完成后可离线使用。"),"app.js must own final Voice Settings copy");'
+new='assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。")&&app.includes(\'id="tts-voice"\'),"app.js must directly own learner-facing Voice Settings and the voice selector");'
+if old not in text:
+    raise SystemExit('runtime authority Voice Settings anchor not found')
+text=text.replace(old,new,1)
 path.write_text(text,encoding='utf-8')
-print('user-facing Review and Settings contracts aligned')
+print('user-facing Review, Settings, and Voice contracts aligned')
