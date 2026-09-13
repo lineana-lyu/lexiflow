@@ -956,7 +956,10 @@
           </div>
         </div>
 
-        <div class="setting-row" style="align-items:flex-start">
+        <details data-settings-advanced="1" style="border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;">
+          <summary style="cursor:pointer;padding:16px 17px;list-style:none;display:flex;justify-content:space-between;gap:16px;align-items:center"><span><strong style="font-size:14px">高级设置</strong><span style="display:block;margin-top:4px;color:var(--muted);font-size:11px">一般无需调整</span></span><span style="color:var(--muted);font-size:12px">展开</span></summary>
+          <div data-settings-advanced-body>
+        <div class="setting-row" style="align-items:flex-start;border:0;border-top:1px solid var(--line-soft);border-radius:0">
           <div style="min-width:260px">
             <h3>AI 高级配置</h3>
             
@@ -985,6 +988,8 @@
             <button class="btn primary" data-action="save-codex-runtime">保存 AI 配置</button>
           </div>
         </div>
+          </div>
+        </details>
 
         <div class="setting-row">
           <div><h3>每日学习目标</h3><p></p></div>
