@@ -42,39 +42,51 @@
     return current&&core.canonicalStage(current)==="visualize"?current:null;
   }
   function committed(id){return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===id);}
+  function stageBusy(){return Boolean(window.LexiFlowVisualizeStageV3?.isBusy?.()||saving);}
 
   function decorate(){
     const note=document.getElementById("visual-note"),footer=document.querySelector(".learning-stage-footer");
     if(!note||!footer)return;
     const current=card();if(!current)return;
-    const hasImage=Boolean(current.imageData||current.imageUrl);
+    const hasImage=Boolean(current.imageData||current.imageUrl),busy=stageBusy();
     const next=footer.querySelector('[data-action="finish-visual"]');
     let skip=footer.querySelector('[data-visual-actions-v3="skip"]');
     if(hasImage){
       skip?.remove();
-      if(next){next.disabled=false;next.textContent="完成视觉联想 · 明天开始造句";next.title="";}
+      if(next){
+        next.disabled=busy;
+        next.textContent=busy?"正在保存当前联想…":"完成视觉联想 · 明天开始造句";
+        next.title=busy?"当前联想正在保存，完成后再进入下一阶段。":"";
+      }
       return;
     }
-    if(next){next.disabled=true;next.textContent="先生成/上传图片，或选择跳过";next.title="没有图片时请明确选择是否跳过视觉联想";}
-    const label=String(note.value||"").trim()?"不生成图片，继续":"暂时跳过视觉联想";
-    if(skip){if(skip.textContent!==label)skip.textContent=label;return;}
+    if(next){
+      next.disabled=true;
+      next.textContent=busy?"正在保存当前联想…":"先生成/上传图片，或选择跳过";
+      next.title=busy?"当前联想正在保存，完成后才能继续。":"没有图片时请明确选择是否跳过视觉联想";
+    }
+    const idleLabel=String(note.value||"").trim()?"不生成图片，继续":"暂时跳过视觉联想";
+    const label=busy?"正在保存当前联想…":idleLabel;
+    if(skip){skip.disabled=busy;skip.textContent=label;skip.title=busy?"当前联想正在保存，完成后才能跳过。":"";return;}
     skip=document.createElement("button");
     skip.type="button";
     skip.className="btn";
     skip.dataset.visualActionsV3="skip";
+    skip.disabled=busy;
     skip.textContent=label;
+    skip.title=busy?"当前联想正在保存，完成后才能跳过。":"";
     footer.prepend(skip);
   }
 
   async function skip(){
-    if(saving)return;
+    if(stageBusy())return;
     const id=currentCardId();if(!id)return;
     const now=new Date();
     const transition=window.LexiFlowStageTransitionV3;
     const write=transition?.beginStageWrite?.(id,"visualize",now);
     if(!write)return;
     const cmd=write.commandId;
-    saving=true;
+    saving=true;decorate();
     try{
       await refresh(true);
       if(committed(cmd)){location.reload();return;}
@@ -91,7 +103,7 @@
       await save(data);
       location.reload();
     }catch(err){console.error("Visualize skip failed",err);}
-    finally{transition?.endStageWrite?.(write);saving=false;}
+    finally{transition?.endStageWrite?.(write);saving=false;decorate();}
   }
 
   document.addEventListener("click",event=>{
