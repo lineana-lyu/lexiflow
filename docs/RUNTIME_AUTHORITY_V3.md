@@ -208,26 +208,25 @@ AI is assistive only. It cannot decide deterministic learning state.
 
 ## 9. Transport and dictionary boundary
 
-`public/transport-fixes.js` is the active generic transport compatibility layer.
+`public/transport-fixes.js` is the active generic transport compatibility layer and the single owner of frontend global fetch wrapping for generic transport compatibility.
 
-It currently owns narrowly scoped transport normalization such as:
+It owns narrowly scoped transport behavior such as:
 
 - Chinese smart-search normalization;
 - Chinese `/api/dictionary/lookup` response normalization;
+- the dictionary payload observer bridge;
 - image-job transport compatibility;
 - unified phrase-voice transport behavior.
 
 It must not own Stage AI endpoints or learning-stage transitions.
 
+`window.LexiFlowTransportV3.registerDictionaryPayloadObserver()` is the narrow extension point for dictionary-response consumers. For `/api/search/smart` and `/api/dictionary/lookup`, observers are invoked from the caller's actual `response.json()` path and receive the exact same parsed payload object that is returned to the caller. A compatibility feature must not create a second dictionary fetch wrapper or hydrate a detached clone.
+
+`public/example-hydration.js` no longer rewrites global fetch. It registers `processDictionaryPayload()` through the transport bridge and may asynchronously enrich local ECDICT/Core lookup payloads with missing examples and pronunciation metadata. Because it receives the caller-owned payload object, later enrichment remains visible to the app lookup state and to persisted-card repair events.
+
+Example Hydration is dictionary enrichment only. It must not observe `/api/learning-data`, change stage state, decide Today membership, or alter Review scheduling.
+
 `public/runtime-fixes.js` is retired and must stay deleted.
-
-### Remaining dictionary hydration exception
-
-`public/example-hydration.js` currently remains a dictionary-only fetch observer for `/api/search/smart` and `/api/dictionary/lookup` so local ECDICT results can asynchronously receive missing examples and pronunciation metadata.
-
-This is a compatibility exception, not learning-engine authority. It must not observe `/api/learning-data`, change stage state, decide Today membership, or alter Review scheduling.
-
-A future migration may replace this observer with an explicit payload bridge, but that migration is not considered complete until the code is actually committed and regression checks pass.
 
 ## 10. Review authority
 
@@ -308,6 +307,7 @@ The following sources must not return to the active runtime load chain and, wher
 
 Current regression gates protect:
 
+- the complete Pending -> Select -> Memorize -> Visualize -> Apply -> Review -> Stable journey across StudyDays;
 - canonical five-stage model and historical-stage migration reads;
 - cross-day gating and frozen DailyPlan semantics;
 - Learning Data Gateway snapshot and hook behavior;
@@ -319,6 +319,8 @@ Current regression gates protect:
 - Apply quality/guard behavior;
 - AI Assist endpoint ownership;
 - Review scheduling, same-day repair, and crash-safe transactions;
+- isolated real HTTP runtime startup, ECDICT fallback lookup, Core Chinese sense resolution, and learning-data persistence;
+- single-owner transport dictionary observation and caller/observer payload object identity;
 - reset correctness;
 - physical absence of retired app-shell stage renderers and retired runtime sources.
 
@@ -332,4 +334,6 @@ A change is a regression even if syntax is valid when it:
 - reintroduces automatic Visualize/Apply AI calls;
 - lets `app.js` become a parallel learning engine;
 - introduces another learning-data observer outside the Gateway;
+- introduces another dictionary fetch wrapper outside the transport bridge;
+- hydrates a detached dictionary payload clone instead of the caller-owned payload;
 - creates a second active-card selector based on DOM text or insertion order.
