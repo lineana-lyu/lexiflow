@@ -50,6 +50,19 @@
   let persistenceReady=false;
   let persistenceQueue=Promise.resolve();
 
+  function syncAppDataFromGateway(snapshot){
+    if(!snapshot||!Array.isArray(snapshot.cards))return false;
+    state.data=normalizeLearningData(snapshot);
+    return true;
+  }
+
+  const learningDataGateway=window.LexiFlowLearningDataGatewayV3;
+  if(learningDataGateway?.registerAfterPersist){
+    learningDataGateway.registerAfterPersist(snapshot=>{syncAppDataFromGateway(snapshot);});
+    const current=learningDataGateway.current?.();
+    if(current?.cards)syncAppDataFromGateway(current);
+  }
+
   function saveData(){
     if(!persistenceReady)return;
     const snapshot=JSON.parse(JSON.stringify(state.data));
@@ -241,23 +254,27 @@
   }
 
   async function ensureCardPronunciation(card){
+    const cardId=String(card?.id||"");
+    const word=String(card?.word||"").trim();
     const existingAudios=Array.isArray(card?.audioUrls)?card.audioUrls.filter(Boolean):[];
-    if(!card || card.audioUrl || existingAudios.length || state.pronunciationHydration[card.id]) return;
-    state.pronunciationHydration[card.id]="loading";
+    if(!cardId || !word || card.audioUrl || existingAudios.length || state.pronunciationHydration[cardId]) return;
+    state.pronunciationHydration[cardId]="loading";
     try{
-      const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:card.word}});
+      const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word}});
+      const target=getCard(cardId);
+      if(!target){state.pronunciationHydration[cardId]="done";return;}
       const phonetic=String(payload.result?.phonetic||"").trim();
       const audioUrl=String(payload.result?.audioUrl||"").trim();
       const audioUrls=Array.isArray(payload.result?.audioUrls)?payload.result.audioUrls.map(String).filter(Boolean):[];
-      if(phonetic) card.phonetic=phonetic;
-      if(audioUrl && !card.audioUrl) card.audioUrl=audioUrl;
-      if(audioUrls.length) card.audioUrls=audioUrls;
-      if(payload.result?.pronunciationSource) card.pronunciationSource=String(payload.result.pronunciationSource);
-      if(phonetic || audioUrl || audioUrls.length){card.updatedAt=new Date().toISOString();saveData();}
-      state.pronunciationHydration[card.id]="done";
+      if(phonetic) target.phonetic=phonetic;
+      if(audioUrl && !target.audioUrl) target.audioUrl=audioUrl;
+      if(audioUrls.length) target.audioUrls=audioUrls;
+      if(payload.result?.pronunciationSource) target.pronunciationSource=String(payload.result.pronunciationSource);
+      if(phonetic || audioUrl || audioUrls.length){target.updatedAt=new Date().toISOString();saveData();}
+      state.pronunciationHydration[cardId]="done";
       render();
     }catch{
-      state.pronunciationHydration[card.id]="failed";
+      state.pronunciationHydration[cardId]="failed";
       render();
     }
   }

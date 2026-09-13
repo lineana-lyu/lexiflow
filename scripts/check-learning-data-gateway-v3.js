@@ -9,6 +9,7 @@ const exists=name=>fs.existsSync(path.join(root,name));
 const index=read("public/index.html");
 const source=read("public/learning-data-gateway-v3.js");
 const sourceContext=read("public/source-context-v3.js");
+const app=read("public/app.js");
 
 assert(index.includes('<script src="./learning-core-v3.js"></script>'),"Learning Core V3 must be active");
 assert(!index.includes('<script src="./learning-core-v2.js"></script>'),"Learning Core V2 must not remain in the runtime load chain");
@@ -20,6 +21,7 @@ assert(!exists("public/legacy-data-fix.js"),"legacy data fetch shim must stay de
 assert(index.indexOf("learning-core-v3.js")<index.indexOf("learning-data-gateway-v3.js"),"Learning Core V3 must load before the V3 data gateway");
 assert(index.indexOf("learning-data-gateway-v3.js")<index.indexOf("studyday-boundary-v3.js"),"V3 data gateway must normalize learning data before downstream runtime modules");
 assert(index.indexOf("learning-data-gateway-v3.js")<index.indexOf("source-context-v3.js"),"Gateway hook API must exist before Source Context registers persistence hooks");
+assert(index.indexOf("learning-data-gateway-v3.js")<index.indexOf("app.js"),"Gateway hook API must exist before the base app registers confirmed-snapshot synchronization");
 
 assert(source.includes('endpoint!=="/api/learning-data"'),"gateway must be scoped to the learning-data endpoint");
 assert(source.includes("core.normalizeData"),"gateway must normalize every learning dataset");
@@ -46,5 +48,7 @@ assert(!sourceContext.includes("window.fetch =")&&!sourceContext.includes("windo
 assert(sourceContext.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context must preserve source metadata through the gateway outgoing hook");
 assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Source Context must observe only successful persistence before clearing a draft");
 assert(sourceContext.includes("pendingDraftCardIds"),"Source Context must track draft attachment until persistence succeeds");
+assert(app.includes("learningDataGateway.registerAfterPersist")&&app.includes("state.data=normalizeLearningData(snapshot)"),"base app state must follow Gateway-confirmed persistence so generic full-data saves cannot revive a stale snapshot");
+assert(app.includes("const target=getCard(cardId);")&&app.includes("target.updatedAt=new Date().toISOString();saveData();"),"async pronunciation hydration must re-resolve the current card after awaiting the dictionary service");
 
 console.log("Learning Data Gateway V3 checks passed.");
