@@ -12,7 +12,7 @@
   let uploadBusy=false;
   const localDrafts=new Map();
 
-  const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;,"'":"&#39;"}[ch]));
   const phonetic=value=>{const s=String(value||"").trim();return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
 
   function syncFromGateway(){
@@ -80,7 +80,7 @@
     const style=document.createElement("style");
     style.id="lexi-visualize-stage-v3-style";
     style.textContent=`
-      .lexi-v3-visual{min-height:500px;padding:4px;display:grid;gap:20px}.lexi-v3-visual-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.lexi-v3-visual-kicker{font-size:12px;font-weight:800;letter-spacing:.09em;color:var(--muted)}.lexi-v3-visual-word{display:flex;align-items:center;gap:8px;margin-top:4px}.lexi-v3-visual-word strong{font-size:30px}.lexi-v3-visual-word button{border:0;background:transparent;cursor:pointer;font-size:18px}.lexi-v3-visual-meta{font-size:13px;color:var(--muted);margin-top:3px}.lexi-v3-visual-principle{max-width:360px;font-size:12px;line-height:1.6;color:var(--muted);text-align:right}.lexi-v3-visual-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);gap:18px}.lexi-v3-visual-image{min-height:330px;border:1px solid var(--line);border-radius:20px;background:rgba(120,140,132,.035);display:grid;place-items:center;overflow:hidden;position:relative}.lexi-v3-visual-image img{width:100%;height:100%;min-height:330px;object-fit:cover}.lexi-v3-visual-empty{text-align:center;display:grid;gap:7px;color:var(--muted);padding:28px}.lexi-v3-visual-empty strong{color:var(--text)}.lexi-v3-visual-loading{position:absolute;inset:0;background:rgba(250,251,249,.88);display:grid;place-items:center;text-align:center;padding:24px}.lexi-v3-visual-loading>div{display:grid;gap:8px}.lexi-v3-visual-panel{border:1px solid var(--line);border-radius:20px;padding:18px;background:var(--surface);display:grid;gap:12px;align-content:start}.lexi-v3-visual-panel h3{margin:0;font-size:16px}.lexi-v3-visual-panel p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.lexi-v3-visual-panel textarea{min-height:135px}.lexi-v3-ai-suggestion{padding:12px;border-radius:14px;background:rgba(120,140,132,.05);display:grid;gap:8px;font-size:13px;line-height:1.6}.lexi-v3-ai-suggestion small{color:var(--muted)}.lexi-v3-ai-actions,.lexi-v3-visual-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-v3-visual-actions{justify-content:space-between}.lexi-v3-visual-actions>div{display:flex;gap:9px;flex-wrap:wrap}.lexi-v3-visual-error{padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-v3-visual .learning-stage-footer{margin-top:2px;display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}@media(max-width:820px){.lexi-v3-visual-grid{grid-template-columns:1fr}.lexi-v3-visual-principle{text-align:left}.lexi-v3-visual-actions{align-items:stretch;flex-direction:column}.lexi-v3-visual-actions>div{width:100%}.lexi-v3-visual-actions .btn,.lexi-v3-visual-actions label{flex:1;text-align:center}.lexi-v3-visual .learning-stage-footer .btn{width:100%}}
+      .lexi-v3-visual{min-height:500px;padding:4px;display:grid;gap:20px}.lexi-v3-visual-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}.lexi-v3-visual-kicker{font-size:12px;font-weight:800;letter-spacing:.09em;color:var(--muted)}.lexi-v3-visual-word{display:flex;align-items:center;gap:8px;margin-top:4px}.lexi-v3-visual-word strong{font-size:30px}.lexi-v3-visual-word button{border:0;background:transparent;cursor:pointer;font-size:18px}.lexi-v3-visual-meta{font-size:13px;color:var(--muted);margin-top:3px}.lexi-v3-visual-principle{max-width:360px;font-size:12px;line-height:1.6;color:var(--muted);text-align:right}.lexi-v3-visual-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);gap:18px}.lexi-v3-visual-image{min-height:330px;border:1px solid var(--line);border-radius:20px;background:rgba(120,140,132,.035);display:grid;place-items:center;overflow:hidden;position:relative}.lexi-v3-visual-image img{width:100%;height:100%;min-height:330px;object-fit:cover}.lexi-v3-visual-empty{text-align:center;display:grid;gap:7px;color:var(--muted);padding:28px}.lexi-v3-visual-empty strong{color:var(--text)}.lexi-v3-visual-loading{position:absolute;inset:0;background:rgba(250,251,249,.88);display:grid;place-items:center;text-align:center;padding:24px}.lexi-v3-visual-loading>div{display:grid;gap:8px}.lexi-v3-visual-panel{border:1px solid var(--line);border-radius:20px;padding:18px;background:var(--surface);display:grid;gap:12px;align-content:start}.lexi-v3-visual-panel h3{margin:0;font-size:16px}.lexi-v3-visual-panel p{margin:0;color:var(--muted);font-size:12px;line-height:1.6}.lexi-v3-visual-panel textarea{min-height:135px}.lexi-v3-ai-suggestion{padding:12px;border-radius:14px;background:rgba(120,140,132,.05);display:grid;gap:8px;font-size:13px;line-height:1.6}.lexi-v3-ai-suggestion small{color:var(--muted)}.lexi-v3-ai-actions,.lexi-v3-visual-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-v3-visual-actions{justify-content:space-between}.lexi-v3-visual-actions>div{display:flex;gap:9px;flex-wrap:wrap}.lexi-v3-visual-error{padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-v3-visual-checkpoint{padding:9px 11px;border-radius:12px;background:rgba(120,140,132,.05);color:var(--muted);font-size:11px;line-height:1.55}.lexi-v3-visual .learning-stage-footer{margin-top:2px;display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap}@media(max-width:820px){.lexi-v3-visual-grid{grid-template-columns:1fr}.lexi-v3-visual-principle{text-align:left}.lexi-v3-visual-actions{align-items:stretch;flex-direction:column}.lexi-v3-visual-actions>div{width:100%}.lexi-v3-visual-actions .btn,.lexi-v3-visual-actions label{flex:1;text-align:center}.lexi-v3-visual .learning-stage-footer .btn{width:100%}}
     `;
     document.head.appendChild(style);
   }
@@ -95,6 +95,7 @@
     const interactionBusy=assistBusy||generating||uploadBusy;
     const suggestion=String(card.visualSceneSuggestion?.scene||"").trim();
     const cue=String(card.visualSceneSuggestion?.cue||"").trim();
+    const preparedUnconfirmed=Boolean(image&&card.visualImageConfirmed!==true);
     return `<div class="lexi-v3-visual" data-visualize-stage-v3="${esc(card.id)}">
       <div class="lexi-v3-visual-head">
         <div><div class="lexi-v3-visual-kicker">VISUALIZE · 视觉联想</div><div class="lexi-v3-visual-word"><strong>${esc(card.word)}</strong><button type="button" data-visual-v3="speak" aria-label="播放发音">🔊</button></div><div class="lexi-v3-visual-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""} · ${esc(card.meaningZh||"")}</div></div>
@@ -112,6 +113,7 @@
           ${suggestion?`<div class="lexi-v3-ai-suggestion"><small>AI 建议 · 仅供参考</small><span>${esc(suggestion)}</span>${cue?`<small>记忆提示：${esc(cue)}</small>`:""}<div><button class="text-action" type="button" data-visual-v3="adopt" ${interactionBusy?"disabled":""}>采用这个建议</button></div></div>`:""}
         </aside>
       </div>
+      ${preparedUnconfirmed?`<div class="lexi-v3-visual-checkpoint">这张图片已经保存为当前 Visualize 草稿；即使刷新或退出后重新进入，也会继续保留。只有点击“完成视觉联想”后，它才会随本阶段一起确认。</div>`:""}
       ${generation.status==="error"?`<div class="lexi-v3-visual-error">${esc(generation.message||"这次图片没有生成成功，可以重试或上传自己的图片。")}</div>`:""}
       <div class="lexi-v3-visual-actions"><div><button class="btn primary" type="button" data-visual-v3="generate" ${!String(note).trim()||interactionBusy?"disabled":""}>${generating?"生成中…":image?"重新生成图片":"生成联想图"}</button><label class="btn" for="visual-v3-file" ${interactionBusy?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.55\"":""}>上传图片</label></div><span style="font-size:11px;color:var(--muted)">没有图片也可以明确选择“跳过视觉联想”。</span></div>
       <input id="visual-v3-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
@@ -125,7 +127,7 @@
     const card=currentCard();
     if(!host||!card)return;
     const generation=imageGeneration(card);
-    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
+    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",confirmed:card.visualImageConfirmed===true,status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
     if(host.dataset.visualizeStageV3===signature)return;
     host.dataset.visualizeStageV3=signature;
     host.innerHTML=html(card);
@@ -194,7 +196,8 @@
       const response=await fetch("/api/ai/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,visualNote:note,suggestedScene:"",sourceQuery:card.sourceQuery||card.word,senseIntentEn:card.senseIntentEn||"",avoidVisualEn:Array.isArray(card.avoidVisualEn)?card.avoidVisualEn:[]})});
       let payload={};try{payload=await response.json();}catch{}
       if(!response.ok||!payload?.image?.url)throw Object.assign(new Error(payload?.error||"IMAGE_FAILED"),{payload});
-      await saveCardPatch(card.id,c=>{c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();c.imageGeneration={status:"success",phase:"done",message:"联想图已生成。",code:"",finishedAt:new Date().toISOString()};});
+      const preparedAt=new Date().toISOString();
+      await saveCardPatch(card.id,c=>{c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();c.visualImageConfirmed=false;c.visualImagePreparedAt=preparedAt;c.visualImageSource="generated";c.imageGeneration={status:"success",phase:"done",message:"联想图已生成并保存为 Visualize 草稿。",code:"",finishedAt:preparedAt};});
     }catch(err){
       const message=err?.payload?.userError?.message||"这次图片没有生成成功，可以重试或上传自己的图片。";
       try{await saveCardPatch(card.id,c=>{c.imageGeneration={status:"error",phase:"error",message,code:err?.payload?.code||"IMAGE_GENERATION_FAILED",finishedAt:new Date().toISOString()};});}catch{}
@@ -213,8 +216,9 @@
       if(!response.ok)throw new Error("UPLOAD_FAILED");
       const payload=await response.json();
       const note=String(document.getElementById("visual-note")?.value??draftFor(card)).trim();
+      const preparedAt=new Date().toISOString();
       setDraft(card.id,note);
-      await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene="";c.imageGeneration={status:"success",phase:"done",message:"已使用本地上传图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()};});
+      await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene="";c.visualImageConfirmed=false;c.visualImagePreparedAt=preparedAt;c.visualImageSource="upload";c.imageGeneration={status:"success",phase:"done",message:"本地图片已保存为 Visualize 草稿。",code:"LOCAL_UPLOAD",finishedAt:preparedAt};});
     }catch(err){console.error("Visualize V3 upload failed",err);window.alert("图片没有保存成功，请重试。");}
     finally{uploadBusy=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
