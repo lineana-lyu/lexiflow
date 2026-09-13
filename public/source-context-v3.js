@@ -2,17 +2,20 @@
   "use strict";
 
   const core=window.LexiFlowLearningCore;
+  const gateway=window.LexiFlowLearningDataGatewayV3;
   if(!core)throw new Error("LexiFlowLearningCore must load before source-context-v3.js");
-  const previousFetch = window.fetch.bind(window);
-  // Preserve the existing draft key so upgrades do not discard unsaved source context.
-  const DRAFT_KEY = "lexiflow-source-context-draft-v2";
-  let latestData = null;
-  let scheduled = false;
-  let activeLibraryCardId = "";
-  const sourceMap = new Map();
+  if(!gateway?.registerOutgoingMutator||!gateway?.registerAfterPersist)throw new Error("Learning Data Gateway V3 hooks must load before source-context-v3.js");
 
-  const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-  const labels = {
+  // Preserve the existing draft key so upgrades do not discard unsaved source context.
+  const DRAFT_KEY="lexiflow-source-context-draft-v2";
+  let latestData=null;
+  let scheduled=false;
+  let activeLibraryCardId="";
+  const sourceMap=new Map();
+  const pendingDraftCardIds=new Set();
+
+  const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+  const labels={
     video:"视频 / 影视",
     article:"文章 / 书",
     conversation:"对话",
@@ -21,36 +24,17 @@
     other:"其他",
   };
 
-  function endpointOf(input){
-    try{return new URL(typeof input === "string" ? input : input?.url || "",location.href).pathname;}catch{return "";}
-  }
-  function parseBody(init){
-    if(!init || typeof init.body !== "string") return null;
-    try{return JSON.parse(init.body);}catch{return null;}
-  }
-  function withJson(init,body){
-    return {...(init||{}),headers:{"Content-Type":"application/json",...((init&&init.headers)||{})},body:JSON.stringify(body)};
-  }
-  function responseWithJson(original,payload){
-    const headers=new Headers(original.headers||{});headers.set("Content-Type","application/json; charset=utf-8");headers.delete("Content-Length");
-    return new Response(JSON.stringify(payload),{status:original.status,statusText:original.statusText,headers});
-  }
-
   function loadDraft(){
     try{
       const parsed=JSON.parse(localStorage.getItem(DRAFT_KEY)||"{}");
       return parsed&&typeof parsed==="object"?parsed:{};
-    }catch{return {};}
+    }catch{return{};}
   }
-  function saveDraft(next){
-    try{localStorage.setItem(DRAFT_KEY,JSON.stringify(next));}catch{}
-  }
-  function clearDraft(){
-    try{localStorage.removeItem(DRAFT_KEY);}catch{}
-  }
+  function saveDraft(next){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(next));}catch{}}
+  function clearDraft(){try{localStorage.removeItem(DRAFT_KEY);}catch{}}
 
   function sourceFields(card){
-    return {
+    return{
       sourceType:String(card?.sourceType||""),
       sourceTitle:String(card?.sourceTitle||""),
       sourceContext:String(card?.sourceContext||""),
@@ -59,18 +43,22 @@
     };
   }
   function hasSource(fields){
-    return Boolean(String(fields?.sourceType||"").trim() || String(fields?.sourceTitle||"").trim() || String(fields?.sourceContext||"").trim());
+    return Boolean(String(fields?.sourceType||"").trim()||String(fields?.sourceTitle||"").trim()||String(fields?.sourceContext||"").trim());
+  }
+  function hasDraftSource(draft){
+    const type=String(draft?.sourceType||"").trim();
+    return Boolean(String(draft?.sourceTitle||"").trim()||String(draft?.sourceContext||"").trim()||(type&&type!=="other"));
   }
   function hydrateSourceMap(data){
-    if(!Array.isArray(data?.cards)) return;
+    if(!Array.isArray(data?.cards))return;
     for(const card of data.cards){
       const fields=sourceFields(card);
-      if(hasSource(fields)) sourceMap.set(card.id,fields);
+      if(hasSource(fields))sourceMap.set(card.id,fields);
     }
   }
   function syncFromGateway(){
     try{
-      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      const current=gateway.current?.();
       if(!current?.cards)return false;
       latestData=core.normalizeData(current);
       hydrateSourceMap(latestData);
@@ -78,69 +66,10 @@
     }catch{return false;}
   }
 
-  window.fetch = async function lexiFlowSourceContextFetch(input,init={}){
-    const endpoint=endpointOf(input), method=String(init?.method||"GET").toUpperCase();
-    if(endpoint==="/api/learning-data"&&method==="POST"){
-      const body=parseBody(init);
-      if(body?.data?.cards){
-        syncFromGateway();
-        const known=new Set((latestData?.cards||[]).map(card=>card.id));
-        const draft=loadDraft();
-        let attachedNew=false;
-        for(const card of body.data.cards){
-          const remembered=sourceMap.get(card.id);
-          if(remembered){
-            card.sourceType=remembered.sourceType;
-            card.sourceTitle=remembered.sourceTitle;
-            card.sourceContext=remembered.sourceContext;
-            card.sourceCapturedAt=remembered.sourceCapturedAt;
-            card.sourceUpdatedAt=remembered.sourceUpdatedAt;
-          }
-          if(!known.has(card.id)&&core.canonicalStage(card)==="select"){
-            const fields={
-              sourceType:String(draft.sourceType||"other"),
-              sourceTitle:String(draft.sourceTitle||"").trim(),
-              sourceContext:String(draft.sourceContext||"").trim(),
-              sourceCapturedAt:new Date().toISOString(),
-              sourceUpdatedAt:"",
-            };
-            card.sourceType=fields.sourceType;
-            card.sourceTitle=fields.sourceTitle;
-            card.sourceContext=fields.sourceContext;
-            card.sourceCapturedAt=fields.sourceCapturedAt;
-            card.sourceUpdatedAt=fields.sourceUpdatedAt;
-            sourceMap.set(card.id,fields);
-            attachedNew=true;
-          }
-        }
-        const response=await previousFetch(input,withJson(init,body));
-        if(response.ok){
-          latestData=core.normalizeData(body.data);
-          hydrateSourceMap(latestData);
-          if(attachedNew)clearDraft();
-        }
-        return response;
-      }
-    }
-
-    const response=await previousFetch(input,init);
-    if(endpoint==="/api/learning-data"&&method==="GET"&&response.ok){
-      try{
-        const payload=await response.clone().json();
-        if(payload?.data){
-          latestData=core.normalizeData(payload.data);
-          hydrateSourceMap(latestData);
-          return responseWithJson(response,payload);
-        }
-      }catch{}
-    }
-    return response;
-  };
-
   async function refresh(force=false){
     if(!force&&syncFromGateway())return latestData;
     try{
-      const response=await previousFetch("/api/learning-data",{cache:"no-store"});
+      const response=await fetch("/api/learning-data",{cache:"no-store"});
       if(response.ok){
         const payload=await response.json();
         if(payload?.data){latestData=core.normalizeData(payload.data);hydrateSourceMap(latestData);}
@@ -148,6 +77,54 @@
     }catch{}
     return latestData;
   }
+
+  function outgoingMutator(body,context={}){
+    if(!body?.data?.cards)return body;
+    const current=context.current?.cards?core.normalizeData(context.current):(latestData||null);
+    const known=new Set((current?.cards||[]).map(card=>String(card.id)));
+    const draft=loadDraft();
+    const canAttachDraft=hasDraftSource(draft);
+    const next={...body,data:{...body.data,cards:body.data.cards.map(card=>({...card}))}};
+
+    for(const card of next.data.cards){
+      const remembered=sourceMap.get(card.id);
+      if(remembered){
+        Object.assign(card,remembered);
+        continue;
+      }
+      if(!known.has(String(card.id))&&core.canonicalStage(card)==="select"&&canAttachDraft){
+        const fields={
+          sourceType:String(draft.sourceType||"other"),
+          sourceTitle:String(draft.sourceTitle||"").trim(),
+          sourceContext:String(draft.sourceContext||"").trim(),
+          sourceCapturedAt:new Date().toISOString(),
+          sourceUpdatedAt:"",
+        };
+        Object.assign(card,fields);
+        sourceMap.set(card.id,fields);
+        pendingDraftCardIds.add(String(card.id));
+      }
+    }
+    return next;
+  }
+
+  function afterPersist(snapshot){
+    if(!snapshot?.cards)return;
+    latestData=core.normalizeData(snapshot);
+    hydrateSourceMap(latestData);
+    if(!pendingDraftCardIds.size)return;
+    const persisted=new Set(latestData.cards.map(card=>String(card.id)));
+    let committedDraft=false;
+    for(const id of [...pendingDraftCardIds]){
+      if(!persisted.has(id))continue;
+      pendingDraftCardIds.delete(id);
+      committedDraft=true;
+    }
+    if(committedDraft)clearDraft();
+  }
+
+  gateway.registerOutgoingMutator(outgoingMutator);
+  gateway.registerAfterPersist(afterPersist);
 
   function injectStyle(){
     if(document.getElementById("lexi-source-style"))return;
@@ -187,7 +164,7 @@
     const type=labels[card.sourceType]||labels.other;
     const title=String(card.sourceTitle||"").trim();
     const context=String(card.sourceContext||"").trim();
-    if(!title&&!context)return "";
+    if(!title&&!context)return"";
     const stage=core.canonicalStage(card);
     let cue="保留你第一次遇到这个词时的真实语境。";
     if(stage==="visualize")cue="先回想这个真实场景，再产生你自己的视觉联想。";
@@ -201,9 +178,9 @@
     const card=currentCard();if(!card)return;
     const html=reminderCopy(card);if(!html)return;
     const existing=host.querySelector(".lexi-source-reminder");
-    if(existing?.dataset.sourceCard===card.id)return;
+    if(existing?.dataset.sourceCard===String(card.id))return;
     existing?.remove();
-    const kicker=host.querySelector(".study-kicker");
+    const kicker=host.querySelector(".study-kicker,.lexi-v3-visual-kicker");
     if(kicker)kicker.insertAdjacentHTML("afterend",html);else host.insertAdjacentHTML("afterbegin",html);
   }
 
@@ -221,8 +198,7 @@
   function decorateLibraryEditor(){
     const sentence=document.getElementById("library-edit-user-sentence");
     if(!sentence)return;
-    const card=libraryCard();
-    if(!card)return;
+    const card=libraryCard();if(!card)return;
     const existing=document.querySelector("[data-library-source-editor]");
     if(existing?.dataset.librarySourceEditor===String(card.id))return;
     existing?.remove();
@@ -233,8 +209,7 @@
   }
 
   function captureLibrarySourceDraft(){
-    const card=libraryCard();
-    if(!card)return;
+    const card=libraryCard();if(!card)return;
     const type=document.getElementById("library-source-type");
     const title=document.getElementById("library-source-title");
     const context=document.getElementById("library-source-context");
@@ -258,10 +233,7 @@
 
   document.addEventListener("click",event=>{
     const opener=event.target?.closest?.('[data-action="open-library-editor"][data-card-id],[data-library-card]');
-    if(opener){
-      activeLibraryCardId=String(opener.dataset.cardId||opener.dataset.libraryCard||"");
-      return;
-    }
+    if(opener){activeLibraryCardId=String(opener.dataset.cardId||opener.dataset.libraryCard||"");return;}
     const save=event.target?.closest?.('[data-action="save-library-card"]');
     if(save)captureLibrarySourceDraft();
     const back=event.target?.closest?.('[data-action="library-edit-back"]');
@@ -286,5 +258,8 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
+
+  window.LexiFlowSourceContextV3=Object.freeze({sync:syncFromGateway});
+
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
