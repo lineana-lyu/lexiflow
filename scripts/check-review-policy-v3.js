@@ -31,6 +31,9 @@ assert(!policyUi.includes("复习方式"),"review method customization must be r
 assert(!policyUi.includes("高级设置"),"question-type advanced settings must be removed from the settings surface");
 assert(!policyUi.includes("data-review-weight"),"question-type weights must no longer be user-editable");
 assert(!policyUi.includes("data-review-type"),"question-type toggles must no longer be user-editable");
+assert(policyUi.includes("function settingsSignature"),"Review settings decorator must have a stable render signature");
+assert(policyUi.includes("row?.dataset.reviewPolicySignature===signature"),"Review settings decorator must skip identical rerenders to avoid MutationObserver loops");
+assert(policyUi.includes("next.dataset.reviewPolicySignature=signature"),"Review settings row must persist its render signature");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
