@@ -13,6 +13,7 @@ const apply=read("public/apply-stage-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
 const applyActions=read("public/apply-actions-v3.js");
 const runtime=read("public/runtime-fixes.js");
+const ai=read("public/ai-assist-v3.js");
 
 function before(a,b){
   const ai=index.indexOf(a),bi=index.indexOf(b);
@@ -28,6 +29,7 @@ before("select-stage-v3.js","visualize-stage-v3.js");
 before("visualize-stage-v3.js","apply-stage-v3.js");
 before("apply-stage-v3.js","apply-actions-v3.js");
 before("visualize-stage-v3.js","visualize-actions-v3.js");
+before("ai-assist-v3.js","runtime-fixes.js");
 assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy Visualize V2 action shim must not remain in the runtime load chain");
 
 assert(surface.includes('["select","选词确认"]')&&surface.includes('["memorize","记忆"]')&&surface.includes('["review","复习巩固"]'),"study surface must expose five canonical product stages");
@@ -50,7 +52,9 @@ assert(apply.includes('core.canonicalStage(card)==="apply"'),"Apply renderer mus
 assert(visual.includes("先用你自己的记忆和经历想画面"),"Visualize must keep learner association before AI assistance");
 assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must be an explicit user action");
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
-assert(runtime.includes('[data-action="refresh-visual-scene"],[data-visual-v3="assist"]'),"V3 Visualize AI assist must be recognized as a user-requested AI call instead of falling back to a synthetic echo");
+assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
+assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility may only delegate Visualize AI to the explicit V3 authority");
+assert(!runtime.includes("stableInternalVisualScene"),"Visualize V3 must never fall back to a synthetic echo");
 assert(visual.includes('fetch("/api/ai/image"'),"Visualize Stage V3 must own image generation instead of relying on app.js stage rendering");
 assert(visual.includes('fetch("/api/images/local"'),"Visualize Stage V3 must own local-image upload");
 assert(visual.includes('data-action="finish-visual"'),"Visualize completion must still delegate persistence to the authoritative stage transition");
@@ -60,6 +64,8 @@ assert(apply.includes('fetch("/api/ai/text"'),"Apply Stage V3 must own AI expres
 assert(apply.includes("copyNorm(text)===copyNorm(card.exampleEn"),"Apply Stage V3 must reject direct reference-example copying before AI checking");
 assert(apply.includes('data-action="pass-apply"'),"Apply completion must still delegate to the authoritative stage transition");
 assert(apply.includes('fetch("/api/ai/practice-prompt"'),"Apply Stage V3 must own optional prompt refresh");
+assert(ai.includes('postJson("/api/ai/practice-prompt"'),"AI Assist V3 must own the real Apply prompt request path");
+assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility may only delegate Apply prompt generation to the explicit V3 authority");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 
 assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip support must follow canonical stage identity");
