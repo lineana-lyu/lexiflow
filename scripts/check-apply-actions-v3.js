@@ -24,7 +24,8 @@ assert(apply.includes('skipped:true'),"Apply skip activity must be distinguishab
 assert(apply.includes("core.crossDayPatch"),"Apply skip must use the same deterministic cross-day transition authority");
 assert(apply.includes("LexiFlowStudySessionV3?.pause"),"saving a draft must pause the resumable Study Session");
 assert(apply.includes("再次点击确认跳过"),"Apply skip must require an explicit second confirmation click");
-assert(apply.includes("skipCommandId"),"Apply skip must carry a deterministic command id");
+assert(apply.includes("beginApplyWrite")&&apply.includes('beginStageWrite?.(id,"apply",now)'),"Apply draft and skip writes must serialize with normal completion through the shared stage-write lock");
+assert(!apply.includes("apply-skip"),"Apply skip must share the canonical Apply command ID with normal completion");
 assert(apply.includes("commandCommitted"),"Apply skip must be safe to retry without double completion");
 assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply Actions V3 must reuse the learning-data gateway snapshot for decoration/draft restore");
 assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Apply action decoration must not GET learning data on every DOM mutation");
@@ -36,13 +37,15 @@ assert(transition.includes('card.applySkipped=false'),"successful Apply completi
 assert(transition.includes('card.applyDraft=""'),"successful Apply completion must clear the durable draft field");
 assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must use deterministic command ids");
 assert(transition.includes("commandCommitted"),"stage completion must explicitly tolerate a retried command");
+assert(transition.includes("beginStageWrite")&&transition.includes("endStageWrite"),"normal terminal completion must participate in the shared stage-write lock");
 assert(transition.includes("copyNorm(card.exampleEn"),"authoritative Apply completion must independently reject a copied reference example");
 assert(transition.includes('stageTransitionAuthority:"v3"'),"normal Apply completion must persist through Stage Transition V3");
 assert(transition.includes('authority:"stage-transition-v3"'),"normal Apply completion history must identify Stage Transition V3 authority");
 
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip must bind to the exact study card ID");
 assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
-assert(visual.includes("visualize-skip"),"Visualize skip must have its own idempotent command id");
+assert(visual.includes('beginStageWrite?.(id,"visualize",now)'),"Visualize skip must serialize with normal completion through the shared stage-write lock");
+assert(!visual.includes("visualize-skip"),"Visualize skip must share the canonical Visualize command ID with normal completion");
 assert(visual.includes('data-visual-actions-v3="skip"'),"Visualize skip must be owned by the V3 action surface");
 assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize Actions V3 must reuse the learning-data gateway snapshot for decoration");
 assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Visualize action decoration must not GET learning data on every DOM mutation");
