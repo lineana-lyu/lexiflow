@@ -334,7 +334,7 @@
   function shell(content){
     return `<div class="shell">
       <aside class="sidebar">
-        <div class="brand"><div class="logo">L</div><div><strong>LexiFlow</strong><span>词义 · 语境 · 主动回忆</span></div></div>
+        <div class="brand"><div class="logo lexi-brand-icon"><img class="lexi-brand-icon-image" src="./icon.png" alt="LexiFlow" draggable="false"></div><div><strong>LexiFlow</strong><span>词义 · 语境 · 主动回忆</span></div></div>
         <nav class="nav">
           ${navButton("home","⌂","今日学习")}
           ${navButton("add","＋","选词制卡")}

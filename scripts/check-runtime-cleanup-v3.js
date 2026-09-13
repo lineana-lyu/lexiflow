@@ -5,6 +5,7 @@ function assert(condition,message){if(!condition)throw new Error(message);}
 const root=path.join(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");
+const app=fs.readFileSync(path.join(root,"public","app.js"),"utf8");
 const productCss=fs.readFileSync(path.join(root,"public","product-ux.css"),"utf8");
 const runtime=fs.readFileSync(path.join(root,"public","runtime-fixes.js"),"utf8");
 const transport=fs.readFileSync(path.join(root,"public","transport-fixes.js"),"utf8");
@@ -50,7 +51,8 @@ for(const name of [
 assert(index.includes('<link rel="icon" type="image/png" href="./icon.png" />'),"index.html must use the approved icon.png asset");
 assert(fs.existsSync(path.join(root,"public","icon.png")),"public/icon.png must exist");
 assert(fs.existsSync(path.join(root,"build","icon.ico")),"build/icon.ico must exist for Windows packaging");
-assert(product.includes("applyAppIcon"),"canonical product UX runtime must own app icon decoration");
+assert(!product.includes("applyAppIcon")&&!product.includes("APP_ICON_URL"),"product UX must not patch the static brand icon after render");
+assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must directly render the approved icon.png brand asset");
 assert(productCss.includes(".brand .logo.lexi-brand-icon"),"canonical product UX CSS must own app icon styling");
 assert(!product.includes("window.fetch ="),"product UX must not rewrite global fetch; Learning Data Gateway V3 owns learning-data transport observation");
 assert(!product.includes("cloneJsonResponse"),"new-user defaults must not be implemented by product-level response rewriting");

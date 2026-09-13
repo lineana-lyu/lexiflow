@@ -155,6 +155,9 @@ for(const retiredDecorator of ["decorateDictionarySettings","mergeAiSettings","a
   assert(!productUx.includes(retiredDecorator),`product-ux must not retain a Settings decorator whose source structure no longer exists: ${retiredDecorator}`);
 }
 assert(productUx.includes("decorateDailyGoal"),"product-ux must retain the active daily-goal enhancement");
+assert(!productUx.includes("applyAppIcon")&&!productUx.includes("APP_ICON_URL"),"product-ux must not patch the static brand icon after render");
+assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must natively render the approved LexiFlow brand icon");
+assert(index.includes('<link rel="icon" type="image/png" href="./icon.png" />'),"index favicon must keep the approved LexiFlow icon asset");
 assert(!productUx.includes("decorateSecurityBanner"),"product-ux must not re-decorate the Settings security banner once app.js owns final markup");
 assert(app.includes('api("/api/dictionary/lookup"'),"front-end lookup must use the dictionary service boundary");
 for(const legacyStage of ["memorize1","memorize2","mastered"]){

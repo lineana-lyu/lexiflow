@@ -2,30 +2,7 @@
   "use strict";
 
   const CUSTOM_GOAL_KEY = "lexiflow-daily-goal-custom-v1";
-  const APP_ICON_URL = "./icon.png?v=20260911-icon3";
   let scheduled = false;
-
-  function applyAppIcon() {
-    const favicon = document.querySelector('link[rel="icon"]');
-    if (favicon) {
-      favicon.type = "image/png";
-      favicon.href = APP_ICON_URL;
-    }
-
-    document.querySelectorAll(".brand .logo").forEach(logo => {
-      logo.classList.add("lexi-brand-icon");
-      logo.textContent = "";
-      let image = logo.querySelector("img.lexi-brand-icon-image");
-      if (!image) {
-        image = document.createElement("img");
-        image.className = "lexi-brand-icon-image";
-        image.alt = "LexiFlow";
-        image.draggable = false;
-        logo.appendChild(image);
-      }
-      image.src = APP_ICON_URL;
-    });
-  }
 
   function speakerSvg() {
     return `<svg class="lexi-speaker-svg" viewBox="0 0 28 28" aria-hidden="true">
@@ -149,7 +126,6 @@
   }
 
   function decorate() {
-    applyAppIcon();
     decorateSpeakers();
     decorateSettings();
   }
