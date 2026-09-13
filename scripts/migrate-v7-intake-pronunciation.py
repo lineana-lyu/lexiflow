@@ -45,7 +45,6 @@ app=replace_once(app,
 match=re.search(r'''  async function speakSentence\(sentence\)\{.*?\n  \}\n''',app,re.S)
 if not match:
     raise SystemExit('missing speakSentence function')
-block=match.group(0)
 if 'LexiFlowPronunciationV3' not in app:
     bridge='''\n  window.LexiFlowPronunciationV3=Object.freeze({\n    playWord:(word,audioUrl="",audioUrls=[])=>speak(word,audioUrl,audioUrls),\n    playSentence:sentence=>speakSentence(sentence),\n  });\n'''
     app=app[:match.end()]+bridge+app[match.end():]
@@ -82,7 +81,11 @@ write('public/select-stage-v3.js',select)
 check_today=read('scripts/check-today-plan-v3.js')
 anchor='''assert(source.includes('authority:"today-plan-v3"'),"Today selection activities must record V3 authority");'''
 if anchor not in check_today: raise SystemExit('missing today check anchor')
-check_today=check_today.replace(anchor,anchor+'\nassert(source.includes("lexiflow:add-context")&&source.includes("source:\"today-plan\""),"Today Add must mark a direct Today-intake context instead of forcing a Library confirmation round-trip");',1)
+check_today=check_today.replace(
+    anchor,
+    anchor+'\nassert(source.includes("lexiflow:add-context")&&source.includes(\'source:"today-plan"\'),"Today Add must mark a direct Today-intake context instead of forcing a Library confirmation round-trip");',
+    1
+)
 write('scripts/check-today-plan-v3.js',check_today)
 
 check_select=read('scripts/check-select-stage-v3.js')
