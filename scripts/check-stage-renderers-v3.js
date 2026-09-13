@@ -12,8 +12,8 @@ const visual=read("public/visualize-stage-v3.js");
 const apply=read("public/apply-stage-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
 const applyActions=read("public/apply-actions-v3.js");
-const runtime=read("public/runtime-fixes.js");
 const ai=read("public/ai-assist-v3.js");
+const transport=read("public/transport-fixes.js");
 
 function before(a,b){
   const ai=index.indexOf(a),bi=index.indexOf(b);
@@ -29,7 +29,6 @@ before("select-stage-v3.js","visualize-stage-v3.js");
 before("visualize-stage-v3.js","apply-stage-v3.js");
 before("apply-stage-v3.js","apply-actions-v3.js");
 before("visualize-stage-v3.js","visualize-actions-v3.js");
-before("ai-assist-v3.js","runtime-fixes.js");
 assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy Visualize V2 action shim must not remain in the runtime load chain");
 
 assert(surface.includes('["select","选词确认"]')&&surface.includes('["memorize","记忆"]')&&surface.includes('["review","复习巩固"]'),"study surface must expose five canonical product stages");
@@ -57,9 +56,7 @@ assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must 
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
 assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize Stage V3 must call the explicit AI Assist V3 authority directly");
 assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
-assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must not retain retired Stage AI caller/block knowledge once AI Assist V3 is the sole frontend authority");
-assert(!runtime.includes("LexiFlowAiAssistV3?.visualScene"),"legacy Visualize auto-call paths must not delegate into AI Assist V3");
-assert(!runtime.includes("stableInternalVisualScene"),"Visualize V3 must never fall back to a synthetic echo");
+assert(!transport.includes("/api/ai/visual-scene")&&!transport.includes("/api/ai/practice-prompt"),"transport must not own Stage AI endpoints once AI Assist V3 is the sole frontend authority");
 assert(visual.includes("let assistBusy=false")&&visual.includes("let imageBusy=false"),"Visualize text assistance and image generation must have independent busy state");
 assert(visual.includes('const generating=generation.status==="generating"||imageBusy'),"Visualize text AI assistance must not impersonate image generation in the UI");
 assert(!visual.includes('generation.status==="generating"||busy'),"Visualize must not reuse a generic busy flag for image-generation state");
@@ -85,7 +82,6 @@ assert(apply.includes("copyNorm(text)===copyNorm(card.exampleEn"),"Apply Stage V
 assert(apply.includes('data-action="pass-apply"'),"Apply completion must still delegate to the authoritative stage transition");
 assert(apply.includes("LexiFlowAiAssistV3?.practicePrompt"),"Apply Stage V3 must call AI Assist V3 directly for optional prompt refresh");
 assert(ai.includes('postJson("/api/ai/practice-prompt"'),"AI Assist V3 must own the real Apply prompt request path");
-assert(!runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"legacy Apply auto-prompt paths must not delegate into AI Assist V3");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply renderer must consume the learning-data gateway snapshot for redraws");
 assert(apply.includes("if(!syncFromGateway())data=normalized;"),"Apply renderer writes must continue from the Gateway-confirmed persisted snapshot");
