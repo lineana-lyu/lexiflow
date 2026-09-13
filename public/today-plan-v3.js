@@ -9,13 +9,22 @@
   let scheduled = false;
   let saving = false;
   let libraryFilter = "all";
-  let settleTimer = null;
 
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `plan-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const setText = (node,text) => { if(node && node.textContent !== text) node.textContent = text; };
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      latestData=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return latestData;
     try{
       const response=await dataFetch("/api/learning-data",{cache:"no-store"});
       if(response.ok){
@@ -184,7 +193,7 @@
   }
 
   function decorate(){injectStyle();decorateHome();decorateAdd();decorateLibrary();}
-  async function refreshAndDecorate(){await refresh();decorate();return latestData;}
+  async function refreshAndDecorate(force=false){await refresh(force);decorate();return latestData;}
 
   document.addEventListener("click",event=>{
     const filter=event.target?.closest?.("[data-library-filter]");if(filter){event.preventDefault();event.stopImmediatePropagation();libraryFilter=filter.dataset.libraryFilter||"all";decorateLibrary();return;}
@@ -198,23 +207,24 @@
     scheduled=true;
     requestAnimationFrame(()=>{
       scheduled=false;
-      if(settleTimer)clearTimeout(settleTimer);
-      settleTimer=setTimeout(()=>void refreshAndDecorate(),180);
+      syncFromGateway();
+      decorate();
     });
   }
 
   function start(){
     const app=document.getElementById("app");if(!app)return;
     injectStyle();
-    void refreshAndDecorate();
+    syncFromGateway();
+    if(latestData)decorate();else void refreshAndDecorate(true);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
-    window.addEventListener("focus",()=>void refreshAndDecorate());
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)void refreshAndDecorate();});
-    window.addEventListener("lexiflow:today-plan-data",()=>void refreshAndDecorate());
+    window.addEventListener("focus",()=>void refreshAndDecorate(true));
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)void refreshAndDecorate(true);});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   window.LexiFlowTodayPlanV3=Object.freeze({
-    refresh:refreshAndDecorate,
+    refresh:()=>refreshAndDecorate(true),
     selectFromPending,
     moveBackToPending,
     current(){return latestData?JSON.parse(JSON.stringify(latestData.dailyPlan||null)):null;}
