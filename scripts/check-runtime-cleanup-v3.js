@@ -8,6 +8,7 @@ const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");
 const app=fs.readFileSync(path.join(root,"public","app.js"),"utf8");
 const productCss=fs.readFileSync(path.join(root,"public","product-ux.css"),"utf8");
 const transport=fs.readFileSync(path.join(root,"public","transport-fixes.js"),"utf8");
+const exampleHydration=fs.readFileSync(path.join(root,"public","example-hydration.js"),"utf8");
 const gateway=fs.readFileSync(path.join(root,"public","learning-data-gateway-v3.js"),"utf8");
 const sourceContext=fs.readFileSync(path.join(root,"public","source-context-v3.js"),"utf8");
 const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
@@ -75,6 +76,17 @@ assert(!fs.existsSync(path.join(root,"public","runtime-fixes.js")),"retired runt
 assert(transport.includes('endpoint === "/api/dictionary/lookup"'),"transport must own active dictionary response normalization after runtime compatibility retirement");
 assert(transport.includes("normalizeSmartSearch(data, body.word)"),"dictionary lookup normalization must reuse the canonical Chinese lookup normalizer");
 assert(!transport.includes("LEGACY_STAGE_AI_BLOCKED")&&!transport.includes("/api/ai/visual-scene")&&!transport.includes("/api/ai/practice-prompt"),"transport must stay free of retired Stage AI endpoint knowledge");
+
+const transportIndex=index.indexOf('<script src="./transport-fixes.js"></script>');
+const hydrationIndex=index.indexOf('<script src="./example-hydration.js"></script>');
+assert(transportIndex>=0&&hydrationIndex>transportIndex,"transport must load before Example Hydration registers its dictionary observer");
+assert(transport.includes("registerDictionaryPayloadObserver")&&transport.includes("observeDictionaryResponse"),"transport must expose and execute the single dictionary payload observation bridge");
+assert(transport.includes("return notifyDictionaryPayload(endpoint, payload)"),"transport must hand observers the exact payload object returned by response.json()");
+assert(transport.includes("LexiFlowTransportV3 = Object.freeze({ registerDictionaryPayloadObserver })"),"transport must expose only the narrow dictionary observer registration surface");
+assert(!exampleHydration.includes("window.fetch =")&&!exampleHydration.includes("window.fetch="),"Example Hydration must not install a second global fetch wrapper");
+assert(exampleHydration.includes("transport.registerDictionaryPayloadObserver(processDictionaryPayload)"),"Example Hydration must register through the transport dictionary observer bridge");
+assert(exampleHydration.includes("LexiFlowExampleHydration = Object.freeze({ processDictionaryPayload })"),"Example Hydration must expose only its narrow payload processor for diagnostics/tests");
+assert(exampleHydration.includes("void hydrateResult(payload.result)")&&exampleHydration.includes("void hydratePronunciation(payload.result)"),"Example Hydration must preserve asynchronous example and pronunciation enrichment");
 
 assert(transport.includes("function visualStudyVisible()"),"transport image-job indicator must centralize Visualize visibility detection");
 assert(transport.includes('document.querySelector(".lexi-v3-visual,.visual-learning-stage")'),"transport must recognize the authoritative Visualize V3 surface while retaining legacy fallback detection");
