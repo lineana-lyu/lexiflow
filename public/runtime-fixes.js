@@ -16,6 +16,9 @@
     headers.delete("Content-Length");
     return new Response(JSON.stringify(data),{status:original.status,statusText:original.statusText,headers});
   }
+  function syntheticJson(data,status=200){
+    return new Response(JSON.stringify(data),{status,headers:{"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}});
+  }
   function isChinese(value){return /[\u3400-\u9fff]/.test(String(value||""));}
   function compactChinese(value){return String(value||"").trim().replace(/[。；;，,]+$/g,"");}
   function preferredChineseMeaning(query,result){
@@ -38,11 +41,22 @@
     return data;
   }
 
-  // Compatibility scope is intentionally narrow: only dictionary display
-  // normalization remains here. V3 learning AI requests are owned by
-  // LexiFlowAiAssistV3 and must not be rewritten through a global fetch shim.
+  // Compatibility transport remains narrow and explicit. Dictionary display
+  // normalization stays here. V3 learning AI calls are delegated to the
+  // dedicated LexiFlowAiAssistV3 authority; this layer no longer invents or
+  // rewrites Visualize/Apply results itself.
   window.fetch=async function lexiFlowRuntimeCompatibilityFetch(input,init={}){
     const endpoint=endpointOf(input),body=parseBody(init);
+
+    if(endpoint==="/api/ai/visual-scene"&&body&&window.LexiFlowAiAssistV3?.visualScene){
+      try{return syntheticJson(await window.LexiFlowAiAssistV3.visualScene(body));}
+      catch(err){console.error("Visual scene authority failed",err);return syntheticJson({ok:false,error:err?.message||"VISUAL_SCENE_FAILED"},Number(err?.status)||502);}
+    }
+    if(endpoint==="/api/ai/practice-prompt"&&body&&window.LexiFlowAiAssistV3?.practicePrompt){
+      try{return syntheticJson(await window.LexiFlowAiAssistV3.practicePrompt(body));}
+      catch(err){console.error("Practice prompt authority failed",err);return syntheticJson({ok:false,error:err?.message||"PRACTICE_PROMPT_FAILED"},Number(err?.status)||502);}
+    }
+
     if(endpoint!=="/api/dictionary/lookup"||!body)return nativeFetch(input,init);
     const response=await nativeFetch(input,init);if(!response.ok)return response;
     try{const data=await response.clone().json();return responseWithJson(response,normalizeChineseLookup(data,body));}catch{return response;}
@@ -60,7 +74,6 @@
       const label=panel.querySelector(".scene-panel-label"),state=makeLoadingState();
       if(label)label.insertAdjacentElement("afterend",state);else panel.prepend(state);
     });
-
     document.querySelectorAll(".scene-editor").forEach(editor=>{
       if(!isGenericFallback(editor.value))return;
       const panel=editor.closest(".scene-panel");if(!panel||panel.querySelector(".scene-generation-warning"))return;
@@ -69,7 +82,6 @@
       warning.innerHTML=`<strong>这次没有生成出具体场景</strong><span>可以重新请求 AI，或直接写下你想看到的具体画面。</span>`;
       editor.insertAdjacentElement("beforebegin",warning);
     });
-
     document.querySelectorAll(".visual-image-canvas.is-generating").forEach(canvas=>{
       const stage=canvas.closest(".visual-learning-stage");if(!stage||stage.querySelector(".background-generation-note"))return;
       const commandBar=stage.querySelector(".visual-command-bar"),note=document.createElement("div");
@@ -77,7 +89,6 @@
       note.innerHTML=`<span class="runtime-spinner" aria-hidden="true"></span><div><strong>联想图正在后台生成</strong><span>不用停在这里等待，可以先进入下一步；完成后会自动保存到这张单词卡。</span></div>`;
       if(commandBar)commandBar.insertAdjacentElement("beforebegin",note);else stage.append(note);
     });
-
     document.querySelectorAll(".ai-practice-prompt").forEach(panel=>{
       const shouldShow=/正在想一个更具体的问题|正在换一个/.test(panel.textContent||"");
       if(panel.classList.contains("is-generating-topic")!==shouldShow)panel.classList.toggle("is-generating-topic",shouldShow);
@@ -85,14 +96,7 @@
   }
 
   let scheduled=false;
-  function scheduleDecorate(){
-    if(scheduled)return;scheduled=true;
-    requestAnimationFrame(()=>{scheduled=false;decorateAiStates();});
-  }
-  function startObserver(){
-    const app=document.getElementById("app");if(!app)return;
-    new MutationObserver(scheduleDecorate).observe(app,{childList:true,subtree:false});
-    scheduleDecorate();
-  }
+  function scheduleDecorate(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;decorateAiStates();});}
+  function startObserver(){const app=document.getElementById("app");if(!app)return;new MutationObserver(scheduleDecorate).observe(app,{childList:true,subtree:false});scheduleDecorate();}
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",startObserver,{once:true});else startObserver();
 })();
