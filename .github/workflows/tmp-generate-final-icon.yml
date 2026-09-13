@@ -17,20 +17,22 @@ jobs:
           node-version: 22.12.0
       - name: Install Pillow
         run: python3 -m pip install --quiet pillow
+      - name: Restore approved PNG bytes
+        run: base64 --decode .tmp/approved-icon.b64 > public/icon.png
       - name: Generate ICO from approved PNG
         run: python3 scripts/tmp-generate-final-icon.py
       - name: Validate repository
         env:
           NODE_OPTIONS: --experimental-sqlite
         run: npm run check
-      - name: Commit generated ICO
+      - name: Commit generated icons
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add build/icon.ico
+          git add public/icon.png build/icon.ico
           if git diff --cached --quiet; then
-            echo "ICO already matches approved PNG"
+            echo "Icons already match approved source"
             exit 0
           fi
-          git commit -m "fix: regenerate Windows icon from approved source"
+          git commit -m "fix: regenerate app icons from approved source"
           git push
