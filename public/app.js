@@ -931,22 +931,17 @@
     const selectedEffort=codex?.selectedReasoningEffort||"";
 
     return shell(
-      header(
-        "",
-        "设置",
-        "",
-        `<button class="btn" data-action="refresh-provider">刷新状态</button>`
-      )
-      + `<div class="settings-security-banner">🔒 API Key 仅保存在本机 settings.json；Windows 桌面版使用系统加密，仓库不会包含该文件。</div><div class="settings-list">
+      header("","设置","")
+      + `<div class="settings-security-banner" style="font-size:12px">服务凭据只保存在当前设备。</div><div class="settings-list">
         <div class="setting-row">
           <div>
             <h3>词典增强</h3>
             <p>基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="输入词典服务密钥（仅本机，可选）" />
+            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="输入词典服务密钥" />
             <button class="btn primary" data-action="save-dictionary-key">保存</button>
-            <button class="btn" data-action="test-dictionary">检查连接</button>
+            <button class="btn" data-action="test-dictionary">验证</button>
           </div>
         </div>
 
@@ -1021,8 +1016,8 @@
           </div>
         </div>
 
-        <div class="setting-row"><div><h3>导出学习数据</h3><p></p></div><button class="btn" data-action="export-data">导出 JSON</button></div>
-        <div class="setting-row"><div><h3>导入学习数据</h3><p></p></div><label class="btn">选择 JSON<input id="import-file" type="file" accept="application/json" style="display:none"></label></div>
+        <div class="setting-row"><div><h3>导出学习数据</h3><p>备份单词卡、学习进度和复习记录。</p></div><button class="btn" data-action="export-data">导出 JSON</button></div>
+        <div class="setting-row"><div><h3>导入学习数据</h3><p>从此前导出的备份恢复学习数据。</p></div><label class="btn">选择 JSON<input id="import-file" type="file" accept="application/json" style="display:none"></label></div>
         <div class="setting-row"><div><h3>清空学习数据</h3><p>删除全部单词与学习记录。</p></div><button class="btn danger" data-action="confirm-reset">清空数据</button></div>
       </div>`
     );
@@ -1420,7 +1415,6 @@
       showNotice("复习会话还没有准备好","Today Plan 会决定本次 Review 队列。请稍后重试，不会自动退回旧复习算法。","warn");
       return;
     }
-    if(action==="refresh-provider"){refreshProviderStatus(false);return;}
     if(action==="save-dictionary-key"){
       const key=document.getElementById("mw-api-key")?.value.trim()||"";
       if(!key){toast("请输入词典服务密钥");return;}

@@ -5,7 +5,6 @@
 
   function clean(value){ return String(value || "").trim(); }
   function setText(node,value){ if(node && node.textContent !== value) node.textContent = value; }
-  function setAttr(node,name,value){ if(node && node.getAttribute(name) !== value) node.setAttribute(name,value); }
   function settingsPage(){
     const title = document.querySelector(".page-head h1");
     return clean(title?.textContent) === "设置" ? document.querySelector(".content") : null;
@@ -13,50 +12,6 @@
   function rows(){ return Array.from(document.querySelectorAll(".settings-list > .setting-row")); }
   function rowByTitle(title){ return rows().find(row => clean(row.querySelector("h3")?.textContent) === title) || null; }
   function firstDescription(row){ return row?.querySelector("div > p") || row?.querySelector("p") || null; }
-
-  function simplifyHeader(root){
-    root.querySelector('[data-action="refresh-provider"]')?.remove();
-    const banner = root.querySelector(".settings-security-banner");
-    if(banner){
-      setText(banner,"服务凭据只保存在当前设备。");
-      if(banner.style.fontSize !== "12px") banner.style.fontSize = "12px";
-    }
-  }
-
-  function simplifyDictionary(){
-    const row = rowByTitle("英语词典") || rowByTitle("词典增强");
-    if(!row) return;
-    setText(row.querySelector("h3"),"词典增强");
-    setText(firstDescription(row),"基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。");
-    setAttr(row.querySelector("#mw-api-key"),"placeholder","输入词典服务密钥");
-    setText(row.querySelector('[data-action="save-dictionary-key"]'),"保存");
-    setText(row.querySelector('[data-action="test-dictionary"]'),"验证");
-  }
-
-  function simplifyAi(){
-    const row = rowByTitle("AI 服务") || rowByTitle("AI 辅助");
-    if(!row) return;
-    setText(row.querySelector("h3"),"AI 辅助");
-    const textCol = row.querySelector(":scope > div:first-child");
-    if(textCol){
-      const ps = Array.from(textCol.querySelectorAll(":scope > p"));
-      setText(ps[0],"用于造句反馈、联想场景和图片生成。");
-      ps.slice(1).forEach(p => p.remove());
-      textCol.querySelector(".advanced-diagnostics")?.remove();
-    }
-    const actions = row.querySelector(".setting-actions-inline");
-    if(actions){
-      const pills = Array.from(actions.querySelectorAll(".pill"));
-      const connected = pills[0]?.classList.contains("green");
-      setText(pills[0], connected ? "已连接" : "未连接");
-      pills.slice(1).forEach(p => p.remove());
-      const test = actions.querySelector('[data-action="test-codex-text"]');
-      if(test){
-        if(connected) test.remove();
-        else setText(test,"重新连接");
-      }
-    }
-  }
 
   function simplifyVoice(){
     const row = rowByTitle("本地自然发音") || rowByTitle("自然发音");
@@ -94,23 +49,12 @@
     }
   }
 
-  function polishDataLabels(){
-    const exportRow = rowByTitle("导出学习数据");
-    const importRow = rowByTitle("导入学习数据");
-    if(exportRow) setText(firstDescription(exportRow),"备份单词卡、学习进度和复习记录。");
-    if(importRow) setText(firstDescription(importRow),"从此前导出的备份恢复学习数据。");
-  }
-
   function enhance(){
     scheduled = false;
     const root = settingsPage();
     if(!root) return;
-    simplifyHeader(root);
-    simplifyDictionary();
-    simplifyAi();
     simplifyVoice();
     buildAdvancedSection();
-    polishDataLabels();
   }
 
   function schedule(){
