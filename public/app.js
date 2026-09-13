@@ -5,64 +5,6 @@
   const STORAGE_KEY = "lexiflow-standalone-mvp-v1";
   const APP_VERSION = 1;
 
-  const DICTIONARY = {
-    address: {
-      word: "address", phonetic: "/əˈdres/",
-      senses: [
-        { id:"address-n", pos:"noun", meaningZh:"地址；住址", exampleEn:"Please write your address on the form.", exampleZh:"请把你的地址写在表格上。" },
-        { id:"address-v", pos:"verb", meaningZh:"向……讲话；称呼；处理", exampleEn:"She addressed the audience calmly.", exampleZh:"她平静地向听众讲话。" }
-      ]
-    },
-    apple: {
-      word:"apple", phonetic:"/ˈæpəl/",
-      senses:[{id:"apple-n",pos:"noun",meaningZh:"苹果",exampleEn:"He ate an apple after lunch.",exampleZh:"午饭后他吃了一个苹果。"}]
-    },
-    book: {
-      word:"book", phonetic:"/bʊk/",
-      senses:[
-        {id:"book-n",pos:"noun",meaningZh:"书；书籍",exampleEn:"I borrowed this book from the library.",exampleZh:"我从图书馆借了这本书。"},
-        {id:"book-v",pos:"verb",meaningZh:"预订",exampleEn:"We booked a room for two nights.",exampleZh:"我们预订了一个住两晚的房间。"}
-      ]
-    },
-    improve:{
-      word:"improve",phonetic:"/ɪmˈpruv/",
-      senses:[{id:"improve-v",pos:"verb",meaningZh:"改善；提高",exampleEn:"Daily practice can improve your English.",exampleZh:"每天练习可以提高你的英语水平。"}]
-    },
-    benefit:{
-      word:"benefit",phonetic:"/ˈbenəfɪt/",
-      senses:[
-        {id:"benefit-n",pos:"noun",meaningZh:"好处；益处",exampleEn:"Exercise has many health benefits.",exampleZh:"锻炼对健康有很多好处。"},
-        {id:"benefit-v",pos:"verb",meaningZh:"使受益；得益于",exampleEn:"Students benefit from regular review.",exampleZh:"学生能从定期复习中受益。"}
-      ]
-    },
-    challenge:{
-      word:"challenge",phonetic:"/ˈtʃælɪndʒ/",
-      senses:[{id:"challenge-n",pos:"noun",meaningZh:"挑战；难题",exampleEn:"Learning a language is a long-term challenge.",exampleZh:"学习一门语言是一项长期挑战。"}]
-    },
-    approach:{
-      word:"approach",phonetic:"/əˈproʊtʃ/",
-      senses:[
-        {id:"approach-n",pos:"noun",meaningZh:"方法；方式",exampleEn:"We need a different approach to this problem.",exampleZh:"我们需要用不同的方法解决这个问题。"},
-        {id:"approach-v",pos:"verb",meaningZh:"接近；靠近",exampleEn:"The train is approaching the station.",exampleZh:"火车正在接近车站。"}
-      ]
-    },
-    maintain:{
-      word:"maintain",phonetic:"/meɪnˈteɪn/",
-      senses:[{id:"maintain-v",pos:"verb",meaningZh:"维持；保持；维护",exampleEn:"It is important to maintain a regular study routine.",exampleZh:"保持规律的学习习惯很重要。"}]
-    },
-    issue:{
-      word:"issue",phonetic:"/ˈɪʃuː/",
-      senses:[{id:"issue-n",pos:"noun",meaningZh:"问题；议题",exampleEn:"We need to discuss this issue carefully.",exampleZh:"我们需要认真讨论这个问题。"}]
-    },
-    support:{
-      word:"support",phonetic:"/səˈpɔːrt/",
-      senses:[
-        {id:"support-v",pos:"verb",meaningZh:"支持；支撑",exampleEn:"Good habits support long-term learning.",exampleZh:"良好的习惯有助于长期学习。"},
-        {id:"support-n",pos:"noun",meaningZh:"支持；帮助",exampleEn:"Thank you for your support.",exampleZh:"感谢你的支持。"}
-      ]
-    }
-  };
-
   const state = {
     route: "home",
     data: defaultData(),
