@@ -45,6 +45,12 @@ check_path.write_text(check,encoding="utf-8")
 
 authority_path=Path("scripts/check-runtime-authority-v3.js")
 authority=authority_path.read_text(encoding="utf-8")
+read_anchor='const visualActions=read("public/visualize-actions-v3.js");\n'
+apply_read='const applyActions=read("public/apply-actions-v3.js");\n'
+if authority.count(read_anchor)!=1:
+    raise SystemExit("Runtime authority visualActions read anchor not unique")
+if apply_read not in authority:
+    authority=authority.replace(read_anchor,read_anchor+apply_read,1)
 anchor='assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize Stage V3 must resolve the exact Study Session renderer card ID");'
 addition='''\nassert(memorize.includes("if(!syncFromGateway())data=normalized;"),"Memorize Stage V3 local state must follow the Gateway-confirmed write result");\nassert(visualActions.includes("if(!syncFromGateway())data=normalized;"),"Visualize Actions V3 local state must follow the Gateway-confirmed write result");\nassert(applyActions.includes("if(!syncFromGateway())data=normalized;"),"Apply Actions V3 local state must follow the Gateway-confirmed write result");'''
 if authority.count(anchor)!=1:
