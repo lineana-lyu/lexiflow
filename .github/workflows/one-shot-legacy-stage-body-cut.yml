@@ -25,25 +25,20 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           app_path=Path('public/app.js')
           text=app_path.read_text(encoding='utf-8')
 
           def remove_function(source,name):
-              markers=[f'function {name}(',f'async function {name}(']
-              hits=[]
-              for marker in markers:
-                  start=0
-                  while True:
-                      idx=source.find(marker,start)
-                      if idx<0: break
-                      hits.append((idx,marker))
-                      start=idx+1
+              pattern=re.compile(rf'(?<![A-Za-z0-9_$])(?:(async)\s+)?function\s+{re.escape(name)}\(')
+              hits=list(pattern.finditer(source))
               if len(hits)!=1:
                   raise SystemExit(f'{name}: expected exactly one function declaration, got {len(hits)}')
-              pos,marker=hits[0]
+              hit=hits[0]
+              pos=hit.start()
               line_start=source.rfind('\n',0,pos)+1
-              brace=source.find('{',pos+len(marker))
+              brace=source.find('{',hit.end())
               if brace<0:
                   raise SystemExit(f'{name}: opening brace not found')
               depth=0
@@ -95,7 +90,7 @@ jobs:
               text=remove_function(text,name)
 
           for name in retired:
-              if f'function {name}(' in text or f'async function {name}(' in text:
+              if re.search(rf'(?:(?:async)\s+)?function\s+{re.escape(name)}\(',text):
                   raise SystemExit(f'{name}: declaration remains after cleanup')
 
           for required in ['data-study-stepper-v3-host','data-study-stage-host-v3','window.LexiFlowStudyRenderer=Object.freeze']:
