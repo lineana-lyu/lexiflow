@@ -42,6 +42,9 @@ assert(surface.includes('.study-card-focus:not([data-stage-host-v3]){visibility:
 assert(surface.includes('.study-card-focus[data-stage-host-v3]{visibility:visible}'),"V3 stage host must become visible only after authority handoff");
 assert(surface.includes("window.LexiFlowStudyStageSurfaceV3=Object.freeze"),"study surface must expose only a narrow canonical-stage descriptor");
 assert(surface.includes('text==="英→中"||text==="中→英"||text==="memorize"'),"legacy and canonical Memorize labels must normalize to the same product label on residual shell surfaces");
+assert(surface.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"study surface must reuse the canonical learning-data gateway snapshot after startup");
+assert(surface.includes("syncFromGateway();\n      decorate();"),"DOM mutation decoration must use the in-memory gateway snapshot instead of refetching");
+assert(!surface.includes("requestAnimationFrame(async()=>{\n      queued=false;\n      decorateLegacyBadges();\n      await refresh();"),"DOM mutations must not trigger a learning-data GET on every renderer update");
 
 assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to explicit Study Session card identity");
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize renderer must bind to explicit Study Session card identity");
