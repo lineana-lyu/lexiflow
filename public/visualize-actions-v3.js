@@ -9,7 +9,17 @@
   let saving=false;
   const uid=()=>crypto.randomUUID?crypto.randomUUID():`visual-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     try{
       const response=await fetch("/api/learning-data",{cache:"no-store"});
       if(response.ok){const payload=await response.json();if(payload?.data?.cards)data=core.normalizeData(payload.data);}
@@ -18,8 +28,10 @@
   }
 
   async function save(next){
-    const response=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:core.normalizeData(next)})});
+    const normalized=core.normalizeData(next);
+    const response=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized,visualizeActionsAuthority:"v3"})});
     if(!response.ok)throw new Error("SAVE_FAILED");
+    data=normalized;
   }
 
   function currentCardId(){return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");}
@@ -38,17 +50,20 @@
     const current=card();if(!current)return;
     const hasImage=Boolean(current.imageData||current.imageUrl);
     const next=footer.querySelector('[data-action="finish-visual"]');
-    footer.querySelector('[data-visual-actions-v3="skip"]')?.remove();
+    let skip=footer.querySelector('[data-visual-actions-v3="skip"]');
     if(hasImage){
+      skip?.remove();
       if(next){next.disabled=false;next.textContent="完成视觉联想 · 明天开始造句";next.title="";}
       return;
     }
     if(next){next.disabled=true;next.textContent="先生成/上传图片，或选择跳过";next.title="没有图片时请明确选择是否跳过视觉联想";}
-    const skip=document.createElement("button");
+    const label=String(note.value||"").trim()?"不生成图片，继续":"暂时跳过视觉联想";
+    if(skip){if(skip.textContent!==label)skip.textContent=label;return;}
+    skip=document.createElement("button");
     skip.type="button";
     skip.className="btn";
     skip.dataset.visualActionsV3="skip";
-    skip.textContent=String(note.value||"").trim()?"不生成图片，继续":"暂时跳过视觉联想";
+    skip.textContent=label;
     footer.prepend(skip);
   }
 
@@ -56,7 +71,7 @@
     if(saving)return;
     saving=true;
     try{
-      await refresh();
+      await refresh(true);
       const id=currentCardId();if(!id)return;
       const now=new Date(),cmd=commandId(id,now);
       if(committed(cmd)){location.reload();return;}
@@ -69,7 +84,7 @@
       Object.assign(current,core.crossDayPatch(prev,{stage:"apply",learningStage:"apply"},now)||{});
       current.updatedAt=now.toISOString();
       data.activities=Array.isArray(data.activities)?data.activities:[];
-      data.activities.push({id:uid(),type:"stage-complete",cardId:current.id,stage:"visualize",skipped:true,nextStage:"apply",commandId:cmd,at:now.toISOString()});
+      data.activities.push({id:uid(),type:"stage-complete",cardId:current.id,stage:"visualize",skipped:true,nextStage:"apply",commandId:cmd,at:now.toISOString(),authority:"visualize-actions-v3"});
       await save(data);
       location.reload();
     }catch(err){console.error("Visualize skip failed",err);}
@@ -84,8 +99,14 @@
     void skip();
   },true);
 
-  function schedule(){if(queued)return;queued=true;requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});}
-  function start(){const app=document.getElementById("app");if(!app)return;void refresh().then(decorate);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});}
+  function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});}
+  function start(){
+    const app=document.getElementById("app");if(!app)return;
+    syncFromGateway();
+    if(data)decorate();else void refresh(true).then(decorate);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
+  }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
   else start();
