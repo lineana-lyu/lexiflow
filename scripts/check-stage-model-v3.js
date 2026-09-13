@@ -31,6 +31,10 @@ assert(study.includes("core.canonicalStage(card)"),"Study Session must bucket ca
 assert(!study.includes("currentStudyWord"),"Study Session must not infer card identity from rendered word text");
 assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical stage");
 assert(!memorize.includes('card.stage==="memorize2"'),"Memorize direction must not be encoded in the persisted stage anymore");
+assert(memorize.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Memorize renderer must consume the learning-data gateway snapshot");
+assert(memorize.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Memorize DOM mutations must redraw from memory instead of GETing learning data");
+assert(!memorize.includes("requestAnimationFrame(async()=>{queued=false;await refresh();render();});"),"Memorize renderer must not restore mutation-driven learning-data GETs");
+assert(memorize.includes('memorizeStageAuthority:"v3"'),"Memorize completion writes must declare their V3 authority");
 assert(advance.includes("core.canonicalStage(card)"),"Advance Learning V3 must use canonical stage");
 assert(gateway.includes("core.normalizeData"),"Learning Data Gateway V3 must canonicalize legacy persisted stages before app/runtime reads");
 assert(!gateway.includes("memorize1")&&!gateway.includes("memorize2"),"Learning Data Gateway must delegate legacy-stage mapping to Learning Core instead of re-encoding sub-stages");
