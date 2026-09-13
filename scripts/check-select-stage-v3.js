@@ -6,6 +6,7 @@ const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const index=read("public/index.html");
+const app=read("public/app.js");
 const select=read("public/select-stage-v3.js");
 const transition=read("public/stage-transition-v3.js");
 
@@ -14,7 +15,11 @@ assert(index.indexOf("study-session-v3.js")<index.indexOf("select-stage-v3.js"),
 assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to the explicit Study Session card ID");
 assert(select.includes('core.canonicalStage(card)==="select"'),"Select renderer must use the canonical stage model");
 assert(select.includes('data-next="memorize"'),"Select UI must expose canonical Memorize as the next product stage");
-assert(select.includes("LexiFlowNaturalTts?.play"),"Select renderer must preserve pronunciation support");
+assert(app.includes("window.LexiFlowPronunciationV1=Object.freeze"),"App shell must expose the shared pronunciation resolver");
+assert(select.includes("LexiFlowPronunciationV1?.playWord"),"Select word audio must reuse the shared pronunciation resolver");
+assert(select.includes("LexiFlowPronunciationV1?.playSentence"),"Select example audio must reuse the shared pronunciation resolver");
+assert(select.includes('data-select-v3="speak-example"'),"Select UI must expose example-sentence audio");
+assert(!select.includes("SpeechSynthesisUtterance"),"Select renderer must not own a separate system-TTS fallback");
 assert(!select.includes("activeLearningCards"),"Select renderer must never choose its own learning card");
 assert(select.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Select renderer must reuse the learning-data gateway snapshot");
 assert(select.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Select DOM mutations must redraw from memory instead of GETing learning data");
