@@ -22,6 +22,10 @@
       reviewCustomCap:custom,
     };
   }
+  function settingsSignature(settings={}){
+    const normalized=normalizeSettings(settings);
+    return JSON.stringify({reviewMode:normalized.reviewMode,reviewCustomCap:normalized.reviewCustomCap});
+  }
 
   async function refresh(){
     try{
@@ -99,8 +103,11 @@
     const list=settingsPage();
     if(!list||!latestData)return;
     const settings=normalizeSettings(latestData.settings||{});
+    const signature=settingsSignature(settings);
     let row=list.querySelector("[data-review-policy-row]");
+    if(row?.dataset.reviewPolicySignature===signature)return;
     const holder=document.createElement("div");holder.innerHTML=settingsHtml(settings);const next=holder.firstElementChild;
+    next.dataset.reviewPolicySignature=signature;
     if(row){row.replaceWith(next);return;}
     const daily=Array.from(list.querySelectorAll(":scope > .setting-row")).find(node=>node.querySelector("h3")?.textContent.trim()==="每日学习目标");
     if(daily)daily.insertAdjacentElement("afterend",next);else list.appendChild(next);
