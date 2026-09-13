@@ -57,7 +57,8 @@ assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must 
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
 assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize Stage V3 must call the explicit AI Assist V3 authority directly");
 assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
-assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility may only delegate legacy Visualize AI calls to the explicit V3 authority");
+assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED"),"runtime compatibility must block dormant legacy stage-AI requests instead of spending real AI work");
+assert(!runtime.includes("LexiFlowAiAssistV3?.visualScene"),"legacy Visualize auto-call paths must not delegate into AI Assist V3");
 assert(!runtime.includes("stableInternalVisualScene"),"Visualize V3 must never fall back to a synthetic echo");
 assert(visual.includes("let assistBusy=false")&&visual.includes("let imageBusy=false"),"Visualize text assistance and image generation must have independent busy state");
 assert(visual.includes('const generating=generation.status==="generating"||imageBusy'),"Visualize text AI assistance must not impersonate image generation in the UI");
@@ -82,7 +83,7 @@ assert(apply.includes("copyNorm(text)===copyNorm(card.exampleEn"),"Apply Stage V
 assert(apply.includes('data-action="pass-apply"'),"Apply completion must still delegate to the authoritative stage transition");
 assert(apply.includes("LexiFlowAiAssistV3?.practicePrompt"),"Apply Stage V3 must call AI Assist V3 directly for optional prompt refresh");
 assert(ai.includes('postJson("/api/ai/practice-prompt"'),"AI Assist V3 must own the real Apply prompt request path");
-assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility may only delegate legacy Apply prompt calls to the explicit V3 authority");
+assert(!runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"legacy Apply auto-prompt paths must not delegate into AI Assist V3");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply renderer must consume the learning-data gateway snapshot for redraws");
 assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Apply DOM mutations must redraw from memory instead of GETing learning data");
