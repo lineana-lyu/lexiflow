@@ -420,9 +420,7 @@
 
   function currentDailyPlan(){
     const plan=state.data.dailyPlan;
-    if(plan?.frozen===true&&plan.date===todayKey())return plan;
-    const core=window.LexiFlowLearningCore;
-    return typeof core?.buildDailyPlan==="function"?core.buildDailyPlan(state.data,new Date()):null;
+    return plan?.frozen===true&&plan.date===todayKey()?plan:null;
   }
 
   function planCards(key){

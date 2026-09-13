@@ -135,6 +135,8 @@ assert(app.includes("data-study-stage-host-v3"),"app.js must expose only the gen
 assert(!app.includes("const STAGES = ["),"app.js must not retain a parallel legacy stage model");
 assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVisual(card)")&&!app.includes("return stageApply(card)"),"app.js must not dispatch into retired stage renderers");
 assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state must contain only the exact card identity");
+assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membership; frozen DailyPlan is owned by V3");
+assert(app.includes("return plan?.frozen===true&&plan.date===todayKey()?plan:null;"),"app.js may only read the already-frozen current DailyPlan");
 assert(!app.includes("stageIndex("),"app.js must not retain or call a legacy stage-order helper");
 assert(app.includes("window.LexiFlowStudyStageSurfaceV3?.stages"),"Study shell motion ordering must reuse the V3 stage surface authority");
 for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply","localFeedback"]){
