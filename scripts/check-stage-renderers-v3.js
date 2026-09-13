@@ -67,6 +67,10 @@ assert(visual.includes('fetch("/api/images/local"'),"Visualize Stage V3 must own
 assert(visual.includes('data-action="finish-visual"'),"Visualize completion must still delegate persistence to the authoritative stage transition");
 assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize renderer must consume the learning-data gateway snapshot for redraws");
 assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Visualize DOM mutations must redraw from memory instead of GETing learning data");
+assert(visual.includes('beginStageWrite?.(cardId,"visualize",now)'),"Visualize async AI/image writes must serialize with terminal stage completion");
+assert(visual.includes('core.canonicalStage(card)!=="visualize"'),"Visualize async patches must fail closed if the card has already left Visualize");
+assert(visual.includes("LexiFlowVisualizeStageV3=Object.freeze({isBusy})"),"Visualize stage must expose only its busy state for action-surface coordination");
+assert(visualActions.includes("LexiFlowVisualizeStageV3?.isBusy?.()"),"Visualize skip UI must reflect an in-flight Visualize write instead of allowing a silent no-op");
 
 assert(apply.includes("先自己表达，再让 AI 检查"),"Apply must preserve learner-first expression before AI feedback");
 assert(apply.includes('fetch("/api/ai/text"'),"Apply Stage V3 must own AI expression checking");
@@ -78,6 +82,9 @@ assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibi
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply renderer must consume the learning-data gateway snapshot for redraws");
 assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Apply DOM mutations must redraw from memory instead of GETing learning data");
+assert(apply.includes('beginStageWrite?.(cardId,"apply",now)'),"Apply prompt persistence must serialize with terminal Apply completion");
+assert(apply.includes('core.canonicalStage(card)!=="apply"'),"Apply async patches must fail closed if the card has already left Apply");
+assert(apply.includes("LexiFlowApplyStageV3=Object.freeze"),"Apply stage must expose a narrow busy-state bridge for action coordination");
 
 assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip support must follow canonical stage identity");
 assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize skip support must expose only the V3 action marker");
