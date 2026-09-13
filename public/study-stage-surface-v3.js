@@ -23,7 +23,16 @@
   let queued=false;
   let refreshing=false;
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(current?.cards)data=core.normalizeData(current);
+    }catch{}
+    return data;
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     if(refreshing)return data;
     refreshing=true;
     try{
@@ -113,10 +122,10 @@
   function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(async()=>{
+    requestAnimationFrame(()=>{
       queued=false;
       decorateLegacyBadges();
-      await refresh();
+      syncFromGateway();
       decorate();
     });
   }
@@ -126,8 +135,10 @@
     const app=document.getElementById("app");
     if(!app)return;
     decorateLegacyBadges();
-    void refresh().then(decorate);
+    syncFromGateway();
+    if(data)decorate();else void refresh(true).then(decorate);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   window.LexiFlowStudyStageSurfaceV3=Object.freeze({stages:STAGES.map(([stage])=>stage)});
