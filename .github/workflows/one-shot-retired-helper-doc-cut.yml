@@ -1,0 +1,36 @@
+name: One-shot Retired Helper Doc Cut
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-retired-helper-doc-cut.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Remove retired helper and update authority doc
+        run: python scripts/cleanup-retired-apply-helper-and-doc.py
+      - name: Verify cleanup
+        run: |
+          node --check public/app.js
+          node --check scripts/check-runtime-authority-v3.js
+          npm run check
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app.js scripts/check-runtime-authority-v3.js docs/RUNTIME_AUTHORITY_V3.md
+          git commit -m "refactor: remove final retired Apply helper [retired-helper-cut]"
+          git push origin HEAD:feat/v7-airy-luminous-ui
