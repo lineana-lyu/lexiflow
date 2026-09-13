@@ -60,6 +60,16 @@ assert(!product.includes("CUSTOM_GOAL_KEY")&&!product.includes("decorateDailyGoa
 assert(!product.includes('/api/learning-data'),"product UX must not issue learning-data reads for presentation decoration");
 assert(app.includes('data-daily-goal-editor')&&app.includes('id="daily-goal"'),"app.js must directly render the Daily Goal editor");
 
+// app.js is now a generic shell/bridge. Retired six-stage renderers and schedulers
+// must stay physically absent instead of being hidden behind V3 overlays.
+assert(!app.includes("const STAGES =")&&!app.includes("const STAGES="),"app.js must not reintroduce the retired six-stage table");
+for(const retiredFunction of ["function stageSelect(","function stageMem1(","function stageMem2(","function stageVisual(","function stageApply(","function advanceStage(","function finishInitialReview(","function startReview(","function reviewSessionPage(","function rateReview("]){
+  assert(!app.includes(retiredFunction),`app.js must keep retired learning authority deleted: ${retiredFunction}`);
+}
+assert(app.includes('function renderStage(card){')&&app.includes('data-study-stage-host-v3'),"app.js study body must be only a passive V3 stage host");
+assert(app.includes('data-study-stepper-v3-host'),"app.js must expose only the passive V3 five-stage stepper host");
+assert(!app.includes('/api/ai/visual-scene')&&!app.includes('/api/ai/practice-prompt'),"app.js must not own retired automatic stage AI calls");
+
 assert(runtime.includes("transport-only"),"runtime compatibility must stay transport-only");
 assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must stay free of retired Stage AI blocking/caller knowledge");
 assert(!runtime.includes("MutationObserver"),"runtime compatibility must not decorate stage DOM through a global observer");
