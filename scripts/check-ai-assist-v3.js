@@ -24,17 +24,21 @@ assert(ai.includes("for(let attempt=0;attempt<3;attempt++)"),"AI Assist V3 must 
 assert(ai.includes("sceneNeedsCleanup"),"AI Assist V3 must keep visual-scene text safety cleanup close to the AI authority");
 assert(ai.includes("tooSimilar"),"AI Assist V3 must prevent repeated scene/prompt candidates");
 
-assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED"),"runtime compatibility must fail closed dormant legacy stage-AI requests");
-assert(runtime.includes('endpoint==="/api/ai/visual-scene"||endpoint==="/api/ai/practice-prompt"'),"runtime compatibility must block both retired stage-AI request paths");
-assert(runtime.includes("只能由当前 V3 学习页面上的明确操作发起"),"legacy stage-AI block must explain that only explicit V3 learner action may invoke AI");
-assert(!runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility must not delegate dormant legacy Visualize auto-calls into real AI");
-assert(!runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility must not delegate dormant legacy Apply auto-calls into real AI");
-assert(!runtime.includes("stableInternalVisualScene"),"runtime compatibility must not synthesize fake Visualize AI results");
-assert(!runtime.includes("robustManualVisualScene"),"runtime compatibility must not own Visualize AI generation logic");
-assert(!runtime.includes("robustPracticePrompt"),"runtime compatibility must not own Apply prompt generation logic");
-assert(!runtime.includes("manualSceneRefreshUntil"),"runtime compatibility must not infer AI intent from click timing");
-assert(!runtime.includes("SCENE_HISTORY_KEY"),"scene history must live with AI Assist V3 instead of the global runtime shim");
-assert(!runtime.includes("PROMPT_HISTORY_KEY"),"prompt history must live with AI Assist V3 instead of the global runtime shim");
+assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("blockedLegacyStageAi"),"runtime compatibility must not retain the retired legacy Stage AI firewall after source callers are gone");
+assert(!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must not know Stage AI endpoints; AI Assist V3 owns them exclusively");
+assert(runtime.includes('/api/dictionary/lookup')&&runtime.includes("normalizeChineseLookup"),"runtime compatibility must remain scoped to the active dictionary response normalization");
+assert(!runtime.includes("stableInternalVisualScene")&&!runtime.includes("robustManualVisualScene")&&!runtime.includes("robustPracticePrompt"),"runtime compatibility must not own Stage AI generation logic");
+assert(!runtime.includes("manualSceneRefreshUntil")&&!runtime.includes("SCENE_HISTORY_KEY")&&!runtime.includes("PROMPT_HISTORY_KEY"),"Stage AI intent/history must stay outside the global runtime shim");
+
+const publicJs=fs.readdirSync(path.join(root,"public")).filter(name=>name.endsWith(".js"));
+for(const endpoint of ["/api/ai/visual-scene","/api/ai/practice-prompt"]){
+  const owners=publicJs.filter(name=>read(`public/${name}`).includes(endpoint));
+  assert(owners.length===1&&owners[0]==="ai-assist-v3.js",`${endpoint} must have exactly one frontend owner: ai-assist-v3.js; found ${owners.join(", ")||"none"}`);
+}
+const appShell=read("public/app.js");
+for(const retiredCaller of ["ensureVisualSceneSuggestion","ensurePracticePrompt"]){
+  assert(!appShell.includes(retiredCaller),`retired app.js Stage AI caller must stay deleted: ${retiredCaller}`);
+}
 
 assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize V3 must call the explicit AI Assist authority directly");
 assert(!visual.includes('fetch("/api/ai/visual-scene"'),"Visualize V3 must not route its primary AI assist through the global fetch compatibility chain");

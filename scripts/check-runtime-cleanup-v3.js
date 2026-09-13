@@ -61,6 +61,7 @@ assert(!product.includes('/api/learning-data'),"product UX must not issue learni
 assert(app.includes('data-daily-goal-editor')&&app.includes('id="daily-goal"'),"app.js must directly render the Daily Goal editor");
 
 assert(runtime.includes("transport-only"),"runtime compatibility must stay transport-only");
+assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must stay free of retired Stage AI blocking/caller knowledge");
 assert(!runtime.includes("MutationObserver"),"runtime compatibility must not decorate stage DOM through a global observer");
 assert(!runtime.includes("visual-image-canvas")&&!runtime.includes("scene-panel.is-loading"),"legacy Visualize DOM selectors must stay out of runtime compatibility");
 assert(!runtime.includes("background-generation-note"),"V3 Visualize renderer must be the only owner of image-generation progress UI");

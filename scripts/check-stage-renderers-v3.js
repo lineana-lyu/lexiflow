@@ -57,7 +57,7 @@ assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must 
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
 assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize Stage V3 must call the explicit AI Assist V3 authority directly");
 assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
-assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED"),"runtime compatibility must block dormant legacy stage-AI requests instead of spending real AI work");
+assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must not retain retired Stage AI caller/block knowledge once AI Assist V3 is the sole frontend authority");
 assert(!runtime.includes("LexiFlowAiAssistV3?.visualScene"),"legacy Visualize auto-call paths must not delegate into AI Assist V3");
 assert(!runtime.includes("stableInternalVisualScene"),"Visualize V3 must never fall back to a synthetic echo");
 assert(visual.includes("let assistBusy=false")&&visual.includes("let imageBusy=false"),"Visualize text assistance and image generation must have independent busy state");
