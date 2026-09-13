@@ -6,6 +6,7 @@ on:
       - feat/v7-airy-luminous-ui
     paths:
       - .github/workflows/one-shot-product-ux-dead-settings.yml
+      - scripts/cleanup-product-ux-dead-settings.py
 
 permissions:
   contents: write
