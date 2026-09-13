@@ -25,7 +25,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply user surface migration
-        run: python3 scripts/migrate-v7-user-surface-polish.py
+        run: |
+          python3 scripts/migrate-v7-user-surface-polish.py
+          python3 scripts/migrate-v7-user-surface-contract-fix.py
       - name: Verify touched JavaScript
         run: |
           node --check public/app.js
@@ -37,6 +39,7 @@ jobs:
           node --check electron-main.js
           node --check scripts/check-review-policy-v3.js
           node --check scripts/check-user-surface-v4.js
+          node --check scripts/check-learning-engine-v3.js
       - name: Run full repository checks
         run: |
           set +e
@@ -54,7 +57,7 @@ jobs:
           rm -f user-surface-check-debug.txt
       - name: Commit verified business files
         run: |
-          FILES="public/app.js public/review-policy-v3.js public/review-session-v3.js public/source-context-v3.js public/theme-v7.css public/example-hydration.js lib/example-enrichment.js electron-main.js scripts/check-review-policy-v3.js scripts/check-user-surface-v4.js package.json"
+          FILES="public/app.js public/review-policy-v3.js public/review-session-v3.js public/source-context-v3.js public/theme-v7.css public/example-hydration.js lib/example-enrichment.js electron-main.js scripts/check-review-policy-v3.js scripts/check-user-surface-v4.js scripts/check-learning-engine-v3.js package.json"
           if git diff --quiet -- $FILES; then
             echo "No business changes to commit"
             exit 0
