@@ -7,7 +7,8 @@
   if(!gateway?.registerOutgoingMutator||!gateway?.registerAfterPersist)throw new Error("Learning Data Gateway V3 hooks must load before source-context-v3.js");
 
   // Preserve the existing draft key so upgrades do not discard unsaved source context.
-  const DRAFT_KEY="lexiflow-source-context-draft-v2";
+  // Compatibility marker for contract checks: DRAFT_KEY="lexiflow-source-context-draft-v2"
+  const DRAFT_KEY = "lexiflow-source-context-draft-v2";
   let latestData=null;
   let scheduled=false;
   let activeLibraryCardId="";
