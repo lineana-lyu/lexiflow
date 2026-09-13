@@ -41,6 +41,14 @@
   function saveStore(store){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store));}catch{}}
   function keyOf(word,meaning){return `${lower(word)}|${normalize(meaning)}`;}
 
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      latestData=current;
+      return true;
+    }catch{return false;}
+  }
   function currentCardId(){
     return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
   }
@@ -146,21 +154,11 @@
     }catch{return response;}
   };
 
-  function currentWord(){
-    return normalize(document.querySelector(".apply-word-hero .target-word-text,.study-card-focus .target-word-text")?.textContent||"");
-  }
-  function currentMeaning(){
-    const hero=document.querySelector(".apply-word-hero");
-    if(!hero)return"";
-    const span=Array.from(hero.children).find(node=>node.tagName==="SPAN");
-    return normalize(span?.textContent||"");
-  }
-
   function auditForCurrent(){
-    const word=currentWord(),meaning=currentMeaning();
-    if(!word)return latestAudit;
+    const card=currentCard();
+    if(!card)return latestAudit;
     const store=loadStore();
-    return store[keyOf(word,meaning)]||latestAudit;
+    return store[keyOf(card.word,card.meaningZh)]||latestAudit;
   }
 
   function qualityState(){
@@ -212,16 +210,20 @@
 
   document.addEventListener("click",event=>{
     const submit=event.target?.closest?.('[data-action="submit-apply"]');
-    if(submit&&isReferenceExampleCopy()){
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      warning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");
-      document.getElementById("apply-text")?.focus();
-      return;
+    if(submit){
+      syncFromGateway();
+      if(isReferenceExampleCopy()){
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        warning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");
+        document.getElementById("apply-text")?.focus();
+        return;
+      }
     }
 
     const button=event.target?.closest?.('[data-action="pass-apply"]');
     if(!button)return;
+    syncFromGateway();
     const state=qualityState();
     if(state.allowed)return;
     event.preventDefault();
@@ -239,13 +241,15 @@
   function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(()=>{queued=false;decorate();});
+    requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});
   }
   function start(){
     const app=document.getElementById("app");
     if(!app)return;
+    syncFromGateway();
     decorate();
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
