@@ -41,20 +41,29 @@
     return data;
   }
 
+  function blockedLegacyStageAi(endpoint){
+    const operation=endpoint==="/api/ai/visual-scene"?"Visualize":"Apply";
+    return syntheticJson({
+      ok:false,
+      code:"LEGACY_STAGE_AI_BLOCKED",
+      error:"Retired stage AI caller blocked",
+      userError:{
+        code:"LEGACY_STAGE_AI_BLOCKED",
+        title:"旧学习流程已停用",
+        message:`${operation} 的 AI 辅助只能由当前 V3 学习页面上的明确操作发起。`,
+      },
+    },409);
+  }
+
   // This compatibility layer is transport-only. V3 stage renderers own all
-  // loading, warning, and progress UI, so this file must never decorate stage DOM.
-  // Legacy callers of the two learning-AI endpoints are delegated to the same
-  // explicit V3 authority until app.js no longer contains those dormant callers.
+  // loading, warning, progress, and AI-assist UI. Dormant legacy app.js stage
+  // callers are deliberately failed closed so merely rendering an old stage body
+  // can never spend an AI request or create a first association for the learner.
   window.fetch=async function lexiFlowRuntimeCompatibilityFetch(input,init={}){
     const endpoint=endpointOf(input),body=parseBody(init);
 
-    if(endpoint==="/api/ai/visual-scene"&&body&&window.LexiFlowAiAssistV3?.visualScene){
-      try{return syntheticJson(await window.LexiFlowAiAssistV3.visualScene(body));}
-      catch(err){console.error("Visual scene authority failed",err);return syntheticJson({ok:false,error:err?.message||"VISUAL_SCENE_FAILED"},Number(err?.status)||502);}
-    }
-    if(endpoint==="/api/ai/practice-prompt"&&body&&window.LexiFlowAiAssistV3?.practicePrompt){
-      try{return syntheticJson(await window.LexiFlowAiAssistV3.practicePrompt(body));}
-      catch(err){console.error("Practice prompt authority failed",err);return syntheticJson({ok:false,error:err?.message||"PRACTICE_PROMPT_FAILED"},Number(err?.status)||502);}
+    if((endpoint==="/api/ai/visual-scene"||endpoint==="/api/ai/practice-prompt")&&body){
+      return blockedLegacyStageAi(endpoint);
     }
 
     if(endpoint!=="/api/dictionary/lookup"||!body)return nativeFetch(input,init);
