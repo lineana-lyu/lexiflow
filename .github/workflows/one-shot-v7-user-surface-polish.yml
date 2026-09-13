@@ -28,6 +28,7 @@ jobs:
         run: |
           python3 scripts/migrate-v7-user-surface-polish.py
           python3 scripts/migrate-v7-user-surface-contract-fix.py
+          python3 scripts/migrate-v7-user-surface-stage-name-fix.py
       - name: Verify touched JavaScript
         run: |
           node --check public/app.js
