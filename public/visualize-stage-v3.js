@@ -12,7 +12,7 @@
   let uploadBusy=false;
   const localDrafts=new Map();
 
-  const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;,"'":"&#39;"}[ch]));
+  const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const phonetic=value=>{const s=String(value||"").trim();return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
 
   function syncFromGateway(){
