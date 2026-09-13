@@ -1,0 +1,36 @@
+name: One-shot Sync App Shell With Gateway
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-sync-app-shell-with-gateway.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Sync app shell from Gateway-confirmed persistence
+        run: python scripts/sync-app-shell-with-gateway.py
+      - name: Verify migration
+        run: |
+          node --check public/app.js
+          node --check scripts/check-learning-data-gateway-v3.js
+          npm run check
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app.js scripts/check-learning-data-gateway-v3.js
+          git commit -m "fix: sync app shell from Gateway-confirmed data [app-gateway-sync]"
+          git push origin HEAD:feat/v7-airy-luminous-ui
