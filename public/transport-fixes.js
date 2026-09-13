@@ -3,6 +3,8 @@
 
   const nativeFetch = window.fetch.bind(window);
   const IMAGE_JOB_TIMEOUT_MS = 165000;
+  const DICTIONARY_PAYLOAD_ENDPOINTS = new Set(["/api/search/smart", "/api/dictionary/lookup"]);
+  const dictionaryPayloadObservers = new Set();
   let activeImageJob = null;
   let clearJobTimer = null;
   let lastIndicatorKey = "";
@@ -87,6 +89,34 @@
     });
     data.result.displayMeaningZh = shortMeaning;
     return data;
+  }
+
+  function registerDictionaryPayloadObserver(observer) {
+    if (typeof observer !== "function") return () => {};
+    dictionaryPayloadObservers.add(observer);
+    return () => dictionaryPayloadObservers.delete(observer);
+  }
+
+  function notifyDictionaryPayload(endpoint, payload) {
+    for (const observer of dictionaryPayloadObservers) {
+      try { observer(endpoint, payload); }
+      catch (err) { console.warn("LexiFlow dictionary payload observer failed:", err?.message || err); }
+    }
+    return payload;
+  }
+
+  function observeDictionaryResponse(response, endpoint) {
+    if (!response || !DICTIONARY_PAYLOAD_ENDPOINTS.has(endpoint)) return response;
+    return new Proxy(response, {
+      get(target, prop) {
+        if (prop === "json") return async () => {
+          const payload = await target.json();
+          return notifyDictionaryPayload(endpoint, payload);
+        };
+        const value = Reflect.get(target, prop, target);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
   }
 
   function voiceScore(voice) {
@@ -349,29 +379,31 @@
     });
   }
 
+  window.LexiFlowTransportV3 = Object.freeze({ registerDictionaryPayloadObserver });
+
   window.fetch = async function lexiFlowTransportFetch(input, init = {}) {
     const endpoint = endpointOf(input);
     const body = parseBody(init);
 
     if (endpoint === "/api/dictionary/lookup" && body?.word && hasChinese(body.word)) {
       const response = await nativeFetch(input, init);
-      if (!response.ok) return response;
+      if (!response.ok) return observeDictionaryResponse(response, endpoint);
       try {
         const data = await response.clone().json();
-        return jsonResponse(response.status, normalizeSmartSearch(data, body.word), response);
+        return observeDictionaryResponse(jsonResponse(response.status, normalizeSmartSearch(data, body.word), response), endpoint);
       } catch {
-        return response;
+        return observeDictionaryResponse(response, endpoint);
       }
     }
 
     if (endpoint === "/api/search/smart" && body?.query && hasChinese(body.query)) {
       const response = await nativeFetch(input, init);
-      if (!response.ok) return response;
+      if (!response.ok) return observeDictionaryResponse(response, endpoint);
       try {
         const data = await response.clone().json();
-        return jsonResponse(response.status, normalizeSmartSearch(data, body.query), response);
+        return observeDictionaryResponse(jsonResponse(response.status, normalizeSmartSearch(data, body.query), response), endpoint);
       } catch {
-        return response;
+        return observeDictionaryResponse(response, endpoint);
       }
     }
 
@@ -379,7 +411,8 @@
       return pollImageJob(input, init, body);
     }
 
-    return nativeFetch(input, init);
+    const response = await nativeFetch(input, init);
+    return DICTIONARY_PAYLOAD_ENDPOINTS.has(endpoint) ? observeDictionaryResponse(response, endpoint) : response;
   };
 
   function observeAppRouteChanges() {
