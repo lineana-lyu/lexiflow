@@ -71,9 +71,9 @@
     const id=currentCardId();if(!id)return;
     const now=new Date();
     const transition=window.LexiFlowStageTransitionV3;
-    const terminal=transition?.beginTerminal?.(id,"visualize",now);
-    if(!terminal)return;
-    const cmd=terminal.commandId;
+    const write=transition?.beginStageWrite?.(id,"visualize",now);
+    if(!write)return;
+    const cmd=write.commandId;
     saving=true;
     try{
       await refresh(true);
@@ -91,7 +91,7 @@
       await save(data);
       location.reload();
     }catch(err){console.error("Visualize skip failed",err);}
-    finally{transition?.endTerminal?.(cmd);saving=false;}
+    finally{transition?.endStageWrite?.(write);saving=false;}
   }
 
   document.addEventListener("click",event=>{
