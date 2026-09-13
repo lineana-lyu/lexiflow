@@ -24,8 +24,8 @@ assert(ai.includes("for(let attempt=0;attempt<3;attempt++)"),"AI Assist V3 must 
 assert(ai.includes("sceneNeedsCleanup"),"AI Assist V3 must keep visual-scene text safety cleanup close to the AI authority");
 assert(ai.includes("tooSimilar"),"AI Assist V3 must prevent repeated scene/prompt candidates");
 
-assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility must delegate Visualize AI calls to the explicit V3 authority");
-assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility must delegate Apply prompt calls to the explicit V3 authority");
+assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility must delegate legacy Visualize AI calls to the explicit V3 authority");
+assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility must delegate legacy Apply prompt calls to the explicit V3 authority");
 assert(!runtime.includes("stableInternalVisualScene"),"runtime compatibility must not synthesize fake Visualize AI results");
 assert(!runtime.includes("robustManualVisualScene"),"runtime compatibility must not own Visualize AI generation logic");
 assert(!runtime.includes("robustPracticePrompt"),"runtime compatibility must not own Apply prompt generation logic");
@@ -33,7 +33,9 @@ assert(!runtime.includes("manualSceneRefreshUntil"),"runtime compatibility must 
 assert(!runtime.includes("SCENE_HISTORY_KEY"),"scene history must live with AI Assist V3 instead of the global runtime shim");
 assert(!runtime.includes("PROMPT_HISTORY_KEY"),"prompt history must live with AI Assist V3 instead of the global runtime shim");
 
-assert(visual.includes('fetch("/api/ai/visual-scene"'),"Visualize V3 must continue to request the canonical visual-scene endpoint");
-assert(apply.includes('fetch("/api/ai/practice-prompt"'),"Apply V3 must continue to request the canonical practice-prompt endpoint");
+assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize V3 must call the explicit AI Assist authority directly");
+assert(!visual.includes('fetch("/api/ai/visual-scene"'),"Visualize V3 must not route its primary AI assist through the global fetch compatibility chain");
+assert(apply.includes("LexiFlowAiAssistV3?.practicePrompt"),"Apply V3 must call the explicit AI Assist authority directly for prompt refresh");
+assert(!apply.includes('fetch("/api/ai/practice-prompt"'),"Apply V3 must not route prompt refresh through the global fetch compatibility chain");
 
 console.log("AI Assist V3 authority checks passed.");
