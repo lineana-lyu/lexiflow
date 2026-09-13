@@ -17,6 +17,9 @@ assert(runtime.includes("job.generation !== resetGeneration"),"an image finishin
 assert(safety.includes('/api/learning-data/reset'),"UI reset must call the dedicated reset endpoint");
 assert(safety.includes("RESET_VERIFICATION_FAILED"),"UI must re-read persistent data and verify the reset");
 assert(safety.includes("cleanupComplete"),"UI must distinguish complete cleanup from partial image-file cleanup");
+assert(safety.includes("lexiflow-study-session-v3"),"reset must clear active Study Session V3 state");
+assert(safety.includes("lexiflow-review-session-v3"),"reset must clear active Review Session V3 state");
+assert(safety.includes("lexiflow-studyday-runtime-v3"),"reset must clear the current StudyDay V3 marker so a reset cannot inherit stale day-boundary state");
 assert(safety.includes("lexiflow-apply-quality-v3"),"reset must clear Apply audit state");
 assert(safety.includes("lexiflow-new-user-defaults-v3"),"reset must allow fresh-user defaults to be applied again after a full reset");
 
