@@ -60,6 +60,7 @@
       .lexi-today-plan{margin:16px 0 0;padding:18px 20px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow-sm,0 8px 30px rgba(34,48,43,.035))}
       .lexi-today-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}.lexi-today-title-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.lexi-today-head h2{margin:0;font-size:20px;letter-spacing:-.01em}.lexi-today-kicker{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted)}.lexi-today-progress-number{font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap}.lexi-today-note{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.55}.lexi-today-progress{height:6px;border-radius:999px;background:rgba(120,140,132,.09);overflow:hidden;margin:13px 0 14px}.lexi-today-progress>i{display:block;height:100%;border-radius:inherit;background:var(--accent,#667f75);transition:width .25s ease}
       .lexi-plan-rows{display:grid;gap:6px}.lexi-plan-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:9px 11px;border-radius:13px;background:rgba(120,140,132,.04)}.lexi-plan-row.is-next{background:rgba(120,140,132,.075)}.lexi-plan-name{font-size:13px;font-weight:750}.lexi-plan-count{font-size:13px;font-weight:800}.lexi-plan-next{font-size:10px;color:var(--muted);min-width:38px;text-align:right}.lexi-plan-empty{padding:4px 0 2px;font-size:13px;color:var(--muted)}.lexi-today-actions{display:flex;gap:9px;align-items:center;margin-top:14px;flex-wrap:wrap}.lexi-today-actions .btn.primary{min-width:150px}.lexi-today-footnote{font-size:11px;color:var(--muted)}
+      .lexi-select-goal-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:13px;background:rgba(77,115,103,.055);border:1px solid rgba(77,115,103,.08)}.lexi-select-goal-row strong{font-size:13px}.lexi-select-goal-row span{font-size:12px;color:var(--muted)}
       .lexi-library-filter{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:12px 0 14px}.lexi-library-filter button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 11px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}.lexi-library-filter button.is-active{background:rgba(77,115,103,.08);border-color:rgba(77,115,103,.28);color:var(--text);font-weight:750}.lexi-library-filter button span{margin-left:5px;opacity:.72}.lexi-library-pending-note{margin-left:auto;font-size:11px;color:var(--muted)}.lexi-library-today-action{margin-right:6px}
       @media(max-width:760px){.lexi-today-head{grid-template-columns:1fr}.lexi-today-progress-number{justify-self:start}.lexi-plan-row{grid-template-columns:1fr auto}.lexi-plan-next{display:none}.lexi-today-actions .btn{width:100%}.lexi-library-pending-note{width:100%;margin-left:0}}
     `;document.head.appendChild(style);
@@ -73,6 +74,13 @@
     if(!count)return "";
     return `<div class="lexi-plan-row ${next===key?"is-next":""}" data-plan-key="${key}"><span class="lexi-plan-name">${name}</span><span class="lexi-plan-count">${count} 个</span><span class="lexi-plan-next">${next===key?"下一项":""}</span></div>`;
   }
+  function selectionGoalHtml(plan){
+    const goal=Math.max(0,Number(plan?.selectGoal||latestData?.settings?.dailyGoal||3));
+    const remaining=Math.max(0,Number(plan?.remainingSelectSlots||0));
+    if(!goal||!remaining)return "";
+    const selected=Math.max(0,goal-remaining);
+    return `<div class="lexi-select-goal-row" data-plan-key="select-goal"><strong>选择新词 ${selected} / ${goal}</strong><span>还需选择 ${remaining} 个</span></div>`;
+  }
   function primaryHtml(plan){
     if(plan.review.length)return `<button class="btn primary" data-action="start-review">开始复习 ${plan.review.length} 个</button>`;
     if(plan.memorize.length)return `<button class="btn primary" data-action="continue-learning">开始记忆 ${plan.memorize.length} 个</button>`;
@@ -80,26 +88,31 @@
     if(plan.apply.length)return `<button class="btn primary" data-action="continue-learning">开始造句 ${plan.apply.length} 个</button>`;
     if(plan.select.length)return `<button class="btn primary" data-action="continue-learning">确认新词 ${plan.select.length} 个</button>`;
     if(plan.inbox.length&&Number(plan.remainingSelectSlots||0)>0)return `<button class="btn primary" data-route="library" data-tp-library-pending="1">从单词库选择待学习词</button>`;
-    if(!(latestData?.cards||[]).length)return `<button class="btn primary" data-route="add">添加第一个单词</button>`;
+    if(Number(plan.remainingSelectSlots||0)>0&&!(latestData?.cards||[]).length)return `<button class="btn primary" data-route="add">添加第一个单词</button>`;
+    if(Number(plan.remainingSelectSlots||0)>0)return `<button class="btn primary" data-route="add">继续添加新词</button>`;
     return `<button class="btn primary" disabled>今天已完成</button>`;
   }
   function homePlanHtml(signature){
     const plan=latestData?.dailyPlan||core.buildDailyPlan(latestData||{});
-    const next=core.firstPlanStage(plan), remaining=remainingCount(plan);
-    const total=Math.max(Number(plan.taskTotal||0),remaining), completed=Math.max(0,Number(plan.taskCompleted??(total-remaining))), percent=total?Math.max(0,Math.min(100,Math.round(completed/total*100))):0;
+    const next=core.firstPlanStage(plan), remaining=remainingCount(plan), selectRemaining=Math.max(0,Number(plan.remainingSelectSlots||0));
+    const plannedRemaining=remaining+selectRemaining;
+    const total=Math.max(Number(plan.taskTotal||0),plannedRemaining), completed=Math.max(0,Number(plan.taskCompleted??(total-plannedRemaining))), percent=total?Math.max(0,Math.min(100,Math.round(completed/total*100))):0;
     const rows=[
       rowHtml("review","复习",plan.review.length,next),
       rowHtml("memorize","记忆",plan.memorize.length,next),
       rowHtml("visualize","视觉联想",plan.visualize.length,next),
       rowHtml("apply","造句应用",plan.apply.length,next),
       rowHtml("select","确认新词",plan.select.length,next),
+      selectionGoalHtml(plan),
     ].join("");
-    const status=total?`${completed} / ${total}`:(remaining?`剩余 ${remaining}`:"今日暂无已安排任务");
-    const note=remaining?"只显示今天仍需完成的任务。":"今天没有剩余任务；明天会按当前学习状态重新安排。";
+    const goal=Math.max(0,Number(plan.selectGoal||latestData?.settings?.dailyGoal||3));
+    const selected=Math.max(0,goal-selectRemaining);
+    const status=selectRemaining>0&&!remaining?`今日新词 ${selected} / ${goal}`:(total?`${completed} / ${total}`:(remaining?`剩余 ${remaining}`:"今日计划已完成"));
+    const note=remaining?"只显示今天仍需完成的任务。":selectRemaining>0?`今天最多选择 ${goal} 个新词；先从第 ${selected+1} 个开始，不会补昨天的数量。`:"今天没有剩余任务；明天会按当前学习状态重新安排。";
     return `<section class="lexi-today-plan" id="lexi-today-plan" data-signature="${esc(signature)}">
       <div class="lexi-today-head"><div><div class="lexi-today-title-line"><span class="lexi-today-kicker">TODAY</span><h2>今日学习</h2></div><p class="lexi-today-note">${note}</p></div><span class="lexi-today-progress-number">${esc(status)}</span></div>
       ${total?`<div class="lexi-today-progress" aria-label="今日进度 ${percent}%"><i style="width:${percent}%"></i></div>`:""}
-      <div class="lexi-plan-rows">${rows||`<div class="lexi-plan-empty">${plan.inbox.length&&plan.remainingSelectSlots>0?"可以从单词库的“待学习”中选择今天的新词。":"今天的计划已经完成。"}</div>`}</div>
+      <div class="lexi-plan-rows">${rows||`<div class="lexi-plan-empty">今天的计划已经完成。</div>`}</div>
       <div class="lexi-today-actions">${primaryHtml(plan)}<span class="lexi-today-footnote">不补昨天任务 · 当天计划生成后保持稳定</span></div>
     </section>`;
   }
@@ -192,6 +205,17 @@
     }finally{saving=false;}
   }
 
+  function routeDynamicTodayAction(target){
+    const routeButton=target?.closest?.("#lexi-today-plan [data-route]");
+    if(!routeButton)return false;
+    const route=String(routeButton.dataset.route||"").trim();
+    if(!route)return false;
+    const appRoute=document.querySelector(`.nav [data-route="${CSS.escape(route)}"]`);
+    if(!appRoute||appRoute===routeButton)return false;
+    appRoute.click();
+    return true;
+  }
+
   function decorate(){injectStyle();decorateHome();decorateAdd();decorateLibrary();}
   async function refreshAndDecorate(force=false){await refresh(force);decorate();return latestData;}
 
@@ -200,6 +224,7 @@
     const pendingRoute=event.target?.closest?.("[data-tp-library-pending]");if(pendingRoute)libraryFilter="pending";
     const pick=event.target?.closest?.("[data-tp-pick]");if(pick){event.preventDefault();event.stopImmediatePropagation();void selectFromPending(pick.dataset.tpPick);return;}
     const unpick=event.target?.closest?.("[data-tp-unpick]");if(unpick){event.preventDefault();event.stopImmediatePropagation();void moveBackToPending(unpick.dataset.tpUnpick);return;}
+    if(routeDynamicTodayAction(event.target)){event.preventDefault();event.stopImmediatePropagation();return;}
   },true);
 
   function schedule(){
