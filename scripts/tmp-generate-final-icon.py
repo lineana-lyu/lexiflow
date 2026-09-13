@@ -5,7 +5,7 @@ import hashlib
 root=Path(__file__).resolve().parents[1]
 png=root/'public/icon.png'
 ico=root/'build/icon.ico'
-expected='b817542e670af2a86de7a95f94f993a262b8650c175b0a0ca136e93ee18af155'
+expected='942ea0886a4828679305f45bb42cafcca37a30d6e927aaadbfcde4dabd1920f1'
 raw=png.read_bytes()
 actual=hashlib.sha256(raw).hexdigest()
 if actual!=expected:
