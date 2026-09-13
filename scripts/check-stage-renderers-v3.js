@@ -67,6 +67,8 @@ assert(visual.includes('fetch("/api/ai/image"'),"Visualize Stage V3 must own ima
 assert(visual.includes('fetch("/api/images/local"'),"Visualize Stage V3 must own local-image upload");
 assert(visual.includes('data-action="finish-visual"'),"Visualize completion must still delegate persistence to the authoritative stage transition");
 assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize renderer must consume the learning-data gateway snapshot for redraws");
+assert(visual.includes("if(!syncFromGateway())data=normalized;"),"Visualize renderer writes must continue from the Gateway-confirmed persisted snapshot");
+assert(visual.includes("loadData(true)"),"Visualize async card patches must retain a fresh source read before mutation");
 assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Visualize DOM mutations must redraw from memory instead of GETing learning data");
 assert(visual.includes('beginStageWrite?.(cardId,"visualize",now)'),"Visualize async AI/image writes must serialize with terminal stage completion");
 assert(visual.includes('core.canonicalStage(card)!=="visualize"'),"Visualize async patches must fail closed if the card has already left Visualize");
@@ -86,6 +88,8 @@ assert(ai.includes('postJson("/api/ai/practice-prompt"'),"AI Assist V3 must own 
 assert(!runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"legacy Apply auto-prompt paths must not delegate into AI Assist V3");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
 assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply renderer must consume the learning-data gateway snapshot for redraws");
+assert(apply.includes("if(!syncFromGateway())data=normalized;"),"Apply renderer writes must continue from the Gateway-confirmed persisted snapshot");
+assert(apply.includes("loadData(true)"),"Apply async card patches must retain a fresh source read before mutation");
 assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Apply DOM mutations must redraw from memory instead of GETing learning data");
 assert(apply.includes('beginStageWrite?.(cardId,"apply",now)'),"Apply prompt persistence must serialize with terminal Apply completion");
 assert(apply.includes('core.canonicalStage(card)!=="apply"'),"Apply async patches must fail closed if the card has already left Apply");

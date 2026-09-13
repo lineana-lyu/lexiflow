@@ -48,8 +48,8 @@
       body:JSON.stringify({data:normalized,visualizeStageAuthority:"v3"}),
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
-    data=normalized;
-    return normalized;
+    if(!syncFromGateway())data=normalized;
+    return data||normalized;
   }
 
   function currentCardId(){return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");}
