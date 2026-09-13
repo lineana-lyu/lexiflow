@@ -137,6 +137,8 @@ assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVis
 assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state must contain only the exact card identity");
 assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membership; frozen DailyPlan is owned by V3");
 assert(!app.includes("const DICTIONARY ="),"app.js must not carry the retired in-memory demo dictionary");
+assert(!app.includes("Merriam-Webster Learner's Dictionary"),"app.js base Settings surface must not present the optional online fallback as the primary dictionary");
+assert(app.includes("基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。"),"app.js base Settings copy must describe local-first dictionary behavior");
 assert(app.includes('api("/api/dictionary/lookup"'),"front-end lookup must use the dictionary service boundary");
 for(const legacyStage of ["memorize1","memorize2","mastered"]){
   assert(!app.includes(legacyStage),`app.js must not expose a historical product stage: ${legacyStage}`);

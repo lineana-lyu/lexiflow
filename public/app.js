@@ -948,11 +948,11 @@
       + `<div class="settings-security-banner">🔒 API Key 仅保存在本机 settings.json；Windows 桌面版使用系统加密，仓库不会包含该文件。</div><div class="settings-list">
         <div class="setting-row">
           <div>
-            <h3>英语词典</h3>
-            <p>Merriam-Webster Learner's Dictionary · ${dict?.configured?`已连接 ${escapeHtml(dict.maskedKey||"")}`:"未连接"}</p>
+            <h3>词典增强</h3>
+            <p>基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="粘贴 Dictionary API Key（仅本机）" />
+            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="输入词典服务密钥（仅本机，可选）" />
             <button class="btn primary" data-action="save-dictionary-key">保存</button>
             <button class="btn" data-action="test-dictionary">检查连接</button>
           </div>
@@ -1449,10 +1449,10 @@
     if(action==="refresh-provider"){refreshProviderStatus(false);return;}
     if(action==="save-dictionary-key"){
       const key=document.getElementById("mw-api-key")?.value.trim()||"";
-      if(!key){toast("请输入 Learner's Dictionary API Key");return;}
+      if(!key){toast("请输入词典服务密钥");return;}
       try{
         await api("/api/settings/dictionary",{method:"POST",body:{apiKey:key}});
-        toast("词典 Key 已保存");
+        toast("词典增强配置已保存");
         await refreshProviderStatus(true);
       }catch(err){showErrorNotice(err,"保存没有完成");}
       return;
@@ -1460,8 +1460,8 @@
     if(action==="test-dictionary"){
       try{
         const payload=await api("/api/dictionary/test",{method:"POST",body:{}});
-        toast(payload.message||"词典 Key 可用");
-      }catch(err){showErrorNotice(err,"词典连接没有成功");}
+        toast(payload.message||"在线词典增强可用");
+      }catch(err){showErrorNotice(err,"在线词典增强连接没有成功");}
       return;
     }
 
