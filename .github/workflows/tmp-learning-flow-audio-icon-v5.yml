@@ -1,0 +1,46 @@
+name: One Shot Learning Flow Audio V5
+
+on:
+  push:
+    branches:
+      - tmp/learning-flow-audio-icon-v5
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: tmp/learning-flow-audio-icon-v5
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Apply guarded migration
+        run: python scripts/migrate-learning-flow-audio-v5.py
+      - name: Syntax check touched JavaScript
+        run: |
+          node --check public/app.js
+          node --check public/today-plan-v3.js
+          node --check public/select-stage-v3.js
+          node --check scripts/check-select-stage-v3.js
+          node --check scripts/check-today-plan-v3.js
+      - name: Full repository checks
+        run: npm run check
+      - name: Commit verified business changes
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/app.js public/today-plan-v3.js public/select-stage-v3.js scripts/check-select-stage-v3.js scripts/check-today-plan-v3.js
+          if git diff --cached --quiet; then
+            echo "No business changes to commit"
+            exit 0
+          fi
+          git commit -m "fix: streamline Today selection and unify pronunciation"
+          git push origin HEAD:tmp/learning-flow-audio-icon-v5
