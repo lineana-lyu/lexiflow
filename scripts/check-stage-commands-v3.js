@@ -19,7 +19,9 @@ assert(transition.includes('stageTransitionAuthority:"v3"'),"normal stage persis
 assert(transition.includes('authority:"stage-transition-v3"'),"normal stage activities must identify Stage Transition V3 authority");
 assert(transition.includes('card.stage="memorize"'),"Select completion must persist canonical Memorize directly");
 assert(!transition.includes('card.stage="memorize1"'),"Stage Transition V3 must not write the retired Memorize sub-stage");
-assert(transition.includes("LexiFlowStageTransitionV3=Object.freeze"),"Stage Transition V3 must expose only a narrow diagnostics bridge");
+assert(transition.includes("beginStageWrite")&&transition.includes("endStageWrite"),"Stage Transition V3 must expose one shared stage-write lock for competing outcomes");
+assert(transition.includes("terminalCommandId:stageCommandId"),"shared command identity must remain discoverable through the V3 transition bridge");
+assert(transition.includes('beginStageWrite(cardId,"visualize",now)')&&transition.includes('beginStageWrite(cardId,"apply",now)'),"normal Visualize and Apply completion must enter the shared write scope before loading mutable data");
 
 assert(memorize.includes("function commandId("),"Memorize completion must have a deterministic command ID");
 assert(memorize.includes("commandCommitted(data,cmd)"),"Memorize completion must be safe to retry after persistence");
@@ -29,14 +31,17 @@ assert(memorize.includes("finalRoundPassed"),"Memorize history must distinguish 
 assert(memorize.includes("if(saving)return"),"Memorize UI must reject double completion clicks while persistence is in flight");
 assert(memorize.includes('core.canonicalStage(c)!=="memorize"'),"Memorize completion must validate the canonical stage before writing");
 
-assert(visualize.includes(":visualize-skip`"),"Visualize skip must have a distinct deterministic command ID");
-assert(visualize.includes("commandId:cmd"),"Visualize skip activity must persist its command ID");
-assert(visualize.includes("finally{saving=false;}"),"Visualize skip must always release its saving lock after an early return or failure");
+assert(visualize.includes('beginStageWrite?.(id,"visualize",now)'),"Visualize skip must use the same exclusive stage-write scope as normal completion");
+assert(!visualize.includes("visualize-skip"),"Visualize complete and skip outcomes must share one deterministic command identity");
+assert(visualize.includes("commandId:cmd"),"Visualize skip activity must persist the shared command ID");
+assert(visualize.includes("endStageWrite?.(write)"),"Visualize skip must always release the shared stage-write lock");
 assert(visualize.includes('data-visual-actions-v3="skip"'),"Visualize skip control must use the V3 action surface");
 assert(visualize.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip must validate the canonical stage");
 
-assert(apply.includes(":apply-skip`"),"Apply skip must have a distinct deterministic command ID");
-assert(apply.includes("commandCommitted(source,commandId)"),"Apply skip must tolerate a retried command against the fresh source snapshot");
-assert(apply.includes("commandId"),"Apply skip history must retain command identity");
+assert(apply.includes('beginStageWrite?.(id,"apply",now)'),"Apply Draft/Skip support must enter the shared Apply stage-write scope");
+assert(!apply.includes("apply-skip"),"Apply complete and skip outcomes must share one deterministic command identity");
+assert(apply.includes("commandCommitted(source,commandId)"),"Apply skip must tolerate a retried shared command against the fresh source snapshot");
+assert(apply.includes("endStageWrite?.(guard.write)"),"Apply actions must release the shared stage-write lock after persistence");
+assert(apply.includes("beginApplyWrite"),"Apply draft writes must serialize with terminal Apply completion instead of racing a full-data POST");
 
 console.log("Stage Commands V3 checks passed.");
