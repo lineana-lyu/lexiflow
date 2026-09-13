@@ -12,6 +12,7 @@ const visual=read("public/visualize-stage-v3.js");
 const apply=read("public/apply-stage-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
 const applyActions=read("public/apply-actions-v3.js");
+const runtime=read("public/runtime-fixes.js");
 
 function before(a,b){
   const ai=index.indexOf(a),bi=index.indexOf(b);
@@ -49,6 +50,7 @@ assert(apply.includes('core.canonicalStage(card)==="apply"'),"Apply renderer mus
 assert(visual.includes("先用你自己的记忆和经历想画面"),"Visualize must keep learner association before AI assistance");
 assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must be an explicit user action");
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
+assert(runtime.includes('[data-action="refresh-visual-scene"],[data-visual-v3="assist"]'),"V3 Visualize AI assist must be recognized as a user-requested AI call instead of falling back to a synthetic echo");
 assert(visual.includes('fetch("/api/ai/image"'),"Visualize Stage V3 must own image generation instead of relying on app.js stage rendering");
 assert(visual.includes('fetch("/api/images/local"'),"Visualize Stage V3 must own local-image upload");
 assert(visual.includes('data-action="finish-visual"'),"Visualize completion must still delegate persistence to the authoritative stage transition");
