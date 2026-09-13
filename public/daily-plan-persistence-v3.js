@@ -12,16 +12,29 @@
     return `${plan.date}:${plan.planVersion}:${plan.generatedAt||""}`;
   }
 
+  function gatewaySnapshot(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      return current?.cards?core.normalizeData(current):null;
+    }catch{return null;}
+  }
+
+  async function currentData(){
+    const current=gatewaySnapshot();
+    if(current)return current;
+    const response=await fetch("/api/learning-data",{cache:"no-store"});
+    if(!response.ok)throw new Error("DAILY_PLAN_READ_FAILED");
+    const payload=await response.json();
+    return payload?.data?core.normalizeData(payload.data):null;
+  }
+
   async function persistFrozenPlan(){
     if(running)return false;
     running=true;
     try{
-      const response=await fetch("/api/learning-data",{cache:"no-store"});
-      if(!response.ok)throw new Error("DAILY_PLAN_READ_FAILED");
-      const payload=await response.json();
-      if(!payload?.data)return false;
+      const normalized=await currentData();
+      if(!normalized)return false;
 
-      const normalized=core.normalizeData(payload.data);
       const marker=markerFor(normalized);
       if(!marker)return false;
       if(normalized.dailyPlanPersistedKey===marker)return true;
