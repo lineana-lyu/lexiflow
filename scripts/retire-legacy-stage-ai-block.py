@@ -94,5 +94,5 @@ cleanup_path.write_text(cleanup,encoding="utf-8")
 
 for path in Path("scripts").glob("check-*.js"):
     text=path.read_text(encoding="utf-8")
-    if "runtime.includes(\"LEGACY_STAGE_AI_BLOCKED\")" in text:
+    if 'assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED")' in text:
         raise SystemExit(f"stale executable legacy Stage AI firewall contract remains: {path}")
