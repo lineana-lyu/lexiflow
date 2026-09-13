@@ -7,14 +7,25 @@
   let data=null;
   let queued=false;
   let refreshing=false;
-  let busy=false;
+  let assistBusy=false;
+  let imageBusy=false;
   let uploadBusy=false;
   const localDrafts=new Map();
 
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const phonetic=value=>{const s=String(value||"").trim();return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
 
-  async function loadData(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function loadData(force=false){
+    if(!force&&syncFromGateway())return data;
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();
@@ -22,10 +33,11 @@
     return data;
   }
 
-  async function refresh(){
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     if(refreshing)return data;
     refreshing=true;
-    try{return await loadData();}catch{return data;}finally{refreshing=false;}
+    try{return await loadData(true);}catch{return data;}finally{refreshing=false;}
   }
 
   async function persist(next){
@@ -33,7 +45,7 @@
     const response=await fetch("/api/learning-data",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({data:normalized}),
+      body:JSON.stringify({data:normalized,visualizeStageAuthority:"v3"}),
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
     data=normalized;
@@ -73,7 +85,8 @@
     const note=draftFor(card);
     const image=String(card.imageData||card.imageUrl||"");
     const generation=imageGeneration(card);
-    const generating=generation.status==="generating"||busy;
+    const generating=generation.status==="generating"||imageBusy;
+    const interactionBusy=assistBusy||generating||uploadBusy;
     const suggestion=String(card.visualSceneSuggestion?.scene||"").trim();
     const cue=String(card.visualSceneSuggestion?.cue||"").trim();
     return `<div class="lexi-v3-visual" data-visualize-stage-v3="${esc(card.id)}">
@@ -89,12 +102,12 @@
         <aside class="lexi-v3-visual-panel scene-panel">
           <h3>我的联想场景</h3><p>尽量写具体的人、地点、动作或物体。越和你自己的经历有关，越容易记住。</p>
           <textarea class="textarea scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="例如：我第一次去东京时，在车站看到一个巨大到让我停下来的广告牌。">${esc(note)}</textarea>
-          <div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||generating?"disabled":""}>${suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>
-          ${suggestion?`<div class="lexi-v3-ai-suggestion"><small>AI 建议 · 仅供参考</small><span>${esc(suggestion)}</span>${cue?`<small>记忆提示：${esc(cue)}</small>`:""}<div><button class="text-action" type="button" data-visual-v3="adopt">采用这个建议</button></div></div>`:""}
+          <div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||interactionBusy?"disabled":""}>${assistBusy?"AI 正在优化…":suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>
+          ${suggestion?`<div class="lexi-v3-ai-suggestion"><small>AI 建议 · 仅供参考</small><span>${esc(suggestion)}</span>${cue?`<small>记忆提示：${esc(cue)}</small>`:""}<div><button class="text-action" type="button" data-visual-v3="adopt" ${interactionBusy?"disabled":""}>采用这个建议</button></div></div>`:""}
         </aside>
       </div>
       ${generation.status==="error"?`<div class="lexi-v3-visual-error">${esc(generation.message||"这次图片没有生成成功，可以重试或上传自己的图片。")}</div>`:""}
-      <div class="lexi-v3-visual-actions"><div><button class="btn primary" type="button" data-visual-v3="generate" ${!String(note).trim()||generating?"disabled":""}>${generating?"生成中…":image?"重新生成图片":"生成联想图"}</button><label class="btn" for="visual-v3-file" ${generating||uploadBusy?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.55\"":""}>上传图片</label></div><span style="font-size:11px;color:var(--muted)">没有图片也可以明确选择“跳过视觉联想”。</span></div>
+      <div class="lexi-v3-visual-actions"><div><button class="btn primary" type="button" data-visual-v3="generate" ${!String(note).trim()||interactionBusy?"disabled":""}>${generating?"生成中…":image?"重新生成图片":"生成联想图"}</button><label class="btn" for="visual-v3-file" ${interactionBusy?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.55\"":""}>上传图片</label></div><span style="font-size:11px;color:var(--muted)">没有图片也可以明确选择“跳过视觉联想”。</span></div>
       <input id="visual-v3-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
       <div class="learning-stage-footer single-action"><button class="btn primary" type="button" data-action="finish-visual">完成视觉联想 · 明天开始造句</button></div>
     </div>`;
@@ -106,14 +119,14 @@
     const card=currentCard();
     if(!host||!card)return;
     const generation=imageGeneration(card);
-    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",busy,uploadBusy});
+    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
     if(host.dataset.visualizeStageV3===signature)return;
     host.dataset.visualizeStageV3=signature;
     host.innerHTML=html(card);
   }
 
   async function saveCardPatch(cardId,mutate){
-    const latest=await loadData();
+    const latest=await loadData(true);
     const card=latest?.cards?.find(item=>String(item.id)===String(cardId));
     if(!card)return null;
     mutate(card,latest);
@@ -129,41 +142,42 @@
   }
 
   async function assist(){
-    if(busy)return;
+    if(assistBusy||imageBusy||uploadBusy)return;
     const card=currentCard();if(!card)return;
     const note=String(document.getElementById("visual-note")?.value??draftFor(card)).trim();
     if(!note)return;
-    setDraft(card.id,note);busy=true;render();
+    const authority=window.LexiFlowAiAssistV3?.visualScene;
+    if(typeof authority!=="function"){console.error("Visualize V3 AI authority unavailable");return;}
+    setDraft(card.id,note);assistBusy=true;render();
     try{
-      const response=await fetch("/api/ai/visual-scene",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:note})});
-      if(!response.ok)throw new Error("VISUAL_ASSIST_FAILED");
-      const payload=await response.json();
-      const scene=String(payload.assist?.scene||"").trim();
-      const cue=String(payload.assist?.cue||"").trim();
-      const question=String(payload.assist?.practiceQuestion||"").trim();
+      const payload=await authority({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:note});
+      const scene=String(payload?.assist?.scene||"").trim();
+      const cue=String(payload?.assist?.cue||"").trim();
+      const question=String(payload?.assist?.practiceQuestion||"").trim();
       await saveCardPatch(card.id,c=>{
         c.visualSceneSuggestion={scene,cue};
         if(question)c.practicePrompt={question};
       });
     }catch(err){console.error("Visualize V3 assist failed",err);}
-    finally{busy=false;await refresh();render();}
+    finally{assistBusy=false;syncFromGateway();render();}
   }
 
   async function adopt(){
+    if(assistBusy||imageBusy||uploadBusy)return;
     const card=currentCard();if(!card)return;
     const suggestion=String(card.visualSceneSuggestion?.scene||"").trim();if(!suggestion)return;
     setDraft(card.id,suggestion);
     const input=document.getElementById("visual-note");
     if(input){input.value=suggestion;input.dispatchEvent(new Event("input",{bubbles:true}));}
     try{await saveCardPatch(card.id,c=>{c.visualNote=suggestion;c.visualSuggestionAdoptedAt=new Date().toISOString();});}catch{}
-    await refresh();render();
+    syncFromGateway();render();
   }
 
   async function generate(){
-    if(busy)return;
+    if(imageBusy||assistBusy||uploadBusy)return;
     const card=currentCard();if(!card)return;
     const note=String(document.getElementById("visual-note")?.value??draftFor(card)).trim();if(!note)return;
-    setDraft(card.id,note);busy=true;
+    setDraft(card.id,note);imageBusy=true;
     try{
       await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageGeneration={status:"generating",phase:"submitted",message:"正在生成联想图。",code:"",startedAt:new Date().toISOString()};});
       render();
@@ -174,11 +188,11 @@
     }catch(err){
       const message=err?.payload?.userError?.message||"这次图片没有生成成功，可以重试或上传自己的图片。";
       try{await saveCardPatch(card.id,c=>{c.imageGeneration={status:"error",phase:"error",message,code:err?.payload?.code||"IMAGE_GENERATION_FAILED",finishedAt:new Date().toISOString()};});}catch{}
-    }finally{busy=false;await refresh();render();}
+    }finally{imageBusy=false;syncFromGateway();render();}
   }
 
   async function upload(file){
-    if(uploadBusy||!file)return;
+    if(uploadBusy||assistBusy||imageBusy||!file)return;
     if(file.size>900*1024){window.alert("图片太大，请选择小于 900KB 的 PNG、JPG 或 WebP 图片。");return;}
     const card=currentCard();if(!card)return;
     uploadBusy=true;render();
@@ -191,7 +205,7 @@
       setDraft(card.id,note);
       await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene="";c.imageGeneration={status:"success",phase:"done",message:"已使用本地上传图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()};});
     }catch(err){console.error("Visualize V3 upload failed",err);window.alert("图片没有保存成功，请重试。");}
-    finally{uploadBusy=false;await refresh();render();}
+    finally{uploadBusy=false;syncFromGateway();render();}
   }
 
   document.addEventListener("input",event=>{
@@ -201,8 +215,9 @@
     const assist=document.querySelector('[data-visual-v3="assist"]');
     const generateButton=document.querySelector('[data-visual-v3="generate"]');
     const empty=!String(event.target.value||"").trim();
-    if(assist)assist.disabled=empty||busy;
-    if(generateButton)generateButton.disabled=empty||busy;
+    const interactionBusy=assistBusy||imageBusy||uploadBusy;
+    if(assist)assist.disabled=empty||interactionBusy;
+    if(generateButton)generateButton.disabled=empty||interactionBusy;
   },true);
 
   document.addEventListener("change",event=>{
@@ -223,12 +238,15 @@
 
   function schedule(){
     if(queued)return;queued=true;
-    requestAnimationFrame(async()=>{queued=false;await refresh();render();});
+    requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});
   }
   function start(){
     const app=document.getElementById("app");if(!app)return;
-    injectStyle();void refresh().then(render);
+    injectStyle();
+    syncFromGateway();
+    if(data)render();else void refresh(true).then(render);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
