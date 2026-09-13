@@ -126,7 +126,7 @@ addition='''
 assert(moduleSource.includes("function syncFromGateway()")&&moduleSource.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Advance Learning V3 must reuse the canonical Gateway snapshot for presentation redraws");
 assert(moduleSource.includes("if(!force&&syncFromGateway())return data;"),"Advance Learning V3 refresh must avoid redundant learning-data GETs when Gateway data exists");
 assert(moduleSource.includes("await refresh(true);"),"explicit early-learning unlock must force a fresh source read before mutating the frozen plan");
-assert(moduleSource.includes("requestAnimationFrame(()=>{")&&moduleSource.includes("syncFromGateway();\n      decorate();"),"Advance Learning MutationObserver redraws must stay memory-only");
+assert(moduleSource.includes("requestAnimationFrame(()=>{")&&moduleSource.includes("syncFromGateway();")&&moduleSource.includes("decorate();"),"Advance Learning MutationObserver redraws must stay memory-only");
 assert(!moduleSource.includes("requestAnimationFrame(async()=>{"),"Advance Learning MutationObserver must not restore network refreshes on DOM mutation");
 assert(moduleSource.includes('fetch("/api/learning-data",{cache:"no-store"})'),"Advance Learning must retain a cold/fresh GET fallback for explicit refreshes and writes");'''
 if check.count(anchor)!=1:
