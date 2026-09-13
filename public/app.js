@@ -81,7 +81,6 @@
     notice: null,
     searchResolution: null,
     lookupAlternativesOpen: false,
-    visualSceneExpanded: false
   };
 
   function defaultData(){
@@ -744,7 +743,6 @@
       practicePromptLoading:false
     };
     state.route="study";
-    state.visualSceneExpanded=Boolean(card.visualNote);
     render();
     void ensureCardPronunciation(card);
     return true;
@@ -811,49 +809,6 @@
   function renderStage(card){
     return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
   }
-
-const visualProgressTimers=new Map();
-
-function stopVisualProgress(cardId){
-  const timers=visualProgressTimers.get(cardId)||[];
-  timers.forEach(timer=>clearTimeout(timer));
-  visualProgressTimers.delete(cardId);
-}
-
-function visualProgressMeta(phase){
-  const phases={
-    preparing:{index:0,title:"正在准备画面",detail:"整理当前词义和联想场景。"},
-    submitted:{index:1,title:"生成任务已提交",detail:"图片任务已经交给图像服务。"},
-    waiting:{index:2,title:"等待图片返回",detail:"图像生成比文字更慢，可以直接进入下一步。"},
-    long:{index:3,title:"仍在生成",detail:"任务仍在继续，不需要停留在这一页。"}
-  };
-  return phases[phase]||phases.waiting;
-}
-
-function startVisualProgress(cardId){
-  stopVisualProgress(cardId);
-  const setPhase=phase=>{
-    const card=getCard(cardId);
-    if(!card||card.imageGeneration?.status!=="generating")return;
-    card.imageGeneration={...card.imageGeneration,phase};
-    if(state.study?.cardId===cardId&&card.stage==="visualize")render();
-  };
-  const timers=[
-    setTimeout(()=>setPhase("submitted"),450),
-    setTimeout(()=>setPhase("waiting"),4200),
-    setTimeout(()=>setPhase("long"),15000)
-  ];
-  visualProgressTimers.set(cardId,timers);
-}
-
-function visualSceneNeedsRefresh(scene,word){
-  const value=String(scene||"").trim();
-  if(!value)return false;
-  const target=String(word||"").trim();
-  if(target&&value.toLowerCase().includes(target.toLowerCase()))return true;
-  if(/[A-Za-z0-9]{2,}/.test(value))return true;
-  return /(写着|标着|印着|标签|招牌|logo|LOGO|屏幕文字|文字为|字样)/.test(value);
-}
 
   function localFeedback(text,word){
     const t=text.trim();
@@ -1408,90 +1363,6 @@ function visualSceneNeedsRefresh(scene,word){
       }catch{toast("导入失败：文件格式不正确");}
     });
 
-    document.querySelectorAll(".visual-memory-image").forEach(img=>img.addEventListener("error",()=>{
-      const cardId=img.dataset.cardId;
-      const c=getCard(cardId);
-      if(!c)return;
-      c.imageData="";
-      c.imageUrl="";
-      c.imageGeneration={
-        status:"error",
-        message:"原图片文件已不在本机，请重新生成或选择一张图片。",
-        code:"IMAGE_MISSING",
-        finishedAt:new Date().toISOString()
-      };
-      c.updatedAt=new Date().toISOString();
-      saveData();
-      if(state.study?.cardId===cardId) render();
-    }));
-
-    const applyText=document.getElementById("apply-text");
-    if(applyText){
-      const syncApplyUi=()=>{
-        if(!state.study)return;
-        const value=String(applyText.value||"");
-        state.study.applyText=value;
-        state.study.applyApproved=false;
-        state.study.applyLastCheckedText="";
-        state.study.applyReviewedText="";
-        const warning=document.getElementById("apply-keyword-warning");
-        const word=getCard(state.study.cardId)?.word||"";
-        const missing=Boolean(value.trim()&&!containsChinese(value)&&!sentenceUsesTargetWord(value,word));
-        if(warning) warning.hidden=!missing;
-        const pass=document.querySelector('[data-action="pass-apply"]');
-        if(pass) pass.disabled=true;
-        const submit=document.querySelector('[data-action="submit-apply"]');
-        if(submit&&!state.study.applySubmitting) submit.textContent="检查句子";
-        if(submit) submit.disabled=!value.trim()||Boolean(state.study.applySubmitting);
-        state.study.feedback=null;
-        document.querySelector('.ai-feedback-panel')?.remove();
-      };
-      applyText.addEventListener("input",syncApplyUi);
-      applyText.addEventListener("keydown",e=>{
-        if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){
-          e.preventDefault();
-          syncApplyUi();
-          document.querySelector('[data-action="submit-apply"]')?.click();
-        }
-      });
-    }
-
-
-    const visualNote=document.getElementById("visual-note");
-    if(visualNote){
-      visualNote.addEventListener("input",e=>{
-        if(!state.study)return;
-        state.study.visualNote=String(e.target.value||"");
-        state.study.visualSceneDirty=true;
-      });
-    }
-
-    const visualFile=document.getElementById("visual-file");
-    if(visualFile) visualFile.addEventListener("change",e=>{
-      const file=e.target.files?.[0];if(!file)return;
-      if(file.size>900*1024){showNotice("图片太大","请选择小于 900KB 的 PNG、JPG 或 WebP 图片。","warn");return;}
-      const cardId=state.study?.cardId;
-      if(!cardId)return;
-      const reader=new FileReader();
-      reader.onload=async()=>{
-        try{
-          const payload=await api("/api/images/local",{method:"POST",body:{dataUrl:String(reader.result||"")}});
-          const c=getCard(cardId);
-          if(!c)return;
-          c.imageData="";
-          c.imageUrl=payload.image.url;
-          c.generatedVisualScene="";
-          c.imageGeneration={status:"success",message:"已使用本地上传图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()};
-          c.updatedAt=new Date().toISOString();
-          saveData();
-          if(state.study?.cardId===cardId) render();
-        }catch(err){
-          if(state.study?.cardId===cardId) showErrorNotice(err,"图片没有保存成功");
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-
     document.querySelectorAll("[data-delete-card]").forEach(el=>el.addEventListener("click",()=>{
       const id=el.dataset.deleteCard;
       if(confirm("确认删除这张单词卡？")){state.data.cards=state.data.cards.filter(c=>c.id!==id);state.data.activities=state.data.activities.filter(a=>a.cardId!==id);saveData();toast("已删除");render();}
@@ -1650,160 +1521,6 @@ function visualSceneNeedsRefresh(scene,word){
     if(action==="continue-learning"){
       if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}
       showNotice("学习会话还没有准备好","Today Plan 会决定下一张学习卡。请稍后重试，不会自动打开旧队列。","warn");
-      return;
-    }
-    if(action==="complete-stage"){
-      showNotice("学习阶段没有正常保存","Select 完成应由当前学习引擎写入明天的 Memorize 计划。本次不会使用旧的同日跳转逻辑。","warn");
-      return;
-    }
-    if(action==="toggle-visual-scene"){
-      const current=document.getElementById("visual-note")?.value;
-      if(current!==undefined) state.study.visualNote=current;
-      state.visualSceneExpanded=!state.visualSceneExpanded;
-      render();
-      return;
-    }
-
-    if(action==="generate-visual"){
-    if(!state.study||state.study.imageGenerating)return;
-    const cardId=state.study.cardId;
-    const c=getCard(cardId);
-    if(!c)return;
-
-    const note=String(document.getElementById("visual-note")?.value??state.study.visualNote??c.visualSceneSuggestion?.scene??"").trim();
-    if(!note){
-      showNotice("还没有联想场景","等 AI 场景生成后再试，或者直接写一个你想看到的画面。","warn");
-      return;
-    }
-    state.study.visualNote=note;
-    state.study.visualSceneDirty=false;
-    state.study.imageGenerating=true;
-    c.visualNote=note;
-    c.imageGeneration={status:"generating",phase:"preparing",message:"正在准备生成任务。",code:"",startedAt:new Date().toISOString()};
-    c.updatedAt=new Date().toISOString();
-    saveData();
-    render();
-    startVisualProgress(cardId);
-
-    try{
-      const payload=await api("/api/ai/image",{
-        method:"POST",
-        body:{word:c.word,meaningZh:c.meaningZh,exampleEn:c.exampleEn,visualNote:note,suggestedScene:"",sourceQuery:c.sourceQuery||c.word,senseIntentEn:c.senseIntentEn||"",avoidVisualEn:c.avoidVisualEn||[]}
-      });
-      c.imageUrl=payload.image.url;
-      c.imageData="";
-      c.generatedVisualScene=String(payload.image.visualNote||note||"").trim();
-      c.imageGeneration={status:"success",phase:"done",message:"联想图已生成。",code:"",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
-      c.updatedAt=new Date().toISOString();
-      saveData();
-      if(state.libraryEditor?.cardId===cardId){
-        state.libraryEditor.imageGenerating=false;
-        state.libraryEditor.draft=libraryEditorBaseDraft(c);
-        render();
-      }
-      if(state.study?.cardId===cardId&&c.stage==="visualize") toast("联想图已生成");
-    }catch(err){
-      const user=err?.userError||err?.payload?.userError;
-      c.imageGeneration={status:"error",phase:"error",message:user?.message||"这次没有生成成功。可以重试或上传自己的图片。",code:err.code||"IMAGE_GENERATION_FAILED",startedAt:c.imageGeneration?.startedAt||"",finishedAt:new Date().toISOString()};
-      c.updatedAt=new Date().toISOString();
-      saveData();
-      if(state.libraryEditor?.cardId===cardId){
-        state.libraryEditor.imageGenerating=false;
-        state.libraryEditor.draft=libraryEditorBaseDraft(c);
-        render();
-      }
-      if(state.study?.cardId===cardId&&c.stage==="visualize") toast("图片没有生成成功");
-    }finally{
-      stopVisualProgress(cardId);
-      if(state.study?.cardId===cardId){
-        state.study.imageGenerating=false;
-        if(c.stage==="visualize") render();
-      }
-    }
-    return;
-  }
-  if(action==="finish-visual"){
-    showNotice("学习阶段没有正常保存","Visualize 完成应由当前学习引擎写入明天的 Apply 计划。本次不会使用旧的同日跳转逻辑。","warn");
-    return;
-  }
-  if(action==="submit-apply"){
-      if(!state.study||state.study.applySubmitting)return;
-      const cardId=state.study.cardId;
-      const sentence=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
-      const c=getCard(cardId);
-      if(!c)return;
-      state.study.applyText=sentence;
-      state.study.applyApproved=false;
-      state.study.applyLastCheckedText="";
-      state.study.applyReviewedText="";
-      state.study.applyDetectedLanguage=containsChinese(sentence)?"zh":"en";
-      if(!sentence){render();return;}
-      state.study.applySubmitting=true;
-      state.study.feedback=null;
-      render();
-      try{
-        const payload=await api("/api/ai/text",{method:"POST",body:{word:c.word,meaningZh:c.meaningZh,sentence}});
-        if(state.study?.cardId!==cardId)return;
-        const fb=payload.feedback||{};
-        const suggested=String(fb.suggestion||"").trim();
-        const inputLanguage=fb.inputLanguage==="zh"?"zh":state.study.applyDetectedLanguage;
-        const keyword=String(fb.keyword||c.word||"").trim()||c.word;
-        const candidate=suggested||sentence;
-        const keywordOk=textContainsKeyword(candidate,keyword)||sentenceUsesTargetWord(candidate,c.word);
-        const candidateApproved=fb.approved!==false&&fb.level==="good"&&keywordOk&&!(inputLanguage==="zh"&&!suggested);
-        const originalApproved=inputLanguage==="en"&&!suggested&&candidateApproved;
-        state.study.applyApproved=originalApproved;
-        state.study.applyLastCheckedText=originalApproved?sentence:"";
-        state.study.applyReviewedText=sentence;
-        state.study.feedback={level:candidateApproved?"good":"warn",title:inputLanguage==="zh"?(candidateApproved?"意思保留了，英文也自然":"这句话还需要调整"):suggested?(candidateApproved?"可以这样说得更自然":"这句话还需要调整"):(originalApproved?"表达自然，可以直接使用":String(fb.title||"这句话还需要调整")),tips:[...(Array.isArray(fb.tips)?fb.tips:[]),...(!keywordOk?[`需要自然使用 “${c.word}” 或它的常见词形。`]:[])].slice(0,2),suggestion:suggested,suggestionApproved:Boolean(suggested&&candidateApproved),keyword,inputLanguage};
-      }catch(err){
-        if(state.study?.cardId!==cardId)return;
-        state.study.applyApproved=false;
-        state.study.applyLastCheckedText="";
-        state.study.feedback={level:"warn",title:"AI 暂时没有完成检查",tips:["你的句子还在，可以直接再试一次。"],suggestion:"",suggestionApproved:false,keyword:c.word,inputLanguage:state.study.applyDetectedLanguage};
-      }finally{
-        if(state.study?.cardId===cardId){state.study.applySubmitting=false;render();}
-      }
-      return;
-    }
-    if(action==="adopt-ai-sentence"){
-      if(!state.study)return;
-      const c=getCard(state.study.cardId);
-      const fb=state.study.feedback||{};
-      const suggestion=String(fb.suggestion||"").trim();
-      if(!c||!suggestion||!fb.suggestionApproved)return;
-      const current=String(document.getElementById("apply-text")?.value??state.study.applyText??"").trim();
-      if(current&&!state.study.originalApplyText)state.study.originalApplyText=current;
-      const keyword=String(fb.keyword||c.word||"").trim()||c.word;
-      const keywordOk=textContainsKeyword(suggestion,keyword)||sentenceUsesTargetWord(suggestion,c.word);
-      state.study.applyText=suggestion;
-      state.study.applyApproved=keywordOk;
-      state.study.applyLastCheckedText=keywordOk?suggestion:"";
-      state.study.applyReviewedText=suggestion;
-      state.study.feedback={...fb,title:"已采用修改建议",tips:[],suggestion:"",suggestionApproved:false,level:keywordOk?"good":"warn"};
-      render();
-      setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
-      return;
-    }
-    if(action==="edit-apply"){document.getElementById("apply-text")?.focus();return;}
-    if(action==="refresh-visual-scene"){const c=state.study&&getCard(state.study.cardId);if(c){const edited=document.getElementById("visual-note")?.value;if(edited!==undefined)state.study.visualNote=edited;state.study.visualSceneDirty=false;void ensureVisualSceneSuggestion(c,true);}return;}
-    if(action==="refresh-practice-prompt"){const c=state.study&&getCard(state.study.cardId);if(c)void ensurePracticePrompt(c,true);return;}
-    if(action==="restore-original-apply"){
-      const original=String(state.study?.originalApplyText||"");
-      if(!original)return;
-      state.study.applyText=original;
-      state.study.originalApplyText="";
-      state.study.applyApproved=false;
-      state.study.applyLastCheckedText="";
-      state.study.applyReviewedText="";
-      state.study.feedback=null;
-      render();
-      setTimeout(()=>document.getElementById("apply-text")?.focus(),0);
-      return;
-    }
-
-    if(action==="pass-apply"){
-      showNotice("学习阶段没有正常保存","Apply 完成应由当前学习引擎写入明天的 Review 计划。本次不会退回旧的同日首次复习流程，请稍后重试。","warn");
       return;
     }
     if(action==="start-review"){

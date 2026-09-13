@@ -137,6 +137,15 @@ assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVis
 for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply"]){
   assert(!app.includes(`function ${retiredBody}(`)&&!app.includes(`async function ${retiredBody}(`),`retired stage body must be physically removed from app.js: ${retiredBody}`);
 }
+for(const retiredAction of ["complete-stage","toggle-visual-scene","generate-visual","finish-visual","submit-apply","adopt-ai-sentence","edit-apply","refresh-visual-scene","refresh-practice-prompt","restore-original-apply","pass-apply"]){
+  assert(!app.includes(`if(action===\"${retiredAction}\")`)&&!app.includes(`if(action==\"${retiredAction}\")`),`retired stage action must be removed from app.js: ${retiredAction}`);
+}
+for(const retiredHook of ["visualProgressTimers","document.getElementById(\"visual-file\")","state.visualSceneExpanded"]){
+  assert(!app.includes(retiredHook),`retired stage event hook must be removed from app.js: ${retiredHook}`);
+}
+assert(app.includes('const libraryImageFile=document.getElementById("library-image-file")'),"Word Library image upload must survive stage cleanup");
+assert(app.includes('if(action==="regenerate-library-image")'),"Word Library image regeneration must survive stage cleanup");
+assert(app.includes('api("/api/ai/image"'),"Word Library image generation transport must survive stage cleanup");
 
 assert(studySurface.includes("data-study-stage-host-v3"),"Study Surface V3 must quarantine legacy stage bodies while authoritative renderers load");
 assert(studySurface.includes("const ROOTS=Object.freeze"),"Study Surface V3 must recognize the active stage renderer roots");
