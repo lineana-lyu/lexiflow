@@ -73,6 +73,15 @@ if check.count(old)!=1:
 check=check.replace(old,new,1)
 check_path.write_text(check,encoding="utf-8")
 
+renderer_path=Path("scripts/check-stage-renderers-v3.js")
+renderer=renderer_path.read_text(encoding="utf-8")
+old_renderer='''assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED"),"runtime compatibility must block dormant legacy stage-AI requests instead of spending real AI work");'''
+new_renderer='''assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must not retain retired Stage AI caller/block knowledge once AI Assist V3 is the sole frontend authority");'''
+if renderer.count(old_renderer)!=1:
+    raise SystemExit(f"Stage Renderer legacy AI firewall assertion count was {renderer.count(old_renderer)}")
+renderer=renderer.replace(old_renderer,new_renderer,1)
+renderer_path.write_text(renderer,encoding="utf-8")
+
 cleanup_path=Path("scripts/check-runtime-cleanup-v3.js")
 cleanup=cleanup_path.read_text(encoding="utf-8")
 anchor='assert(runtime.includes("transport-only"),"runtime compatibility must stay transport-only");'
@@ -82,3 +91,8 @@ if cleanup.count(anchor)!=1:
 if "must stay free of retired Stage AI blocking/caller knowledge" not in cleanup:
     cleanup=cleanup.replace(anchor,anchor+addition,1)
 cleanup_path.write_text(cleanup,encoding="utf-8")
+
+for path in Path("scripts").glob("check-*.js"):
+    text=path.read_text(encoding="utf-8")
+    if "runtime.includes(\"LEGACY_STAGE_AI_BLOCKED\")" in text:
+        raise SystemExit(f"stale executable legacy Stage AI firewall contract remains: {path}")
