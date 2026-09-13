@@ -14,14 +14,14 @@ select_text=select.read_text(encoding='utf-8')
 ct=check_today.read_text(encoding='utf-8')
 cs=check_stage.read_text(encoding='utf-8')
 
-# 1) Today-origin add intent: direct creation should occupy today's Select slot.
+# 1) Today-origin add intent: direct creation should occupy today's frozen Select slot.
 old='''  function bind(){\n    document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{\n      state.route=el.dataset.route;\n      if(state.route!=="library-edit") state.libraryEditor=null;\n      if(state.route!=="study") state.study=null;\n      render();\n    }));'''
 new='''  function bind(){\n    document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{\n      state.route=el.dataset.route;\n      if(state.route!=="add"){try{sessionStorage.removeItem("lexiflow:add-intent-v3");}catch{}}\n      if(state.route!=="library-edit") state.libraryEditor=null;\n      if(state.route!=="study") state.study=null;\n      render();\n    }));'''
 if old not in app_text: raise SystemExit('bind anchor missing')
 app_text=app_text.replace(old,new,1)
 
 pattern=re.compile(r'''      const card=\{id:uid\(\),word:r\.word,phonetic:r\.phonetic,audioUrl:r\.audioUrl\|\|"",audioUrls:Array\.isArray\(r\.audioUrls\)\?r\.audioUrls:\[\],pronunciationSource:r\.pronunciationSource\|\|"",pos:s\.pos,meaningZh:s\.meaningZh,exampleEn:s\.exampleEn,exampleZh:s\.exampleZh\|\|"",exampleTranslationPending:!s\.exampleZh\?\.trim\(\),senseIntentEn:s\.senseIntentEn\|\|"",avoidVisualEn:Array\.isArray\(s\.avoidVisualEn\)\?s\.avoidVisualEn:\[\],sourceQuery:r\.sourceQuery\|\|state\.lookup\?\.query\|\|r\.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:\[\],visualNote:"",imageData:null,userSentence:""\};\n      state\.data\.cards\.unshift\(card\);recordActivity\("card-created",card\.id\);toast\("卡片已保存，已进入学习流程"\);state\.lookup=null;state\.selectedSenseId=null;state\.route="home";render\(\);return;''')
-replacement='''      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};\n      let addIntent=null;\n      try{addIntent=JSON.parse(sessionStorage.getItem("lexiflow:add-intent-v3")||"null");}catch{}\n      const activePlan=state.data.dailyPlan?.date===todayKey()?state.data.dailyPlan:window.LexiFlowLearningCore?.buildDailyPlan?.(state.data);\n      const fromToday=addIntent?.source==="today"&&addIntent?.date===todayKey()&&Number(activePlan?.remainingSelectSlots||0)>0;\n      if(fromToday){\n        card.inboxPending=false;\n        card.todaySelectedOn=todayKey();\n        card.selectedOn=todayKey();\n        card.stageEligibleOn=now;\n        card.inboxSelectedAt=now;\n      }else{\n        card.inboxPending=true;\n        card.inboxAddedOn=todayKey();\n      }\n      try{sessionStorage.removeItem("lexiflow:add-intent-v3");}catch{}\n      state.data.cards.unshift(card);recordActivity("card-created",card.id);\n      state.lookup=null;state.selectedSenseId=null;\n      if(fromToday){toast("已加入今日学习");startStudy(card.id);return;}\n      toast("已保存到单词库 · 待学习");state.route="home";render();return;'''
+replacement='''      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};\n      let addIntent=null;\n      try{addIntent=JSON.parse(sessionStorage.getItem("lexiflow:add-intent-v3")||"null");}catch{}\n      const activePlan=state.data.dailyPlan?.date===todayKey()?state.data.dailyPlan:null;\n      const fromToday=addIntent?.source==="today"&&addIntent?.date===todayKey()&&Number(activePlan?.remainingSelectSlots||0)>0;\n      if(fromToday){\n        card.inboxPending=false;\n        card.todaySelectedOn=todayKey();\n        card.selectedOn=todayKey();\n        card.stageEligibleOn=now;\n        card.inboxSelectedAt=now;\n      }else{\n        card.inboxPending=true;\n        card.inboxAddedOn=todayKey();\n      }\n      try{sessionStorage.removeItem("lexiflow:add-intent-v3");}catch{}\n      state.data.cards.unshift(card);recordActivity("card-created",card.id);\n      state.lookup=null;state.selectedSenseId=null;\n      if(fromToday){toast("已加入今日学习");startStudy(card.id);return;}\n      toast("已保存到单词库 · 待学习");state.route="home";render();return;'''
 app_text,n=pattern.subn(replacement,app_text,count=1)
 if n!=1: raise SystemExit(f'save-card anchor matches={n}')
 
@@ -29,7 +29,6 @@ if n!=1: raise SystemExit(f'save-card anchor matches={n}')
 anchor='''  async function speak(word,audioUrl="",audioUrls=[]){'''
 pos=app_text.find(anchor)
 if pos<0: raise SystemExit('speak function missing')
-# inject bridge after function by locating next known function boundary
 next_anchor='''\n  function formatPhonetic'''
 end=app_text.find(next_anchor,pos)
 if end<0: raise SystemExit('formatPhonetic boundary missing')
@@ -64,9 +63,7 @@ if n!=1: raise SystemExit(f'select speak block matches={n}')
 # Regression contracts.
 ct += '''\nassert(source.includes('sessionStorage.setItem("lexiflow:add-intent-v3"'),"Today add action must mark a one-shot Today-origin add intent");\nassert(source.includes('保存并确认词义'),"Today-origin card creation must explain that it goes straight to Select confirmation");\n'''
 cs += '''\nassert(select.includes("LexiFlowPronunciationV3?.play"),"Select must reuse the same pronunciation resolver as lookup/library surfaces");\nassert(select.includes('data-select-v3="speak-example"'),"Select reference example must expose pronunciation playback");\nassert(select.includes("card.audioUrl")&&select.includes("card.audioUrls"),"Select target-word playback must reuse persisted dictionary audio before TTS fallback");\n'''
-
-# App-level assertions embedded in an existing check to prevent triple-confirm flow returning.
-ct += '''\nconst appSource=read("public/app.js");\nassert(appSource.includes('addIntent?.source==="today"')&&appSource.includes("startStudy(card.id)"),"Today-origin card creation must enter Select directly after saving instead of requiring Library confirmation");\nassert(appSource.includes("LexiFlowPronunciationV3=Object.freeze"),"app shell must expose one shared pronunciation resolver for all learning surfaces");\n'''
+ct += '''\nconst appSource=read("public/app.js");\nassert(appSource.includes('addIntent?.source==="today"')&&appSource.includes("startStudy(card.id)"),"Today-origin card creation must enter Select directly after saving instead of requiring Library confirmation");\nassert(!appSource.includes("LexiFlowLearningCore?.buildDailyPlan?.(state.data)"),"app shell must not construct Today membership while enrolling a just-created card");\nassert(appSource.includes("LexiFlowPronunciationV3=Object.freeze"),"app shell must expose one shared pronunciation resolver for all learning surfaces");\n'''
 
 app.write_text(app_text,encoding='utf-8')
 today.write_text(today_text,encoding='utf-8')
@@ -74,7 +71,6 @@ select.write_text(select_text,encoding='utf-8')
 check_today.write_text(ct,encoding='utf-8')
 check_stage.write_text(cs,encoding='utf-8')
 
-# Final invariants.
 for needle in ['addIntent?.source==="today"','startStudy(card.id)','LexiFlowPronunciationV3=Object.freeze']:
     if needle not in app_text: raise SystemExit('missing app invariant '+needle)
 for needle in ['lexiflow:add-intent-v3','保存并确认词义']:
