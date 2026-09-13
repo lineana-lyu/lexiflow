@@ -42,5 +42,7 @@ assert(transition.includes('card.stage="memorize"'),"Select completion must writ
 assert(transition.includes('card.learningStage="memorize"'),"Select completion must expose canonical Memorize immediately");
 assert(transition.includes('nextStage:"memorize"'),"stage activity history must record canonical next stage");
 assert(!transition.includes('card.stage="memorize1"'),"Stage Transition V3 must not create a legacy Memorize sub-stage");
+assert(!transition.includes('data-next="memorize1"'),"Stage Transition V3 must not keep a retired memorize1 UI action selector");
+assert(transition.includes('data-next="memorize"'),"Stage Transition V3 must keep the canonical Memorize action selector");
 
 console.log("Canonical Stage Model V3 checks passed.");
