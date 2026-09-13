@@ -1,0 +1,36 @@
+name: Tmp Generate Final Icon
+on:
+  push:
+    branches:
+      - tmp-final-icon-regenerate-20260913
+permissions:
+  contents: write
+jobs:
+  icon:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+      - name: Install Pillow
+        run: python3 -m pip install --quiet pillow
+      - name: Generate ICO from approved PNG
+        run: python3 scripts/tmp-generate-final-icon.py
+      - name: Validate repository
+        env:
+          NODE_OPTIONS: --experimental-sqlite
+        run: npm run check
+      - name: Commit generated ICO
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add build/icon.ico
+          if git diff --cached --quiet; then
+            echo "ICO already matches approved PNG"
+            exit 0
+          fi
+          git commit -m "fix: regenerate Windows icon from approved source"
+          git push
