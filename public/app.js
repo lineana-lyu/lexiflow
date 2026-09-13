@@ -18,6 +18,7 @@
     libraryEditor: null,
     lookupStatus: "idle",
     providerStatus: null,
+    providerChecks: { dictionary:null, ai:null },
     loadingMoreSenses: false,
     pronunciationHydration: {},
     notice: null,
@@ -946,30 +947,57 @@
     const tts=status?.tts||{};
     const selectedModel=codex?.selectedModel||"";
     const selectedEffort=codex?.selectedReasoningEffort||"";
+    const dictionaryCheck=state.providerChecks?.dictionary||null;
+    const aiCheck=state.providerChecks?.ai||null;
+    const dictLocalReady=Boolean(dict?.localAvailable);
+    const dictKeySaved=Boolean(dict?.fallbackConfigured);
+    const dictMaskedKey=String(dict?.maskedKey||"");
+    const runtimeTest=codex?.runtimeTest||{};
+    const aiChecking=aiCheck?.status==="checking";
+    const aiPassed=!aiChecking&&(aiCheck?.status==="passed"||runtimeTest.status==="passed");
+    const aiFailed=!aiChecking&&(aiCheck?.status==="failed"||runtimeTest.status==="failed");
+    const aiReadyForTest=Boolean(codex?.cliAvailable&&codex?.authFound);
+    const formatCheckTime=value=>{
+      if(!value)return "";
+      try{return new Date(value).toLocaleString();}catch{return String(value);}
+    };
+    const runtimeMessage=aiCheck?.message||runtimeTest.message||"";
+    const runtimeAt=aiCheck?.at||runtimeTest.at||"";
 
     return shell(
       header("","设置","")
       + `<div class="settings-security-banner"><span class="settings-security-icon">⌁</span><div><strong>连接信息只保存在当前设备</strong><span>用于词典和 AI 服务，不会显示在学习内容中。</span></div></div><div class="settings-list">
-        <div class="setting-row">
-          <div>
+        <div class="setting-row" style="align-items:flex-start">
+          <div style="min-width:310px;flex:1">
             <h3>词典增强</h3>
-            <p>基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。</p>
+            <p>本地 Core + ECDICT 负责快速查词；在线词典只用于真人发音和例句增强。</p>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+              <span class="pill ${dictLocalReady?"green":"red"}">${dictLocalReady?"本地词典已就绪":"本地词典未就绪"}</span>
+              <span class="pill ${dictKeySaved?"green":"amber"}">${dictKeySaved?`在线密钥已保存${dictMaskedKey?` · ${escapeHtml(dictMaskedKey)}`:""}`:"在线增强未配置"}</span>
+              ${dictionaryCheck?.status==="checking"?`<span class="pill amber">正在验证在线词典…</span>`:dictionaryCheck?.status==="passed"?`<span class="pill green">✓ ${escapeHtml(dictionaryCheck.message||"在线增强可用")}</span>`:dictionaryCheck?.status==="failed"?`<span class="pill red">! ${escapeHtml(dictionaryCheck.message||"在线增强验证失败")}</span>`:""}
+            </div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="输入词典服务密钥" />
-            <button class="btn primary" data-action="save-dictionary-key">保存</button>
-            <button class="btn" data-action="test-dictionary">验证</button>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+            <input class="input" id="mw-api-key" type="password" style="width:250px" placeholder="${dictKeySaved?"已保存密钥；输入新密钥可替换":"输入词典服务密钥"}" />
+            <button class="btn primary" data-action="save-dictionary-key">${dictKeySaved?"更新密钥":"保存密钥"}</button>
+            <button class="btn" data-action="test-dictionary" ${dictionaryCheck?.status==="checking"?"disabled":""}>${dictionaryCheck?.status==="checking"?"验证中…":"验证连接"}</button>
           </div>
         </div>
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:310px;flex:1">
             <h3>AI 辅助</h3>
-            <p>用于造句反馈、联想场景和图片生成。</p>
+            <p>用于整段表达查询、造句反馈、联想场景和图片生成。CLI 存在不等于真实连接成功，以“运行验证”为准。</p>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+              <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"CLI 已检测":"CLI 未检测"}</span>
+              <span class="pill ${codex?.authFound?"green":"red"}">${codex?.authFound?"已登录":"未检测到登录"}</span>
+              <span class="pill blue">模型 · ${escapeHtml(codex?.effectiveModel||selectedModel||"gpt-5.6-luna")}</span>
+              <span class="pill ${aiChecking?"amber":aiPassed?"green":aiFailed?"red":aiReadyForTest?"amber":"red"}">${aiChecking?"正在验证 AI…":aiPassed?"✓ 运行连接已验证":aiFailed?"! 运行连接失败":aiReadyForTest?"等待运行验证":"当前不可连接"}</span>
+            </div>
+            <div style="margin-top:8px;color:var(--muted);font-size:11px;line-height:1.55">${runtimeMessage?escapeHtml(runtimeMessage):"尚未进行真实 AI 请求验证。"}${runtimeAt?` · ${escapeHtml(formatCheckTime(runtimeAt))}`:""}${codex?.fastTextTransport?.state?` · Fast transport: ${escapeHtml(codex.fastTextTransport.state)}`:""}</div>
           </div>
           <div class="setting-actions-inline">
-            <span class="pill ${codex?.cliAvailable?"green":"red"}">${codex?.cliAvailable?"已连接":"未连接"}</span>
-            ${codex?.cliAvailable?"":`<button class="btn" data-action="test-codex-text">重新连接</button>`}
+            <button class="btn ${aiPassed?"":"primary"}" data-action="test-codex-text" ${aiChecking?"disabled":""}>${aiChecking?"正在检查…":aiPassed?"重新检查连接":"检查 AI 连接"}</button>
           </div>
         </div>
 
@@ -1472,10 +1500,17 @@
       return;
     }
     if(action==="test-dictionary"){
+      state.providerChecks.dictionary={status:"checking",message:"正在验证在线词典…",at:""};
+      render();
       try{
         const payload=await api("/api/dictionary/test",{method:"POST",body:{}});
-        toast(payload.message||"在线词典增强可用");
-      }catch(err){showErrorNotice(err,"在线词典增强连接没有成功");}
+        state.providerChecks.dictionary={status:"passed",message:payload.message||"在线词典增强可用",at:new Date().toISOString()};
+      }catch(err){
+        state.providerChecks.dictionary={status:"failed",message:err?.userError?.message||err?.message||"在线词典增强连接没有成功",at:new Date().toISOString()};
+      }finally{
+        await refreshProviderStatus(true);
+        render();
+      }
       return;
     }
 
@@ -1495,14 +1530,16 @@
       return;
     }
     if(action==="test-codex-text"){
-      toast("正在检查 AI 连接…");
+      state.providerChecks.ai={status:"checking",message:"正在发起真实 AI 请求…",at:""};
+      render();
       try{
         const payload=await api("/api/ai/test",{method:"POST",body:{}});
-        toast(payload.test?.message||"AI 连接正常");
+        state.providerChecks.ai={status:payload.test?.status==="passed"?"passed":"failed",message:payload.test?.message||"AI 连接正常",at:payload.test?.at||new Date().toISOString()};
       }catch(err){
-        showErrorNotice(err,"AI 连接检查失败");
+        state.providerChecks.ai={status:"failed",message:err?.userError?.message||err?.message||"AI 连接检查失败",at:new Date().toISOString()};
       }finally{
         await refreshProviderStatus(true);
+        render();
       }
       return;
     }

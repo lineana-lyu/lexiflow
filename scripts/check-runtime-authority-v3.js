@@ -147,7 +147,11 @@ assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state 
 assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membership; frozen DailyPlan is owned by V3");
 assert(!app.includes("const DICTIONARY ="),"app.js must not carry the retired in-memory demo dictionary");
 assert(!app.includes("Merriam-Webster Learner's Dictionary"),"app.js base Settings surface must not present the optional online fallback as the primary dictionary");
-assert(app.includes("基础查词可离线使用。连接在线词典后，可补充真人发音和更多例句。"),"app.js base Settings copy must describe local-first dictionary behavior");
+assert(app.includes("本地 Core + ECDICT 负责快速查词；在线词典只用于真人发音和例句增强。"),"Settings must explain the actual local-first dictionary architecture");
+assert(app.includes("dictMaskedKey")&&app.includes("在线密钥已保存")&&app.includes("本地词典已就绪"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
+assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在验证在线词典…")&&app.includes("在线增强验证失败"),"dictionary verification state must stay visibly persisted on the Settings page");
+assert(app.includes("CLI 已检测")&&app.includes("未检测到登录")&&app.includes("runtimeTest")&&app.includes("fastTextTransport"),"AI Settings must distinguish CLI, auth, real runtime verification, and fast transport state");
+assert(app.includes("正在发起真实 AI 请求…")&&app.includes("运行连接已验证")&&app.includes("运行连接失败"),"AI connection checks must have visible checking/success/failure states rather than toast-only feedback");
 for(const retiredSettingsSurface of ["<h3>AI 服务</h3>","<h3>模型与思考强度</h3>","<h3>图片生成</h3>","advanced-diagnostics"]){
   assert(!app.includes(retiredSettingsSurface),`app.js base Settings surface must not retain a runtime-removed legacy block: ${retiredSettingsSurface}`);
 }
