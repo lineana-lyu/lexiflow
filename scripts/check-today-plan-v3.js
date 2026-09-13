@@ -22,8 +22,12 @@ assert(source.includes('data-library-filter="${key}"'),"Word Library must own pe
 assert(source.includes("selectFromPending")&&source.includes("moveBackToPending"),"Word Library must explicitly own adding/removing Pending words from Today");
 assert(source.includes('authority:"today-plan-v3"'),"Today selection activities must record V3 authority");
 assert(source.includes("initialTaskIds=next.dailyPlan.initialTaskIds.filter"),"moving a selected word back to Pending must remove it from the frozen progress denominator");
-assert(source.includes("setTimeout(()=>void refreshAndDecorate(),180)"),"Today Plan V3 must settle-refresh after app-shell DOM changes rather than intercept persistence globally");
-assert(source.includes('window.addEventListener("focus"'),"Today Plan V3 must refresh after returning to the app");
-assert(source.includes('document.addEventListener("visibilitychange"'),"Today Plan V3 must refresh when the app becomes visible");
+assert(source.includes("function syncFromGateway"),"Today Plan V3 must share the Learning Data Gateway snapshot");
+assert(source.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Today decorators must prefer the gateway snapshot over another learning-data GET");
+assert(source.includes("syncFromGateway();\n      decorate();"),"MutationObserver scheduling must only sync/decorate from memory");
+assert(!source.includes("setTimeout(()=>void refreshAndDecorate(),180)"),"Today Plan must not refetch learning data after every app-shell DOM mutation");
+assert(source.includes('window.addEventListener("focus",()=>void refreshAndDecorate(true))'),"Today Plan V3 must force a fresh read after returning to the app");
+assert(source.includes('document.addEventListener("visibilitychange",()=>{if(!document.hidden)void refreshAndDecorate(true);})'),"Today Plan V3 must force a fresh read when the app becomes visible");
+assert(source.includes('window.addEventListener("lexiflow:today-plan-data",schedule)'),"Today writes must trigger an in-memory redraw rather than another GET");
 
 console.log("Today Plan V3 checks passed.");
