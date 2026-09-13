@@ -24,7 +24,13 @@
     notice: null,
     searchResolution: null,
     lookupAlternativesOpen: false,
+    addContext: null,
   };
+
+  window.addEventListener("lexiflow:add-context",event=>{
+    const source=String(event?.detail?.source||"");
+    state.addContext=source==="today-plan"?{source,date:String(event?.detail?.date||todayKey())}:null;
+  });
 
   function defaultData(){
     return {
@@ -74,6 +80,7 @@
         console.error("learning data save failed",err);
         if(!state.notice) showNotice("学习进度暂未保存","本机存储暂时不可用，请稍后重试。","error");
       });
+    return persistenceQueue;
   }
 
   async function hydrateLearningData(){
@@ -632,6 +639,11 @@
     if(await playNaturalTts(text))return;
     toast("当前没有可用的自然例句发音，请稍后重试");
   }
+
+  window.LexiFlowPronunciationV3=Object.freeze({
+    playWord:(word,audioUrl="",audioUrls=[])=>speak(word,audioUrl,audioUrls),
+    playSentence:sentence=>speakSentence(sentence),
+  });
 
   function highlightKeyword(text,keyword){
     const source=String(text||"");
@@ -1241,6 +1253,7 @@
   function bind(){
     document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{
       state.route=el.dataset.route;
+      if(state.route!=="add") state.addContext=null;
       if(state.route!=="library-edit") state.libraryEditor=null;
       if(state.route!=="study") state.study=null;
       render();
@@ -1569,8 +1582,31 @@
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
+      const plan=state.data.dailyPlan?.frozen===true&&state.data.dailyPlan?.date===todayKey()?state.data.dailyPlan:null;
+      const fromToday=state.addContext?.source==="today-plan"&&state.addContext?.date===todayKey();
+      const joinToday=Boolean(fromToday&&Number(plan?.remainingSelectSlots||0)>0);
       const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
-      state.data.cards.unshift(card);recordActivity("card-created",card.id);toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
+      if(joinToday){
+        card.inboxPending=false;
+        card.todaySelectedOn=todayKey();
+        card.selectedOn=todayKey();
+        card.inboxSelectedAt=now;
+        card.stageEligibleOn=now;
+      }
+      state.data.cards.unshift(card);
+      state.data.activities.push({id:uid(),type:"card-created",cardId:card.id,at:now});
+      if(joinToday)state.data.activities.push({id:uid(),type:"library-selected",cardId:card.id,at:now,authority:"today-intake-v4"});
+      await saveData();
+      state.lookup=null;state.selectedSenseId=null;state.addContext=null;state.route="home";
+      if(joinToday){
+        toast("已加入今日学习 · 现在确认词义");
+        render();
+        setTimeout(()=>window.LexiFlowStudySessionV3?.open?.(),0);
+      }else{
+        toast("已保存到单词库 · 待学习");
+        render();
+      }
+      return;
     }
     if(action==="continue-learning"){
       if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}

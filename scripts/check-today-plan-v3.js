@@ -24,6 +24,7 @@ assert(!source.includes("plan?.selectGoal||latestData?.settings?.dailyGoal"),"To
 assert(source.includes('data-library-filter="${key}"'),"Word Library must own pending/learning/stable filters");
 assert(source.includes("selectFromPending")&&source.includes("moveBackToPending"),"Word Library must explicitly own adding/removing Pending words from Today");
 assert(source.includes('authority:"today-plan-v3"'),"Today selection activities must record V3 authority");
+assert(source.includes("lexiflow:add-context")&&source.includes('source:"today-plan"'),"Today Add must mark a direct Today-intake context instead of forcing a Library confirmation round-trip");
 assert(source.includes("initialTaskIds=next.dailyPlan.initialTaskIds.filter"),"moving a selected word back to Pending must remove it from the frozen progress denominator");
 assert(source.includes("function syncFromGateway"),"Today Plan V3 must share the Learning Data Gateway snapshot");
 assert(source.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Today decorators must prefer the gateway snapshot over another learning-data GET");

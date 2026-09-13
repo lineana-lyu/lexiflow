@@ -227,6 +227,9 @@
     if(!routeButton)return false;
     const route=String(routeButton.dataset.route||"").trim();
     if(!route)return false;
+    if(route==="add"){
+      try{window.dispatchEvent(new CustomEvent("lexiflow:add-context",{detail:{source:"today-plan",date:core.dayKey(new Date())}}));}catch{}
+    }
     const appRoute=document.querySelector(`.nav [data-route="${CSS.escape(route)}"]`);
     if(!appRoute||appRoute===routeButton)return false;
     appRoute.click();
