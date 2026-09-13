@@ -21,8 +21,11 @@ assert(core,"learning core did not initialize");
 
 eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"Review ladder changed unexpectedly");
 eq(core.STABLE_INTERVALS,[30,45,68,90],"Stable ladder changed unexpectedly");
+eq(core.STABLE_WINDOWS,[2,3,4,5],"Stable maintenance windows changed unexpectedly");
 eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
-assert(core.PLAN_VERSION===4,"DailyPlan version must include the canonical learning-stage model");
+assert(core.PLAN_VERSION===5,"DailyPlan version must include Review V4 workload semantics");
+assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:1}).mode==="adaptive-v4","legacy Review cap settings must not override Review V4");
+assert(core.adaptiveNewWordGoal(3,17)===0,"heavy review pressure must pause new-word intake before dropping critical review");
 assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memorize2")==="memorize","legacy Memorize stages must collapse to one canonical stage");
 
 const index=read("public/index.html");

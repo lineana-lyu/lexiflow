@@ -19,6 +19,8 @@ assert(!source.includes("window.fetch =")&&!source.includes("window.fetch="),"To
 assert(!source.includes("response.clone().json"),"Today Plan V3 must not proxy arbitrary learning-data responses");
 assert(source.includes('if(!count)return ""'),"Today card must hide zero-count task rows");
 assert(source.includes('class="lexi-today-progress"'),"Today progress must remain integrated into the compact Today card");
+assert(source.includes("function effectiveSelectGoal(plan)"),"Today UI must preserve an adaptive selectGoal of zero instead of falling back to the configured daily goal");
+assert(!source.includes("plan?.selectGoal||latestData?.settings?.dailyGoal"),"Today UI must not treat adaptive zero new-word capacity as a missing value");
 assert(source.includes('data-library-filter="${key}"'),"Word Library must own pending/learning/stable filters");
 assert(source.includes("selectFromPending")&&source.includes("moveBackToPending"),"Word Library must explicitly own adding/removing Pending words from Today");
 assert(source.includes('authority:"today-plan-v3"'),"Today selection activities must record V3 authority");

@@ -67,7 +67,17 @@
   }
 
   function planSignature(plan){
-    return JSON.stringify({date:plan.date,review:plan.review,memorize:plan.memorize,visualize:plan.visualize,apply:plan.apply,select:plan.select,inbox:plan.inbox,goal:plan.selectGoal,remaining:plan.remainingSelectSlots,total:plan.taskTotal,done:plan.taskCompleted});
+    return JSON.stringify({date:plan.date,review:plan.review,memorize:plan.memorize,visualize:plan.visualize,apply:plan.apply,select:plan.select,inbox:plan.inbox,goal:plan.selectGoal,maxGoal:plan.selectMaxGoal,pressure:plan.reviewPressure,loadMode:plan.reviewLoadMode,remaining:plan.remainingSelectSlots,total:plan.taskTotal,done:plan.taskCompleted});
+  }
+  function effectiveSelectGoal(plan){
+    const raw=plan?.selectGoal;
+    if(raw!==undefined&&raw!==null)return Math.max(0,Number(raw)||0);
+    return Math.max(0,Number(latestData?.settings?.dailyGoal??3)||0);
+  }
+  function maxSelectGoal(plan){
+    const raw=plan?.selectMaxGoal;
+    if(raw!==undefined&&raw!==null)return Math.max(0,Number(raw)||0);
+    return Math.max(0,Number(latestData?.settings?.dailyGoal??3)||0);
   }
   function remainingCount(plan){return ["review","memorize","visualize","apply","select"].reduce((sum,key)=>sum+(Array.isArray(plan?.[key])?plan[key].length:0),0);}
   function rowHtml(key,name,count,next){
@@ -75,7 +85,7 @@
     return `<div class="lexi-plan-row ${next===key?"is-next":""}" data-plan-key="${key}"><span class="lexi-plan-name">${name}</span><span class="lexi-plan-count">${count} 个</span><span class="lexi-plan-next">${next===key?"下一项":""}</span></div>`;
   }
   function selectionGoalHtml(plan){
-    const goal=Math.max(0,Number(plan?.selectGoal||latestData?.settings?.dailyGoal||3));
+    const goal=effectiveSelectGoal(plan);
     const remaining=Math.max(0,Number(plan?.remainingSelectSlots||0));
     if(!goal||!remaining)return "";
     const selected=Math.max(0,goal-remaining);
@@ -105,10 +115,17 @@
       rowHtml("select","确认新词",plan.select.length,next),
       selectionGoalHtml(plan),
     ].join("");
-    const goal=Math.max(0,Number(plan.selectGoal||latestData?.settings?.dailyGoal||3));
+    const goal=effectiveSelectGoal(plan),maxGoal=maxSelectGoal(plan);
     const selected=Math.max(0,goal-selectRemaining);
+    const loadAdjusted=goal<maxGoal;
     const status=selectRemaining>0&&!remaining?`今日新词 ${selected} / ${goal}`:(total?`${completed} / ${total}`:(remaining?`剩余 ${remaining}`:"今日计划已完成"));
-    const note=remaining?"只显示今天仍需完成的任务。":selectRemaining>0?`今天最多选择 ${goal} 个新词；先从第 ${selected+1} 个开始，不会补昨天的数量。`:"今天没有剩余任务；明天会按当前学习状态重新安排。";
+    const note=remaining
+      ? (loadAdjusted?(goal===0?"今天复习负荷较高，新词暂缓；先完成已安排任务。":`今天复习负荷较高，新词上限由 ${maxGoal} 调整为 ${goal}；先完成已安排任务。`):"只显示今天仍需完成的任务。")
+      : selectRemaining>0
+        ? `今天最多选择 ${goal} 个新词；先从第 ${selected+1} 个开始，不会补昨天的数量。`
+        : loadAdjusted&&goal===0
+          ? "今天以复习为主，新词暂缓；明天会按新的复习负荷重新计算。"
+          : "今天没有剩余任务；明天会按当前学习状态重新安排。";
     return `<section class="lexi-today-plan" id="lexi-today-plan" data-signature="${esc(signature)}">
       <div class="lexi-today-head"><div><div class="lexi-today-title-line"><span class="lexi-today-kicker">TODAY</span><h2>今日学习</h2></div><p class="lexi-today-note">${note}</p></div><span class="lexi-today-progress-number">${esc(status)}</span></div>
       ${total?`<div class="lexi-today-progress" aria-label="今日进度 ${percent}%"><i style="width:${percent}%"></i></div>`:""}

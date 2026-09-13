@@ -17,66 +17,80 @@ const policyIndex=indexHtml.indexOf("review-policy-v3.js");
 const visualIndex=indexHtml.indexOf("visualize-actions-v3.js");
 assert(policyIndex>=0,"review-policy-v3.js must be loaded by index.html");
 assert(visualIndex>=0,"visualize-actions-v3.js must be loaded by index.html");
-assert(policyIndex<visualIndex,"Review policy controls must load before later stage decorators");
+assert(policyIndex<visualIndex,"Review workload surface must load before later stage decorators");
 assert(!indexHtml.includes('<script src="./review-policy-v2.js"></script>'),"retired Review Policy V2 must not return to runtime");
-assert(!indexHtml.includes('<script src="./visualize-v2.js"></script>'),"retired Visualize V2 actions must not return to runtime");
 
 const policyUi=fs.readFileSync(path.join(root,"public","review-policy-v3.js"),"utf8");
-assert(policyUi.includes("复习与巩固"),"settings must describe this layer as Review & Reinforcement");
-assert(policyUi.includes("1 → 3 → 7 → 16 → 21"),"settings must explain the deterministic reinforcement ladder");
-assert(policyUi.includes("30 → 45 → 68 → 90"),"settings must explain Stable maintenance intervals");
-assert(policyUi.includes("下一学习日必须再次验证"),"settings must explain next-day validation after a first-recall failure");
-assert(policyUi.includes("跟随系统安排"),"default daily review load must be framed as following the system schedule");
-assert(!policyUi.includes("复习方式"),"review method customization must be removed from the normal settings surface");
-assert(!policyUi.includes("高级设置"),"question-type advanced settings must be removed from the settings surface");
-assert(!policyUi.includes("data-review-weight"),"question-type weights must no longer be user-editable");
-assert(!policyUi.includes("data-review-type"),"question-type toggles must no longer be user-editable");
-assert(policyUi.includes("function settingsSignature"),"Review settings decorator must have a stable render signature");
-assert(policyUi.includes("row?.dataset.reviewPolicySignature===signature"),"Review settings decorator must skip identical rerenders to avoid MutationObserver loops");
-assert(policyUi.includes("next.dataset.reviewPolicySignature=signature"),"Review settings row must persist its render signature");
-assert(policyUi.includes("function syncFromGateway"),"Review Policy V3 must read the shared Learning Data Gateway snapshot");
-assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review Policy V3 must prefer the gateway snapshot over DOM-triggered GETs");
-assert(policyUi.includes('requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});'),"Review Policy MutationObserver must only sync/decorate and must not refetch learning data on every DOM mutation");
-assert(!policyUi.includes('requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});'),"Review Policy must not restore mutation-driven network refreshes");
-assert(policyUi.includes('reviewPolicyAuthority:"v3"'),"Review setting writes must declare V3 authority");
-assert(policyUi.includes("if(!syncFromGateway())latestData=core.normalizeData(next);"),"Review Policy must continue from the Gateway-confirmed persisted snapshot after a successful write");
+assert(policyUi.includes("复习与学习负荷"),"settings must describe Review V4 as a workload policy rather than a manual cap");
+assert(policyUi.includes("关键复习到期全部安排"),"settings must explain that critical due reviews are protected");
+assert(policyUi.includes("±2 / ±3 / ±4 / ±5"),"settings must explain bounded Stable maintenance windows");
+assert(policyUi.includes("今日新词"),"settings must expose adaptive new-word intake");
+assert(!policyUi.includes("data-review-mode")&&!policyUi.includes("review-custom-cap"),"Review V4 must remove manual all/custom/intelligent controls");
+assert(!policyUi.includes("persistSettings")&&!policyUi.includes('reviewPolicyAuthority:"v3"'),"Review V4 surface must be read-only; Learning Core owns workload policy");
+assert(policyUi.includes("function syncFromGateway"),"Review workload surface must reuse the shared Learning Data Gateway snapshot");
+assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review workload surface must prefer the gateway snapshot over mutation-driven GETs");
+assert(policyUi.includes('requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});'),"Review workload MutationObserver must decorate from memory");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
-function dueCards(n){return Array.from({length:n},(_,i)=>({id:`r${String(i+1).padStart(2,"0")}`,stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:d1.toISOString(),createdAt:new Date(2026,7,1,i,0,0,0).toISOString()}));}
+function criticalCards(n,due=d1){return Array.from({length:n},(_,i)=>({id:`c${String(i+1).padStart(2,"0")}`,stage:"review",memoryState:"reinforcing",reviewStep:i%5,nextReviewAt:due.toISOString(),createdAt:new Date(2026,7,1,0,i,0,0).toISOString()}));}
+function stableCards(n,due=d1,stableStep=0,prefix="s"){return Array.from({length:n},(_,i)=>({id:`${prefix}${String(i+1).padStart(2,"0")}`,stage:"review",memoryState:"stable",reviewStep:4,stableStep,nextReviewAt:due.toISOString(),createdAt:new Date(2026,6,1,0,i,0,0).toISOString()}));}
 
-let data=core.normalizeData({settings:{},cards:dueCards(37)},d1);
-assert(data.dailyPlan.reviewMode==="intelligent","default Review mode must be intelligent");
-assert(data.dailyPlan.reviewCap===20,"default intelligent Review cap must be 20");
-assert(data.dailyPlan.review.length===20,"intelligent mode must cap Today Review at 20");
-assert(data.dailyPlan.reviewDueTotal===37&&data.dailyPlan.reviewDeferredCount===17,"Review plan must expose scheduled vs due totals");
+assert(core.PLAN_VERSION===5,"Review V4 must bump DailyPlan version to 5");
+eq(core.STABLE_WINDOWS,[2,3,4,5],"Stable maintenance windows must match 30/45/68/90-day ladder tolerance");
+assert(core.reviewPolicy({reviewMode:"all",reviewCustomCap:1}).mode==="adaptive-v4","legacy Review mode settings must no longer control scheduling");
+assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:1}).cap===null,"Review V4 must have no hard critical-review cap");
 
-data=core.normalizeData({settings:{reviewMode:"all"},cards:dueCards(37)},d1);
-assert(data.dailyPlan.reviewMode==="all"&&data.dailyPlan.reviewCap===null,"ALL mode must have no cap");
-assert(data.dailyPlan.review.length===37&&data.dailyPlan.reviewDeferredCount===0,"ALL mode must schedule every due item");
+let data=core.normalizeData({settings:{dailyGoal:3},cards:criticalCards(37)},d1);
+assert(data.dailyPlan.reviewMode==="adaptive-v4"&&data.dailyPlan.reviewCap===null,"Review V4 must advertise adaptive workload with no hard cap");
+assert(data.dailyPlan.review.length===37,"all 37 critical due reviews must remain in Today");
+assert(data.dailyPlan.reviewCriticalCount===37,"critical review count must be explicit");
+assert(data.dailyPlan.reviewDeferredCount===0&&data.dailyPlan.reviewStableDeferredCount===0,"critical review must never be reported as deferred");
+assert(data.dailyPlan.selectGoal===0&&data.dailyPlan.remainingSelectSlots===0,"heavy Review load must pause new-word intake before dropping critical reviews");
+assert(data.dailyPlan.noReviewDebt===true,"Review V4 must not manufacture duplicate review debt");
 
-data=core.normalizeData({settings:{reviewMode:"custom",reviewCustomCap:7},cards:dueCards(37)},d1);
-assert(data.dailyPlan.reviewMode==="custom"&&data.dailyPlan.reviewCap===7,"custom mode must preserve selected cap");
-assert(data.dailyPlan.review.length===7&&data.dailyPlan.reviewDeferredCount===30,"custom mode must cap scheduled Review items");
+for(const [count,goal] of [[8,3],[9,2],[13,1],[17,0]]){
+  const sample=core.normalizeData({settings:{dailyGoal:3},cards:criticalCards(count)},d1);
+  assert(sample.dailyPlan.selectGoal===goal,`critical Review pressure ${count} should adapt new-word goal to ${goal}`);
+}
+assert(core.adaptiveNewWordGoal(6,9)===4,"9-12 scheduled reviews should reduce a 6-word goal to about two-thirds");
+assert(core.adaptiveNewWordGoal(6,13)===2,"13-16 scheduled reviews should reduce a 6-word goal to about one-third");
+assert(core.adaptiveNewWordGoal(6,17)===0,"17+ scheduled reviews should pause new words");
 
-const frozen=data.dailyPlan;
-const changedSameDay=core.normalizeData({settings:{reviewMode:"all"},cards:dueCards(37),dailyPlan:frozen},new Date(2026,8,1,18,0,0,0));
-eq(changedSameDay.dailyPlan.review,frozen.review,"changing Review settings must not mutate same-day frozen Review membership");
-assert(changedSameDay.dailyPlan.reviewMode==="custom"&&changedSameDay.dailyPlan.reviewCap===7,"same-day frozen Review policy metadata must remain stable");
+const stableDue=core.normalizeData({settings:{dailyGoal:3},cards:stableCards(10,d1)},d1);
+assert(stableDue.dailyPlan.review.length===6,"Stable due maintenance may be smoothed to the normal daily target");
+assert(stableDue.dailyPlan.reviewStableScheduledCount===6&&stableDue.dailyPlan.reviewStableDeferredCount===4,"Stable smoothing must expose scheduled and deferred maintenance counts");
+assert(stableDue.dailyPlan.reviewCriticalCount===0,"Stable maintenance must not be misclassified as critical review");
+assert(stableDue.dailyPlan.selectGoal===3,"six Stable maintenance items should not reduce the default new-word goal");
 
-const nextDayCards=dueCards(37).map(card=>({...card,nextReviewAt:d2.toISOString()}));
-const changedNextDay=core.normalizeData({settings:{reviewMode:"all"},cards:nextDayCards,dailyPlan:frozen},d2);
-assert(changedNextDay.dailyPlan.date==="2026-09-02","next StudyDay must rebuild DailyPlan");
-assert(changedNextDay.dailyPlan.reviewMode==="all"&&changedNextDay.dailyPlan.review.length===37,"new StudyDay must apply latest Review settings");
+const nearDate=new Date(d1);nearDate.setDate(nearDate.getDate()+2);
+const stableNear=core.normalizeData({settings:{dailyGoal:3},cards:stableCards(4,nearDate,0,"n")},d1);
+assert(stableNear.dailyPlan.review.length===4,"Stable maintenance may be pulled forward inside its safe window");
+assert(stableNear.dailyPlan.reviewStablePulledForwardCount===4,"pulled-forward Stable count must be explicit");
+assert(stableNear.dailyPlan.reviewDueTotal===0,"pulled-forward Stable work is planned maintenance, not falsely labelled overdue");
 
-const planned=new Set(frozen.review);
-const sorted=changedSameDay.cards.filter(card=>card.stage==="review");
-const firstDeferred=sorted.findIndex(card=>!planned.has(card.id));
-assert(firstDeferred===7,"planned Review items must sort before deferred due items so runtime cannot consume extras first");
-assert(sorted.slice(0,7).every(card=>planned.has(card.id)),"first Review cards must all belong to the frozen plan");
+const urgentDate=new Date(d1);urgentDate.setDate(urgentDate.getDate()-3);
+const stableUrgent=core.normalizeData({settings:{dailyGoal:3},cards:stableCards(8,urgentDate,0,"u")},d1);
+assert(stableUrgent.dailyPlan.review.length===8,"Stable items beyond the ±2-day window must all become urgent");
+assert(stableUrgent.dailyPlan.reviewStableUrgentCount===8&&stableUrgent.dailyPlan.reviewStableDeferredCount===0,"urgent Stable work must not be deferred again");
 
-assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:0}).cap===1,"custom Review cap must clamp to at least 1");
-assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:999}).cap===200,"custom Review cap must clamp to 200");
-assert(core.reviewPolicy({reviewMode:"unknown"}).mode==="intelligent","unknown Review mode must fall back to intelligent");
+const legacyCards=criticalCards(37);
+const legacyIds=legacyCards.slice(0,20).map(card=>card.id);
+const legacyPlan={
+  date:"2026-09-01",generatedAt:d1.toISOString(),planVersion:4,frozen:true,noVocabularyDebt:true,
+  review:legacyIds,memorize:[],visualize:[],apply:[],select:[],inbox:[],reviewMode:"intelligent",reviewCap:20,
+  reviewDueTotal:37,reviewDeferredCount:17,selectGoal:3,selectedToday:[],remainingSelectSlots:3,
+  initialTaskIds:legacyIds,taskTotal:20,taskRemaining:20,taskCompleted:0,taskProgressPercent:0,
+};
+const sameDay=core.normalizeData({settings:{dailyGoal:3},cards:legacyCards,dailyPlan:legacyPlan},new Date(2026,8,1,18,0,0,0));
+eq(sameDay.dailyPlan.review,legacyIds,"upgrading Review policy must not rewrite an already-frozen same-day queue");
+assert(sameDay.dailyPlan.selectGoal===3,"same-day frozen new-word allowance must remain stable during upgrade");
+assert(sameDay.dailyPlan.reviewLoadMode==="frozen-legacy","same-day legacy plan must be visibly marked as frozen legacy behavior");
 
-console.log("Review Policy V3 checks passed.");
+const nextDayCards=criticalCards(37,d2);
+const nextDay=core.normalizeData({settings:{dailyGoal:3},cards:nextDayCards,dailyPlan:sameDay.dailyPlan},d2);
+assert(nextDay.dailyPlan.review.length===37,"next StudyDay must activate Review V4 and protect every critical due item");
+assert(nextDay.dailyPlan.selectGoal===0,"next StudyDay must reduce new-word intake under heavy review pressure");
+assert(nextDay.dailyPlan.reviewLoadMode==="adaptive-v4","new StudyDay must leave frozen-legacy mode");
+
+console.log("Review workload V4 checks passed.");

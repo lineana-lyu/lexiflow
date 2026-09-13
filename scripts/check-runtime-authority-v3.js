@@ -69,8 +69,9 @@ assert(!gateway.includes("/api/ai/visual-scene"),"Learning Data Gateway V3 must 
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
 assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
-assert(reviewPolicy.includes("复习与巩固"),"Review Policy V3 must expose the simplified Review & Reinforcement settings surface");
-assert(!reviewPolicy.includes("复习方式")&&!reviewPolicy.includes("data-review-type"),"Review Policy V3 must not restore user-configurable question methods");
+assert(reviewPolicy.includes("复习与学习负荷"),"Review workload surface must expose Review V4 load adaptation");
+assert(reviewPolicy.includes("关键复习到期全部安排")&&reviewPolicy.includes("±2 / ±3 / ±4 / ±5"),"Review V4 surface must explain protected critical reviews and bounded Stable smoothing");
+assert(!reviewPolicy.includes("data-review-mode")&&!reviewPolicy.includes("review-custom-cap")&&!reviewPolicy.includes("persistSettings"),"Review V4 must not restore manual daily Review caps or a second settings writer");
 assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit current card identity");
 assert(applyGuard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 must validate canonical Apply stage identity");
 assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer card identity from rendered word text");
@@ -103,6 +104,8 @@ assert(reviewSession.includes('data-r3="rate"'),"Review Session V3 must own rati
 assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session V3 must not depend on legacy review-rate controls");
 assert(reviewSession.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review Session V3 must expose a narrow runtime bridge");
 assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app Review entry fallback must delegate to Review Session V3");
+assert(!app.includes('reviewMode==="all"')&&!app.includes('reviewMode==="custom"'),"app Review page must not display retired all/custom cap modes after Review V4");
+assert(app.includes("自适应负荷")&&app.includes("关键复习不截断"),"app Review page must describe the active V4 workload policy");
 for(const legacy of ["function startReview(","function reviewSessionPage(","function rateReview(","function stageInitialReview(","function enterInitialReview(","function finishInitialReview("]){assert(!app.includes(legacy),`legacy Review implementation must be removed from app.js: ${legacy}`);}
 assert(!app.includes("reviewQueue"),"app.js must not keep a second Review queue");
 assert(!app.includes("reviewIndex"),"app.js must not keep a second Review cursor");

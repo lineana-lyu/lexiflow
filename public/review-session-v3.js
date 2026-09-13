@@ -61,9 +61,12 @@
   function plannedQueue(){
     const plan=data?.dailyPlan;
     if(!plan||plan.date!==today()||plan.frozen!==true||!Array.isArray(plan.review))return[];
+    // Frozen DailyPlan membership is authoritative. Review V4 may deliberately
+    // pull Stable maintenance slightly forward inside its safe window, so the
+    // session must not re-run an `isDue()` gate and silently drop planned work.
     return plan.review.filter(id=>{
       const card=cardById(id);
-      return card&&card.stage==="review"&&core.isDue(card,new Date());
+      return card&&core.canonicalStage(card)==="review";
     });
   }
 

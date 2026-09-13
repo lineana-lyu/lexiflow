@@ -760,17 +760,20 @@
     const plan=currentDailyPlan();
     const due=planCards("review");
     const stable=stableCount();
-    const reviewMode=String(plan?.reviewMode||"intelligent");
-    const modeLabel=reviewMode==="all"?"全部到期":reviewMode==="custom"?`自定义上限 ${plan?.reviewCap||""}`:"智能安排";
+    const critical=Math.max(0,Number(plan?.reviewCriticalCount||0));
+    const stableScheduled=Math.max(0,Number(plan?.reviewStableScheduledCount||0));
+    const legacyFrozen=plan?.reviewLoadMode==="frozen-legacy";
+    const loadLabel=legacyFrozen?"沿用今日冻结计划":"自适应负荷";
+    const todayHint=legacyFrozen?"升级前队列保持不变":`${critical} 个关键 · ${stableScheduled} 个稳定维护`;
     return shell(
       header("LEXIFLOW · REVIEW","复习中心","只处理 Today Plan 已冻结的 Review 队列。",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
       + `<div class="grid cols-3">
-        <div class="card stat"><div class="stat-label">今日复习</div><div class="stat-value">${due.length}</div><div class="stat-hint">Today Plan 已安排</div></div>
+        <div class="card stat"><div class="stat-label">今日复习</div><div class="stat-value">${due.length}</div><div class="stat-hint">${escapeHtml(todayHint)}</div></div>
         <div class="card stat"><div class="stat-label">累计复习</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有主动回忆记录</div></div>
-        <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stable}</div><div class="stat-hint">${escapeHtml(modeLabel)}</div></div>
+        <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stable}</div><div class="stat-hint">${escapeHtml(loadLabel)} · 关键复习不截断</div></div>
       </div>
       <div class="section card pad">${due.length?`<div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>中文释义</th><th>复习次数</th><th>计划日期</th></tr></thead><tbody>${due.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic))}</div></td><td>${escapeHtml(c.meaningZh)}</td><td>${c.reviewCount||0}</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td></tr>`).join("")}</tbody></table></div>`
-      :`<div class="empty"><div class="empty-icon">✓</div><strong>今天没有安排复习</strong><span>复习只从当天冻结的 Today Plan 进入；没有补作业，也不会形成词汇债。</span></div>`}</div>`
+      :`<div class="empty"><div class="empty-icon">✓</div><strong>今天没有安排复习</strong><span>复习只从当天冻结的 Today Plan 进入；关键复习不会因数量上限被丢弃。</span></div>`}</div>`
     );
   }
 

@@ -59,6 +59,10 @@ Missing previous days must not create accumulated new-word debt.
 
 A new StudyDay is built from the learner's current real state. Due Review remains important, but missed daily new-word quotas are not multiplied into a large mandatory backlog.
 
+Review workload is protected before new-word intake. Due Review Again and reinforcing Review on the 1 -> 3 -> 7 -> 16 -> 21 ladder must not be dropped by a fixed daily count cap. When Review pressure is high, the system reduces or pauses that StudyDay's new-word allowance first. Stable maintenance may be shifted only within its bounded maintenance window so the system can smooth workload without weakening early memory consolidation.
+
+This workload adaptation is deterministic Learning Core behavior. AI must not choose the cap, the shifted date, the new-word allowance, or which Review cards enter Today.
+
 The same day's DailyPlan is frozen and idempotent once created.
 
 ## 5. Select
@@ -149,7 +153,13 @@ After successful long-term progression, the card may enter Stable maintenance:
 
 `30 -> 45 -> 68 -> 90`
 
-Review membership comes from the frozen DailyPlan.
+Stable maintenance is allowed a bounded workload-smoothing window around those targets:
+
+`30 ± 2 -> 45 ± 3 -> 68 ± 4 -> 90 ± 5`
+
+The window is not permission to postpone critical reinforcement. Review Again and reinforcing Review remain protected when due; only Stable maintenance may move inside its window. If Stable maintenance passes beyond its window, it becomes urgent and must be included.
+
+Review membership comes from the frozen DailyPlan. Review Session executes that membership exactly and must not perform a second due-date filter that can remove a planned Stable maintenance item.
 
 The first active recall controls long-term progression. A first failure enters Review Again. At most one same-day repair is allowed, preferably with a different recall type when another valid type exists. Same-day repair success does not immediately restore a long interval; the next learning day must validate the failed item again.
 
