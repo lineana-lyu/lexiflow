@@ -68,4 +68,4 @@ jobs:
           git add $FILES
           git commit -m "feat: polish user-facing settings and learning stats"
           git push origin HEAD:tmp-v7-user-surface-polish
-# rerun after learner-facing Voice Settings contract alignment
+# rerun after historical stage identifier cleanup
