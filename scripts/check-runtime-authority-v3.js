@@ -154,7 +154,8 @@ const productUx=read("public/product-ux.js");
 for(const retiredDecorator of ["decorateDictionarySettings","mergeAiSettings","ai-unified-setting"]){
   assert(!productUx.includes(retiredDecorator),`product-ux must not retain a Settings decorator whose source structure no longer exists: ${retiredDecorator}`);
 }
-assert(productUx.includes("decorateDailyGoal"),"product-ux must retain the active daily-goal enhancement");
+assert(!productUx.includes("decorateDailyGoal")&&!productUx.includes("CUSTOM_GOAL_KEY")&&!productUx.includes('/api/learning-data'),"product-ux must not own Daily Goal state or duplicate learning-data reads");
+assert(app.includes('data-daily-goal-editor')&&app.includes('data-daily-goal-step="-1"')&&app.includes('data-daily-goal-step="1"'),"app.js must natively own the Daily Goal number editor");
 assert(!productUx.includes("applyAppIcon")&&!productUx.includes("APP_ICON_URL"),"product-ux must not patch the static brand icon after render");
 assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must natively render the approved LexiFlow brand icon");
 assert(index.includes('<link rel="icon" type="image/png" href="./icon.png" />'),"index favicon must keep the approved LexiFlow icon asset");

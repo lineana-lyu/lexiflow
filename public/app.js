@@ -993,7 +993,11 @@
 
         <div class="setting-row">
           <div><h3>每日学习目标</h3><p></p></div>
-          <select class="select" id="daily-goal" style="width:130px">${[3,5,8,10,15].map(n=>`<option value="${n}" ${state.data.settings.dailyGoal===n?"selected":""}>${n} 个词</option>`).join("")}</select>
+          <div class="daily-goal-editor" data-daily-goal-editor>
+            <button type="button" class="goal-step" data-daily-goal-step="-1" aria-label="减少每日学习目标">−</button>
+            <label><input id="daily-goal" class="daily-goal-number" type="number" min="1" max="100" step="1" value="${Math.max(1,Math.min(100,Math.round(Number(state.data.settings.dailyGoal||3))))}" aria-label="每日学习目标"><span>个词 / 天</span></label>
+            <button type="button" class="goal-step" data-daily-goal-step="1" aria-label="增加每日学习目标">＋</button>
+          </div>
         </div>
 
         <div class="setting-row" style="align-items:flex-start">
@@ -1233,7 +1237,28 @@
     });
 
     const goal=document.getElementById("daily-goal");
-    if(goal) goal.addEventListener("change",e=>{state.data.settings.dailyGoal=Number(e.target.value);saveData();toast("每日目标已更新");});
+    if(goal){
+      const commitGoal=()=>{
+        let value=Math.round(Number(goal.value||state.data.settings.dailyGoal||3));
+        value=Math.max(1,Math.min(100,Number.isFinite(value)?value:3));
+        goal.value=String(value);
+        state.data.settings.dailyGoal=value;
+        saveData();
+        toast("每日目标已更新");
+      };
+      goal.addEventListener("change",commitGoal);
+      goal.addEventListener("keydown",event=>{
+        if(event.key!=="Enter")return;
+        event.preventDefault();
+        commitGoal();
+      });
+      document.querySelectorAll("[data-daily-goal-step]").forEach(button=>button.addEventListener("click",()=>{
+        const step=Number(button.dataset.dailyGoalStep||0);
+        const current=Number(goal.value||state.data.settings.dailyGoal||3);
+        goal.value=String(Math.max(1,Math.min(100,Math.round((Number.isFinite(current)?current:3)+step))));
+        commitGoal();
+      }));
+    }
 
     const ttsVoice=document.getElementById("tts-voice");
     if(ttsVoice) ttsVoice.addEventListener("change",e=>{

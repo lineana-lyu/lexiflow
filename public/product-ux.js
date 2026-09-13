@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  const CUSTOM_GOAL_KEY = "lexiflow-daily-goal-custom-v1";
   let scheduled = false;
 
   function speakerSvg() {
@@ -26,70 +25,6 @@
         window.setTimeout(() => button.classList.remove("lexi-speaker-playing"), 1500);
       });
     });
-  }
-
-  function rowByTitle(list, title) {
-    return Array.from(list.querySelectorAll(":scope > .setting-row")).find(row => row.querySelector("h3")?.textContent.trim() === title) || null;
-  }
-
-  function decorateDailyGoal(list) {
-    const row = rowByTitle(list, "每日学习目标");
-    if (!row || row.querySelector(".daily-goal-number")) return;
-    const select = row.querySelector("#daily-goal");
-    if (!select) return;
-
-    select.classList.add("daily-goal-native-select");
-    select.setAttribute("aria-hidden", "true");
-    select.tabIndex = -1;
-
-    const stored = Number(localStorage.getItem(CUSTOM_GOAL_KEY));
-    let initial = Number.isFinite(stored) && stored >= 1 ? stored : Number(select.value || 3);
-    if (!Number.isFinite(initial) || initial < 1) initial = 3;
-
-    const editor = document.createElement("div");
-    editor.className = "daily-goal-editor";
-    editor.innerHTML = `<button type="button" class="goal-step" data-step="-1" aria-label="减少每日目标">−</button><label><input class="daily-goal-number" type="number" min="1" max="100" step="1" value="${Math.round(initial)}" aria-label="每日学习目标"><span>个词 / 天</span></label><button type="button" class="goal-step" data-step="1" aria-label="增加每日目标">＋</button>`;
-    select.insertAdjacentElement("beforebegin", editor);
-
-    const input = editor.querySelector(".daily-goal-number");
-    const commit = () => {
-      let value = Math.round(Number(input.value || 3));
-      value = Math.max(1, Math.min(100, Number.isFinite(value) ? value : 3));
-      input.value = String(value);
-      try { localStorage.setItem(CUSTOM_GOAL_KEY, String(value)); } catch {}
-      let option = Array.from(select.options).find(item => Number(item.value) === value);
-      if (!option) {
-        option = new Option(`${value} 个词`, String(value));
-        select.appendChild(option);
-      }
-      select.value = String(value);
-      select.dispatchEvent(new Event("change", { bubbles: true }));
-    };
-
-    input.addEventListener("change", commit);
-    input.addEventListener("keydown", event => {
-      if (event.key === "Enter") { event.preventDefault(); input.blur(); commit(); }
-    });
-    editor.querySelectorAll(".goal-step").forEach(button => button.addEventListener("click", () => {
-      input.value = String(Math.max(1, Math.min(100, Number(input.value || 3) + Number(button.dataset.step || 0))));
-      commit();
-    }));
-
-    fetch("/api/learning-data", { method: "GET", cache: "no-store" })
-      .then(response => response.ok ? response.json() : null)
-      .then(payload => {
-        const current = Number(payload?.data?.settings?.dailyGoal);
-        if (!Number.isFinite(current) || current < 1 || !document.body.contains(input)) return;
-        input.value = String(Math.round(current));
-        try { localStorage.setItem(CUSTOM_GOAL_KEY, String(Math.round(current))); } catch {}
-      })
-      .catch(() => {});
-  }
-
-  function decorateSettings() {
-    const list = document.querySelector(".settings-list");
-    if (!list) return;
-    decorateDailyGoal(list);
   }
 
   function extractJobWord(pill) {
@@ -127,7 +62,6 @@
 
   function decorate() {
     decorateSpeakers();
-    decorateSettings();
   }
 
   function scheduleDecorate() {

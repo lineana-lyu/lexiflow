@@ -56,6 +56,9 @@ assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"
 assert(productCss.includes(".brand .logo.lexi-brand-icon"),"canonical product UX CSS must own app icon styling");
 assert(!product.includes("window.fetch ="),"product UX must not rewrite global fetch; Learning Data Gateway V3 owns learning-data transport observation");
 assert(!product.includes("cloneJsonResponse"),"new-user defaults must not be implemented by product-level response rewriting");
+assert(!product.includes("CUSTOM_GOAL_KEY")&&!product.includes("decorateDailyGoal"),"product UX must not mirror Daily Goal state outside app.js");
+assert(!product.includes('/api/learning-data'),"product UX must not issue learning-data reads for presentation decoration");
+assert(app.includes('data-daily-goal-editor')&&app.includes('id="daily-goal"'),"app.js must directly render the Daily Goal editor");
 
 assert(runtime.includes("transport-only"),"runtime compatibility must stay transport-only");
 assert(!runtime.includes("MutationObserver"),"runtime compatibility must not decorate stage DOM through a global observer");
