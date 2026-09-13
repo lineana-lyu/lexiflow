@@ -20,7 +20,7 @@ jobs:
           ref: feat/v7-airy-luminous-ui
           fetch-depth: 0
       - name: Remove retired stage event layer
-        run: python scripts/cleanup-legacy-stage-events.py
+        run: python scripts/run-cleanup-legacy-stage-events.py
       - name: Verify cleanup
         run: |
           node --check public/app.js
