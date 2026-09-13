@@ -10,6 +10,7 @@ const index=read("public/index.html");
 const source=read("public/learning-data-gateway-v3.js");
 const sourceContext=read("public/source-context-v3.js");
 const app=read("public/app.js");
+const newUserDefaults=read("public/new-user-defaults-v3.js");
 
 assert(index.includes('<script src="./learning-core-v3.js"></script>'),"Learning Core V3 must be active");
 assert(!index.includes('<script src="./learning-core-v2.js"></script>'),"Learning Core V2 must not remain in the runtime load chain");
@@ -50,6 +51,8 @@ assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Sou
 assert(sourceContext.includes("pendingDraftCardIds"),"Source Context must track draft attachment until persistence succeeds");
 assert(app.includes("learningDataGateway.registerAfterPersist")&&app.includes("state.data=normalizeLearningData(snapshot)"),"base app state must follow Gateway-confirmed persistence so generic full-data saves cannot revive a stale snapshot");
 assert(app.includes('appShellAuthority:"v1"'),"base app learning-data writes must identify their authority for persistence diagnostics");
+assert(app.includes('reason:"legacy-browser-migration"'),"legacy browser-data import must identify its one-time migration reason");
+assert(newUserDefaults.includes('newUserDefaultsAuthority:"v3"'),"fresh-user defaults must identify their learning-data writer authority");
 assert(!app.includes('navigator.sendBeacon("/api/learning-data"'),"base app must not bypass the Learning Data Gateway with a direct learning-data beacon");
 assert(app.includes('void fetch("/api/learning-data"')&&app.includes("keepalive:true")&&app.includes('reason:"beforeunload"'),"beforeunload persistence must stay on the Gateway-observed fetch path while requesting keepalive delivery");
 assert(!app.includes('recordActivity("card-created",card.id);saveData();'),"new-card creation must not enqueue a duplicate whole-data save after recordActivity already persists the mutation");

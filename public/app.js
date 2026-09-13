@@ -82,7 +82,7 @@
       state.data=normalizeLearningData(payload.data);
     }else if(legacy && (legacy.cards.length||legacy.activities.length)){
       state.data=legacy;
-      await api("/api/learning-data",{method:"POST",body:{data:state.data}});
+      await api("/api/learning-data",{method:"POST",body:{data:state.data,appShellAuthority:"v1",reason:"legacy-browser-migration"}});
       try{localStorage.removeItem(STORAGE_KEY);}catch{}
     }else{
       state.data=normalizeLearningData(payload.data);

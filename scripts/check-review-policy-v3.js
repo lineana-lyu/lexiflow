@@ -39,6 +39,7 @@ assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review P
 assert(policyUi.includes('requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});'),"Review Policy MutationObserver must only sync/decorate and must not refetch learning data on every DOM mutation");
 assert(!policyUi.includes('requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});'),"Review Policy must not restore mutation-driven network refreshes");
 assert(policyUi.includes('reviewPolicyAuthority:"v3"'),"Review setting writes must declare V3 authority");
+assert(policyUi.includes("if(!syncFromGateway())latestData=core.normalizeData(next);"),"Review Policy must continue from the Gateway-confirmed persisted snapshot after a successful write");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);

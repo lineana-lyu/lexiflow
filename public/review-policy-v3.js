@@ -63,7 +63,7 @@
         body:JSON.stringify({data:next,reviewPolicyAuthority:"v3"}),
       });
       if(!response.ok)throw new Error("SAVE_FAILED");
-      latestData=core.normalizeData(next);
+      if(!syncFromGateway())latestData=core.normalizeData(next);
       latestData.settings=normalizeSettings(latestData.settings||{});
       decorate();
       try{window.dispatchEvent(new CustomEvent("lexiflow:review-policy-data",{detail:{reviewMode:latestData.settings.reviewMode}}));}catch{}

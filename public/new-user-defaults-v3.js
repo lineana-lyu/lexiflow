@@ -20,7 +20,7 @@
       const saved=await fetch("/api/learning-data",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({data}),
+        body:JSON.stringify({data,newUserDefaultsAuthority:"v3"}),
       });
       if(!saved.ok)return;
       mark();
