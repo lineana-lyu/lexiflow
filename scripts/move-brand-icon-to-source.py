@@ -1,6 +1,6 @@
 from pathlib import Path
 
-ICON='./icon.png?v=20260911-icon3'
+ICON='./icon.png'
 
 app_path=Path("public/app.js")
 app=app_path.read_text(encoding="utf-8")
@@ -18,16 +18,13 @@ app_path.write_text(app,encoding="utf-8")
 
 index_path=Path("public/index.html")
 index=index_path.read_text(encoding="utf-8")
-old_favicon='<link rel="icon" type="image/png" href="./icon.png" />'
-new_favicon=f'<link rel="icon" type="image/png" href="{ICON}" />'
-if index.count(old_favicon)!=1:
-    raise SystemExit(f"favicon source count was {index.count(old_favicon)}")
-index=index.replace(old_favicon,new_favicon,1)
-index_path.write_text(index,encoding="utf-8")
+approved_favicon='<link rel="icon" type="image/png" href="./icon.png" />'
+if index.count(approved_favicon)!=1:
+    raise SystemExit(f"approved favicon source count was {index.count(approved_favicon)}")
 
 ux_path=Path("public/product-ux.js")
 ux=ux_path.read_text(encoding="utf-8")
-const_line=f'  const APP_ICON_URL = "{ICON}";\n'
+const_line='  const APP_ICON_URL = "./icon.png?v=20260911-icon3";\n'
 if ux.count(const_line)!=1:
     raise SystemExit(f"APP_ICON_URL declaration count was {ux.count(const_line)}")
 ux=ux.replace(const_line,"",1)
@@ -49,10 +46,27 @@ for required in ["decorateSpeakers","decorateDailyGoal","openImageWorkspaceFromJ
         raise SystemExit(f"active Product UX capability missing: {required}")
 ux_path.write_text(ux,encoding="utf-8")
 
+# Move the existing runtime-cleanup contract from decorator ownership to source ownership.
+cleanup_path=Path("scripts/check-runtime-cleanup-v3.js")
+cleanup=cleanup_path.read_text(encoding="utf-8")
+product_read='const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");\n'
+app_read='const app=fs.readFileSync(path.join(root,"public","app.js"),"utf8");\n'
+if cleanup.count(product_read)!=1:
+    raise SystemExit("runtime cleanup product read anchor not unique")
+if app_read not in cleanup:
+    cleanup=cleanup.replace(product_read,product_read+app_read,1)
+old_assert='assert(product.includes("applyAppIcon"),"canonical product UX runtime must own app icon decoration");'
+new_assert='''assert(!product.includes("applyAppIcon")&&!product.includes("APP_ICON_URL"),"product UX must not patch the static brand icon after render");
+assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must directly render the approved icon.png brand asset");'''
+if cleanup.count(old_assert)!=1:
+    raise SystemExit(f"legacy app icon cleanup assertion count was {cleanup.count(old_assert)}")
+cleanup=cleanup.replace(old_assert,new_assert,1)
+cleanup_path.write_text(cleanup,encoding="utf-8")
+
 check_path=Path("scripts/check-runtime-authority-v3.js")
 check=check_path.read_text(encoding="utf-8")
 anchor='assert(productUx.includes("decorateDailyGoal"),"product-ux must retain the active daily-goal enhancement");'
-addition='''\nassert(!productUx.includes("applyAppIcon")&&!productUx.includes("APP_ICON_URL"),"product-ux must not patch the static brand icon after render");\nassert(app.includes("lexi-brand-icon-image")&&app.includes("./icon.png?v=20260911-icon3"),"app.js must natively render the current LexiFlow brand icon");\nassert(index.includes('href="./icon.png?v=20260911-icon3"'),"index favicon must use the same current LexiFlow icon asset");'''
+addition='''\nassert(!productUx.includes("applyAppIcon")&&!productUx.includes("APP_ICON_URL"),"product-ux must not patch the static brand icon after render");\nassert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must natively render the approved LexiFlow brand icon");\nassert(index.includes('<link rel="icon" type="image/png" href="./icon.png" />'),"index favicon must keep the approved LexiFlow icon asset");'''
 if check.count(anchor)!=1:
     raise SystemExit("product UX active behavior contract anchor not uniquely found")
 if "must not patch the static brand icon after render" not in check:
