@@ -28,6 +28,7 @@ jobs:
           node --check public/transport-fixes.js
           node --check scripts/check-runtime-cleanup-v3.js
           node --check scripts/check-ai-assist-v3.js
+          node --check scripts/check-stage-renderers-v3.js
           test ! -e public/runtime-fixes.js
           ! grep -q 'runtime-fixes.js' public/index.html
           ! grep -q 'node --check public/runtime-fixes.js' package.json
@@ -37,6 +38,7 @@ jobs:
         run: |
           git config user.name "lexiflow-refactor-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add public/transport-fixes.js public/index.html public/runtime-fixes.js package.json scripts/check-runtime-cleanup-v3.js scripts/check-ai-assist-v3.js
+          git add public/transport-fixes.js public/index.html package.json scripts/check-runtime-cleanup-v3.js scripts/check-ai-assist-v3.js scripts/check-stage-renderers-v3.js
+          git diff --cached --quiet && { echo "No migration changes to commit"; exit 0; }
           git commit -m "refactor: retire runtime compatibility wrapper [transport-consolidation]"
           git push origin HEAD:feat/v7-airy-luminous-ui
