@@ -6,6 +6,8 @@
 
   const upstreamFetch=window.fetch.bind(window);
   let latestData=null;
+  const outgoingMutators=new Set();
+  const afterPersistListeners=new Set();
 
   function endpointOf(input){
     try{return new URL(typeof input==="string"?input:input?.url||"",location.href).pathname;}catch{return"";}
@@ -26,6 +28,9 @@
   function requestWithJson(init,body){
     return {...(init||{}),headers:{"Content-Type":"application/json",...((init&&init.headers)||{})},body:JSON.stringify(body)};
   }
+
+  function clone(value){return value==null?value:JSON.parse(JSON.stringify(value));}
+  function currentSnapshot(){return latestData?clone(latestData):null;}
 
   function hasChinese(value){return /[\u3400-\u9fff]/.test(String(value||""));}
   function clean(value){return String(value||"").trim().replace(/[。；;，,]+$/g,"");}
@@ -51,9 +56,21 @@
 
   function previousCard(id){return latestData?.cards?.find(card=>String(card.id)===String(id))||null;}
 
-  function normalizeOutgoing(body){
-    if(!body?.data||!Array.isArray(body.data.cards))return body;
-    const repaired=repairLegacyMeanings(body.data);
+  function applyOutgoingMutators(body){
+    let next=body;
+    for(const mutator of outgoingMutators){
+      try{
+        const candidate=mutator(next,{current:currentSnapshot()});
+        if(candidate&&typeof candidate==="object")next=candidate;
+      }catch(err){console.error("learning-data outgoing mutator failed",err);}
+    }
+    return next;
+  }
+
+  function normalizeOutgoing(body,{skipMutators=false}={}){
+    const source=skipMutators?body:applyOutgoingMutators(body);
+    if(!source?.data||!Array.isArray(source.data.cards))return source;
+    const repaired=repairLegacyMeanings(source.data);
     const data=core.normalizeData(repaired.data);
     const now=new Date();
     for(const card of data.cards){
@@ -61,14 +78,35 @@
       if(patch)Object.assign(card,patch);
     }
     data.dailyPlan=core.buildDailyPlan(data,now);
-    latestData=JSON.parse(JSON.stringify(data));
-    return {...body,data,learningDataAuthority:body.learningDataAuthority||"gateway-v3"};
+    return {...source,data,learningDataAuthority:source.learningDataAuthority||"gateway-v3"};
+  }
+
+  function commitSnapshot(data,meta={}){
+    if(!data?.cards)return;
+    latestData=clone(core.normalizeData(data));
+    const snapshot=currentSnapshot();
+    for(const listener of afterPersistListeners){
+      try{listener(snapshot,meta);}catch(err){console.error("learning-data after-persist listener failed",err);}
+    }
+  }
+
+  function registerOutgoingMutator(mutator){
+    if(typeof mutator!=="function")return()=>{};
+    outgoingMutators.add(mutator);
+    return()=>outgoingMutators.delete(mutator);
+  }
+
+  function registerAfterPersist(listener){
+    if(typeof listener!=="function")return()=>{};
+    afterPersistListeners.add(listener);
+    return()=>afterPersistListeners.delete(listener);
   }
 
   async function persistMigration(data){
     try{
-      const body=normalizeOutgoing({data,migrationAuthority:"legacy-meaning-v3"});
-      await upstreamFetch("/api/learning-data",requestWithJson({method:"POST"},body));
+      const body=normalizeOutgoing({data,migrationAuthority:"legacy-meaning-v3"},{skipMutators:true});
+      const response=await upstreamFetch("/api/learning-data",requestWithJson({method:"POST"},body));
+      if(response.ok)commitSnapshot(body.data,{source:"migration"});
     }catch(err){console.warn("learning-data migration persistence failed",err);}
   }
 
@@ -79,7 +117,9 @@
     const method=String(init?.method||"GET").toUpperCase();
     if(method==="POST"){
       const body=normalizeOutgoing(parseBody(init));
-      return upstreamFetch(input,requestWithJson(init,body));
+      const response=await upstreamFetch(input,requestWithJson(init,body));
+      if(response.ok&&body?.data?.cards)commitSnapshot(body.data,{source:"post",body});
+      return response;
     }
 
     const response=await upstreamFetch(input,init);
@@ -89,14 +129,16 @@
       if(!payload?.data)return response;
       const repaired=repairLegacyMeanings(payload.data);
       payload.data=core.normalizeData(repaired.data);
-      latestData=JSON.parse(JSON.stringify(payload.data));
+      commitSnapshot(payload.data,{source:"get"});
       if(repaired.changed)queueMicrotask(()=>void persistMigration(payload.data));
       return responseWithJson(response,payload);
     }catch{return response;}
   };
 
   window.LexiFlowLearningDataGatewayV3=Object.freeze({
-    current(){return latestData?JSON.parse(JSON.stringify(latestData)):null;},
-    normalize(data){return core.normalizeData(repairLegacyMeanings(data).data);}
+    current:currentSnapshot,
+    normalize(data){return core.normalizeData(repairLegacyMeanings(data).data);},
+    registerOutgoingMutator,
+    registerAfterPersist,
   });
 })();
