@@ -34,6 +34,12 @@ assert(moduleSource.includes('if(stage==="apply")return"apply"'),"Apply must be 
 assert(!moduleSource.includes('return"review"'),"Review must never be unlocked early");
 assert(!moduleSource.includes('memorize2:"Memorize"'),"early-learning domain config must not expose split Memorize stages");
 assert(moduleSource.includes('advanceLearningAuthority:"v3"'),"Advance Learning V3 persistence must identify its authority");
+assert(moduleSource.includes("function syncFromGateway()")&&moduleSource.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Advance Learning V3 must reuse the canonical Gateway snapshot for presentation redraws");
+assert(moduleSource.includes("if(!force&&syncFromGateway())return data;"),"Advance Learning V3 refresh must avoid redundant learning-data GETs when Gateway data exists");
+assert(moduleSource.includes("await refresh(true);"),"explicit early-learning unlock must force a fresh source read before mutating the frozen plan");
+assert(moduleSource.includes("requestAnimationFrame(()=>{")&&moduleSource.includes("syncFromGateway();")&&moduleSource.includes("decorate();"),"Advance Learning MutationObserver redraws must stay memory-only");
+assert(!moduleSource.includes("requestAnimationFrame(async()=>{"),"Advance Learning MutationObserver must not restore network refreshes on DOM mutation");
+assert(moduleSource.includes('fetch("/api/learning-data",{cache:"no-store"})'),"Advance Learning must retain a cold/fresh GET fallback for explicit refreshes and writes");
 assert(moduleSource.includes('authority:"advance-learning-v3"'),"early-learning activity must identify its V3 authority");
 assert(moduleSource.includes("!core.firstPlanStage(plan)"),"optional early learning must appear only after normal Today work is complete");
 assert(moduleSource.includes("next.dailyPlan[bucket]"),"optional early learning must explicitly append the selected card to the frozen DailyPlan bucket");

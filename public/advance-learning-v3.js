@@ -14,7 +14,17 @@
   const STAGE_LABELS=Object.freeze({memorize:"Memorize",visualize:"Visualize",apply:"Apply"});
   const STAGE_ORDER=Object.freeze({memorize:1,visualize:2,apply:3});
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     if(refreshing)return data;
     refreshing=true;
     try{
@@ -102,7 +112,7 @@
     const original=button?.textContent||"";
     if(button){button.disabled=true;button.textContent="正在准备…";}
     try{
-      await refresh();
+      await refresh(true);
       const now=new Date(),today=core.dayKey(now);
       const next=core.normalizeData(JSON.parse(JSON.stringify(data||{})),now);
       const candidate=candidateList(now).find(card=>card.id===cardId);
@@ -148,9 +158,9 @@
   function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(async()=>{
+    requestAnimationFrame(()=>{
       queued=false;
-      await refresh();
+      syncFromGateway();
       decorate();
     });
   }
@@ -158,12 +168,15 @@
   function start(){
     const app=document.getElementById("app");
     if(!app)return;
-    void refresh().then(decorate);
+    syncFromGateway();
+    if(data)decorate();else void refresh(true).then(decorate);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.LexiFlowLearningDataGatewayV3?.registerAfterPersist?.(()=>schedule());
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   window.LexiFlowAdvanceLearningV3=Object.freeze({
-    refresh:async()=>{await refresh();decorate();return data;},
+    refresh:async()=>{await refresh(true);decorate();return data;},
     unlock(cardId){return unlock(String(cardId||""),null);}
   });
 
