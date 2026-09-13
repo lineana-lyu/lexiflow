@@ -59,6 +59,12 @@
     const card=data.cards.find(item=>String(item.id)===id)||null;
     return card&&core.canonicalStage(card)==="visualize"?card:null;
   }
+  function beginVisualWrite(cardId,now=new Date()){
+    const transition=window.LexiFlowStageTransitionV3;
+    const write=transition?.beginStageWrite?.(cardId,"visualize",now);
+    return write?{transition,write}:null;
+  }
+  function isBusy(){return assistBusy||imageBusy||uploadBusy;}
 
   function draftFor(card){
     if(localDrafts.has(card.id))return localDrafts.get(card.id);
@@ -97,7 +103,7 @@
       <div class="lexi-v3-visual-grid">
         <div class="lexi-v3-visual-image ${image?"has-image":""}">
           ${image?`<img class="visual-memory-image generated-visual-image" data-card-id="${esc(card.id)}" src="${esc(image)}" alt="${esc(card.word)} 的联想图"/>`:`<div class="lexi-v3-visual-empty"><span>✦</span><strong>先在右侧写下你想到的画面</strong><span>写完后可以生成图片，也可以上传自己的图片。</span></div>`}
-          ${generating?`<div class="lexi-v3-visual-loading"><div><span class="mini-spinner"></span><strong>正在生成联想图</strong><span>你可以先保留当前场景；图片完成后会自动更新。</span></div></div>`:""}
+          ${generating?`<div class="lexi-v3-visual-loading"><div><span class="mini-spinner"></span><strong>正在生成联想图</strong><span>当前联想正在保存，完成后会自动更新到这张单词卡。</span></div></div>`:""}
         </div>
         <aside class="lexi-v3-visual-panel scene-panel">
           <h3>我的联想场景</h3><p>尽量写具体的人、地点、动作或物体。越和你自己的经历有关，越容易记住。</p>
@@ -109,7 +115,7 @@
       ${generation.status==="error"?`<div class="lexi-v3-visual-error">${esc(generation.message||"这次图片没有生成成功，可以重试或上传自己的图片。")}</div>`:""}
       <div class="lexi-v3-visual-actions"><div><button class="btn primary" type="button" data-visual-v3="generate" ${!String(note).trim()||interactionBusy?"disabled":""}>${generating?"生成中…":image?"重新生成图片":"生成联想图"}</button><label class="btn" for="visual-v3-file" ${interactionBusy?"aria-disabled=\"true\" style=\"pointer-events:none;opacity:.55\"":""}>上传图片</label></div><span style="font-size:11px;color:var(--muted)">没有图片也可以明确选择“跳过视觉联想”。</span></div>
       <input id="visual-v3-file" type="file" accept="image/png,image/jpeg,image/webp" style="display:none" />
-      <div class="learning-stage-footer single-action"><button class="btn primary" type="button" data-action="finish-visual">完成视觉联想 · 明天开始造句</button></div>
+      <div class="learning-stage-footer single-action"><button class="btn primary" type="button" data-action="finish-visual" ${interactionBusy?"disabled title=\"当前联想正在保存\"":""}>${interactionBusy?"正在保存当前联想…":"完成视觉联想 · 明天开始造句"}</button></div>
     </div>`;
   }
 
@@ -128,7 +134,7 @@
   async function saveCardPatch(cardId,mutate){
     const latest=await loadData(true);
     const card=latest?.cards?.find(item=>String(item.id)===String(cardId));
-    if(!card)return null;
+    if(!card||core.canonicalStage(card)!=="visualize")return null;
     mutate(card,latest);
     card.updatedAt=new Date().toISOString();
     await persist(latest);
@@ -142,12 +148,13 @@
   }
 
   async function assist(){
-    if(assistBusy||imageBusy||uploadBusy)return;
+    if(isBusy())return;
     const card=currentCard();if(!card)return;
     const note=String(document.getElementById("visual-note")?.value??draftFor(card)).trim();
     if(!note)return;
     const authority=window.LexiFlowAiAssistV3?.visualScene;
     if(typeof authority!=="function"){console.error("Visualize V3 AI authority unavailable");return;}
+    const guard=beginVisualWrite(card.id);if(!guard)return;
     setDraft(card.id,note);assistBusy=true;render();
     try{
       const payload=await authority({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:note});
@@ -159,27 +166,30 @@
         if(question)c.practicePrompt={question};
       });
     }catch(err){console.error("Visualize V3 assist failed",err);}
-    finally{assistBusy=false;syncFromGateway();render();}
+    finally{assistBusy=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
   async function adopt(){
-    if(assistBusy||imageBusy||uploadBusy)return;
+    if(isBusy())return;
     const card=currentCard();if(!card)return;
     const suggestion=String(card.visualSceneSuggestion?.scene||"").trim();if(!suggestion)return;
+    const guard=beginVisualWrite(card.id);if(!guard)return;
     setDraft(card.id,suggestion);
     const input=document.getElementById("visual-note");
     if(input){input.value=suggestion;input.dispatchEvent(new Event("input",{bubbles:true}));}
     try{await saveCardPatch(card.id,c=>{c.visualNote=suggestion;c.visualSuggestionAdoptedAt=new Date().toISOString();});}catch{}
-    syncFromGateway();render();
+    finally{guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
   async function generate(){
-    if(imageBusy||assistBusy||uploadBusy)return;
+    if(isBusy())return;
     const card=currentCard();if(!card)return;
     const note=String(document.getElementById("visual-note")?.value??draftFor(card)).trim();if(!note)return;
+    const guard=beginVisualWrite(card.id);if(!guard)return;
     setDraft(card.id,note);imageBusy=true;
     try{
-      await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageGeneration={status:"generating",phase:"submitted",message:"正在生成联想图。",code:"",startedAt:new Date().toISOString()};});
+      const started=await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageGeneration={status:"generating",phase:"submitted",message:"正在生成联想图。",code:"",startedAt:new Date().toISOString()};});
+      if(!started)return;
       render();
       const response=await fetch("/api/ai/image",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,visualNote:note,suggestedScene:"",sourceQuery:card.sourceQuery||card.word,senseIntentEn:card.senseIntentEn||"",avoidVisualEn:Array.isArray(card.avoidVisualEn)?card.avoidVisualEn:[]})});
       let payload={};try{payload=await response.json();}catch{}
@@ -188,13 +198,14 @@
     }catch(err){
       const message=err?.payload?.userError?.message||"这次图片没有生成成功，可以重试或上传自己的图片。";
       try{await saveCardPatch(card.id,c=>{c.imageGeneration={status:"error",phase:"error",message,code:err?.payload?.code||"IMAGE_GENERATION_FAILED",finishedAt:new Date().toISOString()};});}catch{}
-    }finally{imageBusy=false;syncFromGateway();render();}
+    }finally{imageBusy=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
   async function upload(file){
-    if(uploadBusy||assistBusy||imageBusy||!file)return;
+    if(isBusy()||!file)return;
     if(file.size>900*1024){window.alert("图片太大，请选择小于 900KB 的 PNG、JPG 或 WebP 图片。");return;}
     const card=currentCard();if(!card)return;
+    const guard=beginVisualWrite(card.id);if(!guard)return;
     uploadBusy=true;render();
     try{
       const dataUrl=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=reject;reader.onload=()=>resolve(String(reader.result||""));reader.readAsDataURL(file);});
@@ -205,7 +216,7 @@
       setDraft(card.id,note);
       await saveCardPatch(card.id,c=>{c.visualNote=note;c.imageData="";c.imageUrl=payload.image.url;c.generatedVisualScene="";c.imageGeneration={status:"success",phase:"done",message:"已使用本地上传图片。",code:"LOCAL_UPLOAD",finishedAt:new Date().toISOString()};});
     }catch(err){console.error("Visualize V3 upload failed",err);window.alert("图片没有保存成功，请重试。");}
-    finally{uploadBusy=false;syncFromGateway();render();}
+    finally{uploadBusy=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
   document.addEventListener("input",event=>{
@@ -215,7 +226,7 @@
     const assist=document.querySelector('[data-visual-v3="assist"]');
     const generateButton=document.querySelector('[data-visual-v3="generate"]');
     const empty=!String(event.target.value||"").trim();
-    const interactionBusy=assistBusy||imageBusy||uploadBusy;
+    const interactionBusy=isBusy();
     if(assist)assist.disabled=empty||interactionBusy;
     if(generateButton)generateButton.disabled=empty||interactionBusy;
   },true);
@@ -248,6 +259,8 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
+
+  window.LexiFlowVisualizeStageV3=Object.freeze({isBusy});
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
