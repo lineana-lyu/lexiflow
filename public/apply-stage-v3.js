@@ -30,17 +30,27 @@
     return targetForms(target).some(form=>new RegExp(`\\b${escapeRe(form)}\\b`,"i").test(value));
   }
 
-  async function loadData(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function loadData(force=false){
+    if(!force&&syncFromGateway())return data;
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();
     data=payload?.data?core.normalizeData(payload.data):null;
     return data;
   }
-  async function refresh(){if(refreshing)return data;refreshing=true;try{return await loadData();}catch{return data;}finally{refreshing=false;}}
+  async function refresh(force=false){if(!force&&syncFromGateway())return data;if(refreshing)return data;refreshing=true;try{return await loadData(true);}catch{return data;}finally{refreshing=false;}}
   async function persist(next){
     const normalized=core.normalizeData(next);
-    const response=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized})});
+    const response=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized,applyStageAuthority:"v3"})});
     if(!response.ok)throw new Error("SAVE_FAILED");
     data=normalized;return normalized;
   }
@@ -109,7 +119,7 @@
   }
 
   async function saveCardPatch(cardId,mutate){
-    const latest=await loadData();const card=latest?.cards?.find(item=>String(item.id)===String(cardId));if(!card)return null;
+    const latest=await loadData(true);const card=latest?.cards?.find(item=>String(item.id)===String(cardId));if(!card)return null;
     mutate(card,latest);card.updatedAt=new Date().toISOString();await persist(latest);return data?.cards?.find(item=>String(item.id)===String(cardId))||card;
   }
 
@@ -154,14 +164,15 @@
 
   async function refreshPrompt(){
     const card=currentCard();if(!card)return;const s=session(card);if(s.promptLoading||s.submitting)return;
+    const authority=window.LexiFlowAiAssistV3?.practicePrompt;
+    if(typeof authority!=="function"){console.error("Apply V3 prompt authority unavailable");return;}
     s.promptLoading=true;render();
     try{
       const previous=String(card.practicePrompt?.question||"");
-      const response=await fetch("/api/ai/practice-prompt",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,previousQuestion:previous})});
-      if(!response.ok)throw new Error("PROMPT_FAILED");
-      const payload=await response.json();const question=norm(payload.prompt?.question);if(question)await saveCardPatch(card.id,c=>{c.practicePrompt={question};});
+      const payload=await authority({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,previousQuestion:previous});
+      const question=norm(payload?.prompt?.question);if(question)await saveCardPatch(card.id,c=>{c.practicePrompt={question};});
     }catch(err){console.error("Apply Stage V3 prompt refresh failed",err);}
-    finally{s.promptLoading=false;await refresh();render();}
+    finally{s.promptLoading=false;syncFromGateway();render();}
   }
 
   document.addEventListener("input",event=>{
@@ -188,7 +199,12 @@
     if(action==="refresh-prompt")void refreshPrompt();
   },true);
 
-  function schedule(){if(queued)return;queued=true;requestAnimationFrame(async()=>{queued=false;await refresh();render();});}
-  function start(){const app=document.getElementById("app");if(!app)return;injectStyle();void refresh().then(render);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});}
+  function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});}
+  function start(){
+    const app=document.getElementById("app");if(!app)return;
+    injectStyle();syncFromGateway();if(data)render();else void refresh(true).then(render);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
