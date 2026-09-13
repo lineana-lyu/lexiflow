@@ -7,6 +7,7 @@ const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");
 const productCss=fs.readFileSync(path.join(root,"public","product-ux.css"),"utf8");
 const runtime=fs.readFileSync(path.join(root,"public","runtime-fixes.js"),"utf8");
+const transport=fs.readFileSync(path.join(root,"public","transport-fixes.js"),"utf8");
 const sourceContext=fs.readFileSync(path.join(root,"public","source-context-v3.js"),"utf8");
 const pkg=JSON.parse(fs.readFileSync(path.join(root,"package.json"),"utf8"));
 
@@ -57,6 +58,13 @@ assert(runtime.includes("transport-only"),"runtime compatibility must stay trans
 assert(!runtime.includes("MutationObserver"),"runtime compatibility must not decorate stage DOM through a global observer");
 assert(!runtime.includes("visual-image-canvas")&&!runtime.includes("scene-panel.is-loading"),"legacy Visualize DOM selectors must stay out of runtime compatibility");
 assert(!runtime.includes("background-generation-note"),"V3 Visualize renderer must be the only owner of image-generation progress UI");
+
+assert(transport.includes("function visualStudyVisible()"),"transport image-job indicator must centralize Visualize visibility detection");
+assert(transport.includes('document.querySelector(".lexi-v3-visual,.visual-learning-stage")'),"transport must recognize the authoritative Visualize V3 surface while retaining legacy fallback detection");
+assert(transport.includes("const hiddenForStudy = visualStageVisible;"),"global image-job pill must stay hidden whenever the Visualize page already owns image status UI");
+assert(!transport.includes("const hiddenForStudy = visualStageVisible &&"),"transport must not duplicate success/error image status on the Visualize V3 page");
+assert(transport.includes("已保存到当前单词卡草稿"),"transport success copy must describe generated images as durable drafts until Visualize is explicitly completed");
+assert(!transport.includes("可以继续编辑或进入下一步"),"transport must not claim the user can leave Visualize while image persistence is still in flight");
 
 assert(sourceContext.includes("function syncFromGateway()"),"Source Context V3 must reuse the canonical learning-data snapshot");
 assert(sourceContext.includes("requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();})"),"Source Context DOM mutations must decorate from the gateway snapshot without a GET");
