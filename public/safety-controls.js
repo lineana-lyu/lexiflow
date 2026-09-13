@@ -5,6 +5,7 @@
     "lexiflow-standalone-mvp-v1",
     "lexiflow-study-session-v3",
     "lexiflow-review-session-v3",
+    "lexiflow-studyday-runtime-v3",
     "lexiflow-memorize-v2",
     "lexiflow-study-drafts-v2",
     "lexiflow-study-active-v2",
