@@ -4,6 +4,7 @@
   const core=window.LexiFlowLearningCore;
   if(!core)throw new Error("LexiFlowLearningCore must load before apply-actions-v3.js");
 
+  let data=null;
   let queued=false;
   let saving=false;
   let restoring=false;
@@ -11,30 +12,43 @@
 
   const uid=()=>crypto.randomUUID?crypto.randomUUID():`apply-action-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-  async function loadData(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function loadData(force=false){
+    if(!force&&syncFromGateway())return data;
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();
-    return payload?.data?core.normalizeData(payload.data):null;
+    data=payload?.data?core.normalizeData(payload.data):null;
+    return data;
   }
 
-  async function persist(data){
+  async function persist(next){
+    const normalized=core.normalizeData(next);
     const response=await fetch("/api/learning-data",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({data:core.normalizeData(data)}),
+      body:JSON.stringify({data:normalized,applyActionsAuthority:"v3"}),
     });
     if(!response.ok)throw new Error("SAVE_FAILED");
+    data=normalized;
   }
 
   function currentCardId(){
     return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");
   }
 
-  function currentApplyCard(data){
+  function currentApplyCard(source=data){
     const id=currentCardId();
-    if(!id||!Array.isArray(data?.cards))return null;
-    const card=data.cards.find(item=>String(item.id)===id)||null;
+    if(!id||!Array.isArray(source?.cards))return null;
+    const card=source.cards.find(item=>String(item.id)===id)||null;
     return card&&core.canonicalStage(card)==="apply"?card:null;
   }
 
@@ -42,18 +56,18 @@
     return String(document.getElementById("apply-text")?.value??card?.applyDraft??card?.userSentence??"").trim();
   }
 
-  function appendActivity(data,cardId,type,extra={}){
-    data.activities=Array.isArray(data.activities)?data.activities:[];
-    if(extra.commandId&&data.activities.some(item=>String(item.commandId||"")===extra.commandId))return;
-    data.activities.push({id:uid(),type,cardId,at:new Date().toISOString(),...extra});
+  function appendActivity(source,cardId,type,extra={}){
+    source.activities=Array.isArray(source.activities)?source.activities:[];
+    if(extra.commandId&&source.activities.some(item=>String(item.commandId||"")===extra.commandId))return;
+    source.activities.push({id:uid(),type,cardId,at:new Date().toISOString(),authority:"apply-actions-v3",...extra});
   }
 
   function skipCommandId(cardId,now=new Date()){
     return `stage:${core.dayKey(now)}:${String(cardId)}:apply-skip`;
   }
 
-  function commandCommitted(data,commandId){
-    return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===commandId);
+  function commandCommitted(source,commandId){
+    return Array.isArray(source?.activities)&&source.activities.some(item=>String(item.commandId||"")===commandId);
   }
 
   function pauseAndReturn(){
@@ -61,19 +75,18 @@
     setTimeout(()=>location.reload(),100);
   }
 
-  async function restoreDurableDraft(){
+  function restoreDurableDraft(){
     const input=document.getElementById("apply-text");
     if(!input||String(input.value||"").trim()||restoring)return;
+    syncFromGateway();
+    const card=currentApplyCard();
+    const draft=String(card?.applyDraft||"");
+    if(!draft)return;
     restoring=true;
     try{
-      const data=await loadData();
-      const card=currentApplyCard(data);
-      const draft=String(card?.applyDraft||"");
-      if(!draft||String(input.value||"").trim())return;
       input.value=draft;
       input.dispatchEvent(new Event("input",{bubbles:true}));
-    }catch{}
-    finally{restoring=false;}
+    }finally{restoring=false;}
   }
 
   async function saveDraft(button){
@@ -83,15 +96,15 @@
     button.disabled=true;
     button.textContent="正在保存…";
     try{
-      const data=await loadData();
-      const card=currentApplyCard(data);
+      const source=await loadData(true);
+      const card=currentApplyCard(source);
       if(!card)throw new Error("APPLY_CARD_NOT_FOUND");
       const draft=currentDraft(card);
       card.applyDraft=draft;
       card.applyDraftSavedAt=new Date().toISOString();
       card.updatedAt=card.applyDraftSavedAt;
-      appendActivity(data,card.id,"apply-draft-saved",{hasText:Boolean(draft)});
-      await persist(data);
+      appendActivity(source,card.id,"apply-draft-saved",{hasText:Boolean(draft)});
+      await persist(source);
       button.textContent="草稿已保存";
       pauseAndReturn();
     }catch(err){
@@ -124,12 +137,12 @@
     button.disabled=true;
     button.textContent="正在跳过…";
     try{
-      const data=await loadData();
+      const source=await loadData(true);
       const id=currentCardId();
       if(!id)throw new Error("APPLY_CARD_NOT_FOUND");
       const now=new Date(),commandId=skipCommandId(id,now);
-      if(commandCommitted(data,commandId)){location.reload();return;}
-      const card=currentApplyCard(data);
+      if(commandCommitted(source,commandId)){location.reload();return;}
+      const card=currentApplyCard(source);
       if(!card)throw new Error("APPLY_CARD_NOT_FOUND");
       const prev={...card},draft=currentDraft(card);
       card.applyDraft=draft;
@@ -140,8 +153,8 @@
       card.initialReviewPending=false;
       Object.assign(card,core.crossDayPatch(prev,{stage:"review",learningStage:"review"},now)||{});
       card.updatedAt=now.toISOString();
-      appendActivity(data,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),commandId});
-      await persist(data);
+      appendActivity(source,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),commandId});
+      await persist(source);
       button.textContent="已跳过 · 明天首次复习";
       setTimeout(()=>location.reload(),100);
     }catch(err){
@@ -158,7 +171,7 @@
   function decorate(){
     const stage=document.querySelector(".apply-learning-stage");
     if(!stage)return;
-    void restoreDurableDraft();
+    restoreDurableDraft();
     if(stage.querySelector("[data-apply-actions-v3]"))return;
     const bar=document.createElement("div");
     bar.dataset.applyActionsV3="1";
@@ -179,14 +192,16 @@
   function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(()=>{queued=false;decorate();});
+    requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});
   }
 
   function start(){
     const app=document.getElementById("app");
     if(!app)return;
-    decorate();
+    syncFromGateway();
+    if(data)decorate();else void loadData(true).then(decorate).catch(()=>{});
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
