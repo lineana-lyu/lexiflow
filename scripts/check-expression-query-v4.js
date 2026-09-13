@@ -18,7 +18,7 @@ assert.strictEqual(expressionQuery.classifyEnglishQuery("Could you give me a han
 
 assert(runtime.includes('require("./lib/expression-query")'), "server runtime must own whole-expression routing");
 assert(runtime.includes("handleEnglishExpression"), "server runtime must expose whole-expression handling");
-assert(runtime.includes('queryKind !== "sentence"'), "sentence queries must bypass local headword-only lookup");
+assert(runtime.includes('queryKind === "phrase"')&&runtime.includes('lookupPath: "core-phrase"'), "uncurated phrases must not be accepted from raw ECDICT before whole-expression resolution");
 const localIndex = runtime.indexOf("handleLocalDictionary(req, res, url.pathname, body)");
 const expressionIndex = runtime.indexOf("handleEnglishExpression(res, body)", localIndex);
 const forwardIndex = runtime.indexOf("return forward(req, res, body)", expressionIndex);
@@ -30,4 +30,6 @@ assert(!transport.includes("shouldUseUnifiedPhraseVoice"), "transport must not c
 assert(kokoro.includes("playSystemFallback"), "system speech must only remain as an explicit fallback owned by Kokoro voice layer");
 assert(kokoro.includes("Component recordings for a"), "Kokoro voice layer must document whole-expression ownership over component recordings");
 
+assert(runtime.includes('queryKind === "phrase"\n      ? coreLexicon.lookupExact'), "direct dictionary lookup must also avoid raw ECDICT as authoritative phrase semantics");
+assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
 console.log("Expression query V4 checks passed");

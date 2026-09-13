@@ -152,4 +152,16 @@ const progressedData=core.normalizeData(progressed,new Date(2026,8,10,18,0,0,0))
 assert(progressedData.dailyPlan.taskTotal===5,"same-day progress must preserve the frozen original task total");
 assert(progressedData.dailyPlan.taskRemaining===4&&progressedData.dailyPlan.taskCompleted===1,"Today progress must reflect completed frozen tasks");
 
+
+const goalDay=date(2026,9,11,9);
+const goalFive=core.normalizeData({settings:{dailyGoal:5},cards:[]},goalDay);
+assert(goalFive.dailyPlan.selectGoal===5&&goalFive.dailyPlan.reviewPressure===0,"fresh zero-review day must preserve the configured five-word goal");
+const goalThreeSameDay=core.normalizeData({settings:{dailyGoal:3},cards:[],dailyPlan:goalFive.dailyPlan},new Date(2026,8,11,10,0,0,0));
+assert(goalThreeSameDay.dailyPlan.selectMaxGoal===3&&goalThreeSameDay.dailyPlan.selectGoal===3,"explicit same-day daily-goal changes must update new-word capacity immediately");
+assert(goalThreeSameDay.dailyPlan.reviewPressure===0,"changing the daily goal must not invent Review pressure");
+const appSource=read("public/app.js"),serverSource=read("server.js");
+assert(appSource.includes('settings: { dailyGoal: 3, ttsVoice: "af_bella" }'),"app fresh-data default must be three words");
+assert(!appSource.includes('dailyGoal: 5')&&!appSource.includes('dailyGoal:5'),"five-word app default must not return");
+assert(serverSource.includes('settings: { dailyGoal: 3 }')&&!serverSource.includes('dailyGoal: 5'),"server fresh-data default must be three words");
+
 console.log("Learning Engine V3 runtime contract checks passed.");

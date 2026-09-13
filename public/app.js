@@ -31,13 +31,13 @@
       version: APP_VERSION,
       cards: [],
       activities: [],
-      settings: { dailyGoal: 5, ttsVoice: "af_bella" },
+      settings: { dailyGoal: 3, ttsVoice: "af_bella" },
       createdAt: new Date().toISOString()
     };
   }
 
   function normalizeLearningData(parsed){
-    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:5,ttsVoice:"af_bella",...(parsed?.settings||{})} };
+    return { ...defaultData(), ...(parsed||{}), settings:{dailyGoal:3,ttsVoice:"af_bella",...(parsed?.settings||{})} };
   }
 
   function loadLegacyBrowserData(){
@@ -405,7 +405,7 @@
 
   function progressPercent(){
     const plan=currentDailyPlan();
-    const goal=Number(plan?.selectGoal||state.data.settings.dailyGoal||3);
+    const goal=Number(plan?.selectGoal ?? state.data.settings.dailyGoal ?? 3);
     return Math.min(100,Math.round((uniqueLearnedToday()/Math.max(1,goal))*100));
   }
 
@@ -415,7 +415,7 @@
     const learning=["memorize","visualize","apply","select"].reduce((sum,key)=>sum+(Array.isArray(plan?.[key])?plan[key].length:0),0);
     const cards=state.data.cards.length;
     const today=uniqueLearnedToday();
-    const goal=Number(plan?.selectGoal||state.data.settings.dailyGoal||3);
+    const goal=Number(plan?.selectGoal ?? state.data.settings.dailyGoal ?? 3);
     const stable=stableCount();
     const inbox=Array.isArray(plan?.inbox)?plan.inbox.length:state.data.cards.filter(card=>card.inboxPending).length;
     const primary=review
@@ -1292,6 +1292,9 @@
         goal.value=String(value);
         state.data.settings.dailyGoal=value;
         saveData();
+        persistenceQueue.then(()=>{
+          try{window.dispatchEvent(new CustomEvent("lexiflow:today-plan-data",{detail:{reason:"daily-goal-changed"}}));}catch{}
+        }).catch(()=>{});
         toast("每日目标已更新");
       };
       goal.addEventListener("change",commitGoal);
@@ -1322,7 +1325,7 @@
       try{
         const parsed=JSON.parse(await file.text());
         if(!parsed||!Array.isArray(parsed.cards)||!Array.isArray(parsed.activities))throw new Error();
-        state.data={...defaultData(),...parsed,settings:{dailyGoal:5,ttsVoice:"af_bella",...(parsed.settings||{})}};
+        state.data={...defaultData(),...parsed,settings:{dailyGoal:3,ttsVoice:"af_bella",...(parsed.settings||{})}};
         saveData();toast("数据已导入");state.route="home";render();
       }catch{toast("导入失败：文件格式不正确");}
     });

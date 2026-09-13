@@ -89,9 +89,19 @@ async function handleLocalDictionary(req, res, pathname, body) {
       return true;
     }
     const queryKind = expressionQuery.classifyEnglishQuery(query);
-    const result = queryKind !== "sentence" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
-      ? localLookupResult(query.toLowerCase(), "primary", query)
-      : null;
+    let result = null;
+    if (queryKind === "word" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
+      result = localLookupResult(query.toLowerCase(), "primary", query);
+    } else if (queryKind === "phrase" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
+      // Only curated Core phrases may short-circuit whole-expression semantics.
+      // Raw ECDICT phrase rows can put a literal/component sense first
+      // (`hang out -> 挂出`), so they are not authoritative here.
+      result = coreLexicon.lookupExact(query.toLowerCase(), "primary", {
+        sourceQuery: query,
+        autoResolved: false,
+        lookupPath: "core-phrase",
+      });
+    }
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, queryKind, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
     console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${query}`);
@@ -102,7 +112,10 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const word = clean(parsed.word).toLowerCase();
     if (!/^[a-z][a-z '-]*$/i.test(word)) return false;
     const mode = parsed.mode === "expanded" ? "expanded" : "primary";
-    const result = localLookupResult(word, mode, word);
+    const queryKind = expressionQuery.classifyEnglishQuery(word);
+    const result = queryKind === "phrase"
+      ? coreLexicon.lookupExact(word, mode, { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase" })
+      : localLookupResult(word, mode, word);
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
     console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${word}`);
@@ -228,7 +241,7 @@ async function handlePronunciation(res, body) {
     }
   } catch {}
 
-  if (local?.phonetic) {
+  if (local?.phonetic && !/\s/.test(word)) {
     writeJson(res, 200, {
       ok: true,
       result: {

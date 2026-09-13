@@ -246,8 +246,15 @@
       select = appendTodaySelections(keepFrozenOrder(previous.select, buckets.select), buckets.select, cards, now);
     }
 
+    const previousMaxGoal=sameDayFrozen?Number(previous?.selectMaxGoal):Number.NaN;
+    const goalSettingChanged=sameDayFrozen&&Number.isFinite(previousMaxGoal)&&previousMaxGoal!==baseGoal;
+    const frozenGoal=Math.max(0,Number(previous?.selectGoal ?? baseGoal)||0);
+    const pressureForGoalChange=Math.max(0,Number(previous?.reviewPressure ?? reviewLoad.pressure)||0);
+    const recalculatedGoal=adaptiveNewWordGoal(baseGoal,pressureForGoalChange);
     const effectiveGoal=sameDayFrozen
-      ? Math.max(0,Number(previous.selectGoal ?? baseGoal))
+      ? (goalSettingChanged
+          ? Math.max(selectedIds.size,Math.min(baseGoal,recalculatedGoal))
+          : Math.max(selectedIds.size,frozenGoal))
       : adaptiveNewWordGoal(baseGoal,reviewLoad.pressure);
     const remainingTaskIds=planTaskIds(review,memorize,visualize,apply,select);
     let initialTaskIds=sameDayFrozen

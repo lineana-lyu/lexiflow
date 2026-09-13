@@ -203,6 +203,7 @@ async function jsonRequest(base,pathname,{method="GET",body=null}={}){
     assert(firstRead.status===200&&firstRead.payload?.ok===true,"learning-data GET must work through the real outer/inner runtime chain");
     assert(firstRead.payload?.hasStoredData===false,"isolated runtime smoke must start without persisted learning data");
     assert(Array.isArray(firstRead.payload?.data?.cards)&&firstRead.payload.data.cards.length===0,"fresh isolated learning data must contain no cards");
+    assert(firstRead.payload?.data?.settings?.dailyGoal===3,"fresh isolated learning data must default to three new words per day");
 
     const write=await jsonRequest(base,"/api/learning-data",{
       method:"POST",

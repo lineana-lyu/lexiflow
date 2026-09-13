@@ -123,7 +123,7 @@ function defaultLearningData() {
     version: 1,
     cards: [],
     activities: [],
-    settings: { dailyGoal: 5 },
+    settings: { dailyGoal: 3 },
     createdAt: new Date().toISOString(),
   };
 }
@@ -135,7 +135,7 @@ async function loadLearningData() {
     return {
       ...defaultLearningData(),
       ...parsed,
-      settings: { dailyGoal: 5, ...(parsed.settings || {}) },
+      settings: { dailyGoal: 3, ...(parsed.settings || {}) },
     };
   } catch {
     return defaultLearningData();
@@ -151,7 +151,7 @@ async function saveLearningData(value) {
   const clean = {
     ...defaultLearningData(),
     ...value,
-    settings: { dailyGoal: 5, ...(value.settings || {}) },
+    settings: { dailyGoal: 3, ...(value.settings || {}) },
   };
   await writeJsonAtomic(LEARNING_FILE, clean);
   return clean;

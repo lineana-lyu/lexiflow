@@ -82,10 +82,15 @@
 
   function loadText(plan){
     const base=selectMaxGoal(plan),goal=selectGoal(plan),legacy=plan?.reviewLoadMode==="frozen-legacy";
+    const critical=Math.max(0,numberOr(plan?.reviewCriticalCount,0));
+    const stable=Math.max(0,numberOr(plan?.reviewStableScheduledCount,0));
+    const reviewCount=critical+stable;
     if(legacy)return "今天继续沿用升级前已经冻结的计划；Review V4 会从下一个 StudyDay 开始重新计算。";
-    if(goal===base)return `今日复习负荷正常，新词上限保持 ${goal} 个。`;
-    if(goal===0)return `今日复习负荷较高，新词暂缓；先保护已经学过的内容。`;
-    return `今日复习负荷较高，新词上限已由 ${base} 个自动调整为 ${goal} 个。`;
+    if(goal>base)return `你今天已经选择 ${goal} 个新词，超过刚设置的每日目标 ${base} 个；今天不会再新增，明天按 ${base} 个上限执行。`;
+    if(reviewCount===0)return `今天没有安排复习，新词上限保持 ${goal} 个。`;
+    if(goal===base)return `今天安排 ${reviewCount} 个复习，新词上限保持 ${goal} 个。`;
+    if(goal===0)return `今天安排 ${reviewCount} 个复习，新词暂缓；先保护已经学过的内容。`;
+    return `今天安排 ${reviewCount} 个复习，新词上限由 ${base} 个自动调整为 ${goal} 个。`;
   }
 
   function settingsHtml(plan){
@@ -99,6 +104,8 @@
       <div class="lexi-review-policy-panel">
         <div class="lexi-review-policy-note"><strong>关键复习到期全部安排：</strong>Review Again 与 1 → 3 → 7 → 16 → 21 天强化链不会再被“每天最多 N 个”的硬上限截断。</div>
         <div class="lexi-review-policy-note"><strong>Stable 只在安全窗口内平滑：</strong>30 → 45 → 68 → 90 天维护分别允许在 ±2 / ±3 / ±4 / ±5 天内前后微调；超过窗口的维护项会强制进入 Today。</div>
+        <div class="lexi-review-policy-note"><strong>你会怎么复习：</strong>Apply 完成后的下一个 StudyDay 做第一次主动回忆；记住后依次等待 3 → 7 → 16 → 21 天，再进入 Stable 的 30 → 45 → 68 → 90 天维护。没想起来时，当天最多修复一次，下一 StudyDay 再验证。</div>
+        <div class="lexi-review-policy-note"><strong>新词如何减压：</strong>Today 实际安排的 Review 为 0–8 个时保持你的新词目标；9–12 个时约降到 2/3；13–16 个时约降到 1/3；17 个及以上时当天暂停新词。只减少新词，不砍关键复习。</div>
         <div class="lexi-review-policy-chips">
           <span class="lexi-review-policy-chip">关键复习 <strong>${critical}</strong></span>
           <span class="lexi-review-policy-chip">Stable 今日 <strong>${stable}</strong></span>
