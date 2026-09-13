@@ -61,6 +61,11 @@
     const card=data.cards.find(item=>String(item.id)===id)||null;
     return card&&core.canonicalStage(card)==="apply"?card:null;
   }
+  function beginApplyWrite(cardId,now=new Date()){
+    const transition=window.LexiFlowStageTransitionV3;
+    const write=transition?.beginStageWrite?.(cardId,"apply",now);
+    return write?{transition,write}:null;
+  }
   function session(card){
     let value=sessions.get(card.id);
     if(!value){value={text:String(card.applyDraft||card.userSentence||""),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}
@@ -88,8 +93,8 @@
       ${suggestion?`<div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
       <div class="lexi-apply-v3-actions">
-        ${suggestion?`<button class="btn primary" type="button" data-apply-stage-v3="adopt" ${s.suggestionApproved?"":"disabled"}>采用建议</button>`:""}
-        ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply">确认这句话 · 明天首次复习</button>`:""}
+        ${suggestion?`<button class="btn primary" type="button" data-apply-stage-v3="adopt" ${s.suggestionApproved||s.promptLoading?"":"disabled"}>采用建议</button>`:""}
+        ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply" ${s.promptLoading?"disabled title=\"正在保存新的练习话题\"":""}>${s.promptLoading?"正在保存当前阶段…":"确认这句话 · 明天首次复习"}</button>`:""}
         <button class="text-action" type="button" data-apply-stage-v3="edit">继续修改</button>
       </div>
     </div>`;
@@ -115,11 +120,12 @@
     const s=session(card);const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading});
     if(host.dataset.applyStageV3===signature)return;
     host.dataset.applyStageV3=signature;host.innerHTML=html(card);
-    if(!s.submitting)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
+    if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
   }
 
   async function saveCardPatch(cardId,mutate){
-    const latest=await loadData(true);const card=latest?.cards?.find(item=>String(item.id)===String(cardId));if(!card)return null;
+    const latest=await loadData(true);const card=latest?.cards?.find(item=>String(item.id)===String(cardId));
+    if(!card||core.canonicalStage(card)!=="apply")return null;
     mutate(card,latest);card.updatedAt=new Date().toISOString();await persist(latest);return data?.cards?.find(item=>String(item.id)===String(cardId))||card;
   }
 
@@ -166,13 +172,14 @@
     const card=currentCard();if(!card)return;const s=session(card);if(s.promptLoading||s.submitting)return;
     const authority=window.LexiFlowAiAssistV3?.practicePrompt;
     if(typeof authority!=="function"){console.error("Apply V3 prompt authority unavailable");return;}
+    const guard=beginApplyWrite(card.id);if(!guard)return;
     s.promptLoading=true;render();
     try{
       const previous=String(card.practicePrompt?.question||"");
       const payload=await authority({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,previousQuestion:previous});
       const question=norm(payload?.prompt?.question);if(question)await saveCardPatch(card.id,c=>{c.practicePrompt={question};});
     }catch(err){console.error("Apply Stage V3 prompt refresh failed",err);}
-    finally{s.promptLoading=false;syncFromGateway();render();}
+    finally{s.promptLoading=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
   document.addEventListener("input",event=>{
@@ -190,7 +197,7 @@
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.("[data-apply-stage-v3]");if(!button)return;
     event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.applyStageV3;
-    const card=currentCard();const s=card?session(card):null;
+    const card=currentCard();
     if(action==="speak-word"&&card)void speak(card.word);
     if(action==="submit")void submit();
     if(action==="adopt")adopt();
@@ -206,5 +213,6 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
+  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);}});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
