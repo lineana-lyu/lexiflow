@@ -13,7 +13,10 @@ assert(index.includes('<script src="./daily-plan-persistence-v3.js"></script>'),
 assert(!index.includes('<script src="./daily-plan-persistence-v2.js"></script>'),"DailyPlan Persistence V2 must be retired from runtime");
 assert(!exists("public/daily-plan-persistence-v2.js"),"DailyPlan Persistence V2 source must stay deleted after promotion");
 assert(persistence.includes("LexiFlowLearningCore"),"DailyPlan Persistence V3 must normalize through Learning Core");
-assert(persistence.includes('fetch("/api/learning-data",{cache:"no-store"})'),"DailyPlan Persistence V3 must explicitly read the current learning data once");
+assert(persistence.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"DailyPlan Persistence V3 must reuse the canonical gateway snapshot before issuing a redundant GET");
+assert(persistence.includes("function gatewaySnapshot()")&&persistence.includes("async function currentData()"),"DailyPlan persistence must separate in-memory reuse from network fallback");
+assert(persistence.includes('fetch("/api/learning-data",{cache:"no-store"})'),"DailyPlan Persistence V3 may fall back to one explicit GET only when the gateway has not hydrated yet");
+assert(persistence.indexOf("gatewaySnapshot()")<persistence.indexOf('fetch("/api/learning-data",{cache:"no-store"})'),"gateway snapshot lookup must happen before network fallback");
 assert(persistence.includes('method:"POST"'),"DailyPlan Persistence V3 must explicitly persist the frozen plan");
 assert(persistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 writes must identify their authority");
 assert(persistence.includes("dailyPlanPersistedKey"),"DailyPlan Persistence V3 must keep an idempotent persisted marker");
