@@ -4,16 +4,16 @@
 
 Dictionary Payload Bridge V3 checks passed.
 Expression query V4 checks passed
-(node:3003) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:3077) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 
 LexiFlow 本地服务已启动
-地址: http://127.0.0.1:35004
+地址: http://127.0.0.1:35078
 
 LexiFlow dictionary: Core local (1 words / 2 zh aliases)
 LexiFlow lookup [ECDICT] ?ms: resolve
 LexiFlow lookup [ECDICT] ?ms: resolve
-LexiFlow lookup [core-zh] 1ms: 应对 -> address
+LexiFlow lookup [core-zh] 2ms: 应对 -> address
 Local Runtime V3 HTTP smoke checks passed.
 User surface V4 checks passed.
 
@@ -32,9 +32,9 @@ Today Plan V3 checks passed.
 function assert(condition,message){ if(!condition) throw new Error(message); }
                                                    ^
 
-Error: Settings must explain the actual local-first dictionary architecture
+Error: app.js must own final Voice Settings copy
     at assert (/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:4:58)
-    at Object.<anonymous> (/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:154:1)
+    at Object.<anonymous> (/home/runner/work/lexiflow/lexiflow/scripts/check-runtime-authority-v3.js:166:1)
     at Module._compile (node:internal/modules/cjs/loader:1565:14)
     at Object..js (node:internal/modules/cjs/loader:1708:10)
     at Module.load (node:internal/modules/cjs/loader:1318:32)
