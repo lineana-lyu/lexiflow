@@ -96,3 +96,6 @@ assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize skip s
 assert(applyActions.includes('core.canonicalStage(card)==="apply"'),"Apply Draft/Skip support must follow canonical stage identity");
 
 console.log("Stage Renderer V3 checks passed.");
+assert(select.includes("LexiFlowPronunciationV3?.play"),"Select must reuse the same pronunciation resolver as lookup/library surfaces");
+assert(select.includes('data-select-v3="speak-example"'),"Select reference example must expose pronunciation playback");
+assert(select.includes("card.audioUrl")&&select.includes("card.audioUrls"),"Select target-word playback must reuse persisted dictionary audio before TTS fallback");

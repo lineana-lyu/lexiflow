@@ -149,7 +149,12 @@
 
   function decorateAdd(){
     const save=document.querySelector('[data-action="save-card"].save-learning-card,[data-action="save-card"]');
-    if(save&&!document.querySelector(".study-card-focus")){setText(save,"保存到单词库");save.title="保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";}
+    if(save&&!document.querySelector(".study-card-focus")){
+      let intent=null;try{intent=JSON.parse(sessionStorage.getItem("lexiflow:add-intent-v3")||"null");}catch{}
+      const fromToday=intent?.source==="today"&&intent?.date===core.dayKey(new Date());
+      setText(save,fromToday?"保存并确认词义":"保存到单词库");
+      save.title=fromToday?"保存后直接进入今天的词义确认":"保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";
+    }
     Array.from(document.querySelectorAll("h1,h2")).forEach(node=>{if(["选词制卡","查词并收集"].includes(node.textContent.trim()))setText(node,"查词并添加");});
     document.querySelectorAll(".toast").forEach(node=>{if(node.textContent.includes("卡片已保存")||node.textContent.includes("已加入收集箱"))setText(node,"已保存到单词库 · 待学习");});
   }
@@ -229,6 +234,9 @@
     if(!route)return false;
     const appRoute=document.querySelector(`.nav [data-route="${CSS.escape(route)}"]`);
     if(!appRoute||appRoute===routeButton)return false;
+    if(route==="add"){
+      try{sessionStorage.setItem("lexiflow:add-intent-v3",JSON.stringify({source:"today",date:core.dayKey(new Date()),at:Date.now()}));}catch{}
+    }
     appRoute.click();
     return true;
   }

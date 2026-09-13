@@ -747,6 +747,10 @@
     );
   }
 
+  window.LexiFlowPronunciationV3=Object.freeze({
+    play:(text,audioUrl="",audioUrls=[])=>speak(text,audioUrl,audioUrls)
+  });
+
   function formatPhonetic(value){
     const raw=String(value||"").trim();
     if(!raw)return "暂无音标";
@@ -1241,6 +1245,7 @@
   function bind(){
     document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{
       state.route=el.dataset.route;
+      if(state.route!=="add"){try{sessionStorage.removeItem("lexiflow:add-intent-v3");}catch{}}
       if(state.route!=="library-edit") state.libraryEditor=null;
       if(state.route!=="study") state.study=null;
       render();
@@ -1570,7 +1575,25 @@
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
       const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
-      state.data.cards.unshift(card);recordActivity("card-created",card.id);toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
+      let addIntent=null;
+      try{addIntent=JSON.parse(sessionStorage.getItem("lexiflow:add-intent-v3")||"null");}catch{}
+      const activePlan=state.data.dailyPlan?.date===todayKey()?state.data.dailyPlan:null;
+      const fromToday=addIntent?.source==="today"&&addIntent?.date===todayKey()&&Number(activePlan?.remainingSelectSlots||0)>0;
+      if(fromToday){
+        card.inboxPending=false;
+        card.todaySelectedOn=todayKey();
+        card.selectedOn=todayKey();
+        card.stageEligibleOn=now;
+        card.inboxSelectedAt=now;
+      }else{
+        card.inboxPending=true;
+        card.inboxAddedOn=todayKey();
+      }
+      try{sessionStorage.removeItem("lexiflow:add-intent-v3");}catch{}
+      state.data.cards.unshift(card);recordActivity("card-created",card.id);
+      state.lookup=null;state.selectedSenseId=null;
+      if(fromToday){toast("已加入今日学习");startStudy(card.id);return;}
+      toast("已保存到单词库 · 待学习");state.route="home";render();return;
     }
     if(action==="continue-learning"){
       if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}

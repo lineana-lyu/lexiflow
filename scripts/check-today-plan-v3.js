@@ -34,3 +34,11 @@ assert(source.includes('document.addEventListener("visibilitychange",()=>{if(!do
 assert(source.includes('window.addEventListener("lexiflow:today-plan-data",schedule)'),"Today writes must trigger an in-memory redraw rather than another GET");
 
 console.log("Today Plan V3 checks passed.");
+
+assert(source.includes('sessionStorage.setItem("lexiflow:add-intent-v3"'),"Today add action must mark a one-shot Today-origin add intent");
+assert(source.includes('保存并确认词义'),"Today-origin card creation must explain that it goes straight to Select confirmation");
+
+const appSource=read("public/app.js");
+assert(appSource.includes('addIntent?.source==="today"')&&appSource.includes("startStudy(card.id)"),"Today-origin card creation must enter Select directly after saving instead of requiring Library confirmation");
+assert(!appSource.includes("LexiFlowLearningCore?.buildDailyPlan?.(state.data)"),"app shell must not construct Today membership while enrolling a just-created card");
+assert(appSource.includes("LexiFlowPronunciationV3=Object.freeze"),"app shell must expose one shared pronunciation resolver for all learning surfaces");
