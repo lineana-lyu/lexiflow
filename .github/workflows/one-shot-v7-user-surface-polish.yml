@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   migrate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -69,4 +69,4 @@ jobs:
           git add $FILES
           git commit -m "feat: polish user-facing settings and learning stats"
           git push origin HEAD:tmp-v7-user-surface-polish
-# rerun after ordering historical stage cleanup before contract checks
+# use the 22.04 runner pool after prolonged queueing
