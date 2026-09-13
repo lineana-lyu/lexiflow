@@ -932,7 +932,7 @@
 
     return shell(
       header("","设置","")
-      + `<div class="settings-security-banner" style="font-size:12px">服务凭据只保存在当前设备。</div><div class="settings-list">
+      + `<div class="settings-security-banner"><span class="settings-security-icon">⌁</span><div><strong>连接信息只保存在当前设备</strong><span>用于词典和 AI 服务，不会显示在学习内容中。</span></div></div><div class="settings-list">
         <div class="setting-row">
           <div>
             <h3>词典增强</h3>

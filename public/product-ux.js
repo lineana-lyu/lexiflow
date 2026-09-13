@@ -55,13 +55,6 @@
     return Array.from(list.querySelectorAll(":scope > .setting-row")).find(row => row.querySelector("h3")?.textContent.trim() === title) || null;
   }
 
-  function decorateSecurityBanner() {
-    const banner = document.querySelector(".settings-security-banner");
-    if (!banner || banner.dataset.lexiFriendly === "1") return;
-    banner.dataset.lexiFriendly = "1";
-    banner.innerHTML = `<span class="settings-security-icon">⌁</span><div><strong>连接信息只保存在当前设备</strong><span>用于词典和 AI 服务，不会显示在学习内容中。</span></div>`;
-  }
-
   function decorateDailyGoal(list) {
     const row = rowByTitle(list, "每日学习目标");
     if (!row || row.querySelector(".daily-goal-number")) return;
@@ -119,7 +112,6 @@
   function decorateSettings() {
     const list = document.querySelector(".settings-list");
     if (!list) return;
-    decorateSecurityBanner();
     decorateDailyGoal(list);
   }
 
