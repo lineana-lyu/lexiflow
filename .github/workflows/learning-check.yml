@@ -7,6 +7,9 @@ on:
       - feat/v7-airy-luminous-ui
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -20,3 +23,105 @@ jobs:
           node-version: '22.12.0'
       - name: Run repository checks
         run: npm run check
+
+  app-shell-cut:
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.message, '[run-app-shell-cut]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout refactor branch
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+
+      - name: Detach app shell from legacy stage dispatch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('public/app.js')
+          text = path.read_text(encoding='utf-8')
+
+          old_stages = '''  const STAGES = [
+            ["select","选词确认"],
+            ["memorize1","英 → 中"],
+            ["memorize2","中 → 英"],
+            ["visualize","视觉联想"],
+            ["apply","造句应用"],
+            ["review","首次复习"]
+          ];
+
+          '''
+          if old_stages not in text:
+              raise SystemExit('Expected legacy STAGES block not found; refusing fuzzy edit')
+          text = text.replace(old_stages, '', 1)
+
+          old_rail = '''  function stageIndex(stage){ return STAGES.findIndex(([key])=>key===stage); }
+
+          function renderStageRail(card){
+            const idx=stageIndex(card.stage);
+            return `<div class="study-stepper">${STAGES.map(([k,label],i)=>`<div class="study-stepper-item ${i<idx?"done":i===idx?"active":""}"><span class="study-stepper-dot">${i<idx?"✓":i+1}</span><span>${label}</span></div>${i<STAGES.length-1?`<i class="study-stepper-line ${i<idx?"done":""}"></i>`:""}`).join("")}</div>`;
+          }
+
+          '''
+          new_rail = '''  function renderStageRail(card){
+            return `<div class="study-stepper" data-study-stepper-v3-host="${escapeHtml(card.id)}"></div>`;
+          }
+
+          '''
+          if old_rail not in text:
+              raise SystemExit('Expected legacy stage rail block not found; refusing fuzzy edit')
+          text = text.replace(old_rail, new_rail, 1)
+
+          old_dispatch = '''  function renderStage(card){
+            const stage=card.stage;
+            if(stage==="select") return stageSelect(card);
+            if(stage==="memorize1"||stage==="memorize2") return `<div class="study-center" data-lexi-memorize-shell="${escapeHtml(card.id)}"><span class="prompt-small">正在准备双向记忆练习…</span></div>`;
+            if(stage==="visualize") return stageVisual(card);
+            if(stage==="apply") return stageApply(card);
+            return `<div class="study-center"><strong class="prompt-big">当前学习阶段不可在这里打开</strong><p class="prompt-small">Review 由 Today Plan 的独立复习会话处理。</p><button class="btn primary" data-route="home">返回今日学习</button></div>`;
+          }
+
+          '''
+          new_dispatch = '''  function renderStage(card){
+            return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
+          }
+
+          '''
+          if old_dispatch not in text:
+              raise SystemExit('Expected legacy stage dispatch block not found; refusing fuzzy edit')
+          text = text.replace(old_dispatch, new_dispatch, 1)
+
+          forbidden = [
+              'const STAGES = [',
+              'function stageIndex(',
+              'return stageSelect(card)',
+              'return stageVisual(card)',
+              'return stageApply(card)',
+          ]
+          leftovers = [item for item in forbidden if item in text]
+          if leftovers:
+              raise SystemExit(f'Legacy dispatch remains: {leftovers}')
+
+          path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Verify refactor before commit
+        run: |
+          node --check public/app.js
+          npm run check:learning
+
+      - name: Commit exact shell cut
+        shell: bash
+        run: |
+          if git diff --quiet -- public/app.js; then
+            echo "No app.js change produced"
+            exit 1
+          fi
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app.js
+          git commit -m "refactor: detach app shell from legacy stage dispatch [app-shell-cut]"
+          git push origin HEAD:feat/v7-airy-luminous-ui
