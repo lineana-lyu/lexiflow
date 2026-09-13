@@ -5,6 +5,7 @@
   const DEFAULT_VOICE = "af_bella";
   let activeAudio = null;
   let activeButton = null;
+  let fallbackUtterance = null;
 
   function clean(v){ return String(v || "").trim(); }
   function selectedVoice(){
@@ -36,6 +37,35 @@
     }
   }
 
+  function systemVoiceScore(voice){
+    const lang=clean(voice?.lang).toLowerCase();
+    const name=clean(voice?.name).toLowerCase();
+    let score=0;
+    if(lang==="en-us")score+=100;else if(lang.startsWith("en"))score+=60;
+    if(/natural|neural|online/.test(name))score+=40;
+    if(/aria|jenny|ava|guy|david|zira|samantha/.test(name))score+=12;
+    return score;
+  }
+
+  function playSystemFallback(text,button=null){
+    const value=clean(text);
+    if(!value||!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window))return false;
+    try{window.speechSynthesis.cancel();}catch{}
+    const utterance=new SpeechSynthesisUtterance(value);
+    utterance.lang="en-US";
+    utterance.rate=.9;
+    utterance.pitch=1;
+    const voices=window.speechSynthesis.getVoices?.()||[];
+    const voice=voices.filter(v=>clean(v.lang).toLowerCase().startsWith("en")).sort((a,b)=>systemVoiceScore(b)-systemVoiceScore(a))[0];
+    if(voice)utterance.voice=voice;
+    fallbackUtterance=utterance;
+    setBusy(button,true);
+    utterance.onend=()=>{fallbackUtterance=null;setBusy(button,false);};
+    utterance.onerror=()=>{fallbackUtterance=null;setBusy(button,false);};
+    window.speechSynthesis.speak(utterance);
+    return true;
+  }
+
   async function play(text,button=null){
     const value=clean(text); if(!value)return false;
     const voice=selectedVoice();
@@ -59,6 +89,8 @@
         throw err;
       }
       try{activeAudio?.pause();}catch{}
+      try{if(fallbackUtterance)window.speechSynthesis?.cancel?.();}catch{}
+      fallbackUtterance=null;
       activeAudio=new Audio(payload.audioDataUrl);
       activeAudio.addEventListener("ended",()=>setBusy(button,false),{once:true});
       activeAudio.addEventListener("error",()=>setBusy(button,false),{once:true});
@@ -66,11 +98,17 @@
       return true;
     }catch(err){
       console.warn("Kokoro playback failed",err);
+      clearTimeout(slowNoticeTimer);slowNoticeTimer=null;
+      const fallback=playSystemFallback(value,button);
+      if(fallback){
+        showToast("本地自然语音暂时不可用，已使用系统语音兜底。",3200);
+        return true;
+      }
       document.dispatchEvent(new CustomEvent("lexiflow:tts-error",{detail:{message:err?.message||"本地自然语音暂时不可用"}}));
       return false;
     }finally{
       if(slowNoticeTimer)clearTimeout(slowNoticeTimer);
-      if(!activeAudio||activeAudio.paused)setBusy(button,false);
+      if((!activeAudio||activeAudio.paused)&&!fallbackUtterance)setBusy(button,false);
     }
   }
 
@@ -99,11 +137,14 @@
 
     const speaker=event.target?.closest?.('[data-action="speak"]');
     if(!speaker)return;
-    const audio=clean(speaker.dataset.audio);
-    let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
-    if(audio||audios.length)return; // Real dictionary/Wikimedia audio always wins when it can play.
     const word=clean(speaker.dataset.word || speaker.closest(".word-line")?.querySelector("h2")?.textContent || speaker.closest(".learning-card-wordtop")?.querySelector("h2")?.textContent || speaker.closest(".library-editor-word-line")?.querySelector(".library-editor-word")?.textContent);
     if(!word)return;
+    const audio=clean(speaker.dataset.audio);
+    let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
+    const isExpression=/\s/.test(word) || /[.!?,;:]/.test(word);
+    // A single exact dictionary recording still wins. Component recordings for a
+    // phrase are not a natural whole-expression pronunciation, so Kokoro owns it.
+    if(audio || (!isExpression && audios.length))return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
     await play(word,speaker);
   },true);
