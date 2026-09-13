@@ -5,6 +5,7 @@ const path = require("path");
 const ecdict = require("./lib/ecdict");
 const coreLexicon = require("./lib/core-lexicon");
 const exampleEnrichment = require("./lib/example-enrichment");
+const expressionQuery = require("./lib/expression-query");
 const kokoroTts = require("./lib/kokoro-tts");
 
 const HOST = "127.0.0.1";
@@ -87,11 +88,12 @@ async function handleLocalDictionary(req, res, pathname, body) {
       console.log(`LexiFlow lookup [${result.lookupPath || "core-zh"}] ${result.lookupMs ?? "?"}ms: ${query} -> ${result.word}`);
       return true;
     }
-    const result = /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
+    const queryKind = expressionQuery.classifyEnglishQuery(query);
+    const result = queryKind !== "sentence" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)
       ? localLookupResult(query.toLowerCase(), "primary", query)
       : null;
     if (!result) return false;
-    writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+    writeJson(res, 200, { ok: true, result: { ...result, queryKind, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
     console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${query}`);
     return true;
   }
@@ -138,6 +140,39 @@ function requestInnerJson(pathname, { method = "GET", body = null, timeoutMs = 5
     if (buffer) request.end(buffer);
     else request.end();
   });
+}
+
+async function handleEnglishExpression(res, body) {
+  let parsed;
+  try {
+    parsed = parseJsonBuffer(body);
+  } catch {
+    writeJson(res, 400, { ok: false, code: "INVALID_JSON", error: "请求格式不正确" });
+    return true;
+  }
+  const query = clean(parsed.query);
+  const queryKind = expressionQuery.classifyEnglishQuery(query);
+  if (!new Set(["phrase", "sentence"]).has(queryKind)) return false;
+  try {
+    const result = await expressionQuery.resolveEnglishExpression(query);
+    if (!result) return false;
+    writeJson(res, 200, { ok: true, result });
+    console.log(`LexiFlow expression [${queryKind}]: ${query} -> ${result.word}`);
+    return true;
+  } catch (err) {
+    console.warn("LexiFlow expression query failed:", err?.message || err);
+    writeJson(res, 503, {
+      ok: false,
+      code: err?.code || "EXPRESSION_QUERY_UNAVAILABLE",
+      error: "完整表达暂时没有解析完成",
+      userError: {
+        code: err?.code || "EXPRESSION_QUERY_UNAVAILABLE",
+        title: queryKind === "sentence" ? "短句解析暂时不可用" : "短语解析暂时不可用",
+        message: "LexiFlow 会保留你输入的完整表达，不会把它拆成单词。请确认 AI 连接后重试。",
+      },
+    });
+    return true;
+  }
 }
 
 async function handlePronunciation(res, body) {
@@ -574,6 +609,10 @@ function createProxy() {
         }
         const handled = await handleLocalDictionary(req, res, url.pathname, body);
         if (handled) return;
+        if (url.pathname === "/api/search/smart") {
+          const expressionHandled = await handleEnglishExpression(res, body);
+          if (expressionHandled) return;
+        }
         return forward(req, res, body);
       } catch (err) {
         console.error("local dictionary proxy failed:", err.message || err);
