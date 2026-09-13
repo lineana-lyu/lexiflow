@@ -68,12 +68,22 @@
       if(hasSource(fields)) sourceMap.set(card.id,fields);
     }
   }
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      latestData=core.normalizeData(current);
+      hydrateSourceMap(latestData);
+      return true;
+    }catch{return false;}
+  }
 
   window.fetch = async function lexiFlowSourceContextFetch(input,init={}){
     const endpoint=endpointOf(input), method=String(init?.method||"GET").toUpperCase();
     if(endpoint==="/api/learning-data"&&method==="POST"){
       const body=parseBody(init);
       if(body?.data?.cards){
+        syncFromGateway();
         const known=new Set((latestData?.cards||[]).map(card=>card.id));
         const draft=loadDraft();
         let attachedNew=false;
@@ -105,7 +115,7 @@
         }
         const response=await previousFetch(input,withJson(init,body));
         if(response.ok){
-          latestData=body.data;
+          latestData=core.normalizeData(body.data);
           hydrateSourceMap(latestData);
           if(attachedNew)clearDraft();
         }
@@ -118,7 +128,7 @@
       try{
         const payload=await response.clone().json();
         if(payload?.data){
-          latestData=payload.data;
+          latestData=core.normalizeData(payload.data);
           hydrateSourceMap(latestData);
           return responseWithJson(response,payload);
         }
@@ -127,11 +137,16 @@
     return response;
   };
 
-  async function refresh(){
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return latestData;
     try{
       const response=await previousFetch("/api/learning-data",{cache:"no-store"});
-      if(response.ok){const payload=await response.json();if(payload?.data){latestData=payload.data;hydrateSourceMap(latestData);}}
+      if(response.ok){
+        const payload=await response.json();
+        if(payload?.data){latestData=core.normalizeData(payload.data);hydrateSourceMap(latestData);}
+      }
     }catch{}
+    return latestData;
   }
 
   function injectStyle(){
@@ -262,7 +277,14 @@
   document.addEventListener("change",event=>{if(event.target?.id==="lexi-source-type")persistDraftFromUi();},true);
 
   function decorate(){injectStyle();decorateAdd();decorateStudy();decorateLibraryEditor();}
-  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});}
-  function start(){const app=document.getElementById("app");if(!app)return;injectStyle();void refresh().then(decorate);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});}
+  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});}
+  function start(){
+    const app=document.getElementById("app");if(!app)return;
+    injectStyle();
+    syncFromGateway();
+    if(latestData)decorate();else void refresh(true).then(decorate);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
