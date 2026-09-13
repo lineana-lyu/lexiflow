@@ -29,7 +29,16 @@
     return targetForms(target).some(form=>new RegExp(`\\b${escapeRe(form)}\\b`,"i").test(value));
   }
 
-  async function loadData(){
+  function gatewaySnapshot(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      return current?.cards?core.normalizeData(current):null;
+    }catch{return null;}
+  }
+
+  async function loadData(force=false){
+    const snapshot=force?null:gatewaySnapshot();
+    if(snapshot)return snapshot;
     const response=await fetch("/api/learning-data",{cache:"no-store"});
     if(!response.ok)throw new Error("LOAD_FAILED");
     const payload=await response.json();

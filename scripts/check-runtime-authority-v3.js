@@ -117,6 +117,7 @@ assert(reviewTransaction.includes('authority==="review-session-v3"'),"Review tra
 assert(reviewTransaction.includes("expectedReviewCount"),"Review transaction recovery must be reviewCount-idempotent");
 
 assert(stageTransition.includes("core.crossDayPatch"),"learning stage transitions must use Learning Core");
+assert(stageTransition.includes("LexiFlowLearningDataGatewayV3?.current?.()")&&stageTransition.includes("if(snapshot)return snapshot;"),"Stage Transition V3 reads must prefer the canonical Gateway snapshot while retaining network fallback");
 assert(stageTransition.includes('stageTransitionAuthority:"v3"'),"normal stage writes must identify Stage Transition V3 authority");
 assert(stageTransition.includes('authority:"stage-transition-v3"'),"normal stage activity history must identify Stage Transition V3 authority");
 assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");

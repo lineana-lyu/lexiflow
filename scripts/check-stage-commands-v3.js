@@ -11,6 +11,9 @@ const visualize=read("public/visualize-actions-v3.js");
 const apply=read("public/apply-actions-v3.js");
 
 assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must have deterministic command IDs");
+assert(transition.includes("function gatewaySnapshot()")&&transition.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Stage Transition V3 must prefer the persistence-confirmed Gateway snapshot before network fallback");
+assert(transition.includes("const snapshot=force?null:gatewaySnapshot();")&&transition.includes("if(snapshot)return snapshot;"),"Stage Transition V3 must avoid a redundant learning-data GET when the Gateway snapshot is available");
+assert(transition.includes('fetch("/api/learning-data",{cache:"no-store"})'),"Stage Transition V3 must retain a cold-start GET fallback when no Gateway snapshot exists");
 assert(transition.includes("commandCommitted"),"normal stage completion must explicitly tolerate a retried command");
 assert(transition.includes('appendActivity(data,card.id,"select",{nextStage:"memorize",commandId})'),"Select completion must persist its command ID and canonical next stage");
 assert(transition.includes('appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:true,nextStage:"apply",commandId})'),"normal Visualize completion must persist its shared command ID and image confirmation outcome");
