@@ -40,6 +40,8 @@ It may intercept only that endpoint in order to:
 - perform the narrowly scoped safe legacy Chinese-meaning repair;
 - tag writes with `learningDataAuthority` / migration authority.
 
+It also supplies the canonical in-memory snapshot used by V3 UI decorators. MutationObservers must redraw from this snapshot rather than issuing a learning-data GET for every DOM change.
+
 It must not own stage UI, Review execution, AI Visualize behavior, or product navigation.
 
 ### StudyDay Boundary V3
@@ -64,7 +66,11 @@ Rules:
 
 ### DailyPlan Persistence V3
 
-`public/daily-plan-persistence-v3.js` persists a newly built frozen DailyPlan explicitly. It does not create GET-side effects and does not replace global fetch. Writes are tagged `dailyPlanAuthority: "v3"`.
+`public/daily-plan-persistence-v3.js` persists a newly built frozen DailyPlan explicitly. It does not create hidden GET-side effects through a fetch wrapper and does not replace global fetch. Writes are tagged `dailyPlanAuthority: "v3"`.
+
+### Runtime compatibility
+
+`public/runtime-fixes.js` is transport-only. It may keep narrowly scoped compatibility for old callers that still reach the canonical AI endpoints and the Chinese dictionary display repair, but it must not observe or decorate Study DOM. Visualize/Apply loading states belong to their V3 stage renderers.
 
 ### Advance Learning V3
 
@@ -112,9 +118,9 @@ Memorize's two recall directions/rounds are exercise state inside one product st
 
 `study-drafts-v3.js` is draft recovery only. It may preserve the historical localStorage key for upgrade continuity, but it cannot own active-session selection or auto-click the learning entry point.
 
-`source-context-v3.js` owns optional source-context capture/editing and must bind all study reminders to the explicit card ID plus canonical stage.
+`source-context-v3.js` owns optional source-context capture/editing and must bind all study reminders to the explicit card ID plus canonical stage. Its DOM decoration uses the Learning Data Gateway snapshot; source metadata preservation remains its temporary compatibility write boundary until the generic add-card writer is removed from `app.js`.
 
-## 3. Stage completion
+## 3. Stage completion and write serialization
 
 `public/stage-transition-v3.js` is the persisted authority for normal Select, Visualize, and Apply completion.
 
@@ -127,17 +133,33 @@ It must:
 - tag writes `stageTransitionAuthority: "v3"` and activities `authority: "stage-transition-v3"`;
 - schedule Apply -> Review for the next StudyDay rather than opening a same-day initial Review.
 
+For a given StudyDay/card/stage there is one deterministic terminal command identity:
+
+`stage:${StudyDay}:${cardId}:${stage}`
+
+Normal completion and Skip are competing outcomes of that same command, not two unrelated commands. Outcome semantics live in activity data such as `skipped: true/false`.
+
+`Stage Transition V3` also exposes the narrow in-memory `beginStageWrite()` / `endStageWrite()` serialization scope. Any operation that can persist a full card dataset while a card is in Visualize or Apply must participate in this scope before loading mutable data. This prevents two browser modules from reading the same old snapshot and later overwriting each other's stage result.
+
 `memorize-stage-v3.js` owns Memorize exercise state and persisted Memorize completion. `initialMemoryWeak` records first-round weakness separately from whether a later reinforcement round passes.
 
-`visualize-actions-v3.js` owns explicit Visualize Skip as a distinct idempotent command.
+`visualize-stage-v3.js` owns Visualize AI suggestion, image generation, image upload, and their persistent card patches. These asynchronous writes share the Visualize stage-write scope with completion/Skip, and a patch fails closed if the card has already left Visualize.
+
+`visualize-actions-v3.js` owns explicit Visualize Skip. It uses the same Visualize command ID and stage-write scope as normal completion; only one terminal outcome may commit.
+
+`apply-stage-v3.js` owns Apply expression checking and optional practice-prompt refresh. Prompt persistence shares the Apply stage-write scope and fails closed if the card has already left Apply.
 
 `apply-actions-v3.js` owns Apply Draft and Skip:
 
 - Draft persists learner work and pauses without completing Apply;
-- Skip requires explicit confirmation and is a distinct persisted outcome;
+- Draft persistence is serialized with terminal Apply writes because it writes the full learning dataset;
+- Skip requires explicit confirmation;
+- Skip and normal completion share the same deterministic Apply command ID, while `skipped` distinguishes their outcomes;
 - normal completion remains owned by Stage Transition V3.
 
-`apply-quality-v3.js` owns Apply quality approval. The learner must produce an original expression: an exact normalized copy of the dictionary reference example cannot graduate.
+`apply-quality-v3.js` owns Apply quality approval. Audit lookup is bound to the exact active card ID and its stored word/meaning, not visible DOM text. The learner must produce an original expression: an exact normalized copy of the dictionary reference example cannot graduate.
+
+`apply-guard-v3.js` independently validates the exact current Apply card and target word immediately before completion. It also redraws from the gateway snapshot rather than refetching learning data on every renderer mutation.
 
 ## 4. Learner-first AI behavior
 
@@ -147,9 +169,13 @@ AI is assistive, never authoritative.
 
 Visualize starts from the learner's own association or scene. AI may make the scene more concrete only after explicit learner action. Image generation/upload is memory support and cannot alter learning stage or Review timing.
 
+The V3 stage separates `assistBusy`, `imageBusy`, and `uploadBusy`; a text-assistance request must never impersonate an image-generation state. While a Visualize write is active, completion and Skip are visibly disabled and the shared stage-write scope prevents a stale asynchronous patch from reverting a terminal transition.
+
 ### Apply
 
 Apply starts from the learner's own intended expression. AI may check, translate, or suggest a correction, but it cannot silently replace the learner sentence and cannot bypass the approval contract.
+
+Optional practice-prompt refresh may update only the prompt. Its persistence is serialized with Apply completion/Draft/Skip so a late prompt result cannot move a card back from Review or erase a completed outcome.
 
 ## 5. Review execution
 
@@ -238,8 +264,8 @@ The active checks cover:
 - Today Plan and DailyPlan Persistence V3;
 - Advance Learning V3;
 - Study Session V3 exact-card selection and pause/resume;
-- canonical stage renderers and stage-command idempotency;
-- Apply quality/actions and Visualize skip;
+- canonical stage renderers, serialized stage writes, and command idempotency;
+- exact-card Apply quality/guard behavior, Apply Draft/Skip, and Visualize Skip;
 - verified reset behavior.
 
 A syntax-clean change is still a regression if it:
@@ -249,8 +275,10 @@ A syntax-clean change is still a regression if it:
 - restores a no-argument study-card selector;
 - rebuilds Review membership outside the frozen DailyPlan;
 - writes `memorize1` / `memorize2` as current product stages;
+- gives normal and Skip outcomes different command identities for the same card/stage/day;
 - allows same-day Apply -> initial Review;
 - lets Today UI mutate the global fetch layer;
+- lets a stale Visualize/Apply async write overwrite a terminal transition;
 - lets AI choose stage timing or Review scheduling.
 
 ## 9. Next cleanup boundary
@@ -261,6 +289,7 @@ Next cleanup should therefore be source deletion rather than another behavior re
 
 1. keep Learning Core V3, DailyPlan, Study Session V3, Stage Transition V3, and Review V3 contracts unchanged;
 2. physically remove obsolete legacy Select/Visualize/Apply stage render bodies and obsolete stage-specific handlers from `app.js` in small parity-checked slices;
-3. preserve dictionary/ECDICT, TTS, library editing, settings, Source Context V3, and generic navigation while shrinking `app.js`;
-4. after each slice, run the full repository checks;
-5. after repository checks are green, run a real Windows Electron click regression because CI cannot validate every GUI interaction.
+3. in particular, remove the dormant legacy auto-Visualize/auto-practice-prompt calls so the learner-first rule is guaranteed by source structure rather than only by V3 UI replacement;
+4. preserve dictionary/ECDICT, TTS, library editing, settings, Source Context V3, and generic navigation while shrinking `app.js`;
+5. after each slice, run the full repository checks;
+6. after repository checks are green, run a real Windows Electron click regression because CI cannot validate every GUI interaction.
