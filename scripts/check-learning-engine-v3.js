@@ -124,7 +124,8 @@ assert(diffDays(d2,validationFailed.nextReviewAt)===1,"failed next-day validatio
 
 const reviewUi=read("public/review-session-v3.js");
 assert(reviewUi.includes('kind==="scheduled"||kind==="stable-maintenance"'),"only a normal scheduled first-recall failure may create the one same-day repair tail");
-assert(reviewUi.includes("没记住，明天再验证"),"next-day validation failure copy must not promise another same-day repair");
+assert(reviewUi.includes("没记住，明天再练"),"next-day validation failure copy must tell the learner to return tomorrow rather than promise another same-day repair");
+assert(!reviewUi.includes("没记住，明天再验证"),"retired internal validation wording must not return to the user surface");
 assert(!reviewUi.includes("settings.reviewTypes"),"Review question types must be system-owned after removing the user-facing review-method setting");
 assert(!reviewUi.includes("settings.reviewTypeWeights"),"Review question weights must be system-owned after removing the user-facing review-method setting");
 

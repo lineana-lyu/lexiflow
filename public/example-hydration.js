@@ -23,9 +23,9 @@
       .trim();
   }
 
-  function isLocalDictionaryPayload(payload) {
+  function isDictionaryPayload(payload) {
     const result = payload?.result;
-    return Boolean(payload?.ok && result && (result.localLookup === true || result.dictionarySource === "ECDICT" || result.dictionarySource === "LexiFlow Core") && Array.isArray(result.senses));
+    return Boolean(payload?.ok && result && Array.isArray(result.senses));
   }
 
   function resultKey(result, senses) {
@@ -89,7 +89,7 @@
       const en = document.querySelector(".example-pair .example-en");
       const zh = document.querySelector(".example-pair .example-zh");
       if (en && !clean(firstSense?.exampleEn) && /暂无例句|手动编辑/.test(clean(en.textContent))) en.textContent = "例句正在后台准备…";
-      if (zh && !clean(firstSense?.exampleZh)) zh.textContent = clean(firstSense?.exampleEn) ? "中文翻译正在后台准备…" : "";
+      if (zh && !clean(firstSense?.exampleZh)) zh.textContent = clean(firstSense?.exampleEn) ? "正在补充中文翻译…" : "";
     }
   }
 
@@ -219,7 +219,7 @@
 
   function processDictionaryPayload(pathname, payload) {
     if (!DICTIONARY_PAYLOAD_ENDPOINTS.has(String(pathname || ""))) return payload;
-    if (isLocalDictionaryPayload(payload)) {
+    if (isDictionaryPayload(payload)) {
       void hydrateResult(payload.result);
       void hydratePronunciation(payload.result);
     }

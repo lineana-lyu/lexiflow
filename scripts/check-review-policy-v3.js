@@ -21,15 +21,12 @@ assert(policyIndex<visualIndex,"Review workload surface must load before later s
 assert(!indexHtml.includes('<script src="./review-policy-v2.js"></script>'),"retired Review Policy V2 must not return to runtime");
 
 const policyUi=fs.readFileSync(path.join(root,"public","review-policy-v3.js"),"utf8");
-assert(policyUi.includes("复习与学习负荷"),"settings must describe Review V4 as a workload policy rather than a manual cap");
-assert(policyUi.includes("关键复习到期全部安排"),"settings must explain that critical due reviews are protected");
-assert(policyUi.includes("±2 / ±3 / ±4 / ±5"),"settings must explain bounded Stable maintenance windows");
-assert(policyUi.includes("今日新词"),"settings must expose adaptive new-word intake");
-assert(!policyUi.includes("data-review-mode")&&!policyUi.includes("review-custom-cap"),"Review V4 must remove manual all/custom/intelligent controls");
-assert(!policyUi.includes("persistSettings")&&!policyUi.includes('reviewPolicyAuthority:"v3"'),"Review V4 surface must be read-only; Learning Core owns workload policy");
-assert(policyUi.includes("function syncFromGateway"),"Review workload surface must reuse the shared Learning Data Gateway snapshot");
-assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review workload surface must prefer the gateway snapshot over mutation-driven GETs");
-assert(policyUi.includes('requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});'),"Review workload MutationObserver must decorate from memory");
+assert(!policyUi.includes("复习与学习负荷"),"automatic review workload must not be exposed as a Settings panel");
+assert(!policyUi.includes("settingsHtml")&&!policyUi.includes("decorateSettings"),"Review scheduling must stay out of Settings");
+assert(!policyUi.includes("Review V4")&&!policyUi.includes("Stable 今日"),"internal scheduling labels must not reach users");
+assert(policyUi.includes("function syncFromGateway"),"Review hint surface must reuse the shared Learning Data Gateway snapshot");
+assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review hint surface must prefer the gateway snapshot");
+assert(policyUi.includes("今天没有复习任务"),"Today hint must use user-facing review language");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
