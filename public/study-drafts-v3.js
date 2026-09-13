@@ -14,11 +14,22 @@
   const get=id=>load()[id]||{};
   const patch=(id,next)=>{const all=load();all[id]={...(all[id]||{}),...next,updatedAt:new Date().toISOString()};save(all);};
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     try{
       const response=await fetch("/api/learning-data",{cache:"no-store"});
       if(response.ok){const payload=await response.json();if(payload?.data?.cards)data=core.normalizeData(payload.data);}
     }catch{}
+    return data;
   }
 
   function currentCard(){
@@ -63,6 +74,7 @@
   document.addEventListener("input",event=>{
     const element=event.target;
     if(!(element instanceof HTMLTextAreaElement||element instanceof HTMLInputElement))return;
+    syncFromGateway();
     const card=currentCard();
     if(!card)return;
     const stage=core.canonicalStage(card);
@@ -73,22 +85,24 @@
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.('[data-action="finish-visual"],[data-action="pass-apply"]');
     if(!button)return;
-    setTimeout(async()=>{await refresh();cleanup();},900);
+    setTimeout(()=>{syncFromGateway();cleanup();},900);
   },true);
 
   function decorate(){cleanup();restore();}
   function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});
+    requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});
   }
 
   function start(){
     try{localStorage.removeItem(LEGACY_ACTIVE_KEY);}catch{}
     const app=document.getElementById("app");
     if(!app)return;
-    void refresh().then(decorate);
+    syncFromGateway();
+    if(data)decorate();else void refresh(true).then(decorate);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
