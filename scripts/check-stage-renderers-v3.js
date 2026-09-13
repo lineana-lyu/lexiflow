@@ -70,6 +70,10 @@ assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway(
 assert(visual.includes('beginStageWrite?.(cardId,"visualize",now)'),"Visualize async AI/image writes must serialize with terminal stage completion");
 assert(visual.includes('core.canonicalStage(card)!=="visualize"'),"Visualize async patches must fail closed if the card has already left Visualize");
 assert(visual.includes("LexiFlowVisualizeStageV3=Object.freeze({isBusy})"),"Visualize stage must expose only its busy state for action-surface coordination");
+assert(visual.includes("visualImageConfirmed=false"),"generated or uploaded Visualize images must persist first as unconfirmed checkpoints");
+assert(visual.includes("visualImagePreparedAt"),"Visualize image checkpoints must record when the durable draft image was prepared");
+assert(visual.includes('visualImageSource="generated"')&&visual.includes('visualImageSource="upload"'),"Visualize checkpoints must preserve generated versus uploaded source semantics");
+assert(visual.includes("这张图片已经保存为当前 Visualize 草稿"),"Visualize must tell the learner that an unconfirmed image survives reload before stage completion");
 assert(visualActions.includes("LexiFlowVisualizeStageV3?.isBusy?.()"),"Visualize skip UI must reflect an in-flight Visualize write instead of allowing a silent no-op");
 
 assert(apply.includes("先自己表达，再让 AI 检查"),"Apply must preserve learner-first expression before AI feedback");
