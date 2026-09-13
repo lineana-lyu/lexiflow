@@ -4,7 +4,6 @@
   const core = window.LexiFlowLearningCore;
   if(!core) throw new Error("LexiFlowLearningCore must load before review-policy-v3.js");
 
-  const previousFetch = window.fetch.bind(window);
   let latestData = null;
   let scheduled = false;
   let saving = false;
@@ -27,9 +26,20 @@
     return JSON.stringify({reviewMode:normalized.reviewMode,reviewCustomCap:normalized.reviewCustomCap});
   }
 
-  async function refresh(){
+  function syncFromGateway(){
     try{
-      const response=await previousFetch("/api/learning-data",{cache:"no-store"});
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      latestData=core.normalizeData(current);
+      latestData.settings=normalizeSettings(latestData.settings||{});
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return latestData;
+    try{
+      const response=await fetch("/api/learning-data",{cache:"no-store"});
       if(response.ok){
         const payload=await response.json();
         if(payload?.data){latestData=core.normalizeData(payload.data);latestData.settings=normalizeSettings(latestData.settings||{});}
@@ -42,18 +52,21 @@
     if(saving)return;
     saving=true;
     try{
-      await refresh();
+      syncFromGateway();
+      if(!latestData)await refresh(true);
       if(!latestData)return;
       const next=clone(latestData);
       next.settings=normalizeSettings({...next.settings,...patch});
-      const response=await previousFetch("/api/learning-data",{
+      const response=await fetch("/api/learning-data",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({data:next}),
+        body:JSON.stringify({data:next,reviewPolicyAuthority:"v3"}),
       });
       if(!response.ok)throw new Error("SAVE_FAILED");
-      latestData=next;
-      schedule();
+      latestData=core.normalizeData(next);
+      latestData.settings=normalizeSettings(latestData.settings||{});
+      decorate();
+      try{window.dispatchEvent(new CustomEvent("lexiflow:review-policy-data",{detail:{reviewMode:latestData.settings.reviewMode}}));}catch{}
     }catch(err){
       console.error("review policy save failed",err);
     }finally{saving=false;}
@@ -119,8 +132,8 @@
     const reviewRow=document.querySelector('#lexi-today-plan [data-plan-key="review"]');
     if(!reviewRow||!plan)return;
     const count=reviewRow.querySelector(".lexi-plan-count");
-    const scheduled=Number(plan.review?.length||0), total=Number(plan.reviewDueTotal??scheduled), deferred=Math.max(0,Number(plan.reviewDeferredCount||0));
-    if(count)count.title=deferred>0?`今天安排 ${scheduled} 个；另有 ${deferred} 个到期词会在之后的学习日重新计算。`:total?`今天安排 ${scheduled} 个到期词。`:"今天没有到期复习。";
+    const scheduledCount=Number(plan.review?.length||0), total=Number(plan.reviewDueTotal??scheduledCount), deferred=Math.max(0,Number(plan.reviewDeferredCount||0));
+    if(count)count.title=deferred>0?`今天安排 ${scheduledCount} 个；另有 ${deferred} 个到期词会在之后的学习日重新计算。`:total?`今天安排 ${scheduledCount} 个到期词。`:"今天没有到期复习。";
   }
 
   document.addEventListener("click",event=>{
@@ -141,12 +154,16 @@
   function schedule(){
     if(scheduled)return;
     scheduled=true;
-    requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});
+    requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});
   }
   function start(){
     const app=document.getElementById("app");
     if(!app)return;
-    injectStyle();void refresh().then(decorate);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    injectStyle();
+    syncFromGateway();
+    if(latestData)decorate();else void refresh(true).then(decorate);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
