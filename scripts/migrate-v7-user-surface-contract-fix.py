@@ -31,5 +31,28 @@ new='assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截�
 if old not in text:
     raise SystemExit('runtime authority app-review-copy anchor not found')
 text=text.replace(old,new,1)
+
+# Settings still preserve the same underlying local-first dictionary and Codex
+# runtime authorities, but they must present learner-facing connection states
+# and verify them automatically on startup instead of exposing diagnostics.
+old='''assert(app.includes("本地 Core + ECDICT 负责快速查词；在线词典只用于真人发音和例句增强。"),"Settings must explain the actual local-first dictionary architecture");
+assert(app.includes("dictMaskedKey")&&app.includes("在线密钥已保存")&&app.includes("本地词典已就绪"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
+assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在验证在线词典…")&&app.includes("在线增强验证失败"),"dictionary verification state must stay visibly persisted on the Settings page");
+assert(app.includes("CLI 已检测")&&app.includes("未检测到登录")&&app.includes("runtimeTest")&&app.includes("fastTextTransport"),"AI Settings must distinguish CLI, auth, real runtime verification, and fast transport state");
+assert(app.includes("正在发起真实 AI 请求…")&&app.includes("运行连接已验证")&&app.includes("运行连接失败"),"AI connection checks must have visible checking/success/failure states rather than toast-only feedback");'''
+new='''assert(app.includes("本地词典负责快速查词；配置在线词典后，会自动补充真人发音和例句。"),"Settings must explain local-first dictionary behavior in learner-facing language");
+assert(app.includes("dictMaskedKey")&&app.includes("密钥已保存")&&app.includes("本地词典可用"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
+assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在连接在线词典…")&&app.includes("在线词典连接失败"),"dictionary connection state must remain visible on Settings");
+assert(app.includes("verifyProviderConnectionsOnStartup")&&app.includes('/api/dictionary/test')&&app.includes('/api/ai/test'),"provider connections must be verified automatically with real service calls on startup");
+assert(app.includes("正在连接 AI…")&&app.includes("AI 已连接")&&app.includes("AI 连接失败"),"AI connection state must expose checking/success/failure without diagnostic jargon");
+for(const internalLabel of ["CLI 已检测","CLI 未检测","真实 AI 请求验证","Fast transport","运行连接已验证"]){assert(!app.includes(internalLabel),`Settings must not expose internal diagnostic label: ${internalLabel}`);}'''
+if old not in text:
+    raise SystemExit('runtime authority Settings block anchor not found')
+text=text.replace(old,new,1)
+old='assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 高级配置</h3>"),"app.js base Settings surface must match the current product labels");'
+new='assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 模型</h3>"),"app.js Settings surface must use learner-facing AI labels");'
+if old not in text:
+    raise SystemExit('runtime authority AI label anchor not found')
+text=text.replace(old,new,1)
 path.write_text(text,encoding='utf-8')
-print('user-facing Review contracts aligned')
+print('user-facing Review and Settings contracts aligned')
