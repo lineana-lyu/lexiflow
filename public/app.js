@@ -493,7 +493,7 @@
   }
 
   function cardMini(c){
-    const stageLabel = stageLabelOf(c.stage);
+    const stageLabel = stageLabelOf(c);
     return `<div class="card pad">
       <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
         <div><strong style="font-size:18px">${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></div>
@@ -503,8 +503,11 @@
     </div>`;
   }
 
-  function stageLabelOf(stage){
-    return ({select:"选词确认",memorize1:"英→中",memorize2:"中→英",visualize:"视觉联想",apply:"造句",review:"复习中",mastered:"已掌握"})[stage]||stage;
+  function stageLabelOf(card){
+    const core=window.LexiFlowLearningCore;
+    const stage=typeof core?.canonicalStage==="function"?core.canonicalStage(card):String(card?.stage||"");
+    if(card?.memoryState==="stable")return "长期稳定";
+    return ({select:"待确认",memorize:"记忆中",visualize:"视觉联想",apply:"造句应用",review:"复习巩固"})[stage]||stage;
   }
 
   function addPage(){
@@ -717,7 +720,8 @@
     const explicitId=String(cardId||"").trim();
     const card=explicitId?getCard(explicitId):null;
     if(!card){toast("当前没有可打开的学习任务");state.route="home";render();return false;}
-    if(card.inboxPending||card.stage==="review"||card.stage==="mastered"){
+    const canonical=window.LexiFlowLearningCore?.canonicalStage?.(card)||String(card.stage||"");
+    if(card.inboxPending||canonical==="review"||card.memoryState==="stable"){
       toast("这张卡片当前不能进入首次学习");
       state.route="home";
       render();
@@ -822,7 +826,7 @@
         <td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic||""))}</div></td>
         <td><span class="pill blue">${escapeHtml(c.pos)}</span></td>
         <td>${escapeHtml(c.meaningZh)}</td>
-        <td>${stageLabelOf(c.stage)}</td>
+        <td>${stageLabelOf(c)}</td>
         <td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td>
         <td><div class="library-actions"><button class="btn small" data-action="open-library-editor" data-card-id="${c.id}">编辑</button><button class="btn small danger" data-delete-card="${c.id}">删除</button></div></td>
       </tr>`).join(""):`<tr><td colspan="7"><div class="empty"><strong>没有匹配的单词</strong></div></td></tr>`}</tbody></table></div>`
