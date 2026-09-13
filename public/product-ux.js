@@ -1,7 +1,6 @@
 (() => {
   "use strict";
 
-  const DICTIONARY_KEY_URL = "https://www.dictionaryapi.com/register/index";
   const CUSTOM_GOAL_KEY = "lexiflow-daily-goal-custom-v1";
   const APP_ICON_URL = "./icon.png?v=20260911-icon3";
   let scheduled = false;
@@ -56,76 +55,11 @@
     return Array.from(list.querySelectorAll(":scope > .setting-row")).find(row => row.querySelector("h3")?.textContent.trim() === title) || null;
   }
 
-  function decorateDictionarySettings(list) {
-    const row = rowByTitle(list, "英语词典");
-    if (!row) return;
-
-    const intro = row.querySelector("p");
-    if (intro && !intro.dataset.lexiFriendlyCopy) {
-      intro.dataset.lexiFriendlyCopy = "1";
-      const connected = /已连接/.test(intro.textContent || "");
-      intro.textContent = connected ? "词典已连接，可用于释义、音标和单词发音。" : "连接词典后，可获得更稳定的释义、音标和单词发音。";
-      const link = document.createElement("a");
-      link.className = "settings-inline-link";
-      link.href = DICTIONARY_KEY_URL;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      link.textContent = "获取免费词典密钥 ↗";
-      intro.insertAdjacentElement("afterend", link);
-    }
-
-    const keyInput = row.querySelector("#mw-api-key");
-    if (keyInput) {
-      keyInput.placeholder = "粘贴词典密钥";
-      keyInput.setAttribute("aria-label", "词典密钥");
-    }
-  }
-
   function decorateSecurityBanner() {
     const banner = document.querySelector(".settings-security-banner");
     if (!banner || banner.dataset.lexiFriendly === "1") return;
     banner.dataset.lexiFriendly = "1";
     banner.innerHTML = `<span class="settings-security-icon">⌁</span><div><strong>连接信息只保存在当前设备</strong><span>用于词典和 AI 服务，不会显示在学习内容中。</span></div>`;
-  }
-
-  function mergeAiSettings(list) {
-    if (list.querySelector(".ai-unified-setting")) return;
-    const serviceRow = rowByTitle(list, "AI 服务");
-    const modelRow = rowByTitle(list, "模型与思考强度");
-    const imageRow = rowByTitle(list, "图片生成");
-    if (!serviceRow || !modelRow || !imageRow) return;
-
-    const serviceActions = serviceRow.querySelector(".setting-actions-inline");
-    const diagnostics = serviceRow.querySelector(".advanced-diagnostics");
-    const controls = modelRow.querySelector(".codex-runtime-grid");
-    const imageStatus = imageRow.querySelector(".pill");
-
-    const merged = document.createElement("div");
-    merged.className = "setting-row ai-unified-setting";
-    merged.innerHTML = `
-      <div class="ai-unified-head">
-        <div>
-          <span class="settings-section-kicker">智能能力</span>
-          <h3>AI 助手</h3>
-          <p>用于联想场景、造句反馈和联想图生成。</p>
-        </div>
-        <div class="ai-unified-status"></div>
-      </div>
-      <div class="ai-unified-controls"></div>
-      <div class="ai-unified-image-row">
-        <div><strong>联想图生成</strong><span>与文字能力使用同一套 AI 配置。</span></div>
-        <div class="ai-unified-image-status"></div>
-      </div>
-      <div class="ai-unified-diagnostics"></div>`;
-
-    serviceRow.insertAdjacentElement("beforebegin", merged);
-    if (serviceActions) merged.querySelector(".ai-unified-status")?.appendChild(serviceActions);
-    if (controls) merged.querySelector(".ai-unified-controls")?.appendChild(controls);
-    if (imageStatus) merged.querySelector(".ai-unified-image-status")?.appendChild(imageStatus);
-    if (diagnostics) merged.querySelector(".ai-unified-diagnostics")?.appendChild(diagnostics);
-    serviceRow.remove();
-    modelRow.remove();
-    imageRow.remove();
   }
 
   function decorateDailyGoal(list) {
@@ -186,8 +120,6 @@
     const list = document.querySelector(".settings-list");
     if (!list) return;
     decorateSecurityBanner();
-    decorateDictionarySettings(list);
-    mergeAiSettings(list);
     decorateDailyGoal(list);
   }
 

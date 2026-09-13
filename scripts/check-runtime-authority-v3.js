@@ -146,6 +146,11 @@ assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 高级配置</h3
 assert(!app.includes('data-action="refresh-provider"'),"Settings base surface must not render the retired manual provider refresh control");
 assert(app.includes("服务凭据只保存在当前设备。"),"Settings base surface must own the final credential privacy copy");
 assert(app.includes("备份单词卡、学习进度和复习记录。")&&app.includes("从此前导出的备份恢复学习数据。"),"Settings base surface must own backup/restore descriptions");
+const productUx=read("public/product-ux.js");
+for(const retiredDecorator of ["decorateDictionarySettings","mergeAiSettings","ai-unified-setting"]){
+  assert(!productUx.includes(retiredDecorator),`product-ux must not retain a Settings decorator whose source structure no longer exists: ${retiredDecorator}`);
+}
+assert(productUx.includes("decorateDailyGoal")&&productUx.includes("decorateSecurityBanner"),"product-ux must retain active Settings enhancements");
 assert(app.includes('api("/api/dictionary/lookup"'),"front-end lookup must use the dictionary service boundary");
 for(const legacyStage of ["memorize1","memorize2","mastered"]){
   assert(!app.includes(legacyStage),`app.js must not expose a historical product stage: ${legacyStage}`);
