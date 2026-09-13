@@ -794,18 +794,6 @@
     return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
   }
 
-  function localFeedback(text,word){
-    const t=text.trim();
-    const tips=[];
-    if(!t) return {level:"warn",title:"请先写一个完整句子",tips:["句子不能为空。"]};
-    if(t.split(/\s+/).length<4) tips.push("句子偏短，建议补充更完整的语境。");
-    const re=new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}\\b`,"i");
-    if(!re.test(t)) tips.push(`句子里还没有出现目标词 “${word}”。`);
-    if(!/[.!?]$/.test(t)) tips.push("建议在句末加入标点。");
-    if(t[0] && t[0]!==t[0].toUpperCase()) tips.push("英文句子通常以大写字母开头。");
-    return tips.length?{level:"warn",title:"本地反馈：可以再改一改",tips}:{level:"good",title:"本地反馈：句子结构基本完整",tips:["目标词已使用。","句子长度和基本格式完整。"]};
-  }
-
   function reviewPage(){
     const plan=currentDailyPlan();
     const due=planCards("review");

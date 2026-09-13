@@ -77,7 +77,7 @@ Rules:
 
 `public/runtime-fixes.js` is transport-only. It may keep narrowly scoped Chinese dictionary display compatibility, but it must not observe or decorate Study DOM.
 
-Dormant historical `app.js` callers for `/api/ai/visual-scene` and `/api/ai/practice-prompt` are now deliberately failed closed with `LEGACY_STAGE_AI_BLOCKED`. They must not be delegated into real AI work. This guarantees that rendering a retired stage body cannot spend an AI request, invent the learner's first Visualize association, or create an Apply prompt without an explicit learner action.
+Historical `app.js` callers for `/api/ai/visual-scene` and `/api/ai/practice-prompt`, together with their retired stage bodies and event handlers, have been physically removed. `LEGACY_STAGE_AI_BLOCKED` remains at the runtime compatibility boundary as defense-in-depth: any future direct reintroduction of those retired transport calls must fail closed instead of reaching real AI work.
 
 The only valid Visualize scene / Apply practice-prompt AI path is the explicit V3 stage action through `LexiFlowAiAssistV3`. `ai-assist-v3.js` captures the upstream transport before `runtime-fixes.js` is installed, so legitimate V3 AI actions do not pass through the retired-call block.
 
@@ -187,7 +187,7 @@ Visualize starts from the learner's own association or scene. AI may make the sc
 
 The V3 stage separates `assistBusy`, `imageBusy`, and `uploadBusy`; a text-assistance request must never impersonate an image-generation state. While a Visualize write is active, completion and Skip are visibly disabled and the shared stage-write scope prevents a stale asynchronous patch from reverting a terminal transition.
 
-Historical automatic Visualize AI calls in `app.js` are dormant technical debt and are blocked at the runtime compatibility boundary. They are not permitted to reach AI Assist V3.
+Historical automatic Visualize AI calls and their `app.js` render/event paths have been physically removed. The runtime compatibility block remains a fail-closed regression guard; only explicit V3 Visualize actions may reach AI Assist V3.
 
 ### Apply
 
@@ -195,7 +195,7 @@ Apply starts from the learner's own intended expression. AI may check, translate
 
 Optional practice-prompt refresh may update only the prompt. Its persistence is serialized with Apply completion/Draft/Skip so a late prompt result cannot move a card back from Review or erase a completed outcome.
 
-Historical automatic Apply prompt calls in `app.js` are likewise blocked and cannot reach real AI. The V3 renderer must initiate prompt refresh explicitly.
+Historical automatic Apply prompt calls and their `app.js` render/event paths have been physically removed. The V3 renderer must initiate prompt refresh explicitly, while the compatibility block remains a fail-closed regression guard.
 
 ## 5. Review execution
 

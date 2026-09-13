@@ -137,7 +137,7 @@ assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVis
 assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state must contain only the exact card identity");
 assert(!app.includes("stageIndex("),"app.js must not retain or call a legacy stage-order helper");
 assert(app.includes("window.LexiFlowStudyStageSurfaceV3?.stages"),"Study shell motion ordering must reuse the V3 stage surface authority");
-for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply"]){
+for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply","localFeedback"]){
   assert(!app.includes(`function ${retiredBody}(`)&&!app.includes(`async function ${retiredBody}(`),`retired stage body must be physically removed from app.js: ${retiredBody}`);
 }
 for(const retiredAction of ["complete-stage","toggle-visual-scene","generate-visual","finish-visual","submit-apply","adopt-ai-sentence","edit-apply","refresh-visual-scene","refresh-practice-prompt","restore-original-apply","pass-apply"]){
