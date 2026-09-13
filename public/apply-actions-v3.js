@@ -62,12 +62,15 @@
     source.activities.push({id:uid(),type,cardId,at:new Date().toISOString(),authority:"apply-actions-v3",...extra});
   }
 
-  function skipCommandId(cardId,now=new Date()){
-    return `stage:${core.dayKey(now)}:${String(cardId)}:apply-skip`;
-  }
-
   function commandCommitted(source,commandId){
     return Array.isArray(source?.activities)&&source.activities.some(item=>String(item.commandId||"")===commandId);
+  }
+
+  function beginApplyWrite(now=new Date()){
+    const id=currentCardId();if(!id)return null;
+    const transition=window.LexiFlowStageTransitionV3;
+    const write=transition?.beginStageWrite?.(id,"apply",now);
+    return write?{id,transition,write}:null;
   }
 
   function pauseAndReturn(){
@@ -91,6 +94,8 @@
 
   async function saveDraft(button){
     if(saving)return;
+    const guard=beginApplyWrite();
+    if(!guard)return;
     saving=true;
     const original=button.textContent;
     button.disabled=true;
@@ -113,6 +118,7 @@
       button.textContent=original;
       window.alert("草稿没有保存成功，请保持 LexiFlow 本地服务运行后重试。");
     }finally{
+      guard.transition?.endStageWrite?.(guard.write);
       saving=false;
     }
   }
@@ -132,15 +138,19 @@
       return;
     }
     if(saving)return;
+    const now=new Date(),guard=beginApplyWrite(now);
+    if(!guard){
+      button.textContent="当前阶段正在保存…";
+      setTimeout(()=>{if(button.isConnected&&!saving){button.textContent="跳过本次造句";button.classList.remove("danger");}},700);
+      return;
+    }
     saving=true;
     skipArmedUntil=0;
     button.disabled=true;
     button.textContent="正在跳过…";
+    const commandId=guard.write.commandId;
     try{
       const source=await loadData(true);
-      const id=currentCardId();
-      if(!id)throw new Error("APPLY_CARD_NOT_FOUND");
-      const now=new Date(),commandId=skipCommandId(id,now);
       if(commandCommitted(source,commandId)){location.reload();return;}
       const card=currentApplyCard(source);
       if(!card)throw new Error("APPLY_CARD_NOT_FOUND");
@@ -153,7 +163,7 @@
       card.initialReviewPending=false;
       Object.assign(card,core.crossDayPatch(prev,{stage:"review",learningStage:"review"},now)||{});
       card.updatedAt=now.toISOString();
-      appendActivity(source,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),commandId});
+      appendActivity(source,card.id,"stage-complete",{stage:"apply",skipped:true,hasDraft:Boolean(draft),nextStage:"review",commandId});
       await persist(source);
       button.textContent="已跳过 · 明天首次复习";
       setTimeout(()=>location.reload(),100);
@@ -164,6 +174,7 @@
       button.classList.remove("danger");
       window.alert("跳过状态没有保存成功，本次造句仍未完成，请重试。");
     }finally{
+      guard.transition?.endStageWrite?.(guard.write);
       saving=false;
     }
   }
