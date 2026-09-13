@@ -3,9 +3,12 @@
 
   const REVIEW_INTERVALS = Object.freeze([1, 3, 7, 16, 21]);
   const STABLE_INTERVALS = Object.freeze([30, 45, 68, 90]);
+  const STABLE_WINDOWS = Object.freeze([2, 3, 4, 5]);
   const TODAY_ORDER = Object.freeze(["review", "memorize", "visualize", "apply", "select"]);
-  const PLAN_VERSION = 4;
-  const REVIEW_INTELLIGENT_CAP = 20;
+  const PLAN_VERSION = 5;
+  // Kept only as a compatibility export. Review V4 has no hard cap for critical reviews.
+  const REVIEW_INTELLIGENT_CAP = null;
+  const STABLE_DAILY_TARGET = 6;
 
   function dayKey(input = new Date()){
     const d = input instanceof Date ? input : new Date(input);
@@ -23,6 +26,18 @@
     d.setHours(12,0,0,0);
     d.setDate(d.getDate()+days);
     return d.toISOString();
+  }
+
+  function dayOrdinal(value){
+    const key=valueDayKey(value);
+    if(!key)return null;
+    const [y,m,d]=key.split("-").map(Number);
+    return Math.round(Date.UTC(y,m-1,d)/86400000);
+  }
+
+  function dayDistance(from,to){
+    const a=dayOrdinal(from),b=dayOrdinal(to);
+    return a===null||b===null?Number.POSITIVE_INFINITY:b-a;
   }
 
   function canonicalStage(value){
@@ -58,9 +73,6 @@
       card.stage = "memorize";
     }
 
-    // `stage` and `learningStage` now expose the same canonical product stage.
-    // Historical memorize1/memorize2 values are accepted on read and collapsed
-    // without changing the learner's round/session data.
     card.learningStage = canonicalStage(card.stage);
 
     if(card.learningStage === "select" && card.inboxPending === undefined){
@@ -89,6 +101,7 @@
     if(card?.inboxPending) return 100;
     if(isDue(card, now)){
       if(card.memoryState === "review_again") return card.reviewAgainFailedOn === dayKey(now) ? 70 : -2;
+      if(card.memoryState === "stable") return 0;
       return -1;
     }
     if(!eligibleToday(card, now)) return 90;
@@ -116,20 +129,75 @@
     };
   }
 
-  function reviewPolicy(settings = {}){
-    const raw = String(settings.reviewMode || "intelligent").toLowerCase();
-    const mode = ["intelligent","all","custom"].includes(raw) ? raw : "intelligent";
-    if(mode === "all") return {mode,cap:null};
-    if(mode === "custom"){
-      const value = Math.round(Number(settings.reviewCustomCap));
-      return {mode,cap:Math.max(1,Math.min(200,Number.isFinite(value)?value:20))};
-    }
-    return {mode:"intelligent",cap:REVIEW_INTELLIGENT_CAP};
+  function stableWindowDays(card){
+    const index=Math.max(0,Math.min(Number(card?.stableStep||0),STABLE_WINDOWS.length-1));
+    return STABLE_WINDOWS[index];
   }
 
-  function applyReviewPolicy(ids, policy){
-    if(policy.cap === null) return [...ids];
-    return ids.slice(0,policy.cap);
+  function reviewCardSort(a,b){
+    if(a?.memoryState==="review_again"&&b?.memoryState!=="review_again")return -1;
+    if(b?.memoryState==="review_again"&&a?.memoryState!=="review_again")return 1;
+    const ad=dayOrdinal(a?.nextReviewAt),bd=dayOrdinal(b?.nextReviewAt);
+    if(ad!==bd)return (ad??Number.MAX_SAFE_INTEGER)-(bd??Number.MAX_SAFE_INTEGER);
+    const ac=new Date(a?.createdAt||0).getTime(),bc=new Date(b?.createdAt||0).getTime();
+    if(ac!==bc)return ac-bc;
+    return String(a?.id||"").localeCompare(String(b?.id||""));
+  }
+
+  function stableDailyTarget(criticalCount){
+    if(criticalCount>=17)return 0;
+    if(criticalCount>=13)return 2;
+    if(criticalCount>=9)return 4;
+    return STABLE_DAILY_TARGET;
+  }
+
+  function reviewWorkload(cards, now = new Date()){
+    const reviewCards=(cards||[]).filter(card=>canonicalStage(card)==="review"&&card?.nextReviewAt);
+    const critical=reviewCards.filter(card=>card.memoryState!=="stable"&&isDue(card,now)).sort(reviewCardSort);
+    const stable=reviewCards.filter(card=>card.memoryState==="stable").map(card=>({
+      card,
+      distance:dayDistance(now,card.nextReviewAt),
+      window:stableWindowDays(card),
+    }));
+    const stableUrgent=stable.filter(item=>item.distance < -item.window).sort((a,b)=>a.distance-b.distance||reviewCardSort(a.card,b.card));
+    const stableDue=stable.filter(item=>item.distance<=0&&item.distance>=-item.window).sort((a,b)=>a.distance-b.distance||reviewCardSort(a.card,b.card));
+    const stableNear=stable.filter(item=>item.distance>0&&item.distance<=item.window).sort((a,b)=>a.distance-b.distance||reviewCardSort(a.card,b.card));
+
+    const target=stableDailyTarget(critical.length);
+    const optionalCapacity=Math.max(0,target-stableUrgent.length);
+    const selectedDue=stableDue.slice(0,optionalCapacity);
+    const remainingCapacity=Math.max(0,optionalCapacity-selectedDue.length);
+    const selectedNear=stableNear.slice(0,remainingCapacity);
+    const stableScheduled=[...stableUrgent,...selectedDue,...selectedNear].map(item=>item.card);
+    const review=[...critical,...stableScheduled];
+
+    return {
+      review:review.map(card=>card.id),
+      candidateIds:new Set([...critical,...stableUrgent.map(item=>item.card),...stableDue.map(item=>item.card),...stableNear.map(item=>item.card)].map(card=>card.id)),
+      criticalCount:critical.length,
+      stableScheduledCount:stableScheduled.length,
+      stableUrgentCount:stableUrgent.length,
+      stableDueTotal:stableUrgent.length+stableDue.length,
+      stableDeferredCount:Math.max(0,stableDue.length-selectedDue.length),
+      stablePulledForwardCount:selectedNear.length,
+      reviewDueTotal:critical.length+stableUrgent.length+stableDue.length,
+      pressure:review.length,
+      stableTarget:target,
+    };
+  }
+
+  function adaptiveNewWordGoal(baseGoal, reviewPressure){
+    const base=Math.max(0,Math.round(Number(baseGoal)||0));
+    const pressure=Math.max(0,Number(reviewPressure)||0);
+    if(!base)return 0;
+    if(pressure>=17)return 0;
+    if(pressure>=13)return Math.min(base,Math.max(1,Math.ceil(base/3)));
+    if(pressure>=9)return Math.min(base,Math.max(1,Math.ceil(base*2/3)));
+    return base;
+  }
+
+  function reviewPolicy(){
+    return {mode:"adaptive-v4",cap:null};
   }
 
   function keepFrozenOrder(previousIds, currentIds){
@@ -155,29 +223,32 @@
   function buildDailyPlan(data, now = new Date()){
     const cards = Array.isArray(data?.cards) ? data.cards : [];
     const goalRaw = Number(data?.settings?.dailyGoal);
-    const goal = Number.isFinite(goalRaw) && goalRaw > 0 ? Math.round(goalRaw) : 3;
+    const baseGoal = Number.isFinite(goalRaw) && goalRaw > 0 ? Math.round(goalRaw) : 3;
     const selectedIds = selectedTodayIds(cards, now);
     const buckets = currentBuckets(cards, now);
+    const reviewLoad=reviewWorkload(cards,now);
     const previous = data?.dailyPlan;
-    const sameDayFrozen = previous?.frozen === true && previous?.planVersion === PLAN_VERSION && previous?.date === dayKey(now);
-    const policy = sameDayFrozen
-      ? {mode:previous.reviewMode || "intelligent",cap:previous.reviewCap === null ? null : Number(previous.reviewCap ?? REVIEW_INTELLIGENT_CAP)}
-      : reviewPolicy(data?.settings || {});
+    // A plan generated by an older version is still frozen for the rest of that
+    // StudyDay. Review V4 starts changing membership only on the next StudyDay.
+    const sameDayFrozen = previous?.frozen === true && previous?.date === dayKey(now);
 
-    let review = applyReviewPolicy(buckets.review,policy);
+    let review = reviewLoad.review;
     let memorize = buckets.memorize;
     let visualize = buckets.visualize;
     let apply = buckets.apply;
     let select = buckets.select;
 
     if(sameDayFrozen){
-      review = keepFrozenOrder(previous.review, buckets.review);
+      review = keepFrozenOrder(previous.review, Array.from(reviewLoad.candidateIds));
       memorize = keepFrozenOrder(previous.memorize, buckets.memorize);
       visualize = keepFrozenOrder(previous.visualize, buckets.visualize);
       apply = keepFrozenOrder(previous.apply, buckets.apply);
       select = appendTodaySelections(keepFrozenOrder(previous.select, buckets.select), buckets.select, cards, now);
     }
 
+    const effectiveGoal=sameDayFrozen
+      ? Math.max(0,Number(previous.selectGoal ?? baseGoal))
+      : adaptiveNewWordGoal(baseGoal,reviewLoad.pressure);
     const remainingTaskIds=planTaskIds(review,memorize,visualize,apply,select);
     let initialTaskIds=sameDayFrozen
       ? uniqueIds(Array.isArray(previous.initialTaskIds)?previous.initialTaskIds:planTaskIds(previous.review,previous.memorize,previous.visualize,previous.apply,previous.select))
@@ -188,6 +259,10 @@
     const taskTotal=initialTaskIds.length;
     const taskRemaining=remainingTaskIds.length;
     const taskCompleted=Math.max(0,taskTotal-taskRemaining);
+    const legacyFrozen=sameDayFrozen&&Number(previous.planVersion||0)<PLAN_VERSION;
+    const remainingReviewCards=review.map(id=>cards.find(card=>card.id===id)).filter(Boolean);
+    const remainingCriticalCount=remainingReviewCards.filter(card=>card.memoryState!=="stable").length;
+    const remainingStableCount=remainingReviewCards.filter(card=>card.memoryState==="stable").length;
 
     return {
       date: dayKey(now),
@@ -195,19 +270,29 @@
       planVersion: PLAN_VERSION,
       frozen: true,
       noVocabularyDebt: true,
+      noReviewDebt: true,
       review,
       memorize,
       visualize,
       apply,
       select,
       inbox: buckets.inbox,
-      reviewMode: policy.mode,
-      reviewCap: policy.cap,
-      reviewDueTotal: buckets.review.length,
-      reviewDeferredCount: Math.max(0,buckets.review.length-review.length),
-      selectGoal: goal,
+      reviewMode:"adaptive-v4",
+      reviewLoadMode:legacyFrozen?"frozen-legacy":"adaptive-v4",
+      reviewCap:null,
+      reviewDueTotal:legacyFrozen?Number(previous.reviewDueTotal??reviewLoad.reviewDueTotal):reviewLoad.reviewDueTotal,
+      reviewDeferredCount:legacyFrozen?Number(previous.reviewDeferredCount||0):reviewLoad.stableDeferredCount,
+      reviewCriticalCount:remainingCriticalCount,
+      reviewStableScheduledCount:remainingStableCount,
+      reviewStableUrgentCount:legacyFrozen?0:reviewLoad.stableUrgentCount,
+      reviewStableDeferredCount:legacyFrozen?Number(previous.reviewDeferredCount||0):reviewLoad.stableDeferredCount,
+      reviewStablePulledForwardCount:legacyFrozen?0:reviewLoad.stablePulledForwardCount,
+      reviewStableTarget:legacyFrozen?null:reviewLoad.stableTarget,
+      reviewPressure:review.length,
+      selectMaxGoal:baseGoal,
+      selectGoal:effectiveGoal,
       selectedToday: Array.from(selectedIds),
-      remainingSelectSlots: Math.max(0, goal-selectedIds.size),
+      remainingSelectSlots: Math.max(0, effectiveGoal-selectedIds.size),
       initialTaskIds,
       taskTotal,
       taskRemaining,
@@ -323,9 +408,11 @@
   window.LexiFlowLearningCore = Object.freeze({
     REVIEW_INTERVALS,
     STABLE_INTERVALS,
+    STABLE_WINDOWS,
     TODAY_ORDER,
     PLAN_VERSION,
     REVIEW_INTELLIGENT_CAP,
+    STABLE_DAILY_TARGET,
     dayKey,
     valueDayKey,
     addDaysIso,
@@ -335,6 +422,8 @@
     normalizeCard,
     learningPriority,
     reviewPolicy,
+    reviewWorkload,
+    adaptiveNewWordGoal,
     buildDailyPlan,
     normalizeData,
     crossDayPatch,
