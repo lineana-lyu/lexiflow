@@ -11,6 +11,7 @@ const transition=read("public/stage-transition-v3.js");
 const visual=read("public/visualize-actions-v3.js");
 const drafts=read("public/study-drafts-v3.js");
 const source=read("public/source-context-v3.js");
+const gateway=read("public/learning-data-gateway-v3.js");
 const fresh=read("public/new-user-defaults-v3.js");
 
 assert(index.includes("apply-actions-v3.js"),"Apply Actions V3 must be loaded by index.html");
@@ -62,7 +63,10 @@ assert(!source.includes("const stage=String(card.stage"),"Source Context V3 must
 assert(!source.includes("trim().toLowerCase()===word"),"source reminders must not resolve the learning card by word text");
 assert(source.includes("data-library-source-editor"),"Word Library editor must expose editable source context");
 assert(source.includes("captureLibrarySourceDraft"),"Word Library source edits must enter the authoritative source map before save");
-assert(source.includes("card.sourceTitle=remembered.sourceTitle"),"later card saves must preserve edited source metadata");
+assert(source.includes("Object.assign(card,remembered)"),"later card saves must preserve edited source metadata through the outgoing source map");
+assert(source.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context V3 must attach source preservation through the central learning-data gateway");
+assert(!source.includes("window.fetch=")&&!source.includes("window.fetch ="),"Source Context V3 must not restore a competing global fetch wrapper");
+assert(gateway.includes("registerOutgoingMutator"),"Learning Data Gateway V3 must expose the source-preservation hook used by Source Context");
 
 assert(index.includes("new-user-defaults-v3.js"),"fresh-user defaults must be loaded by index.html");
 assert(fresh.includes('payload.hasStoredData!==false'),"three-word migration must only touch a genuinely fresh data store");
