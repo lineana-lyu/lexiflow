@@ -68,7 +68,7 @@
     const snapshot=JSON.parse(JSON.stringify(state.data));
     persistenceQueue=persistenceQueue
       .catch(()=>{})
-      .then(()=>api("/api/learning-data",{method:"POST",body:{data:snapshot}}))
+      .then(()=>api("/api/learning-data",{method:"POST",body:{data:snapshot,appShellAuthority:"v1"}}))
       .catch(err=>{
         console.error("learning data save failed",err);
         if(!state.notice) showNotice("学习进度暂未保存","本机存储暂时不可用，请稍后重试。","error");
@@ -1449,7 +1449,7 @@
       if(exists){toast("这张义项卡已经存在");return;}
       const now=new Date().toISOString();
       const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
-      state.data.cards.unshift(card);recordActivity("card-created",card.id);saveData();toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
+      state.data.cards.unshift(card);recordActivity("card-created",card.id);toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
     if(action==="continue-learning"){
       if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}
@@ -1550,8 +1550,13 @@
   window.addEventListener("beforeunload",()=>{
     if(!persistenceReady)return;
     try{
-      const body=JSON.stringify({data:state.data});
-      navigator.sendBeacon("/api/learning-data",new Blob([body],{type:"application/json"}));
+      const body=JSON.stringify({data:state.data,appShellAuthority:"v1",reason:"beforeunload"});
+      void fetch("/api/learning-data",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body,
+        keepalive:true,
+      }).catch(()=>{});
     }catch{}
   });
 

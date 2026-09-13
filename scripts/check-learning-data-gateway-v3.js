@@ -49,6 +49,10 @@ assert(sourceContext.includes("gateway.registerOutgoingMutator(outgoingMutator)"
 assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Source Context must observe only successful persistence before clearing a draft");
 assert(sourceContext.includes("pendingDraftCardIds"),"Source Context must track draft attachment until persistence succeeds");
 assert(app.includes("learningDataGateway.registerAfterPersist")&&app.includes("state.data=normalizeLearningData(snapshot)"),"base app state must follow Gateway-confirmed persistence so generic full-data saves cannot revive a stale snapshot");
+assert(app.includes('appShellAuthority:"v1"'),"base app learning-data writes must identify their authority for persistence diagnostics");
+assert(!app.includes('navigator.sendBeacon("/api/learning-data"'),"base app must not bypass the Learning Data Gateway with a direct learning-data beacon");
+assert(app.includes('void fetch("/api/learning-data"')&&app.includes("keepalive:true")&&app.includes('reason:"beforeunload"'),"beforeunload persistence must stay on the Gateway-observed fetch path while requesting keepalive delivery");
+assert(!app.includes('recordActivity("card-created",card.id);saveData();'),"new-card creation must not enqueue a duplicate whole-data save after recordActivity already persists the mutation");
 assert(app.includes("const target=getCard(cardId);")&&app.includes("target.updatedAt=new Date().toISOString();saveData();"),"async pronunciation hydration must re-resolve the current card after awaiting the dictionary service");
 
 console.log("Learning Data Gateway V3 checks passed.");
