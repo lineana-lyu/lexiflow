@@ -34,6 +34,11 @@ assert(!policyUi.includes("data-review-type"),"question-type toggles must no lon
 assert(policyUi.includes("function settingsSignature"),"Review settings decorator must have a stable render signature");
 assert(policyUi.includes("row?.dataset.reviewPolicySignature===signature"),"Review settings decorator must skip identical rerenders to avoid MutationObserver loops");
 assert(policyUi.includes("next.dataset.reviewPolicySignature=signature"),"Review settings row must persist its render signature");
+assert(policyUi.includes("function syncFromGateway"),"Review Policy V3 must read the shared Learning Data Gateway snapshot");
+assert(policyUi.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review Policy V3 must prefer the gateway snapshot over DOM-triggered GETs");
+assert(policyUi.includes('requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});'),"Review Policy MutationObserver must only sync/decorate and must not refetch learning data on every DOM mutation");
+assert(!policyUi.includes('requestAnimationFrame(async()=>{scheduled=false;await refresh();decorate();});'),"Review Policy must not restore mutation-driven network refreshes");
+assert(policyUi.includes('reviewPolicyAuthority:"v3"'),"Review setting writes must declare V3 authority");
 
 const d1=new Date(2026,8,1,12,0,0,0);
 const d2=new Date(2026,8,2,12,0,0,0);
