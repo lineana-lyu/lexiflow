@@ -69,8 +69,8 @@ assert(!gateway.includes("/api/ai/visual-scene"),"Learning Data Gateway V3 must 
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
 assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
-assert(reviewPolicy.includes("复习与学习负荷"),"Review workload surface must expose Review V4 load adaptation");
-assert(reviewPolicy.includes("关键复习到期全部安排")&&reviewPolicy.includes("±2 / ±3 / ±4 / ±5"),"Review V4 surface must explain protected critical reviews and bounded Stable smoothing");
+assert(!reviewPolicy.includes("复习与学习负荷")&&!reviewPolicy.includes("settingsHtml")&&!reviewPolicy.includes("decorateSettings"),"Core-owned Review workload policy must stay out of user Settings because it is not configurable");
+assert(reviewPolicy.includes("function syncFromGateway")&&reviewPolicy.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review hint surface must read the shared Gateway snapshot");
 assert(!reviewPolicy.includes("data-review-mode")&&!reviewPolicy.includes("review-custom-cap")&&!reviewPolicy.includes("persistSettings"),"Review V4 must not restore manual daily Review caps or a second settings writer");
 assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit current card identity");
 assert(applyGuard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 must validate canonical Apply stage identity");
@@ -105,7 +105,8 @@ assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session 
 assert(reviewSession.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review Session V3 must expose a narrow runtime bridge");
 assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app Review entry fallback must delegate to Review Session V3");
 assert(!app.includes('reviewMode==="all"')&&!app.includes('reviewMode==="custom"'),"app Review page must not display retired all/custom cap modes after Review V4");
-assert(app.includes("自适应负荷")&&app.includes("关键复习不截断"),"app Review page must describe the active V4 workload policy");
+assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截断"),"app Review page must not expose internal Review workload terminology");
+assert(app.includes("系统会自动安排今天真正需要巩固的词")&&app.includes("你不需要手动管理复习日期"),"app Review page must explain automatic scheduling in learner-facing language");
 for(const legacy of ["function startReview(","function reviewSessionPage(","function rateReview(","function stageInitialReview(","function enterInitialReview(","function finishInitialReview("]){assert(!app.includes(legacy),`legacy Review implementation must be removed from app.js: ${legacy}`);}
 assert(!app.includes("reviewQueue"),"app.js must not keep a second Review queue");
 assert(!app.includes("reviewIndex"),"app.js must not keep a second Review cursor");
@@ -150,18 +151,19 @@ assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state 
 assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membership; frozen DailyPlan is owned by V3");
 assert(!app.includes("const DICTIONARY ="),"app.js must not carry the retired in-memory demo dictionary");
 assert(!app.includes("Merriam-Webster Learner's Dictionary"),"app.js base Settings surface must not present the optional online fallback as the primary dictionary");
-assert(app.includes("本地 Core + ECDICT 负责快速查词；在线词典只用于真人发音和例句增强。"),"Settings must explain the actual local-first dictionary architecture");
-assert(app.includes("dictMaskedKey")&&app.includes("在线密钥已保存")&&app.includes("本地词典已就绪"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
-assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在验证在线词典…")&&app.includes("在线增强验证失败"),"dictionary verification state must stay visibly persisted on the Settings page");
-assert(app.includes("CLI 已检测")&&app.includes("未检测到登录")&&app.includes("runtimeTest")&&app.includes("fastTextTransport"),"AI Settings must distinguish CLI, auth, real runtime verification, and fast transport state");
-assert(app.includes("正在发起真实 AI 请求…")&&app.includes("运行连接已验证")&&app.includes("运行连接失败"),"AI connection checks must have visible checking/success/failure states rather than toast-only feedback");
+assert(app.includes("本地词典负责快速查词；配置在线词典后，会自动补充真人发音和例句。"),"Settings must explain local-first dictionary behavior in learner-facing language");
+assert(app.includes("dictMaskedKey")&&app.includes("密钥已保存")&&app.includes("本地词典可用"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
+assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在连接在线词典…")&&app.includes("在线词典连接失败"),"dictionary connection state must remain visible on Settings");
+assert(app.includes("verifyProviderConnectionsOnStartup")&&app.includes('/api/dictionary/test')&&app.includes('/api/ai/test'),"provider connections must be verified automatically with real service calls on startup");
+assert(app.includes("正在连接 AI…")&&app.includes("AI 已连接")&&app.includes("AI 连接失败"),"AI connection state must expose checking/success/failure without diagnostic jargon");
+for(const internalLabel of ["CLI 已检测","CLI 未检测","真实 AI 请求验证","Fast transport","运行连接已验证"]){assert(!app.includes(internalLabel),`Settings must not expose internal diagnostic label: ${internalLabel}`);}
 for(const retiredSettingsSurface of ["<h3>AI 服务</h3>","<h3>模型与思考强度</h3>","<h3>图片生成</h3>","advanced-diagnostics"]){
   assert(!app.includes(retiredSettingsSurface),`app.js base Settings surface must not retain a runtime-removed legacy block: ${retiredSettingsSurface}`);
 }
-assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 高级配置</h3>"),"app.js base Settings surface must match the current product labels");
+assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 模型</h3>"),"app.js Settings surface must use learner-facing AI labels");
 assert(!app.includes('data-action="refresh-provider"'),"Settings base surface must not render the retired manual provider refresh control");
 assert(app.includes("连接信息只保存在当前设备")&&app.includes("settings-security-icon"),"Settings base surface must own the final credential privacy banner markup");
-assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。首次准备完成后可离线使用。"),"app.js must own final Voice Settings copy");
+assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。")&&app.includes('id="tts-voice"'),"app.js must directly own learner-facing Voice Settings and the voice selector");
 assert(!exists("public/settings-surface.js"),"retired Settings mutation decorator must stay deleted");
 assert(!index.includes('<script src="./settings-surface.js"></script>'),"retired Settings mutation decorator must not load at runtime");
 assert(app.includes('data-settings-advanced="1"')&&app.includes("data-settings-advanced-body"),"app.js must natively own the Advanced Settings disclosure layout");

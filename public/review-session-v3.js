@@ -160,8 +160,8 @@
   }
 
   function sessionFrame(inner,session){
-    const p=progress(session),phase=session.phase==="repair"?"当天修复复测":"本轮主动回忆";
-    return `<div class="lexi-r3-screen"><div class="lexi-r3-shell"><div class="lexi-r3-top"><div class="lexi-r3-top-left"><strong>${phase}</strong><span>${p.current} / ${p.total} · 只处理 Today Plan 已安排的词</span></div><button class="btn" type="button" data-r3="pause">退出复习</button></div>${inner}</div></div>`;
+    const p=progress(session),phase=session.phase==="repair"?"再巩固一次":"今日复习";
+    return `<div class="lexi-r3-screen"><div class="lexi-r3-shell"><div class="lexi-r3-top"><div class="lexi-r3-top-left"><strong>${phase}</strong><span>${p.current} / ${p.total} · 今天安排的复习</span></div><button class="btn" type="button" data-r3="pause">退出复习</button></div>${inner}</div></div>`;
   }
 
   function answerMeta(card){const phonetic=String(card.phonetic||"").trim();return `${phonetic?esc(phonetic):"暂无音标"} · ${esc(card.meaningZh||"")}`;}
@@ -173,7 +173,7 @@
       body=`<div class="lexi-r3-kicker">英文 → 中文 · 主动回忆</div><div class="lexi-r3-word">${esc(card.word)}</div><div class="lexi-r3-meta">先在脑中说出当前词义，再查看答案。</div>${active.revealed?`<div class="lexi-r3-result"><strong>${esc(card.meaningZh||"")}</strong><span>${esc(card.exampleEn||"")}</span><div class="lexi-r3-actions"><button class="btn" type="button" data-r3="rate" data-quality="again">没想起来</button><button class="btn primary" type="button" data-r3="rate" data-quality="good">我想起来了</button></div></div>`:`<div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="reveal">查看答案</button></div>`}`;
     }else{
       const prompt=active.type==="image-en"?`<div class="lexi-r3-kicker">图片 → 英文 · 主动回忆</div><img class="lexi-r3-image" src="${esc(card.imageData||card.imageUrl||"")}" alt="联想图"/>`:`<div class="lexi-r3-kicker">中文 → 英文 · 主动回忆</div><div class="lexi-r3-meaning">${esc(card.meaningZh||"")}</div>`;
-      const failLabel=kind==="next-day-validation"?"没记住，明天再验证":"没记住，进入修复";
+      const failLabel=kind==="next-day-validation"?"没记住，明天再练":"没记住，进入修复";
       body=`${prompt}<div class="lexi-r3-meta">不要先看答案，直接把英文完整输入出来。</div><div class="lexi-r3-input"><input id="lexi-r3-answer" class="input" autocomplete="off" spellcheck="false" value="${esc(active.draft||"")}" ${active.checked?"readonly":""}/>${active.checked?"":`<button class="btn primary" type="button" data-r3="check">提交答案</button>`}</div>${active.checked?`<div class="lexi-r3-result"><strong>${active.correct?"主动回忆成功":"这次没有完整想起来"}</strong><span>正确答案：${esc(card.word)} · ${answerMeta(card)}</span><div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="rate" data-quality="${active.correct?"good":"again"}">${active.correct?"记住了，继续":failLabel}</button><button class="btn" type="button" data-r3="speak">🔊 发音</button></div></div>`:""}`;
     }
     return sessionFrame(`<section class="lexi-r3-card" data-r3-card="${esc(card.id)}">${body}</section>`,session);
@@ -187,7 +187,7 @@
     let session=reconcile(loadSession());
     if(!session.queue.length&&session.phase==="normal"){
       saveSession(null);
-      app.innerHTML=`<div class="lexi-r3-screen"><div class="lexi-r3-empty"><strong>今天没有已安排的复习</strong><p>只会进入 Today Plan 中已经冻结的 Review 队列，不会把计划外到期词临时塞进来。</p><button class="btn" type="button" data-r3="reload">返回今日学习</button></div></div>`;
+      app.innerHTML=`<div class="lexi-r3-screen"><div class="lexi-r3-empty"><strong>今天没有需要复习的内容</strong><p>需要巩固的词会由系统自动安排，你不需要手动管理复习日期。</p><button class="btn" type="button" data-r3="reload">返回今日学习</button></div></div>`;
       return;
     }
     if(isFinished(session)){finishSession();return;}
