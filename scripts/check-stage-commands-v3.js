@@ -36,7 +36,7 @@ assert(visualize.includes('data-visual-actions-v3="skip"'),"Visualize skip contr
 assert(visualize.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip must validate the canonical stage");
 
 assert(apply.includes(":apply-skip`"),"Apply skip must have a distinct deterministic command ID");
-assert(apply.includes("commandCommitted(data,commandId)"),"Apply skip must tolerate a retried command");
+assert(apply.includes("commandCommitted(source,commandId)"),"Apply skip must tolerate a retried command against the fresh source snapshot");
 assert(apply.includes("commandId"),"Apply skip history must retain command identity");
 
 console.log("Stage Commands V3 checks passed.");
