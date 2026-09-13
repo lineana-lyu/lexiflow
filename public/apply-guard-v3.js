@@ -30,7 +30,17 @@
     return forms(target).some(form=>new RegExp(`\\b${escapeRe(form)}\\b`,"i").test(String(text||"")));
   }
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     if(refreshing)return data;
     refreshing=true;
     try{
@@ -96,6 +106,7 @@
   document.addEventListener("click",event=>{
     const button=event.target?.closest?.('[data-action="pass-apply"]');
     if(!button)return;
+    syncFromGateway();
     const result=status();
     if(result.ok)return;
     event.preventDefault();
@@ -107,15 +118,15 @@
   document.addEventListener("input",event=>{
     if(event.target?.id!=="apply-text")return;
     warning("");
-    schedule(false);
+    schedule();
   },true);
 
-  function schedule(refreshData=true){
+  function schedule(){
     if(queued)return;
     queued=true;
-    requestAnimationFrame(async()=>{
+    requestAnimationFrame(()=>{
       queued=false;
-      if(refreshData)await refresh();
+      syncFromGateway();
       decorate();
     });
   }
@@ -123,8 +134,10 @@
   function start(){
     const app=document.getElementById("app");
     if(!app)return;
-    void refresh().then(decorate);
-    new MutationObserver(()=>schedule(true)).observe(app,{childList:true,subtree:true});
+    syncFromGateway();
+    if(data)decorate();else void refresh(true).then(decorate);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
