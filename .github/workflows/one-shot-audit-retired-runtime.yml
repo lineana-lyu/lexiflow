@@ -1,0 +1,32 @@
+name: One-shot Audit Retired Runtime
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-audit-retired-runtime.yml
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Audit retired runtime references
+        shell: bash
+        run: |
+          echo '=== RETIRED RUNTIME REFERENCES ==='
+          grep -RInE 'runtime-fixes\.js|LEGACY_STAGE_AI_BLOCKED|blockedLegacyStageAi' public scripts docs package.json .github/workflows --exclude='one-shot-audit-retired-runtime.yml' || true
+          echo
+          echo '=== RETIRED APP STAGE SYMBOLS ==='
+          grep -nE 'stageSelect|stageVisual|stageApply|ensureVisualSceneSuggestion|ensurePracticePrompt|memorize1|memorize2|initialReview|reviewQueue|reviewIndex' public/app.js || true
+          echo
+          echo '=== LEGACY MEMORIZE TOKENS IN ACTIVE PUBLIC JS ==='
+          grep -RInE 'memorize1|memorize2' public --include='*.js' || true
