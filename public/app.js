@@ -993,9 +993,8 @@
 
         <div class="setting-row" style="align-items:flex-start">
           <div style="min-width:300px;flex:1">
-            <h3>本地自然发音</h3>
-            <p>Kokoro-82M 本地语音 · 真人词典/Wikimedia 发音仍优先。首次使用会自动下载模型，完成后可离线使用，不需要 Python 或 Windows 系统音色。</p>
-            ${tts.status==="downloading"?`<p>模型下载中${Number.isFinite(Number(tts.progress))?` · ${Math.round(Number(tts.progress))}%`:""}</p>`:tts.status==="error"?`<p>最近错误：${escapeHtml(tts.error||"模型没有准备完成")}</p>`:""}
+            <h3>自然发音</h3>
+            <p>优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。首次准备完成后可离线使用。</p>
           </div>
           <div class="setting-actions-inline" style="align-items:flex-end;flex-wrap:wrap">
             <div class="field" style="min-width:210px">

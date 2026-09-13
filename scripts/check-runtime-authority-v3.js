@@ -145,6 +145,12 @@ for(const retiredSettingsSurface of ["<h3>AI 服务</h3>","<h3>模型与思考�
 assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 高级配置</h3>"),"app.js base Settings surface must match the current product labels");
 assert(!app.includes('data-action="refresh-provider"'),"Settings base surface must not render the retired manual provider refresh control");
 assert(app.includes("连接信息只保存在当前设备")&&app.includes("settings-security-icon"),"Settings base surface must own the final credential privacy banner markup");
+assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。首次准备完成后可离线使用。"),"app.js must own final Voice Settings copy");
+const settingsSurface=read("public/settings-surface.js");
+for(const retiredSettingsCompat of ["simplifyVoice","本地自然发音","模型与思考强度","图片生成"]){
+  assert(!settingsSurface.includes(retiredSettingsCompat),`settings-surface must not retain obsolete source-compatibility logic: ${retiredSettingsCompat}`);
+}
+assert(settingsSurface.includes("buildAdvancedSection")&&settingsSurface.includes('rowByTitle("AI 高级配置")'),"settings-surface must retain only the active Advanced Settings layout behavior");
 assert(app.includes("备份单词卡、学习进度和复习记录。")&&app.includes("从此前导出的备份恢复学习数据。"),"Settings base surface must own backup/restore descriptions");
 const productUx=read("public/product-ux.js");
 for(const retiredDecorator of ["decorateDictionarySettings","mergeAiSettings","ai-unified-setting"]){
