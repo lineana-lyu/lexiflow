@@ -61,7 +61,7 @@ assert(!advance.includes('return"review"'),"Advance Learning V3 must never unloc
 const sourceContext=read("public/source-context-v3.js");
 assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
 assert(sourceContext.includes('DRAFT_KEY="lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve the prior draft key for upgrades");
-assert(!sourceContext.includes("window.fetch=" )&&!sourceContext.includes("window.fetch ="),"Source Context V3 must use gateway hooks instead of rewriting global fetch");
+assert(!sourceContext.includes("window.fetch=")&&!sourceContext.includes("window.fetch ="),"Source Context V3 must use gateway hooks instead of rewriting global fetch");
 assert(sourceContext.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context V3 must preserve source fields through the gateway outgoing hook");
 assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Source Context V3 must clear pending source drafts only after a successful persistence callback");
 const applyGuard=read("public/apply-guard-v3.js");
@@ -93,19 +93,60 @@ const legacyMem=core.normalizeCard({id:"legacy-m",stage:"memorize2",memorizeRoun
 assert(legacyMem.stage==="memorize"&&legacyMem.learningStage==="memorize","legacy persisted memorize2 cards must physically expose one canonical Memorize stage");
 assert(legacyMem.memorizeRound===2,"canonical stage normalization must preserve Memorize round progress");
 
-const data={version:1,cards:[],activities:[],settings:{dailyGoal:3}};
-const plan=core.buildDailyPlan(data,d1);
-eq(plan.order,["review","memorize","visualize","apply","select"],"DailyPlan order changed");
-assert(plan.frozen===true,"DailyPlan must be frozen");
+const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize"},d1);
+assert(diffDays(d1,selectPatch.stageEligibleOn)===1,"Select -> Memorize must wait until next StudyDay");
+const memorizePatch=core.crossDayPatch({stage:"memorize2"},{stage:"visualize"},d1);
+assert(diffDays(d1,memorizePatch.stageEligibleOn)===1,"legacy Memorize -> Visualize must use the canonical cross-day gate");
+const applyPatch=core.crossDayPatch({stage:"apply"},{stage:"review"},d1);
+assert(applyPatch.initialReviewPending===false,"Apply must not open same-day initial Review");
+assert(diffDays(d1,applyPatch.nextReviewAt)===1,"first Review must be scheduled for next StudyDay");
 
-const dueCard={id:"r1",stage:"review",learningStage:"review",nextReviewAt:d1.toISOString(),createdAt:d1.toISOString()};
-const normalizedDue=core.normalizeCard(dueCard,d1);
-assert(core.isDue(normalizedDue,d1),"review card should be due on its StudyDay");
-assert(!core.isDue(normalizedDue,date(2026,8,31)),"review card must not be due before its StudyDay");
+let patch=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:0},"good",d1);
+assert(patch.reviewStep===1&&diffDays(d1,patch.nextReviewAt)===3,"Review step 0 success must schedule +3d");
+patch=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:4},"good",d1);
+assert(patch.memoryState==="stable"&&diffDays(d1,patch.nextReviewAt)===30,"21d success must enter Stable at +30d");
+patch=core.reviewSchedulePatch({memoryState:"stable",stableStep:0,reviewStep:4},"good",d1);
+assert(patch.stableStep===1&&diffDays(d1,patch.nextReviewAt)===45,"Stable success must advance 30 -> 45");
 
-const first=core.scheduleReview(normalizedDue,"good",d1,{firstAttempt:true});
-assert(diffDays(d1,first.nextReviewAt)===3,"first successful Review must advance from the 1d entry to 3d");
-const second=core.scheduleReview({...first,reviewStep:1},"good",d2,{firstAttempt:true});
-assert(diffDays(d2,second.nextReviewAt)===7,"second successful Review must advance to 7d");
+const failed=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:3},"again",d1);
+assert(failed.memoryState==="review_again","failed first recall must enter Review Again");
+assert(core.valueDayKey(failed.nextReviewAt)===core.dayKey(d1),"first failure must remain eligible for same-day repair");
+const repaired=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d1);
+assert(repaired.memoryState==="review_again"&&diffDays(d1,repaired.nextReviewAt)===1,"same-day repair success must still require next-day validation");
+const recovered=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d2);
+assert(recovered.memoryState==="reinforcing"&&recovered.reviewStep===2,"next-day validation must recover one step lower");
+const validationFailed=core.reviewSchedulePatch({...failed,reviewStep:3},"again",d2);
+assert(validationFailed.memoryState==="review_again","failed next-day validation must remain Review Again");
+assert(diffDays(d2,validationFailed.nextReviewAt)===1,"failed next-day validation must wait until the next StudyDay, not create another same-day repair loop");
 
-console.log("Learning Engine V3 checks passed.");
+const reviewUi=read("public/review-session-v3.js");
+assert(reviewUi.includes('kind==="scheduled"||kind==="stable-maintenance"'),"only a normal scheduled first-recall failure may create the one same-day repair tail");
+assert(reviewUi.includes("没记住，明天再验证"),"next-day validation failure copy must not promise another same-day repair");
+assert(!reviewUi.includes("settings.reviewTypes"),"Review question types must be system-owned after removing the user-facing review-method setting");
+assert(!reviewUi.includes("settings.reviewTypeWeights"),"Review question weights must be system-owned after removing the user-facing review-method setting");
+
+const morning=date(2026,9,10,8);
+const noon=date(2026,9,10,12);
+assert(core.isDue({stage:"review",nextReviewAt:noon.toISOString()},morning)===true,"Review due semantics must be StudyDay-based, not clock-time-based");
+
+const data=core.normalizeData({settings:{dailyGoal:3},cards:[
+  {id:"r",stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:morning.toISOString(),createdAt:d1.toISOString()},
+  {id:"m",stage:"memorize1",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"v",stage:"visualize",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"a",stage:"apply",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"s",stage:"select",todaySelectedOn:"2026-09-10",inboxPending:false,createdAt:d1.toISOString()},
+]},morning);
+assert(core.firstPlanStage(data.dailyPlan)==="review","Review must remain first in Today Plan");
+eq([data.dailyPlan.review.length,data.dailyPlan.memorize.length,data.dailyPlan.visualize.length,data.dailyPlan.apply.length,data.dailyPlan.select.length],[1,1,1,1,1],"Today Plan stage buckets are incorrect");
+assert(data.cards.find(card=>card.id==="m").stage==="memorize"&&data.cards.find(card=>card.id==="m").learningStage==="memorize","Today data must physically expose canonical Memorize even for legacy storage input");
+assert(data.dailyPlan.noVocabularyDebt===true,"DailyPlan must preserve No Vocabulary Debt");
+assert(data.dailyPlan.taskTotal===5&&data.dailyPlan.taskRemaining===5&&data.dailyPlan.taskCompleted===0,"new frozen plan must capture its initial task total");
+
+const progressed=JSON.parse(JSON.stringify(data));
+const reviewCard=progressed.cards.find(card=>card.id==="r");
+reviewCard.nextReviewAt=core.addDaysIso(morning,1);
+const progressedData=core.normalizeData(progressed,new Date(2026,8,10,18,0,0,0));
+assert(progressedData.dailyPlan.taskTotal===5,"same-day progress must preserve the frozen original task total");
+assert(progressedData.dailyPlan.taskRemaining===4&&progressedData.dailyPlan.taskCompleted===1,"Today progress must reflect completed frozen tasks");
+
+console.log("Learning Engine V3 runtime contract checks passed.");
