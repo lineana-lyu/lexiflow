@@ -6,6 +6,7 @@ on:
       - feat/v7-airy-luminous-ui
     paths:
       - .github/workflows/one-shot-security-banner-decorator.yml
+      - scripts/cleanup-security-banner-decorator.py
 
 permissions:
   contents: write
