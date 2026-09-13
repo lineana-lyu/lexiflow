@@ -1,0 +1,130 @@
+name: One-shot Legacy Stage Body Cut
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-legacy-stage-body-cut.yml
+
+permissions:
+  contents: write
+
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+
+      - name: Remove retired stage bodies
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          app_path=Path('public/app.js')
+          text=app_path.read_text(encoding='utf-8')
+
+          def remove_function(source,name):
+              markers=[f'function {name}(',f'async function {name}(']
+              hits=[]
+              for marker in markers:
+                  start=0
+                  while True:
+                      idx=source.find(marker,start)
+                      if idx<0: break
+                      hits.append((idx,marker))
+                      start=idx+1
+              if len(hits)!=1:
+                  raise SystemExit(f'{name}: expected exactly one function declaration, got {len(hits)}')
+              pos,marker=hits[0]
+              line_start=source.rfind('\n',0,pos)+1
+              brace=source.find('{',pos+len(marker))
+              if brace<0:
+                  raise SystemExit(f'{name}: opening brace not found')
+              depth=0
+              state='normal'
+              escape=False
+              i=brace
+              while i<len(source):
+                  ch=source[i]
+                  nxt=source[i+1] if i+1<len(source) else ''
+                  if state=='line_comment':
+                      if ch=='\n': state='normal'
+                  elif state=='block_comment':
+                      if ch=='*' and nxt=='/':
+                          state='normal'; i+=1
+                  elif state in ('single','double','template'):
+                      quote={'single':"'",'double':'"','template':'`'}[state]
+                      if escape:
+                          escape=False
+                      elif ch=='\\':
+                          escape=True
+                      elif ch==quote:
+                          state='normal'
+                  else:
+                      if ch=='/' and nxt=='/':
+                          state='line_comment'; i+=1
+                      elif ch=='/' and nxt=='*':
+                          state='block_comment'; i+=1
+                      elif ch=="'": state='single'
+                      elif ch=='"': state='double'
+                      elif ch=='`': state='template'
+                      elif ch=='{': depth+=1
+                      elif ch=='}':
+                          depth-=1
+                          if depth==0:
+                              end=i+1
+                              while end<len(source) and source[end] in ' \t': end+=1
+                              if end<len(source) and source[end]=='\n': end+=1
+                              if end<len(source) and source[end]=='\n': end+=1
+                              return source[:line_start]+source[end:]
+                  i+=1
+              raise SystemExit(f'{name}: closing brace not found')
+
+          retired=[
+              'stageKicker','stageTop','stageSelect',
+              'ensureVisualSceneSuggestion','ensurePracticePrompt',
+              'stageVisual','stageApply',
+          ]
+          for name in retired:
+              text=remove_function(text,name)
+
+          for name in retired:
+              if f'function {name}(' in text or f'async function {name}(' in text:
+                  raise SystemExit(f'{name}: declaration remains after cleanup')
+
+          for required in ['data-study-stepper-v3-host','data-study-stage-host-v3','window.LexiFlowStudyRenderer=Object.freeze']:
+              if required not in text:
+                  raise SystemExit(f'required V3 shell contract missing: {required}')
+
+          app_path.write_text(text,encoding='utf-8')
+
+          check_path=Path('scripts/check-runtime-authority-v3.js')
+          check=check_path.read_text(encoding='utf-8')
+          anchor='assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVisual(card)")&&!app.includes("return stageApply(card)"),"app.js must not dispatch into retired stage renderers");'
+          addition='''\nfor(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply"]){\n  assert(!app.includes(`function ${retiredBody}(`)&&!app.includes(`async function ${retiredBody}(`),`retired stage body must be physically removed from app.js: ${retiredBody}`);\n}'''
+          if check.count(anchor)!=1:
+              raise SystemExit('runtime authority stage-dispatch assertion not uniquely found')
+          check=check.replace(anchor,anchor+addition,1)
+          check_path.write_text(check,encoding='utf-8')
+          PY
+
+      - name: Verify cleanup
+        run: |
+          node --check public/app.js
+          node --check scripts/check-runtime-authority-v3.js
+          npm run check
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/app.js scripts/check-runtime-authority-v3.js
+          git commit -m "refactor: remove retired legacy stage bodies [legacy-stage-body-cut]"
+          git push origin HEAD:feat/v7-airy-luminous-ui
