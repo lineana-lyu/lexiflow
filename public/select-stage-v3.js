@@ -10,7 +10,17 @@
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const phonetic=value=>{const s=String(value||"").trim();return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     if(refreshing)return data;
     refreshing=true;
     try{
@@ -61,13 +71,14 @@
 
   function schedule(){
     if(queued)return;queued=true;
-    requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});
+    requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});
   }
 
   function start(){
     const app=document.getElementById("app");if(!app)return;
-    injectStyle();void refresh().then(decorate);
+    injectStyle();syncFromGateway();if(data)decorate();else void refresh(true).then(decorate);
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
   }
 
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});
