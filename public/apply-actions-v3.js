@@ -72,6 +72,7 @@
     const write=transition?.beginStageWrite?.(id,"apply",now);
     return write?{id,transition,write}:null;
   }
+  function stageBusy(){return Boolean(window.LexiFlowApplyStageV3?.isBusy?.()||saving);}
 
   function pauseAndReturn(){
     window.LexiFlowStudySessionV3?.pause?.();
@@ -92,11 +93,18 @@
     }finally{restoring=false;}
   }
 
+  function temporaryBusyCopy(button,idle){
+    if(!button)return;
+    button.disabled=true;
+    button.textContent="当前阶段正在保存…";
+    setTimeout(()=>{if(button.isConnected&&!stageBusy()){button.disabled=false;button.textContent=idle;}},700);
+  }
+
   async function saveDraft(button){
-    if(saving)return;
+    if(stageBusy()){temporaryBusyCopy(button,"保存草稿并退出");return;}
     const guard=beginApplyWrite();
-    if(!guard)return;
-    saving=true;
+    if(!guard){temporaryBusyCopy(button,"保存草稿并退出");return;}
+    saving=true;decorate();
     const original=button.textContent;
     button.disabled=true;
     button.textContent="正在保存…";
@@ -119,11 +127,12 @@
       window.alert("草稿没有保存成功，请保持 LexiFlow 本地服务运行后重试。");
     }finally{
       guard.transition?.endStageWrite?.(guard.write);
-      saving=false;
+      saving=false;decorate();
     }
   }
 
   async function skipApply(button){
+    if(stageBusy()){temporaryBusyCopy(button,"跳过本次造句");return;}
     const nowMs=Date.now();
     if(skipArmedUntil<nowMs){
       skipArmedUntil=nowMs+5000;
@@ -137,13 +146,8 @@
       },5100);
       return;
     }
-    if(saving)return;
     const now=new Date(),guard=beginApplyWrite(now);
-    if(!guard){
-      button.textContent="当前阶段正在保存…";
-      setTimeout(()=>{if(button.isConnected&&!saving){button.textContent="跳过本次造句";button.classList.remove("danger");}},700);
-      return;
-    }
+    if(!guard){temporaryBusyCopy(button,"跳过本次造句");return;}
     saving=true;
     skipArmedUntil=0;
     button.disabled=true;
@@ -175,7 +179,7 @@
       window.alert("跳过状态没有保存成功，本次造句仍未完成，请重试。");
     }finally{
       guard.transition?.endStageWrite?.(guard.write);
-      saving=false;
+      saving=false;decorate();
     }
   }
 
@@ -183,13 +187,18 @@
     const stage=document.querySelector(".apply-learning-stage");
     if(!stage)return;
     restoreDurableDraft();
-    if(stage.querySelector("[data-apply-actions-v3]"))return;
-    const bar=document.createElement("div");
-    bar.dataset.applyActionsV3="1";
-    bar.className="learning-stage-footer lexi-apply-actions-v3";
-    bar.style.cssText="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px";
-    bar.innerHTML='<button class="btn" type="button" data-apply-v3="draft">保存草稿并退出</button><button class="text-action" type="button" data-apply-v3="skip">跳过本次造句</button>';
-    stage.appendChild(bar);
+    let bar=stage.querySelector("[data-apply-actions-v3]");
+    if(!bar){
+      bar=document.createElement("div");
+      bar.dataset.applyActionsV3="1";
+      bar.className="learning-stage-footer lexi-apply-actions-v3";
+      bar.style.cssText="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px";
+      bar.innerHTML='<button class="btn" type="button" data-apply-v3="draft">保存草稿并退出</button><button class="text-action" type="button" data-apply-v3="skip">跳过本次造句</button>';
+      stage.appendChild(bar);
+    }
+    const busy=stageBusy(),draft=bar.querySelector('[data-apply-v3="draft"]'),skip=bar.querySelector('[data-apply-v3="skip"]');
+    if(draft&&!saving){draft.disabled=busy;draft.textContent=busy?"当前阶段正在保存…":"保存草稿并退出";}
+    if(skip&&!saving&&skipArmedUntil<Date.now()){skip.disabled=busy;skip.textContent=busy?"当前阶段正在保存…":"跳过本次造句";skip.classList.remove("danger");}
   }
 
   document.addEventListener("click",event=>{
