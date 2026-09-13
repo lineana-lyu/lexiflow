@@ -24,8 +24,11 @@ assert(ai.includes("for(let attempt=0;attempt<3;attempt++)"),"AI Assist V3 must 
 assert(ai.includes("sceneNeedsCleanup"),"AI Assist V3 must keep visual-scene text safety cleanup close to the AI authority");
 assert(ai.includes("tooSimilar"),"AI Assist V3 must prevent repeated scene/prompt candidates");
 
-assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility must delegate legacy Visualize AI calls to the explicit V3 authority");
-assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility must delegate legacy Apply prompt calls to the explicit V3 authority");
+assert(runtime.includes("LEGACY_STAGE_AI_BLOCKED"),"runtime compatibility must fail closed dormant legacy stage-AI requests");
+assert(runtime.includes('endpoint==="/api/ai/visual-scene"||endpoint==="/api/ai/practice-prompt"'),"runtime compatibility must block both retired stage-AI request paths");
+assert(runtime.includes("只能由当前 V3 学习页面上的明确操作发起"),"legacy stage-AI block must explain that only explicit V3 learner action may invoke AI");
+assert(!runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility must not delegate dormant legacy Visualize auto-calls into real AI");
+assert(!runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility must not delegate dormant legacy Apply auto-calls into real AI");
 assert(!runtime.includes("stableInternalVisualScene"),"runtime compatibility must not synthesize fake Visualize AI results");
 assert(!runtime.includes("robustManualVisualScene"),"runtime compatibility must not own Visualize AI generation logic");
 assert(!runtime.includes("robustPracticePrompt"),"runtime compatibility must not own Apply prompt generation logic");
