@@ -5,7 +5,7 @@
   if(!core) throw new Error("LexiFlowLearningCore must load before stage-transition-v3.js");
 
   let saving = false;
-  const terminalLocks = new Set();
+  const stageWriteLocks = new Set();
 
   const uid = () => crypto.randomUUID ? crypto.randomUUID() : `stage-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const normalize = value => String(value || "").trim().toLowerCase();
@@ -48,13 +48,16 @@
   function currentStudyCardId(){return String(window.LexiFlowStudyRenderer?.currentCardId?.()||"");}
   function currentStudyCard(data){const id=currentStudyCardId();if(!id||!Array.isArray(data?.cards))return null;return data.cards.find(item=>String(item.id)===id)||null;}
   function stageCommandId(cardId,stage,now=new Date()){return `stage:${core.dayKey(now)}:${String(cardId)}:${String(stage)}`;}
-  function beginTerminal(cardId,stage,now=new Date()){
+  function beginStageWrite(cardId,stage,now=new Date()){
     const commandId=stageCommandId(cardId,stage,now);
-    if(!cardId||terminalLocks.has(commandId))return null;
-    terminalLocks.add(commandId);
+    if(!cardId||stageWriteLocks.has(commandId))return null;
+    stageWriteLocks.add(commandId);
     return Object.freeze({commandId});
   }
-  function endTerminal(commandId){if(commandId)terminalLocks.delete(String(commandId));}
+  function endStageWrite(handle){
+    const commandId=typeof handle==="string"?handle:handle?.commandId;
+    if(commandId)stageWriteLocks.delete(String(commandId));
+  }
   function commandCommitted(data,commandId){return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===commandId);}
   function appendActivity(data,cardId,stage,extra={}){
     data.activities=Array.isArray(data.activities)?data.activities:[];
@@ -85,8 +88,8 @@
 
   async function completeVisualize(button){
     const cardId=currentStudyCardId();if(!cardId)return false;
-    const now=new Date(),terminal=beginTerminal(cardId,"visualize",now);if(!terminal)return "busy";
-    const commandId=terminal.commandId;
+    const now=new Date(),write=beginStageWrite(cardId,"visualize",now);if(!write)return "busy";
+    const commandId=write.commandId;
     try{
       const data=await loadData(); const card=currentStudyCard(data); if(!card)return false;
       if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天开始造句");setTimeout(()=>location.reload(),80);return true;}
@@ -98,13 +101,13 @@
       Object.assign(card,core.crossDayPatch(prev,{stage:"apply",learningStage:"apply"},now)||{});
       card.updatedAt=now.toISOString(); appendActivity(data,card.id,"visualize",{skipped:false,nextStage:"apply",commandId});
       busy(button,"已完成 · 明天开始造句"); await persist(data); location.reload(); return true;
-    }finally{endTerminal(commandId);}
+    }finally{endStageWrite(write);}
   }
 
   async function completeApply(button){
     const cardId=currentStudyCardId();if(!cardId)return false;
-    const now=new Date(),terminal=beginTerminal(cardId,"apply",now);if(!terminal)return "busy";
-    const commandId=terminal.commandId;
+    const now=new Date(),write=beginStageWrite(cardId,"apply",now);if(!write)return "busy";
+    const commandId=write.commandId;
     try{
       const data=await loadData(); const card=currentStudyCard(data); if(!card)return false;
       if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天首次复习");setTimeout(()=>location.reload(),80);return true;}
@@ -117,7 +120,7 @@
       Object.assign(card,core.crossDayPatch(prev,{stage:"review",learningStage:"review"},now)||{});
       card.updatedAt=now.toISOString(); appendActivity(data,card.id,"apply",{sentence,skipped:false,nextStage:"review",commandId});
       busy(button,"已完成 · 明天首次复习"); await persist(data); location.reload(); return true;
-    }finally{endTerminal(commandId);}
+    }finally{endStageWrite(write);}
   }
 
   async function handle(button,kind){
@@ -143,7 +146,7 @@
   window.LexiFlowStageTransitionV3=Object.freeze({
     currentCardId:currentStudyCardId,
     terminalCommandId:stageCommandId,
-    beginTerminal,
-    endTerminal,
+    beginStageWrite,
+    endStageWrite,
   });
 })();
