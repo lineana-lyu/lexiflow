@@ -41,7 +41,6 @@
     const current=data.cards.find(item=>String(item.id)===id)||null;
     return current&&core.canonicalStage(current)==="visualize"?current:null;
   }
-  function commandId(cardId,now=new Date()){return `stage:${core.dayKey(now)}:${String(cardId)}:visualize-skip`;}
   function committed(id){return Array.isArray(data?.activities)&&data.activities.some(item=>String(item.commandId||"")===id);}
 
   function decorate(){
@@ -69,11 +68,15 @@
 
   async function skip(){
     if(saving)return;
+    const id=currentCardId();if(!id)return;
+    const now=new Date();
+    const transition=window.LexiFlowStageTransitionV3;
+    const terminal=transition?.beginTerminal?.(id,"visualize",now);
+    if(!terminal)return;
+    const cmd=terminal.commandId;
     saving=true;
     try{
       await refresh(true);
-      const id=currentCardId();if(!id)return;
-      const now=new Date(),cmd=commandId(id,now);
       if(committed(cmd)){location.reload();return;}
       const current=card();if(!current){location.reload();return;}
       const note=String(document.getElementById("visual-note")?.value||"").trim(),prev={...current,learningStage:"visualize"};
@@ -88,7 +91,7 @@
       await save(data);
       location.reload();
     }catch(err){console.error("Visualize skip failed",err);}
-    finally{saving=false;}
+    finally{transition?.endTerminal?.(cmd);saving=false;}
   }
 
   document.addEventListener("click",event=>{
