@@ -21,7 +21,17 @@
   function setSession(id, value){ const all=loadAll(); all[id]={...value,updatedAt:new Date().toISOString()}; try{localStorage.setItem(KEY,JSON.stringify(all));}catch{} }
   function clearSession(id){ const all=loadAll(); delete all[id]; try{localStorage.setItem(KEY,JSON.stringify(all));}catch{} }
 
-  async function refresh(){
+  function syncFromGateway(){
+    try{
+      const current=window.LexiFlowLearningDataGatewayV3?.current?.();
+      if(!current?.cards)return false;
+      data=core.normalizeData(current);
+      return true;
+    }catch{return false;}
+  }
+
+  async function refresh(force=false){
+    if(!force&&syncFromGateway())return data;
     try{
       const r=await fetch("/api/learning-data",{cache:"no-store"});
       if(r.ok){ const p=await r.json(); if(p?.data?.cards) data=core.normalizeData(p.data); }
@@ -29,8 +39,10 @@
     return data;
   }
   async function save(next){
-    const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:core.normalizeData(next)})});
+    const normalized=core.normalizeData(next);
+    const r=await fetch("/api/learning-data",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:normalized,memorizeStageAuthority:"v3"})});
     if(!r.ok) throw new Error("SAVE_FAILED");
+    data=normalized;
   }
 
   function currentCard(){
@@ -94,7 +106,7 @@
     if(saving)return;
     saving=true;
     try{
-      await refresh();
+      await refresh(true);
       const c=data?.cards?.find(x=>x.id===card.id); if(!c)return;
       const now=new Date(),cmd=commandId(c.id,now);
       if(commandCommitted(data,cmd)){clearSession(card.id);location.reload();return;}
@@ -113,7 +125,7 @@
       c.memoryHistory=Array.isArray(c.memoryHistory)?c.memoryHistory:[];
       c.memoryHistory.push({stage:"memorize",round:s.round,enToZh:final.en===true,zhToEn:final.zh===true,initialMemoryWeak:initialWeak,finalRoundPassed,at:now.toISOString()});
       data.activities=Array.isArray(data.activities)?data.activities:[];
-      data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:initialWeak,finalRoundPassed,commandId:cmd,at:now.toISOString()});
+      data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:initialWeak,finalRoundPassed,commandId:cmd,at:now.toISOString(),authority:"memorize-stage-v3"});
       await save(data);
       clearSession(card.id);
       location.reload();
@@ -142,7 +154,12 @@
   document.addEventListener("input",e=>{if(e.target?.id!=="lexi-m2-answer")return;const c=currentCard();if(!c)return;const s=session(c);s.draft=e.target.value;setSession(c.id,s);},true);
   document.addEventListener("keydown",e=>{if(e.target?.id==="lexi-m2-answer"&&e.key==="Enter"&&!e.isComposing){e.preventDefault();document.querySelector('[data-m2="check"]')?.click();}},true);
 
-  function schedule(){if(queued)return;queued=true;requestAnimationFrame(async()=>{queued=false;await refresh();render();});}
-  function start(){const app=document.getElementById("app");if(!app)return;style();void refresh().then(render);new MutationObserver(schedule).observe(app,{childList:true,subtree:true});}
+  function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});}
+  function start(){
+    const app=document.getElementById("app");if(!app)return;
+    style();syncFromGateway();if(data)render();else void refresh(true).then(render);
+    new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+    window.addEventListener("lexiflow:today-plan-data",schedule);
+  }
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
