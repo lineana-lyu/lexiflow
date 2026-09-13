@@ -55,21 +55,29 @@ assert(apply.includes('core.canonicalStage(card)==="apply"'),"Apply renderer mus
 assert(visual.includes("先用你自己的记忆和经历想画面"),"Visualize must keep learner association before AI assistance");
 assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must be an explicit user action");
 assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
+assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize Stage V3 must call the explicit AI Assist V3 authority directly");
 assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
-assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility may only delegate Visualize AI to the explicit V3 authority");
+assert(runtime.includes("LexiFlowAiAssistV3?.visualScene"),"runtime compatibility may only delegate legacy Visualize AI calls to the explicit V3 authority");
 assert(!runtime.includes("stableInternalVisualScene"),"Visualize V3 must never fall back to a synthetic echo");
+assert(visual.includes("let assistBusy=false")&&visual.includes("let imageBusy=false"),"Visualize text assistance and image generation must have independent busy state");
+assert(visual.includes('const generating=generation.status==="generating"||imageBusy'),"Visualize text AI assistance must not impersonate image generation in the UI");
+assert(!visual.includes('generation.status==="generating"||busy'),"Visualize must not reuse a generic busy flag for image-generation state");
 assert(visual.includes('fetch("/api/ai/image"'),"Visualize Stage V3 must own image generation instead of relying on app.js stage rendering");
 assert(visual.includes('fetch("/api/images/local"'),"Visualize Stage V3 must own local-image upload");
 assert(visual.includes('data-action="finish-visual"'),"Visualize completion must still delegate persistence to the authoritative stage transition");
+assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize renderer must consume the learning-data gateway snapshot for redraws");
+assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Visualize DOM mutations must redraw from memory instead of GETing learning data");
 
 assert(apply.includes("先自己表达，再让 AI 检查"),"Apply must preserve learner-first expression before AI feedback");
 assert(apply.includes('fetch("/api/ai/text"'),"Apply Stage V3 must own AI expression checking");
 assert(apply.includes("copyNorm(text)===copyNorm(card.exampleEn"),"Apply Stage V3 must reject direct reference-example copying before AI checking");
 assert(apply.includes('data-action="pass-apply"'),"Apply completion must still delegate to the authoritative stage transition");
-assert(apply.includes('fetch("/api/ai/practice-prompt"'),"Apply Stage V3 must own optional prompt refresh");
+assert(apply.includes("LexiFlowAiAssistV3?.practicePrompt"),"Apply Stage V3 must call AI Assist V3 directly for optional prompt refresh");
 assert(ai.includes('postJson("/api/ai/practice-prompt"'),"AI Assist V3 must own the real Apply prompt request path");
-assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility may only delegate Apply prompt generation to the explicit V3 authority");
+assert(runtime.includes("LexiFlowAiAssistV3?.practicePrompt"),"runtime compatibility may only delegate legacy Apply prompt calls to the explicit V3 authority");
 assert(apply.includes("suggestionApproved"),"Apply renderer must distinguish an approved correction from ordinary feedback");
+assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply renderer must consume the learning-data gateway snapshot for redraws");
+assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Apply DOM mutations must redraw from memory instead of GETing learning data");
 
 assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize skip support must follow canonical stage identity");
 assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize skip support must expose only the V3 action marker");
