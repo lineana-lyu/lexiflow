@@ -134,6 +134,9 @@ assert(app.includes("data-study-stepper-v3-host"),"app.js must expose only the g
 assert(app.includes("data-study-stage-host-v3"),"app.js must expose only the generic V3 stage render host");
 assert(!app.includes("const STAGES = ["),"app.js must not retain a parallel legacy stage model");
 assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVisual(card)")&&!app.includes("return stageApply(card)"),"app.js must not dispatch into retired stage renderers");
+assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state must contain only the exact card identity");
+assert(!app.includes("stageIndex("),"app.js must not retain or call a legacy stage-order helper");
+assert(app.includes("window.LexiFlowStudyStageSurfaceV3?.stages"),"Study shell motion ordering must reuse the V3 stage surface authority");
 for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply"]){
   assert(!app.includes(`function ${retiredBody}(`)&&!app.includes(`async function ${retiredBody}(`),`retired stage body must be physically removed from app.js: ${retiredBody}`);
 }

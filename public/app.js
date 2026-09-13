@@ -725,23 +725,7 @@
       render();
       return false;
     }
-    state.study={
-      cardId:card.id,
-      revealed:false,
-      feedback:null,
-      applyText:card.userSentence||"",
-      originalApplyText:"",
-      aiSuggestionApplied:false,
-      applyApproved:false,
-      applyLastCheckedText:"",
-      applyReviewedText:"",
-      applyDetectedLanguage:"",
-      visualNote:card.visualNote||"",
-      visualSceneLoading:false,
-      visualSceneRefreshing:false,
-      visualSceneDirty:Boolean(card.visualNote),
-      practicePromptLoading:false
-    };
+    state.study={cardId:card.id};
     state.route="study";
     render();
     void ensureCardPronunciation(card);
@@ -1150,10 +1134,12 @@
     if(state.route==="study"&&state.study?.cardId){
       const card=getCard(state.study.cardId);
       if(!card)return null;
+      const canonical=window.LexiFlowLearningCore?.canonicalStage?.(card)||String(card.stage||"");
+      const stages=window.LexiFlowStudyStageSurfaceV3?.stages||[];
       return {
-        key:`study:${card.id}:${card.stage}`,
+        key:`study:${card.id}:${canonical}`,
         cardId:card.id,
-        order:stageIndex(card.stage)
+        order:Math.max(0,stages.indexOf(canonical))
       };
     }
     return null;
