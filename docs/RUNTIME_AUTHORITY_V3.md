@@ -6,11 +6,11 @@
 
 ## 1. Runtime control plane
 
-The active learning control plane is now V3 end to end:
+The active learning control plane is V3 end to end:
 
 `Learning Core V3 -> Learning Data Gateway V3 -> StudyDay Boundary V3 -> Stage Transition V3 -> Today Plan V3 -> DailyPlan Persistence V3 -> Advance Learning V3 -> Study / Review V3`
 
-The browser-facing global for the deterministic core remains `window.LexiFlowLearningCore` for compatibility, but the active source file is `public/learning-core-v3.js`.
+The browser-facing deterministic core remains `window.LexiFlowLearningCore` for compatibility, but its active source file is `public/learning-core-v3.js`.
 
 ### Learning Core V3
 
@@ -30,7 +30,7 @@ AI must never decide stage transitions, Review intervals, Today membership, or S
 
 ### Learning Data Gateway V3
 
-`public/learning-data-gateway-v3.js` is the single compatibility boundary around `/api/learning-data`.
+`public/learning-data-gateway-v3.js` is the single compatibility boundary and the only learning-data transport observer around `/api/learning-data`.
 
 It may intercept only that endpoint in order to:
 
@@ -38,11 +38,16 @@ It may intercept only that endpoint in order to:
 - preserve deterministic cross-day guards for generic app writes;
 - rebuild the canonical frozen DailyPlan before persistence;
 - perform the narrowly scoped safe legacy Chinese-meaning repair;
-- tag writes with `learningDataAuthority` / migration authority.
+- tag writes with `learningDataAuthority` / migration authority;
+- expose a defensive in-memory snapshot for V3 UI modules;
+- run explicitly registered outgoing feature mutators before deterministic normalization;
+- notify explicitly registered after-persist listeners only after persistence succeeds.
 
-It also supplies the canonical in-memory snapshot used by V3 UI decorators. MutationObservers must redraw from this snapshot rather than issuing a learning-data GET for every DOM change.
+The Gateway's in-memory snapshot is persistence-confirmed state, not optimistic state. A failed POST must not advance it. Successful POST and GET responses may advance the snapshot. Feature modules that need to preserve metadata across generic full-data writes must register through the Gateway instead of installing another `window.fetch` wrapper.
 
-It must not own stage UI, Review execution, AI Visualize behavior, or product navigation.
+Legacy meaning migration deliberately bypasses feature outgoing mutators so a background migration cannot accidentally consume an unsaved feature draft.
+
+The Gateway must not own stage UI, Review execution, AI Visualize behavior, or product navigation.
 
 ### StudyDay Boundary V3
 
@@ -66,11 +71,15 @@ Rules:
 
 ### DailyPlan Persistence V3
 
-`public/daily-plan-persistence-v3.js` persists a newly built frozen DailyPlan explicitly. It does not create hidden GET-side effects through a fetch wrapper and does not replace global fetch. Writes are tagged `dailyPlanAuthority: "v3"`.
+`public/daily-plan-persistence-v3.js` persists a newly built frozen DailyPlan explicitly. It first reuses the confirmed Gateway snapshot and only falls back to a direct learning-data GET when no snapshot exists. It does not create hidden GET-side effects through a fetch wrapper and does not replace global fetch. Writes are tagged `dailyPlanAuthority: "v3"`.
 
 ### Runtime compatibility
 
-`public/runtime-fixes.js` is transport-only. It may keep narrowly scoped compatibility for old callers that still reach the canonical AI endpoints and the Chinese dictionary display repair, but it must not observe or decorate Study DOM. Visualize/Apply loading states belong to their V3 stage renderers.
+`public/runtime-fixes.js` is transport-only. It may keep narrowly scoped Chinese dictionary display compatibility, but it must not observe or decorate Study DOM.
+
+Dormant historical `app.js` callers for `/api/ai/visual-scene` and `/api/ai/practice-prompt` are now deliberately failed closed with `LEGACY_STAGE_AI_BLOCKED`. They must not be delegated into real AI work. This guarantees that rendering a retired stage body cannot spend an AI request, invent the learner's first Visualize association, or create an Apply prompt without an explicit learner action.
+
+The only valid Visualize scene / Apply practice-prompt AI path is the explicit V3 stage action through `LexiFlowAiAssistV3`. `ai-assist-v3.js` captures the upstream transport before `runtime-fixes.js` is installed, so legitimate V3 AI actions do not pass through the retired-call block.
 
 ### Advance Learning V3
 
@@ -118,7 +127,7 @@ Memorize's two recall directions/rounds are exercise state inside one product st
 
 `study-drafts-v3.js` is draft recovery only. It may preserve the historical localStorage key for upgrade continuity, but it cannot own active-session selection or auto-click the learning entry point.
 
-`source-context-v3.js` owns optional source-context capture/editing and must bind all study reminders to the explicit card ID plus canonical stage. Its DOM decoration uses the Learning Data Gateway snapshot; source metadata preservation remains its temporary compatibility write boundary until the generic add-card writer is removed from `app.js`.
+`source-context-v3.js` owns optional source-context capture/editing and binds study reminders to the explicit card ID plus canonical stage. It does not rewrite global fetch. Instead it registers an outgoing mutator with Learning Data Gateway V3 so generic card saves preserve edited source metadata, and an after-persist listener so a pending Add-page source draft is cleared only after the new card has actually persisted. Its DOM decoration redraws from the Gateway snapshot rather than GETing learning data on every mutation.
 
 ## 3. Stage completion and write serialization
 
@@ -145,6 +154,13 @@ Normal completion and Skip are competing outcomes of that same command, not two 
 
 `visualize-stage-v3.js` owns Visualize AI suggestion, image generation, image upload, and their persistent card patches. These asynchronous writes share the Visualize stage-write scope with completion/Skip, and a patch fails closed if the card has already left Visualize.
 
+Generated and uploaded images are durable but initially unconfirmed Visualize checkpoints:
+
+- image generation/upload persists the image immediately with `visualImageConfirmed: false`;
+- the checkpoint records `visualImagePreparedAt` and whether the source was `generated` or `upload`;
+- refresh, exit, or crash must not discard the prepared image;
+- only explicit `finish-visual` sets `visualImageConfirmed: true` / `visualImageConfirmedAt` and transitions the card to Apply for the next StudyDay.
+
 `visualize-actions-v3.js` owns explicit Visualize Skip. It uses the same Visualize command ID and stage-write scope as normal completion; only one terminal outcome may commit.
 
 `apply-stage-v3.js` owns Apply expression checking and optional practice-prompt refresh. Prompt persistence shares the Apply stage-write scope and fails closed if the card has already left Apply.
@@ -159,7 +175,7 @@ Normal completion and Skip are competing outcomes of that same command, not two 
 
 `apply-quality-v3.js` owns Apply quality approval. Audit lookup is bound to the exact active card ID and its stored word/meaning, not visible DOM text. The learner must produce an original expression: an exact normalized copy of the dictionary reference example cannot graduate.
 
-`apply-guard-v3.js` independently validates the exact current Apply card and target word immediately before completion. It also redraws from the gateway snapshot rather than refetching learning data on every renderer mutation.
+`apply-guard-v3.js` independently validates the exact current Apply card and target word immediately before completion. It also redraws from the Gateway snapshot rather than refetching learning data on every renderer mutation.
 
 ## 4. Learner-first AI behavior
 
@@ -171,11 +187,15 @@ Visualize starts from the learner's own association or scene. AI may make the sc
 
 The V3 stage separates `assistBusy`, `imageBusy`, and `uploadBusy`; a text-assistance request must never impersonate an image-generation state. While a Visualize write is active, completion and Skip are visibly disabled and the shared stage-write scope prevents a stale asynchronous patch from reverting a terminal transition.
 
+Historical automatic Visualize AI calls in `app.js` are dormant technical debt and are blocked at the runtime compatibility boundary. They are not permitted to reach AI Assist V3.
+
 ### Apply
 
 Apply starts from the learner's own intended expression. AI may check, translate, or suggest a correction, but it cannot silently replace the learner sentence and cannot bypass the approval contract.
 
 Optional practice-prompt refresh may update only the prompt. Its persistence is serialized with Apply completion/Draft/Skip so a late prompt result cannot move a card back from Review or erase a completed outcome.
+
+Historical automatic Apply prompt calls in `app.js` are likewise blocked and cannot reach real AI. The V3 renderer must initiate prompt refresh explicitly.
 
 ## 5. Review execution
 
@@ -258,13 +278,15 @@ Legacy localStorage key names may remain temporarily when preserving upgrade con
 The active checks cover:
 
 - Learning Core V3 deterministic ladders, DailyPlan, canonical stages, and cross-day gates;
-- Learning Data Gateway V3 normalization/migration boundary;
+- Learning Data Gateway V3 normalization/migration boundary, successful-POST snapshot semantics, and feature hook API;
+- Source Context preservation through Gateway hooks without a competing fetch wrapper;
 - StudyDay due semantics and StudyDay Boundary V3;
 - Review Policy, Review Session, and crash-safe Review Transaction V3;
 - Today Plan and DailyPlan Persistence V3;
 - Advance Learning V3;
 - Study Session V3 exact-card selection and pause/resume;
-- canonical stage renderers, serialized stage writes, and command idempotency;
+- canonical stage renderers, serialized stage writes, image checkpoint semantics, and command idempotency;
+- explicit AI Assist V3 ownership and fail-closed legacy stage-AI calls;
 - exact-card Apply quality/guard behavior, Apply Draft/Skip, and Visualize Skip;
 - verified reset behavior.
 
@@ -277,19 +299,21 @@ A syntax-clean change is still a regression if it:
 - writes `memorize1` / `memorize2` as current product stages;
 - gives normal and Skip outcomes different command identities for the same card/stage/day;
 - allows same-day Apply -> initial Review;
-- lets Today UI mutate the global fetch layer;
+- lets Today UI or Source Context install another learning-data fetch wrapper;
+- advances the Gateway's authoritative snapshot when persistence failed;
 - lets a stale Visualize/Apply async write overwrite a terminal transition;
+- lets dormant legacy stage rendering spend AI work;
 - lets AI choose stage timing or Review scheduling.
 
 ## 9. Next cleanup boundary
 
-The learning control plane is now V3. The largest remaining technical debt is physical legacy code still present inside the large `public/app.js` even though V3 modules quarantine it at runtime.
+The learning control plane is V3. The largest remaining technical debt is physical legacy code still present inside the large `public/app.js` even though V3 modules quarantine it at runtime and dormant stage-AI calls are now fail-closed.
 
 Next cleanup should therefore be source deletion rather than another behavior rewrite:
 
-1. keep Learning Core V3, DailyPlan, Study Session V3, Stage Transition V3, and Review V3 contracts unchanged;
+1. keep Learning Core V3, Gateway V3, DailyPlan, Study Session V3, Stage Transition V3, and Review V3 contracts unchanged;
 2. physically remove obsolete legacy Select/Visualize/Apply stage render bodies and obsolete stage-specific handlers from `app.js` in small parity-checked slices;
-3. in particular, remove the dormant legacy auto-Visualize/auto-practice-prompt calls so the learner-first rule is guaranteed by source structure rather than only by V3 UI replacement;
+3. remove the dormant legacy auto-Visualize/auto-practice-prompt code once a safe source-edit boundary is available; until then the runtime block must remain regression-locked;
 4. preserve dictionary/ECDICT, TTS, library editing, settings, Source Context V3, and generic navigation while shrinking `app.js`;
 5. after each slice, run the full repository checks;
 6. after repository checks are green, run a real Windows Electron click regression because CI cannot validate every GUI interaction.
