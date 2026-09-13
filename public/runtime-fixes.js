@@ -112,12 +112,10 @@
     saveHistory(storageKey, history);
   }
 
-  function normalizeForSimilarity(value) {
-    return String(value || "")
-      .toLowerCase()
-      .replace(/[\s，。！？；：、“”‘’（）()\-—_]/g, "")
-      .trim();
-  }
+  const normalizeForSimilarity = value => String(value || "")
+    .toLowerCase()
+    .replace(/[\s，。！？；：、“”‘’（）()\-—_]/g, "")
+    .trim();
 
   function bigrams(value) {
     const text = normalizeForSimilarity(value);
@@ -301,7 +299,7 @@
   }
 
   document.addEventListener("click", event => {
-    const button = event.target?.closest?.('[data-action="refresh-visual-scene"]');
+    const button = event.target?.closest?.('[data-action="refresh-visual-scene"],[data-visual-v3="assist"]');
     if (!button || button.disabled) return;
     manualSceneRefreshUntil = Date.now() + 2500;
   }, true);
