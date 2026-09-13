@@ -1,0 +1,36 @@
+name: One-shot Remove Legacy Memorize UI Selector
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-remove-legacy-memorize-ui-selector.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Remove retired memorize1 UI selector
+        run: python scripts/remove-legacy-memorize-ui-selector.py
+      - name: Verify migration
+        run: |
+          node --check public/stage-transition-v3.js
+          node --check scripts/check-stage-model-v3.js
+          npm run check
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/stage-transition-v3.js scripts/check-stage-model-v3.js
+          git commit -m "refactor: remove retired memorize1 UI selector [canonical-memorize-ui]"
+          git push origin HEAD:feat/v7-airy-luminous-ui
