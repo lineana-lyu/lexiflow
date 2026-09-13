@@ -8,6 +8,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 const index=read("public/index.html");
 const quality=read("public/apply-quality-v3.js");
 const guard=read("public/apply-guard-v3.js");
+const transport=read("public/transport-fixes.js");
 const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 
@@ -36,6 +37,9 @@ assert(!guard.includes('document.querySelector(".apply-word-hero .target-word-te
 assert(guard.includes("event.stopImmediatePropagation()"),"invalid final Apply attempts must fail closed before stage completion");
 assert(transition.includes('stageTransitionAuthority:"v3"'),"approved Apply completion must persist through Stage Transition V3");
 
+assert(!transport.includes('endpoint === "/api/ai/text"'),"transport layer must not reinterpret authoritative Apply feedback");
+assert(!transport.includes("softenNearIdenticalSentenceFeedback"),"transport layer must not downgrade required corrections into optional polish");
+assert(!transport.includes("optionalSuggestion"),"transport layer must not manufacture optional Apply suggestions");
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
 
