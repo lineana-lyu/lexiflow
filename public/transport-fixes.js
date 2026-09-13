@@ -353,6 +353,17 @@
     const endpoint = endpointOf(input);
     const body = parseBody(init);
 
+    if (endpoint === "/api/dictionary/lookup" && body?.word && hasChinese(body.word)) {
+      const response = await nativeFetch(input, init);
+      if (!response.ok) return response;
+      try {
+        const data = await response.clone().json();
+        return jsonResponse(response.status, normalizeSmartSearch(data, body.word), response);
+      } catch {
+        return response;
+      }
+    }
+
     if (endpoint === "/api/search/smart" && body?.query && hasChinese(body.query)) {
       const response = await nativeFetch(input, init);
       if (!response.ok) return response;

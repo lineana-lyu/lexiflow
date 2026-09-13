@@ -7,7 +7,6 @@ const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8");
 const product=fs.readFileSync(path.join(root,"public","product-ux.js"),"utf8");
 const app=fs.readFileSync(path.join(root,"public","app.js"),"utf8");
 const productCss=fs.readFileSync(path.join(root,"public","product-ux.css"),"utf8");
-const runtime=fs.readFileSync(path.join(root,"public","runtime-fixes.js"),"utf8");
 const transport=fs.readFileSync(path.join(root,"public","transport-fixes.js"),"utf8");
 const gateway=fs.readFileSync(path.join(root,"public","learning-data-gateway-v3.js"),"utf8");
 const sourceContext=fs.readFileSync(path.join(root,"public","source-context-v3.js"),"utf8");
@@ -21,6 +20,7 @@ const retired=[
   "public/learning-flow-fixes.css",
   "public/product-ux-v2.js",
   "public/product-ux-v2.css",
+  "public/runtime-fixes.js",
   "public/README_ICON_FIX.txt",
   "public/icon-test.txt",
   "public/icon-v2.png",
@@ -70,11 +70,11 @@ assert(app.includes('function renderStage(card){')&&app.includes('data-study-sta
 assert(app.includes('data-study-stepper-v3-host'),"app.js must expose only the passive V3 five-stage stepper host");
 assert(!app.includes('/api/ai/visual-scene')&&!app.includes('/api/ai/practice-prompt'),"app.js must not own retired automatic stage AI calls");
 
-assert(runtime.includes("transport-only"),"runtime compatibility must stay transport-only");
-assert(!runtime.includes("LEGACY_STAGE_AI_BLOCKED")&&!runtime.includes("/api/ai/visual-scene")&&!runtime.includes("/api/ai/practice-prompt"),"runtime compatibility must stay free of retired Stage AI blocking/caller knowledge");
-assert(!runtime.includes("MutationObserver"),"runtime compatibility must not decorate stage DOM through a global observer");
-assert(!runtime.includes("visual-image-canvas")&&!runtime.includes("scene-panel.is-loading"),"legacy Visualize DOM selectors must stay out of runtime compatibility");
-assert(!runtime.includes("background-generation-note"),"V3 Visualize renderer must be the only owner of image-generation progress UI");
+assert(!index.includes('<script src="./runtime-fixes.js"></script>'),"retired runtime compatibility wrapper must not load");
+assert(!fs.existsSync(path.join(root,"public","runtime-fixes.js")),"retired runtime compatibility source must stay deleted");
+assert(transport.includes('endpoint === "/api/dictionary/lookup"'),"transport must own active dictionary response normalization after runtime compatibility retirement");
+assert(transport.includes("normalizeSmartSearch(data, body.word)"),"dictionary lookup normalization must reuse the canonical Chinese lookup normalizer");
+assert(!transport.includes("LEGACY_STAGE_AI_BLOCKED")&&!transport.includes("/api/ai/visual-scene")&&!transport.includes("/api/ai/practice-prompt"),"transport must stay free of retired Stage AI endpoint knowledge");
 
 assert(transport.includes("function visualStudyVisible()"),"transport image-job indicator must centralize Visualize visibility detection");
 assert(transport.includes('document.querySelector(".lexi-v3-visual,.visual-learning-stage")'),"transport must recognize the authoritative Visualize V3 surface while retaining legacy fallback detection");
