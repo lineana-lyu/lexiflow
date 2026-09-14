@@ -614,14 +614,14 @@
     const segments=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
     if(audioUrl) segments.unshift(audioUrl);
     if(segments.length){
-      try{
-        for(const src of Array.from(new Set(segments))){
+      for(const src of Array.from(new Set(segments))){
+        try{
           await new Promise((resolve,reject)=>{
             const audio=new Audio(src);audio.onended=resolve;audio.onerror=reject;audio.play().catch(reject);
           });
-        }
-        return;
-      }catch{}
+          return;
+        }catch{}
+      }
     }
     if(await playNaturalTts(word))return;
     toast("当前没有可用的自然发音，请稍后重试");

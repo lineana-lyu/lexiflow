@@ -141,9 +141,16 @@
     if(!word)return;
     const audio=clean(speaker.dataset.audio);
     let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
+    const pronunciation=window.LexiFlowPronunciationV3;
+    if(typeof pronunciation?.playWord==="function"){
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+      await pronunciation.playWord(word,{audioUrl:audio,audioUrls:audios});
+      return;
+    }
     const isExpression=/\s/.test(word) || /[.!?,;:]/.test(word);
-    // A single exact dictionary recording still wins. Component recordings for a
-    // phrase are not a natural whole-expression pronunciation, so Kokoro owns it.
+    // If the shared bridge is unavailable during startup, retain the old fallback:
+    // exact dictionary recordings remain owned by the base surface; expressions
+    // without an exact recording use whole-expression natural synthesis.
     if(audio || (!isExpression && audios.length))return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
     await play(word,speaker);

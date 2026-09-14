@@ -33,7 +33,8 @@ assert(runtime.includes("不会把它拆成单词"), "expression failure must pr
 assert(!transport.includes("speakPhraseContinuously"), "transport must not steal phrase playback from Kokoro");
 assert(!transport.includes("shouldUseUnifiedPhraseVoice"), "transport must not classify phrase voice playback");
 assert(kokoro.includes("playSystemFallback"), "system speech must only remain as an explicit fallback owned by Kokoro voice layer");
-assert(kokoro.includes("Component recordings for a"), "Kokoro voice layer must document whole-expression ownership over component recordings");
+assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");
+assert(app.includes("for(const src of Array.from(new Set(segments)))")&&app.includes("audio.play().catch(reject);\n          });\n          return;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
 assert(runtime.includes('queryKind === "phrase"\n      ? coreLexicon.lookupExact'), "direct dictionary lookup must also avoid raw ECDICT as authoritative phrase semantics");
 assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
