@@ -7,7 +7,7 @@ const read=name=>fs.readFileSync(path.join(root,name),"utf8");
 
 const index=read("public/index.html");
 const surface=read("public/study-stage-surface-v3.js");
-const select=read("public/select-stage-v3.js");
+const intake=read("public/select-intake-v3.js");
 const visual=read("public/visualize-stage-v3.js");
 const apply=read("public/apply-stage-v3.js");
 const visualActions=read("public/visualize-actions-v3.js");
@@ -22,13 +22,14 @@ function before(a,b){
   assert(ai<bi,`${a} must load before ${b}`);
 }
 
-before("app.js","study-stage-surface-v3.js");
+before("app.js","select-intake-v3.js");
+before("select-intake-v3.js","study-stage-surface-v3.js");
 before("study-stage-surface-v3.js","study-session-v3.js");
-before("study-stage-surface-v3.js","select-stage-v3.js");
-before("select-stage-v3.js","visualize-stage-v3.js");
+before("study-session-v3.js","visualize-stage-v3.js");
 before("visualize-stage-v3.js","apply-stage-v3.js");
 before("apply-stage-v3.js","apply-actions-v3.js");
 before("visualize-stage-v3.js","visualize-actions-v3.js");
+assert(!index.includes('<script src="./select-stage-v3.js"></script>'),"obsolete duplicate Select renderer must not remain in the runtime load chain");
 assert(!index.includes('<script src="./visualize-v2.js"></script>'),"legacy Visualize V2 action shim must not remain in the runtime load chain");
 
 assert(surface.includes('["select","选词确认"]')&&surface.includes('["memorize","记忆"]')&&surface.includes('["review","复习巩固"]'),"study surface must expose five canonical product stages");
@@ -45,7 +46,8 @@ assert(surface.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"study sur
 assert(surface.includes("syncFromGateway();\n      decorate();"),"DOM mutation decoration must use the in-memory gateway snapshot instead of refetching");
 assert(!surface.includes("requestAnimationFrame(async()=>{\n      queued=false;\n      decorateLegacyBadges();\n      await refresh();"),"DOM mutations must not trigger a learning-data GET on every renderer update");
 
-assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to explicit Study Session card identity");
+assert(intake.includes("选择明天要学的新词")&&intake.includes("不再重复确认词义"),"Select must be handled by direct Today intake without a second confirmation renderer");
+assert(intake.includes('core.crossDayPatch(prev,{stage:"memorize",learningStage:"memorize"},now)'),"Select intake must schedule Memorize for the next StudyDay");
 assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize renderer must bind to explicit Study Session card identity");
 assert(apply.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply renderer must bind to explicit Study Session card identity");
 assert(visual.includes('core.canonicalStage(card)==="visualize"'),"Visualize renderer must use canonical stage identity");
