@@ -28,10 +28,11 @@ jobs:
       - name: Apply audited phrase pronunciation repair
         run: python scripts/apply-v7-phrase-pronunciation-v2-fix.py
 
-      - name: Update expression regression contract
+      - name: Update regression contracts
         run: |
           python - <<'PY'
           from pathlib import Path
+
           p = Path('scripts/check-expression-query-v4.js')
           s = p.read_text(encoding='utf-8')
           old = '''assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('if (local?.phonetic)'), "multiword phrases must prefer exact local whole-phrase IPA instead of a one-component ECDICT phonetic");'''
@@ -43,6 +44,15 @@ jobs:
           new = '''assert(runtime.includes("composePhrasePhonetic")&&runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("phraseFallback:true"), "phrase pronunciation must compose a complete IPA when necessary and force one whole-expression TTS playback");'''
           if old not in s:
               raise SystemExit('missing expression pronunciation policy assertion')
+          s = s.replace(old, new, 1)
+          p.write_text(s, encoding='utf-8')
+
+          p = Path('scripts/check-user-surface-v4.js')
+          s = p.read_text(encoding='utf-8')
+          old = '''assert(!app.includes("verifiedWholeExpressionAudio")&&app.includes("if(isExpression){")&&app.includes("完整短语发音"),"phrase playback must bypass dictionary/component audio and synthesize the whole expression");'''
+          new = '''assert(app.includes("A phrase is a single pronunciation unit")&&app.includes("完整短语发音")&&app.includes("if(isExpression){"),"phrase playback must bypass component audio and synthesize the whole expression as one unit");'''
+          if old not in s:
+              raise SystemExit('missing user-surface phrase playback assertion')
           s = s.replace(old, new, 1)
           p.write_text(s, encoding='utf-8')
           PY
