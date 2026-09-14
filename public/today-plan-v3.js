@@ -98,8 +98,8 @@
     if(plan.apply.length)return `<button class="btn primary" data-action="continue-learning">开始造句 ${plan.apply.length} 个</button>`;
     if(plan.select.length)return `<button class="btn primary" data-action="continue-learning">确认新词 ${plan.select.length} 个</button>`;
     if(plan.inbox.length&&Number(plan.remainingSelectSlots||0)>0)return `<button class="btn primary" data-route="library" data-tp-library-pending="1">从单词库选择待学习词</button>`;
-    if(Number(plan.remainingSelectSlots||0)>0&&!(latestData?.cards||[]).length)return `<button class="btn primary" data-route="add">添加第一个单词</button>`;
-    if(Number(plan.remainingSelectSlots||0)>0)return `<button class="btn primary" data-route="add">继续添加新词</button>`;
+    if(Number(plan.remainingSelectSlots||0)>0&&!(latestData?.cards||[]).length)return `<button class="btn primary" data-tp-add-today="1">添加第一个单词</button>`;
+    if(Number(plan.remainingSelectSlots||0)>0)return `<button class="btn primary" data-tp-add-today="1">继续添加新词</button>`;
     return `<button class="btn primary" disabled>今天已完成</button>`;
   }
   function homePlanHtml(signature){
@@ -149,9 +149,13 @@
 
   function decorateAdd(){
     const save=document.querySelector('[data-action="save-card"].save-learning-card,[data-action="save-card"]');
-    if(save&&!document.querySelector(".study-card-focus")){setText(save,"保存到单词库");save.title="保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";}
-    Array.from(document.querySelectorAll("h1,h2")).forEach(node=>{if(["选词制卡","查词并收集"].includes(node.textContent.trim()))setText(node,"查词并添加");});
-    document.querySelectorAll(".toast").forEach(node=>{if(node.textContent.includes("卡片已保存")||node.textContent.includes("已加入收集箱"))setText(node,"已保存到单词库 · 待学习");});
+    const fromToday=Boolean(window.LexiFlowAddFlowV3?.isAddingForToday?.());
+    if(save&&!document.querySelector(".study-card-focus")){
+      setText(save,fromToday?"确认这个词义并加入今天":"保存到单词库");
+      save.title=fromToday?"保存这个词义并计入今天的新词；明天开始主动记忆":"保存后会出现在单词库的“待学习”中，由你决定哪天加入 Today";
+    }
+    Array.from(document.querySelectorAll("h1,h2")).forEach(node=>{if(["选词制卡","查词并收集"].includes(node.textContent.trim()))setText(node,fromToday?"选择今天的新词":"查词并添加");});
+    if(!fromToday)document.querySelectorAll(".toast").forEach(node=>{if(node.textContent.includes("卡片已保存")||node.textContent.includes("已加入收集箱"))setText(node,"已保存到单词库 · 待学习");});
   }
 
   function libraryCounts(){
@@ -253,6 +257,14 @@
       decorate();
     });
   }
+
+  document.addEventListener("click",event=>{
+    const button=event.target?.closest?.("[data-tp-add-today]");
+    if(!button)return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.LexiFlowAddFlowV3?.openForToday?.();
+  },true);
 
   function start(){
     const app=document.getElementById("app");if(!app)return;

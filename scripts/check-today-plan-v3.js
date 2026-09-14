@@ -32,5 +32,8 @@ assert(!source.includes("setTimeout(()=>void refreshAndDecorate(),180)"),"Today 
 assert(source.includes('window.addEventListener("focus",()=>void refreshAndDecorate(true))'),"Today Plan V3 must force a fresh read after returning to the app");
 assert(source.includes('document.addEventListener("visibilitychange",()=>{if(!document.hidden)void refreshAndDecorate(true);})'),"Today Plan V3 must force a fresh read when the app becomes visible");
 assert(source.includes('window.addEventListener("lexiflow:today-plan-data",schedule)'),"Today writes must trigger an in-memory redraw rather than another GET");
+assert(source.includes('data-tp-add-today="1"'),"Today new-word CTA must use the direct Today add flow instead of routing through Pending");
+assert(source.includes("LexiFlowAddFlowV3?.openForToday?.()"),"Today add CTA must hand off to the explicit app add-flow bridge");
+assert(source.includes('fromToday?"确认这个词义并加入今天":"保存到单词库"'),"Add surface must distinguish Today intent from generic library collection");
 
 console.log("Today Plan V3 checks passed.");

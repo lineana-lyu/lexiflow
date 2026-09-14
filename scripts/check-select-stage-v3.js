@@ -14,7 +14,9 @@ assert(index.indexOf("study-session-v3.js")<index.indexOf("select-stage-v3.js"),
 assert(select.includes("LexiFlowStudyRenderer?.currentCardId"),"Select renderer must bind to the explicit Study Session card ID");
 assert(select.includes('core.canonicalStage(card)==="select"'),"Select renderer must use the canonical stage model");
 assert(select.includes('data-next="memorize"'),"Select UI must expose canonical Memorize as the next product stage");
-assert(select.includes("LexiFlowNaturalTts?.play"),"Select renderer must preserve pronunciation support");
+assert(select.includes("LexiFlowPronunciationV3"),"Select renderer must reuse the same pronunciation bridge as lookup/card creation");
+assert(select.includes('data-select-v3="speak-example"'),"Select renderer must provide example-sentence audio");
+assert(select.includes("playSentence(sentence)"),"Select example audio must use the shared sentence pronunciation path");
 assert(!select.includes("activeLearningCards"),"Select renderer must never choose its own learning card");
 assert(select.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Select renderer must reuse the learning-data gateway snapshot");
 assert(select.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Select DOM mutations must redraw from memory instead of GETing learning data");
