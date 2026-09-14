@@ -1,0 +1,59 @@
+name: Apply V7 Local Phrase Dictionary
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-local-phrase-dictionary.py
+      - .github/workflows/apply-v7-local-phrase-dictionary.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+
+      - name: Apply local phrase dictionary integration
+        run: python scripts/apply-v7-local-phrase-dictionary.py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build real phrase dictionary and smoke test hang out
+        run: |
+          node scripts/prepare-phrase-dictionary.js --force --required
+          node - <<'NODE'
+          const phrase = require('./lib/phrase-dictionary');
+          const result = phrase.lookupExact('hang out', 'primary');
+          if (!result) throw new Error('Open Dictionary v2.0 does not contain hang out');
+          const meaning = String(result.senses?.[0]?.meaningZh || '');
+          if (!meaning || /挂出/.test(meaning)) throw new Error(`bad hang out primary meaning: ${meaning}`);
+          if (!String(result.phonetic || '').trim()) throw new Error('hang out whole-expression IPA is missing');
+          console.log(JSON.stringify({word:result.word, phonetic:result.phonetic, meaningZh:meaning, exampleEn:result.senses?.[0]?.exampleEn || ''}, null, 2));
+          NODE
+
+      - name: Run repository checks
+        run: npm run check
+
+      - name: Commit verified integration and remove one-shot files
+        run: |
+          rm -f scripts/apply-v7-local-phrase-dictionary.py .github/workflows/apply-v7-local-phrase-dictionary.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server-runtime.js lib/phrase-dictionary.js scripts/prepare-phrase-dictionary.js scripts/check-phrase-dictionary-v5.js scripts/check-expression-query-v4.js package.json THIRD_PARTY_NOTICES.md .gitignore
+          git add -u scripts/apply-v7-local-phrase-dictionary.py .github/workflows/apply-v7-local-phrase-dictionary.yml
+          git commit -m "fix: make common phrases local-first with whole-expression IPA"
+          git push origin HEAD:feat/v7-airy-luminous-ui
