@@ -1,0 +1,39 @@
+name: Apply V7 Pronunciation Hardening
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-pronunciation-hardening.js
+      - .github/workflows/apply-v7-pronunciation-hardening.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Apply pronunciation hardening
+        run: node scripts/apply-v7-pronunciation-hardening.js
+      - name: Run repository checks
+        run: npm run check
+      - name: Commit fix and remove one-shot patcher
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm scripts/apply-v7-pronunciation-hardening.js .github/workflows/apply-v7-pronunciation-hardening.yml
+          git add public/app.js server-runtime.js public/product-ux.css scripts/check-expression-query-v4.js
+          git commit -m "fix: harden dictionary-first phrase pronunciation"
+          git push origin HEAD:feat/v7-airy-luminous-ui
