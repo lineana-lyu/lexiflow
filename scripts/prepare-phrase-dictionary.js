@@ -14,6 +14,7 @@ const ROOT = path.resolve(__dirname, "..");
 const DEFAULT_SOURCE_URL = "https://github.com/ahpxex/open-dictionary/releases/download/v2.0/distribution.jsonl.gz";
 const DEFAULT_SOURCE_SHA256 = "69af69cdc685b5dce465613d1cc8fffb598eb46714f57cf73bd6606c2ceb7e43";
 const DEFAULT_OUTPUT = path.join(ROOT, "resources", "phrase-dictionary.sqlite");
+const PHRASE_SCHEMA = "lexiflow-open-dictionary-phrases-v2-whole-ipa";
 
 function clean(value) {
   return String(value ?? "").trim().replace(/\s+/g, " ");
@@ -21,6 +22,21 @@ function clean(value) {
 
 function normalizeHeadword(value) {
   return clean(value).toLowerCase();
+}
+
+function expressionParts(value) {
+  return clean(value).match(/[A-Za-z]+(?:['-][A-Za-z]+)*/g) || [];
+}
+
+function ipaParts(value) {
+  const raw = clean(value).replace(/^\/+|\/+$/g, "").replace(/^\[+|\]+$/g, "");
+  return raw.split(/\s+/).map(part => part.trim()).filter(Boolean);
+}
+
+function isWholeExpressionIpa(headword, ipa) {
+  const words = expressionParts(headword);
+  const phones = ipaParts(ipa);
+  return words.length >= 2 && phones.length >= words.length;
 }
 
 function priorityRank(value) {
@@ -45,7 +61,7 @@ function compactEntry(entry) {
     const pos = clean(group?.pos) || "phrase";
     for (const pronunciation of Array.isArray(group?.pronunciations) ? group.pronunciations : []) {
       const ipa = clean(pronunciation?.ipa || pronunciation?.text);
-      if (!ipa) continue;
+      if (!ipa || !isWholeExpressionIpa(normalized, ipa)) continue;
       pronunciations.push({ ipa, us:isUsPronunciation(pronunciation) });
     }
     for (const meaning of Array.isArray(group?.meanings) ? group.meanings : []) {
@@ -123,7 +139,9 @@ function isValidDatabase(filePath) {
   let db;
   try {
     db = new DatabaseSync(filePath, { readOnly:true });
-    return Number(db.prepare("SELECT value FROM metadata WHERE key='phrase_count'").get()?.value || 0) > 0;
+    const count = Number(db.prepare("SELECT value FROM metadata WHERE key='phrase_count'").get()?.value || 0);
+    const schema = String(db.prepare("SELECT value FROM metadata WHERE key='schema'").get()?.value || "");
+    return count > 0 && schema === PHRASE_SCHEMA;
   } catch {
     return false;
   } finally {
@@ -175,7 +193,7 @@ async function importJsonlGzipToSqlite(gzipPath, outputPath, sourceLabel) {
     meta.run("phrase_count", String(count));
     meta.run("source", String(sourceLabel || DEFAULT_SOURCE_URL));
     meta.run("source_sha256", DEFAULT_SOURCE_SHA256);
-    meta.run("schema", "lexiflow-open-dictionary-phrases-v1");
+    meta.run("schema", PHRASE_SCHEMA);
     meta.run("prepared_at", new Date().toISOString());
     meta.run("scanned_entries", String(scanned));
     db.exec("ANALYZE");
@@ -247,6 +265,8 @@ module.exports = {
   DEFAULT_SOURCE_URL,
   DEFAULT_SOURCE_SHA256,
   DEFAULT_OUTPUT,
+  PHRASE_SCHEMA,
+  isWholeExpressionIpa,
   compactEntry,
   isValidDatabase,
   importJsonlGzipToSqlite,

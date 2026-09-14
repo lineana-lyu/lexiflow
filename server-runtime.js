@@ -305,32 +305,12 @@ async function handlePronunciation(res, body) {
   const local = queryKind === "phrase" ? localPhraseResult(word, "primary") : localLookupResult(word, "primary", word);
 
   if (queryKind === "phrase") {
-    let remotePronunciation = null;
-    try {
-      const remote = await requestInnerJson("/api/dictionary/pronunciation", {
-        method:"POST",
-        body:{ word },
-        timeoutMs:10000,
-      });
-      if (remote.status >= 200 && remote.status < 300) remotePronunciation = remote.payload?.result || null;
-    } catch {}
-
-    const remoteExact = remotePronunciation?.exactMatch === true;
-    const rawAudio = [
-      clean(remotePronunciation?.audioUrl),
-      ...(Array.isArray(remotePronunciation?.audioUrls) ? remotePronunciation.audioUrls.map(clean) : []),
-    ].filter(Boolean);
-    const uniqueAudio = Array.from(new Set(rawAudio));
-    // Phrase dictionary playback has a single-owner rule: only one exact whole
-    // expression recording may play. Component arrays are never exposed.
-    const exactWholeAudio = remoteExact && uniqueAudio.length ? uniqueAudio[0] : "";
-
+    // Multi-word playback has one canonical policy: synthesize the entire
+    // expression in one TTS request. Dictionary APIs often expose an exact
+    // phrase headword while attaching audio/IPA for only the lexical head, so
+    // phrase audio is never accepted from the single-word dictionary channel.
     let phrasePhonetic = clean(local?.phonetic);
     let phoneticSource = phrasePhonetic ? clean(local?.pronunciationSource) : "";
-    if (!phrasePhonetic && remoteExact && clean(remotePronunciation?.phonetic)) {
-      phrasePhonetic = clean(remotePronunciation.phonetic);
-      phoneticSource = clean(remotePronunciation.pronunciationSource) || "merriam-webster-whole-expression";
-    }
     if (!phrasePhonetic) {
       phrasePhonetic = await composePhrasePhonetic(word);
       if (phrasePhonetic) phoneticSource = "composed-exact-word-ipa";
@@ -340,17 +320,15 @@ async function handlePronunciation(res, body) {
       ok:true,
       result:{
         phonetic:phrasePhonetic,
-        audioUrl:exactWholeAudio,
-        audioUrls:exactWholeAudio ? [exactWholeAudio] : [],
-        pronunciationSource:exactWholeAudio
-          ? (clean(remotePronunciation?.pronunciationSource) || "merriam-webster-whole-expression")
-          : phoneticSource,
-        exactMatch:Boolean(local?.dictionaryExact || remoteExact),
+        audioUrl:"",
+        audioUrls:[],
+        pronunciationSource:phoneticSource,
+        exactMatch:Boolean(local?.dictionaryExact || local?.exactMatch),
         wholeExpressionPhonetic:Boolean(phrasePhonetic),
-        dictionaryAudio:Boolean(exactWholeAudio),
-        wholeExpressionAudio:Boolean(exactWholeAudio),
+        dictionaryAudio:false,
+        wholeExpressionAudio:false,
         localLookup:Boolean(local),
-        pronunciationPolicy:"whole-expression-v2",
+        pronunciationPolicy:"whole-expression-tts-v3",
       },
     });
     return true;

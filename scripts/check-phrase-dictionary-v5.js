@@ -48,4 +48,49 @@ assert(result?.phraseCard && result?.dictionaryExact, "phrase result should be a
 assert.strictEqual(result.phonetic, "/hæŋ aʊt/", "whole phrase IPA must be displayed as a single phrase transcription");
 assert(/闲逛|一起待着/.test(result.senses[0].meaningZh), "phrase lookup must expose learner-oriented idiomatic meaning");
 assert.strictEqual(result.audioUrl, "", "Open Dictionary supplies IPA/meaning, not fake component audio");
+
+
+const partial = compactEntry({
+  headword:"look forward to",
+  normalized_headword:"look forward to",
+  pos_groups:[{
+    pos:"verb",
+    pronunciations:[{ ipa:"ˈfɔrwərd", tags:["US"] }],
+    meanings:[{
+      sense_id:"s-look-forward",
+      priority:"core",
+      short_gloss:"期待；盼望",
+      learner_explanation:"期待未来发生的事情。",
+      examples:[{text:"I'm really looking forward to seeing you next weekend.",translation:"我真的很期待下周末见到你。"}],
+    }],
+  }],
+});
+assert(partial, "look forward to should remain a valid phrase entry");
+assert.strictEqual(partial.phoneticUs, "", "single-component IPA must not be stored as a whole three-word phrase transcription");
+const partialLegacyRow = rowToResult({
+  normalized_headword:"look forward to",
+  headword:"look forward to",
+  phonetic_us:"ˈfɔrwərd",
+  phonetic_any:"ˈfɔrwərd",
+  senses_json:JSON.stringify(partial.senses),
+});
+assert.strictEqual(partialLegacyRow.phonetic, "", "runtime must also reject component IPA from an already-built legacy phrase database");
+
+const complete = compactEntry({
+  headword:"look forward to",
+  normalized_headword:"look forward to",
+  pos_groups:[{
+    pos:"verb",
+    pronunciations:[{ ipa:"lʊk ˈfɔrwərd tə", tags:["US"] }],
+    meanings:[{
+      sense_id:"s-look-forward-complete",
+      priority:"core",
+      short_gloss:"期待；盼望",
+      learner_explanation:"期待未来发生的事情。",
+      examples:[{text:"I look forward to hearing from you.",translation:"我期待收到你的回复。"}],
+    }],
+  }],
+});
+assert.strictEqual(complete.phoneticUs, "lʊk ˈfɔrwərd tə", "a verified full three-word IPA should be retained");
+
 console.log("Phrase dictionary V5 checks passed");

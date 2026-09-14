@@ -41,7 +41,7 @@ assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:aud
 assert(app.includes("async function playDictionaryAudio")&&app.includes("for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean))))")&&app.includes("return true;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
 assert(runtime.includes('const localPhrase = localPhraseResult(word, mode)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary first and AI whole-expression resolution only as fallback");
-assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('if (local?.phonetic)'), "multiword phrases must prefer exact local whole-phrase IPA instead of a one-component ECDICT phonetic");
+assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('let phrasePhonetic = clean(local?.phonetic)'), "multiword phrases must use only verified local whole-phrase IPA before composing a complete fallback");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
 assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true")&&hydration.includes("wholeExpressionPhonetic:true"), "phrase lookup must reject partial phonetics and compose a complete fallback only when whole-expression IPA is unavailable");
 assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
@@ -52,7 +52,7 @@ const speakIndex=app.indexOf('async function speak(word,audioUrl="",audioUrls=[]
 const dictionaryAttemptIndex=app.indexOf('api("/api/dictionary/pronunciation"',speakIndex);
 const naturalFallbackIndex=app.indexOf('playNaturalTts(value)',dictionaryAttemptIndex);
 assert(speakIndex>=0&&dictionaryAttemptIndex>speakIndex&&naturalFallbackIndex>dictionaryAttemptIndex,"word pronunciation order must remain dictionary audio -> natural synthesis -> system fallback");
-assert(runtime.includes("composePhrasePhonetic")&&runtime.includes('pronunciationPolicy:"whole-expression-v2"')&&runtime.includes("phraseFallback:true"), "phrase pronunciation must compose a complete IPA when necessary and keep phrase semantics on an exact local fallback");
+assert(runtime.includes("composePhrasePhonetic")&&runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("phraseFallback:true"), "phrase pronunciation must compose a complete IPA when necessary and force one whole-expression TTS playback");
 assert(runtime.includes("expressionQuery.setAiRunner(runInnerAiText)")&&runtime.includes("exampleEnrichment.setAiRunner(runInnerAiText)"), "all outer-runtime AI helpers must share the inner verified AI gateway");
 assert(server.includes('/api/internal/codex')&&server.includes('runCodex(prompt, { timeoutMs, workspaceWrite:false })'), "the inner AI gateway must use the same runCodex transport verified by Settings");
 assert(expressionSource.includes("externalAiRunner")&&expressionSource.includes("setAiRunner"), "expression lookup must support shared AI transport injection");

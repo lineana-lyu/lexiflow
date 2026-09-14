@@ -28,8 +28,9 @@ assert(hydration.includes("function isDictionaryPayload")&&!hydration.includes("
 assert(enrichment.includes("runCodex(prompt, 28000)"),"example translation must allow a realistic AI response window");
 assert(electron.includes('path.join(__dirname, "public", "icon.png")')&&electron.includes("nativeImage.createFromPath"),"desktop window must use the same source icon as the app UI");
 assert(!electron.includes("APP_ICON_DATA_URL"),"stale embedded desktop icon must not return");
-assert(app.includes("verifiedWholeExpressionAudio")&&app.includes("if(!isExpression){")&&app.includes("target.audioUrl=nextAudioUrl"),"phrase playback must revalidate exact whole-expression audio and clear stale saved audio");
+assert(app.includes("A phrase is a single pronunciation unit")&&app.includes("完整短语发音")&&app.includes("if(isExpression){"),"phrase playback must bypass component audio and synthesize the whole expression as one unit");
 assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydration.includes("result.audioUrl = first")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true"),"lookup hydration must remove component audio and reject partial phrase IPA");
 assert(kokoro.includes("if(!isExpression && (audio || audios.length))return;"),"startup fallback must synthesize expressions instead of trusting supplied component audio");
-assert(runtime.includes('pronunciationPolicy:"whole-expression-v2"')&&runtime.includes("exactWholeAudio")&&runtime.includes("composePhrasePhonetic"),"runtime must expose one verified phrase recording or synthesize the complete expression");
+assert(runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("wholeExpressionAudio:false")&&runtime.includes("composePhrasePhonetic"),"runtime phrase pronunciation must expose full IPA metadata but never component dictionary audio");
+assert(app.includes("normalizedDiff")&&app.includes("targetWordForms(head)"),"phrase result UX must hide identical auto-resolution and accept inflected phrase examples");
 console.log("User surface V4 checks passed.");

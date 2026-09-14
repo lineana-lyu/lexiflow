@@ -568,8 +568,9 @@
     const senses=Array.isArray(r.senses)?r.senses:[];
     const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
     const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r.word));
-    const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || r.normalizedQuery)
-      ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${r.normalizedQuery && r.normalizedQuery!==r.sourceQuery?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
+    const normalizedDiff=Boolean(r.normalizedQuery && String(r.normalizedQuery).toLowerCase()!==String(r.sourceQuery||"").toLowerCase());
+    const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || normalizedDiff)
+      ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${normalizedDiff?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
       : "";
     const alternativeWords=Array.isArray(r.alternatives)?r.alternatives.filter(item=>item?.word&&String(item.word).toLowerCase()!==String(r.word).toLowerCase()):[];
     const alternativePanel=(r.sourceQuery&&/[\u3400-\u9fff]/.test(r.sourceQuery)&&(alternativeWords.length||r.autoResolved))?`
@@ -663,45 +664,30 @@
     return list;
   }
 
-  function verifiedWholeExpressionAudio(result){
-    // Transferable dictionary rule: audio belongs to an expression only when
-    // the dictionary matched that exact headword and explicitly marks the
-    // recording as whole-expression audio. Component recordings never qualify.
-    if(result?.dictionaryAudio!==true || result?.wholeExpressionAudio!==true || result?.exactMatch!==true)return [];
-    const candidates=audioCandidates(result);
-    // One click must produce one continuous recording. Never concatenate
-    // multiple dictionary files with different voices/pauses into a phrase.
-    return candidates.length===1?[candidates[0]]:[];
-  }
-
   async function speak(word,audioUrl="",audioUrls=[]){
     const value=String(word||"").trim();
     if(!value)return;
     const isExpression=isMultiWordExpression(value);
 
-    // Existing/saved audio is trusted only for a single lexical word. A phrase
-    // may carry stale per-word recordings from older builds, so it must first
-    // be revalidated by the pronunciation endpoint.
-    if(!isExpression){
-      const supplied=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
-      if(audioUrl)supplied.unshift(audioUrl);
-      if(await playDictionaryAudio(supplied))return;
+    // A phrase is a single pronunciation unit. Never trust saved or dictionary
+    // component audio for it; synthesize the complete text in one request.
+    if(isExpression){
+      if(await playNaturalTts(value))return;
+      toast("当前没有可用的完整短语发音，请稍后重试");
+      return;
     }
+
+    const supplied=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
+    if(audioUrl)supplied.unshift(audioUrl);
+    if(await playDictionaryAudio(supplied))return;
 
     try{
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:value}});
       const result=payload?.result||{};
-      if(isExpression){
-        const verified=verifiedWholeExpressionAudio(result);
-        if(await playDictionaryAudio(verified))return;
-      }else{
-        const resolved=audioCandidates(result);
-        if(await playDictionaryAudio(resolved))return;
-      }
+      const resolved=audioCandidates(result);
+      if(await playDictionaryAudio(resolved))return;
     }catch{}
 
-    // No verified whole-expression dictionary recording: synthesize the entire
-    // expression in one TTS request so voice, prosody and timing stay coherent.
     if(await playNaturalTts(value))return;
     toast("当前没有可用的自然发音，请稍后重试");
   }
@@ -787,7 +773,14 @@
     const example=String(text||"").trim().toLowerCase().replace(/\s+/g," ");
     const target=String(word||"").trim().toLowerCase().replace(/\s+/g," ");
     if(!example||!target)return false;
-    if(target.includes(" "))return example.includes(target);
+    if(target.includes(" ")){
+      if(example.includes(target))return true;
+      const parts=target.split(" ").filter(Boolean);
+      const head=parts.shift()||"";
+      const tail=parts.join(" ");
+      if(!head||!tail)return false;
+      return targetWordForms(head).some(form=>new RegExp(`\\b${escapeRegExp(`${form} ${tail}`)}\\b`,"i").test(example));
+    }
     return sentenceUsesTargetWord(example,target);
   }
 
