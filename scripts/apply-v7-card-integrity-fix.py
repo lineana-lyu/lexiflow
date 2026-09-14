@@ -210,7 +210,7 @@ s=replace_once(s,
 'const read=name=>fs.readFileSync(path.join(root,name),"utf8");\nconst {normalizePhonetic}=require("../lib/ecdict");','ecdict test import')
 s=replace_once(s,
 '(async()=>{',
-'''assert.strictEqual(normalizePhonetic(",selfə'ʃuəd; ?(@)-'?rd"),"/ˌselfəˈʃuəd/","ECDICT must keep the clean IPA candidate and discard garbled alternates");
+'''assert(normalizePhonetic(",selfə'ʃuəd; ?(@)-'?rd")==="/ˌselfəˈʃuəd/","ECDICT must keep the clean IPA candidate and discard garbled alternates");
 
 (async()=>{''','ecdict phonetic regression')
 write(rel,s)
