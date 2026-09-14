@@ -1,6 +1,11 @@
 name: One Shot V7 Add Flow Pronunciation
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - tmp-v7-addflow-pronunciation
+    paths:
+      - .github/workflows/one-shot-v7-addflow-pronunciation.yml
+      - scripts/migrate-v7-addflow-pronunciation.py
 permissions:
   contents: write
 jobs:
