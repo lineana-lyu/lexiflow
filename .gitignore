@@ -5,6 +5,7 @@ generated/*
 !generated/.gitkeep
 resources/ecdict.sqlite
 resources/core-lexicon.sqlite
+resources/phrase-dictionary.sqlite
 resources/*.tmp
 startup.log
 *.log

@@ -89,3 +89,28 @@ The Kokoro model is downloaded to the user's local LexiFlow data directory on
 first use and is not generated from or dependent on the Windows system voice.
 Redistributors should preserve the Apache-2.0 notices shipped with the npm/model
 artifacts and comply with their respective license terms.
+
+
+## Open Dictionary phrase subset
+
+LexiFlow can build a compact local phrase-only SQLite database from Open
+Dictionary v2.0. The upstream distribution is a learner-oriented English
+Dictionary derived from English Wiktionary/Wiktextract and enriched with
+Simplified-Chinese learner explanations, sense priorities, bilingual examples,
+and US/UK IPA transcriptions.
+
+- Project: `ahpxex/open-dictionary`
+- Source: https://github.com/ahpxex/open-dictionary
+- Release used: v2.0 `distribution.jsonl.gz`
+- Upstream artifact SHA-256:
+  `69af69cdc685b5dce465613d1cc8fffb598eb46714f57cf73bd6606c2ceb7e43`
+- Data license: Creative Commons Attribution-ShareAlike 4.0 International
+  (CC BY-SA 4.0)
+- Upstream source content: English Wiktionary contributors, extracted with
+  Wiktextract and transformed by the Open Dictionary pipeline.
+
+The generated `phrase-dictionary.sqlite` is a derived subset containing only
+multiword entries needed by LexiFlow. Redistributors of that data file or a
+modified version must preserve attribution and comply with CC BY-SA 4.0,
+including the ShareAlike requirement. This data license does not replace the
+licenses of LexiFlow's separately distributed source code or runtime components.

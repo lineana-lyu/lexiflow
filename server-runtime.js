@@ -4,6 +4,7 @@ const http = require("http");
 const path = require("path");
 const ecdict = require("./lib/ecdict");
 const coreLexicon = require("./lib/core-lexicon");
+const phraseDictionary = require("./lib/phrase-dictionary");
 const exampleEnrichment = require("./lib/example-enrichment");
 const expressionQuery = require("./lib/expression-query");
 const kokoroTts = require("./lib/kokoro-tts");
@@ -63,6 +64,10 @@ function localLookupResult(word, mode = "primary", sourceQuery = "") {
   return coreLexicon.lookupExact(word, mode, options) || ecdict.lookupExact(word, mode, options);
 }
 
+function localPhraseResult(phrase, mode = "primary") {
+  return phraseDictionary.lookupExact(phrase, mode, { sourceQuery:phrase });
+}
+
 function localChineseResult(query) {
   return coreLexicon.lookupChinese(query);
 }
@@ -92,6 +97,8 @@ async function handleLocalDictionary(req, res, pathname, body) {
     let result = null;
     if (queryKind === "word" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
       result = localLookupResult(query.toLowerCase(), "primary", query);
+    } else if (queryKind === "phrase" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
+      result = localPhraseResult(query.toLowerCase(), "primary");
     }
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, queryKind, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
@@ -105,11 +112,17 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const mode = parsed.mode === "expanded" ? "expanded" : "primary";
     const queryKind = expressionQuery.classifyEnglishQuery(word);
     if (queryKind === "phrase") {
+      const localPhrase = localPhraseResult(word, mode);
+      if (localPhrase) {
+        writeJson(res, 200, { ok:true, result:{ ...localPhrase, examplesPending:localPhrase.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+        console.log("LexiFlow phrase dictionary lookup: " + word);
+        return true;
+      }
       try {
         const result = await expressionQuery.resolveEnglishExpression(word);
         if (!result) return false;
         writeJson(res, 200, { ok: true, result: { ...result, localLookup: false, expressionLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
-        console.log("LexiFlow expression dictionary lookup: " + word);
+        console.log("LexiFlow expression dictionary fallback: " + word);
       } catch (err) {
         writeJson(res, 503, {
           ok: false,
@@ -117,8 +130,8 @@ async function handleLocalDictionary(req, res, pathname, body) {
           error: "完整短语暂时没有解析完成",
           userError: {
             code: err?.code || "EXPRESSION_QUERY_UNAVAILABLE",
-            title: "短语解析暂时不可用",
-            message: "LexiFlow 不会退回逐词字面义。请确认 AI 连接后重试。",
+            title: "短语暂未收录",
+            message: "本地短语词典暂未收录这个表达，AI 补充解析也没有完成。LexiFlow 不会退回逐词字面义。",
           },
         });
       }
@@ -175,6 +188,14 @@ async function handleEnglishExpression(res, body) {
   const query = clean(parsed.query);
   const queryKind = expressionQuery.classifyEnglishQuery(query);
   if (!new Set(["phrase", "sentence"]).has(queryKind)) return false;
+  if (queryKind === "phrase") {
+    const localPhrase = localPhraseResult(query, "primary");
+    if (localPhrase) {
+      writeJson(res, 200, { ok:true, result:localPhrase });
+      console.log(`LexiFlow phrase dictionary: ${query}`);
+      return true;
+    }
+  }
   try {
     const result = await expressionQuery.resolveEnglishExpression(query);
     if (!result) return false;
@@ -213,9 +234,9 @@ async function handlePronunciation(res, body) {
   }
 
   const queryKind = expressionQuery.classifyEnglishQuery(word);
-  // Multi-word expressions must never inherit a single component's local ECDICT phonetic/audio.
-  // Whole-phrase exact dictionary audio is resolved remotely; otherwise synthesize the complete expression.
-  const local = queryKind === "phrase" ? null : localLookupResult(word, "primary", word);
+  // Multi-word expressions get whole-phrase IPA from the local Open Dictionary subset.
+  // Audio still prefers an exact whole-expression dictionary recording; component recordings never own phrase playback.
+  const local = queryKind === "phrase" ? localPhraseResult(word, "primary") : localLookupResult(word, "primary", word);
   if (local?.audioUrl) {
     writeJson(res, 200, {
       ok: true,
@@ -250,7 +271,9 @@ async function handlePronunciation(res, body) {
         ok: true,
         result: {
           ...pronunciation,
-          phonetic: clean(pronunciation.phonetic) || local?.phonetic || "",
+          phonetic: queryKind === "phrase"
+            ? (clean(local?.phonetic) || clean(pronunciation.phonetic))
+            : (clean(pronunciation.phonetic) || clean(local?.phonetic)),
           audioUrl: safeAudioUrl,
           audioUrls: safeAudioUrls,
           pronunciationSource: componentOnly && clean(pronunciation.phonetic)
@@ -265,15 +288,16 @@ async function handlePronunciation(res, body) {
     }
   } catch {}
 
-  if (local?.phonetic && !/\s/.test(word)) {
+  if (local?.phonetic) {
     writeJson(res, 200, {
       ok: true,
       result: {
         phonetic: local.phonetic,
         audioUrl: "",
         audioUrls: [],
-        pronunciationSource: "ecdict-phonetic",
+        pronunciationSource: queryKind === "phrase" ? (local.pronunciationSource || "open-dictionary-wiktionary-ipa") : "ecdict-phonetic",
         exactMatch: true,
+        wholeExpressionAudio: queryKind !== "phrase",
         dictionaryAudio: false,
         localLookup: true,
       },

@@ -22,9 +22,9 @@ assert.strictEqual(expressionQuery.classifyEnglishQuery("look forward to"), "phr
 assert.strictEqual(expressionQuery.classifyEnglishQuery("I'm looking forward to seeing you."), "sentence", "punctuated English sentence must be treated as a sentence");
 assert.strictEqual(expressionQuery.classifyEnglishQuery("Could you give me a hand?"), "sentence", "question sentence must not be split into dictionary words");
 
-assert(runtime.includes('require("./lib/expression-query")'), "server runtime must own whole-expression routing");
+assert(runtime.includes('require("./lib/expression-query")')&&runtime.includes('require("./lib/phrase-dictionary")'), "server runtime must own phrase dictionary plus whole-expression fallback routing");
 assert(runtime.includes("handleEnglishExpression"), "server runtime must expose whole-expression handling");
-assert(!runtime.includes('result = coreLexicon.lookupExact(query.toLowerCase(), "primary"'), "multiword search must not short-circuit through local Core/ECDICT phrase semantics before expression resolution");
+assert(!runtime.includes('result = coreLexicon.lookupExact(query.toLowerCase(), "primary"')&&runtime.includes('result = localPhraseResult(query.toLowerCase(), "primary")'), "multiword search must use the curated local phrase dictionary rather than raw Core/ECDICT phrase semantics");
 const localIndex = runtime.indexOf("handleLocalDictionary(req, res, url.pathname, body)");
 const expressionIndex = runtime.indexOf("handleEnglishExpression(res, body)", localIndex);
 const forwardIndex = runtime.indexOf("return forward(req, res, body)", expressionIndex);
@@ -37,8 +37,8 @@ assert(kokoro.includes("playSystemFallback"), "system speech must only remain as
 assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");
 assert(app.includes("async function playDictionaryAudio")&&app.includes("for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean))))")&&app.includes("return true;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
-assert(runtime.includes('if (queryKind === "phrase")')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct dictionary phrase lookup must use whole-expression semantics rather than raw ECDICT");
-assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
+assert(runtime.includes('const localPhrase = localPhraseResult(word, mode)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary first and AI whole-expression resolution only as fallback");
+assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('if (local?.phonetic)'), "multiword phrases must prefer exact local whole-phrase IPA instead of a one-component ECDICT phonetic");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
 assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!pronunciation?.dictionaryAudio)"), "phrase lookup must show complete phrase phonetics without stitching component audio");
 assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
@@ -49,6 +49,6 @@ const speakIndex=app.indexOf('async function speak(word,audioUrl="",audioUrls=[]
 const dictionaryAttemptIndex=app.indexOf('api("/api/dictionary/pronunciation"',speakIndex);
 const naturalFallbackIndex=app.indexOf('playNaturalTts(value)',dictionaryAttemptIndex);
 assert(speakIndex>=0&&dictionaryAttemptIndex>speakIndex&&naturalFallbackIndex>dictionaryAttemptIndex,"word pronunciation order must remain dictionary audio -> natural synthesis -> system fallback");
-assert(runtime.includes('const local = queryKind === "phrase" ? null : localLookupResult')&&runtime.includes('const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true')&&runtime.includes('wholeExpressionAudio'), "phrase pronunciation must reject component recordings and reserve audio ownership for exact whole-expression recordings");
+assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true')&&runtime.includes('wholeExpressionAudio'), "phrase pronunciation must combine exact whole-phrase IPA with exact-recording-only audio ownership");
 assert(productCss.includes("width:38px!important")&&productCss.includes("flex:0 0 38px!important")&&productCss.includes("aspect-ratio:1/1!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must keep the same non-deforming canonical card-creation geometry");
 console.log("Expression query V4 checks passed");
