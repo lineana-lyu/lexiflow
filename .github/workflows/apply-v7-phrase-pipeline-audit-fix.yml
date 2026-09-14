@@ -1,0 +1,67 @@
+name: Apply V7 Phrase Pipeline Audit Fix
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-phrase-pipeline-audit-fix.py
+      - .github/workflows/apply-v7-phrase-pipeline-audit-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Apply audited repair
+        run: python scripts/apply-v7-phrase-pipeline-audit-fix.py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare phrase coverage fixtures
+        run: |
+          node scripts/prepare-ecdict.js
+          node scripts/prepare-phrase-dictionary.js
+          node - <<'NODE'
+          const assert = require('assert');
+          const ecdict = require('./lib/ecdict');
+          const phrases = require('./lib/phrase-dictionary');
+          const depend = phrases.lookupExact('depend on') || ecdict.lookupExact('depend on');
+          assert(depend, 'depend on must be resolvable by local phrase coverage or exact ECDICT fallback');
+          assert.strictEqual(String(depend.word || '').toLowerCase(), 'depend on');
+          const hang = phrases.lookupExact('hang out');
+          assert(hang, 'hang out must remain covered by the curated phrase dictionary');
+          assert(/闲逛|一起待着|消磨/.test(String(hang.senses?.[0]?.meaningZh || '')), 'hang out must keep an idiomatic primary meaning');
+          console.log('Phrase coverage smoke:', {
+            dependOn: depend.senses?.[0]?.meaningZh || '',
+            hangOut: hang.senses?.[0]?.meaningZh || '',
+            hangOutPhonetic: hang.phonetic || ''
+          });
+          NODE
+
+      - name: Run repository checks
+        run: npm run check
+
+      - name: Commit verified repair and remove one-shot files
+        run: |
+          rm -f scripts/apply-v7-phrase-pipeline-audit-fix.py .github/workflows/apply-v7-phrase-pipeline-audit-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.js server-runtime.js lib/expression-query.js lib/example-enrichment.js public/app.js public/example-hydration.js scripts/check-expression-query-v4.js scripts/check-user-surface-v4.js
+          git add -u scripts/apply-v7-phrase-pipeline-audit-fix.py .github/workflows/apply-v7-phrase-pipeline-audit-fix.yml
+          git commit -m "fix: unify phrase lookup pronunciation and AI transport"
+          git push origin HEAD:feat/v7-airy-luminous-ui
