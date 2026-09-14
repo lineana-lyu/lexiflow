@@ -27,7 +27,18 @@ jobs:
           node-version: 24.x
 
       - name: Apply phrase audio integrity repair
-        run: python scripts/apply-v7-phrase-audio-integrity.py
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/apply-v7-phrase-audio-integrity.py')
+          s = p.read_text(encoding='utf-8')
+          old = 'new_text, count = re.subn(pattern, replacement, text, count=1, flags=flags)'
+          new = 'new_text, count = re.subn(pattern, lambda _match: replacement, text, count=1, flags=flags)'
+          if old not in s:
+              raise SystemExit('patcher replacement target not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+          python scripts/apply-v7-phrase-audio-integrity.py
 
       - name: Install dependencies
         run: npm ci
