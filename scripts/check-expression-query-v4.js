@@ -9,6 +9,11 @@ const root = path.resolve(__dirname, "..");
 const runtime = fs.readFileSync(path.join(root, "server-runtime.js"), "utf8");
 const transport = fs.readFileSync(path.join(root, "public", "transport-fixes.js"), "utf8");
 const kokoro = fs.readFileSync(path.join(root, "public", "kokoro-voice.js"), "utf8");
+const app = fs.readFileSync(path.join(root, "public", "app.js"), "utf8");
+const hydration = fs.readFileSync(path.join(root, "public", "example-hydration.js"), "utf8");
+const memorize = fs.readFileSync(path.join(root, "public", "memorize-stage-v3.js"), "utf8");
+const review = fs.readFileSync(path.join(root, "public", "review-session-v3.js"), "utf8");
+const productUx = fs.readFileSync(path.join(root, "public", "product-ux.js"), "utf8");
 
 assert.strictEqual(expressionQuery.classifyEnglishQuery("address"), "word", "single headword must remain a word query");
 assert.strictEqual(expressionQuery.classifyEnglishQuery("take it for granted"), "phrase", "multiword expression must remain a whole phrase query");
@@ -32,4 +37,8 @@ assert(kokoro.includes("Component recordings for a"), "Kokoro voice layer must d
 
 assert(runtime.includes('queryKind === "phrase"\n      ? coreLexicon.lookupExact'), "direct dictionary lookup must also avoid raw ECDICT as authoritative phrase semantics");
 assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
+assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
+assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!pronunciation?.dictionaryAudio)"), "phrase lookup must show complete phrase phonetics without stitching component audio");
+assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
+assert(productUx.includes('[data-m2=\\"speak\\"]')&&productUx.includes("subtree: true"), "speaker decoration must reach nested learning surfaces");
 console.log("Expression query V4 checks passed");

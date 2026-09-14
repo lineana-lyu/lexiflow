@@ -192,6 +192,28 @@
     }finally{busy=false;autoOpening=false;}
   }
 
+  function advanceWithinBucket(currentCardId,bucket){
+    syncFromGateway();
+    const session=reconcile(loadSession());
+    const queue=Array.isArray(session.queue)?session.queue:[];
+    if(!queue.length)return false;
+    const currentId=String(currentCardId||"");
+    const currentIndex=queue.indexOf(currentId);
+    for(let offset=1;offset<=queue.length;offset++){
+      const index=currentIndex>=0?(currentIndex+offset)%queue.length:(offset-1)%queue.length;
+      const id=queue[index];
+      if(!id||id===currentId)continue;
+      const card=cardById(id);
+      if(bucketForCard(card)!==bucket||!core.eligibleToday(card,new Date()))continue;
+      session.activeCardId=id;
+      session.activeBucket=bucket;
+      session.paused=false;
+      saveSession(session);
+      return invokeRenderer(session);
+    }
+    return false;
+  }
+
   function pauseSession(){
     const session=loadSession();
     if(!validSession(session))return;
@@ -243,6 +265,7 @@
 
   window.LexiFlowStudySessionV3=Object.freeze({
     open:()=>openSession({resume:true}),
+    advanceWithinBucket,
     pause:pauseSession,
     current:()=>loadSession(),
   });

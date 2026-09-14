@@ -61,23 +61,50 @@
     }
   }
 
-  async function hydratePronunciation(result) {
-    if (!result?.word) return;
-    const existing = [clean(result.audioUrl), ...(Array.isArray(result.audioUrls) ? result.audioUrls.map(clean) : [])].filter(Boolean);
-    if (existing.length) return;
-    const word = normalizeWord(result.word);
-    let task = pronunciationInFlight.get(word);
-    if (!task) {
-      task = nativeFetch(`${API_ORIGIN}/api/dictionary/pronunciation`, {
-        method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({word:result.word}),
-      }).then(async response => {
-        let payload={}; try{payload=await response.json();}catch{}
-        if(!response.ok || !payload?.ok) return null;
-        return payload.result || null;
-      }).finally(()=>pronunciationInFlight.delete(word));
-      pronunciationInFlight.set(word, task);
+  function phoneticToken(value) {
+    return clean(value).replace(/^\/+|\/+$/g,"").replace(/^\[+|\]+$/g,"").trim();
+  }
+
+  async function requestPronunciation(word) {
+    const key=normalizeWord(word);
+    if(!key)return null;
+    let task=pronunciationInFlight.get(key);
+    if(!task){
+      task=nativeFetch(`${API_ORIGIN}/api/dictionary/pronunciation`,{
+        method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({word}),
+      }).then(async response=>{
+        let payload={};try{payload=await response.json();}catch{}
+        if(!response.ok||!payload?.ok)return null;
+        return payload.result||null;
+      }).finally(()=>pronunciationInFlight.delete(key));
+      pronunciationInFlight.set(key,task);
     }
-    try { const pronunciation = await task; if (pronunciation) patchPronunciation(result, pronunciation); } catch {}
+    try{return await task;}catch{return null;}
+  }
+
+  async function composePhrasePhonetic(expression) {
+    const parts=clean(expression).split(/\s+/).map(part=>part.replace(/^[^A-Za-z'-]+|[^A-Za-z'-]+$/g,"")).filter(Boolean);
+    if(parts.length<2||parts.length>8)return "";
+    const pronunciations=await Promise.all(parts.map(part=>requestPronunciation(part)));
+    const tokens=pronunciations.map(item=>phoneticToken(item?.phonetic));
+    if(tokens.some(token=>!token))return "";
+    return `/${tokens.join(" ")}/`;
+  }
+
+  async function hydratePronunciation(result) {
+    if(!result?.word)return;
+    const word=normalizeWord(result.word);
+    const isPhrase=/\s/.test(word);
+    const existing=[clean(result.audioUrl),...(Array.isArray(result.audioUrls)?result.audioUrls.map(clean):[])].filter(Boolean);
+    let pronunciation=null;
+    if(!existing.length||!clean(result.phonetic)||isPhrase){
+      pronunciation=await requestPronunciation(result.word);
+      if(pronunciation)patchPronunciation(result,pronunciation);
+    }
+    if(isPhrase&&!pronunciation?.dictionaryAudio){
+      const composite=await composePhrasePhonetic(result.word);
+      if(composite)patchPronunciation(result,{phonetic:composite});
+    }
   }
 
   function markLoading(result, senses) {

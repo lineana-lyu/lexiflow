@@ -11,6 +11,7 @@ const session=read("public/study-session-v3.js");
 const drafts=read("public/study-drafts-v3.js");
 const boundary=read("public/studyday-boundary-v3.js");
 const app=read("public/app.js");
+const memorize=read("public/memorize-stage-v3.js");
 
 function before(a,b){
   const ai=index.indexOf(a),bi=index.indexOf(b);
@@ -40,6 +41,8 @@ assert(session.includes("pauseSession"),"Study Session V3 must distinguish user 
 assert(session.includes("maybeResume"),"Study Session V3 must resume an unpaused same-day session after reload");
 assert(session.includes("window.LexiFlowStudySessionV3"),"Study Session V3 must expose a narrow runtime control surface");
 assert(!session.includes("activeLearningCards()[0]"),"Study Session V3 must never choose work from the legacy activeLearningCards queue");
+assert(session.includes("function advanceWithinBucket")&&session.includes("core.eligibleToday(card,new Date())"),"Study Session V3 must support safe same-stage rotation between planned cards");
+assert(memorize.includes('advanceWithinBucket?.(card.id,"memorize")'),"Memorize must separate the two recall directions with another word whenever the plan has one");
 
 assert(app.includes("function startStudy(cardId)"),"renderer must retain explicit-card rendering support");
 assert(app.includes("window.LexiFlowStudyRenderer=Object.freeze"),"app renderer must expose a narrow explicit-card bridge");

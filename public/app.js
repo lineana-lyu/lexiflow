@@ -1296,7 +1296,7 @@
         // Exact English headwords can safely reuse an existing learning card.
         // Chinese queries must be resolved again: an older card may contain a
         // previously mis-resolved translation and must not shadow the verified resolver.
-        const exactLocal=Boolean(saved&&!containsChinese(q)&&normalizeSearchText(saved.word)===qNormalized);
+        const exactLocal=Boolean(saved&&!containsChinese(q)&&!/\s/.test(qNormalized)&&normalizeSearchText(saved.word)===qNormalized);
         if(exactLocal){
           if(saved){
             state.lookup={query:q,result:{

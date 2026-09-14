@@ -13,10 +13,10 @@
   }
 
   function decorateSpeakers() {
-    document.querySelectorAll(".speaker,.sentence-speaker").forEach(button => {
+    document.querySelectorAll(".speaker,.sentence-speaker,[data-m2=\"speak\"],[data-r3=\"speak\"]").forEach(button => {
       if (button.dataset.lexiSpeakerDecorated === "1") return;
       button.dataset.lexiSpeakerDecorated = "1";
-      button.classList.add("lexi-speaker-button");
+      button.classList.add("speaker","lexi-speaker-button");
       button.innerHTML = speakerSvg();
       button.addEventListener("click", () => {
         button.classList.remove("lexi-speaker-playing");
@@ -76,7 +76,7 @@
   function startObserver() {
     const app = document.getElementById("app");
     if (!app) return;
-    new MutationObserver(scheduleDecorate).observe(app, { childList: true, subtree: false });
+    new MutationObserver(scheduleDecorate).observe(app, { childList: true, subtree: true });
     scheduleDecorate();
   }
 
