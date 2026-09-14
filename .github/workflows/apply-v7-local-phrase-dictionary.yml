@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22.12.0
+          node-version: 24.x
 
       - name: Apply local phrase dictionary integration
         run: python scripts/apply-v7-local-phrase-dictionary.py
