@@ -1,0 +1,38 @@
+name: Apply V7 Phrase Semantic Pronunciation Fix
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-phrase-semantic-pronunciation-fix.js
+      - .github/workflows/apply-v7-phrase-semantic-pronunciation-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+      - name: Apply phrase fix
+        run: node scripts/apply-v7-phrase-semantic-pronunciation-fix.js
+      - name: Run repository checks
+        run: npm run check
+      - name: Commit fix and remove one-shot patcher
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm scripts/apply-v7-phrase-semantic-pronunciation-fix.js .github/workflows/apply-v7-phrase-semantic-pronunciation-fix.yml
+          git add server-runtime.js lib/expression-query.js public/product-ux.css public/product-ux.js scripts/check-expression-query-v4.js
+          git commit -m "fix: resolve phrases semantically and speak whole expressions"
+          git push origin HEAD:feat/v7-airy-luminous-ui
