@@ -13,6 +13,7 @@
     lookup: null,
     selectedSenseId: null,
     addDraft: null,
+    addToTodayIntent: null,
     study: null,
     librarySearch: "",
     libraryEditor: null,
@@ -633,6 +634,11 @@
     toast("当前没有可用的自然例句发音，请稍后重试");
   }
 
+  window.LexiFlowPronunciationV3=Object.freeze({
+    playWord(word,{audioUrl="",audioUrls=[]}={}){return speak(word,audioUrl,audioUrls);},
+    playSentence(sentence){return speakSentence(sentence);}
+  });
+
   function highlightKeyword(text,keyword){
     const source=String(text||"");
     const key=String(keyword||"").trim();
@@ -730,6 +736,23 @@
     openCard(cardId){return startStudy(String(cardId||""));},
     currentCardId(){return state.route==="study"?String(state.study?.cardId||""):"";},
     hasCard(cardId){return Boolean(getCard(String(cardId||"")));}
+  });
+
+
+  function openAddFromToday(){
+    const core=window.LexiFlowLearningCore;
+    const plan=state.data.dailyPlan;
+    if(Number(plan?.remainingSelectSlots||0)<=0){toast("今天的新词已经选满");return false;}
+    state.addToTodayIntent=todayKey();
+    state.route="add";
+    state.study=null;
+    render();
+    return true;
+  }
+
+  window.LexiFlowAddFlowV3=Object.freeze({
+    openForToday:openAddFromToday,
+    isAddingForToday(){return state.route==="add"&&state.addToTodayIntent===todayKey();}
   });
 
   function studyPage(){
@@ -1240,6 +1263,7 @@
 
   function bind(){
     document.querySelectorAll("[data-route]").forEach(el=>el.addEventListener("click",()=>{
+      state.addToTodayIntent=null;
       state.route=el.dataset.route;
       if(state.route!=="library-edit") state.libraryEditor=null;
       if(state.route!=="study") state.study=null;
@@ -1568,9 +1592,28 @@
       }
       const exists=state.data.cards.find(c=>c.word.toLowerCase()===r.word.toLowerCase()&&c.meaningZh===s.meaningZh);
       if(exists){toast("这张义项卡已经存在");return;}
-      const now=new Date().toISOString();
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
-      state.data.cards.unshift(card);recordActivity("card-created",card.id);toast("卡片已保存，已进入学习流程");state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
+      const nowDate=new Date(),now=nowDate.toISOString();
+      const core=window.LexiFlowLearningCore;
+      const requestedToday=state.addToTodayIntent===todayKey(nowDate);
+      const currentPlan=state.data.dailyPlan;
+      const addToToday=requestedToday&&Number(currentPlan?.remainingSelectSlots||0)>0;
+      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      if(addToToday){
+        card.inboxPending=false;
+        card.todaySelectedOn=todayKey(nowDate);
+        card.selectedOn=todayKey(nowDate);
+        card.inboxSelectedAt=now;
+        const prev={...card,learningStage:"select"};
+        card.stage="memorize";
+        card.learningStage="memorize";
+        Object.assign(card,core?.crossDayPatch?.(prev,{stage:"memorize",learningStage:"memorize"},nowDate)||{});
+      }
+      state.data.cards.unshift(card);
+      state.data.activities.push({id:uid(),type:"card-created",cardId:card.id,at:now,authority:"app-shell-v1"});
+      if(addToToday)state.data.activities.push({id:uid(),type:"stage-complete",cardId:card.id,stage:"select",nextStage:"memorize",at:now,authority:"add-to-today-v1"});
+      saveData();
+      toast(addToToday?"已加入今天的新词 · 明天开始记忆":"已保存到单词库 · 待学习");
+      state.addToTodayIntent=null;state.lookup=null;state.selectedSenseId=null;state.route="home";render();return;
     }
     if(action==="continue-learning"){
       if(window.LexiFlowStudySessionV3?.open){window.LexiFlowStudySessionV3.open();return;}
