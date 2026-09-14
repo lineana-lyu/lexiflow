@@ -27,7 +27,7 @@ write(rel,s)
 
 rel='scripts/check-user-surface-v4.js'
 s=read(rel)
-needle='console.log("User surface V4 checks passed");'
+needle='console.log("User surface V4 checks passed.");'
 assertions='''assert(!app.includes('navButton("review","↻","复习中心")'),"Review Center must not remain a top-level navigation destination");\nassert(app.includes('reviewRecent')&&app.includes('reviewLongTerm')&&app.includes('近期巩固')&&app.includes('长期巩固'),"Today must surface the review breakdown inside the daily plan");\nassert(app.includes('else if(state.route==="review"){state.route="home";html=homePage();}'),"legacy review routes must redirect into Today instead of reopening a second learning entrance");\n'''
 if needle not in s: raise SystemExit('missing patch target: user surface console')
 s=s.replace(needle,assertions+needle,1)
