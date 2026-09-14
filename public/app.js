@@ -810,6 +810,63 @@
     return sentenceUsesTargetWord(example,target);
   }
 
+
+  function mergeHydratedSense(target, incoming){
+    if(!target||!incoming)return false;
+    let changed=false;
+    for(const key of ["exampleEn","exampleZh"]){
+      const value=String(incoming[key]||"").trim();
+      if(value&&String(target[key]||"").trim()!==value){target[key]=value;changed=true;}
+    }
+    return changed;
+  }
+
+  function mergeActiveLookupHydration(detail){
+    const result=state.lookup?.result;
+    const word=String(detail?.word||"").trim().toLowerCase();
+    if(!result||!word||String(result.word||"").trim().toLowerCase()!==word)return false;
+    let changed=false;
+    for(const incoming of Array.isArray(detail.senses)?detail.senses:[]){
+      const target=(result.senses||[]).find(item=>String(item.id||"")===String(incoming.id||""))
+        ||(result.senses||[]).find(item=>String(item.pos||"")===String(incoming.pos||"")&&String(item.meaningZh||"")===String(incoming.meaningZh||""));
+      if(!target)continue;
+      if(mergeHydratedSense(target,incoming))changed=true;
+      if(state.addDraft&&String(state.addDraft.id||"")===String(target.id||"")){
+        if(mergeHydratedSense(state.addDraft,incoming))changed=true;
+      }
+    }
+    return changed;
+  }
+
+  async function prepareLookupForSave(result, sense){
+    if(!result||!sense)return sense;
+    if(!String(sense.exampleEn||"").trim()||!String(sense.exampleZh||"").trim()){
+      try{
+        const payload=await api("/api/dictionary/examples",{method:"POST",body:{
+          word:result.word,
+          senses:[{id:sense.id,pos:sense.pos,meaningZh:sense.meaningZh,senseIntentEn:sense.senseIntentEn||"",exampleEn:sense.exampleEn||"",exampleZh:sense.exampleZh||""}]
+        }});
+        const incoming=Array.isArray(payload?.senses)?payload.senses.find(item=>String(item.id||"")===String(sense.id||""))||payload.senses[0]:null;
+        if(incoming)mergeHydratedSense(sense,incoming);
+      }catch{}
+    }
+
+    const isPhrase=isMultiWordExpression(result.word);
+    if(isPhrase||!String(result.phonetic||"").trim()){
+      try{
+        const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:result.word}});
+        const pronunciation=payload?.result||{};
+        const phonetic=String(pronunciation.phonetic||"").trim();
+        if(phonetic&&(!String(result.phonetic||"").trim()||isPhrase||!/ecdict/i.test(String(pronunciation.pronunciationSource||"")))){
+          result.phonetic=phonetic;
+          result.pronunciationSource=String(pronunciation.pronunciationSource||result.pronunciationSource||"");
+        }
+        if(isPhrase){result.audioUrl="";result.audioUrls=[];}
+      }catch{}
+    }
+    return sense;
+  }
+
   function startStudy(cardId){
     const explicitId=String(cardId||"").trim();
     const card=explicitId?getCard(explicitId):null;
@@ -1691,7 +1748,8 @@
       r.senses=r.senses.map(s=>s.id===d.id?d:s);state.addDraft=null;toast("已应用修改");render();return;
     }
     if(action==="save-card"){
-      const r=state.lookup?.result,s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
+      const r=state.lookup?.result;let s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
+      s=await prepareLookupForSave(r,s);
       if(!s.meaningZh?.trim()||!s.exampleEn?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和英文例句");render();return;}
       if(!learningExampleUsesTarget(s.exampleEn,r.word)){
         showNotice("这张卡片还不能保存",`例句没有使用当前目标词“${r.word}”。请重新识别结果，或修改例句后再保存。`,"warn");
@@ -1810,6 +1868,7 @@
     const word=String(detail.word||"").trim().toLowerCase();
     const senses=Array.isArray(detail.senses)?detail.senses:[];
     if(!word||!senses.length)return;
+    const lookupChanged=mergeActiveLookupHydration(detail);
     let changed=false;
     for(const card of state.data.cards){
       if(String(card.word||"").trim().toLowerCase()!==word)continue;
@@ -1825,7 +1884,8 @@
         changed=true;
       }
     }
-    if(changed){saveData();render();}
+    if(changed)saveData();
+    if(changed||lookupChanged)render();
   });
 
   window.addEventListener("beforeunload",()=>{

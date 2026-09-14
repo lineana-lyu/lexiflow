@@ -33,6 +33,9 @@ assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydrat
 assert(kokoro.includes("if(!isExpression && (audio || audios.length))return;"),"startup fallback must synthesize expressions instead of trusting supplied component audio");
 assert(runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("wholeExpressionAudio:false")&&runtime.includes("composePhrasePhonetic"),"runtime phrase pronunciation must expose full IPA metadata but never component dictionary audio");
 assert(app.includes("normalizedDiff")&&app.includes("targetWordForms(head)"),"phrase result UX must hide identical auto-resolution and accept inflected phrase examples");
+assert(app.includes("prepareLookupForSave")&&app.includes("mergeActiveLookupHydration"),"lookup save must await hydrated examples/pronunciation and merge them into active state");
+assert(runtime.includes("ensureWholePhrasePhonetic")&&runtime.includes("await ensureWholePhrasePhonetic(localPhraseResult"),"phrase responses must carry a complete phonetic before they reach the UI");
+assert(hydration.includes("shouldAdoptPhonetic")&&hydration.includes("phoneticSourceRank"),"low-quality phonetic hydration must not overwrite an existing authoritative transcription");
 
 assert(app.includes("lookupRequestSeq")&&app.includes("requestId!==state.lookupRequestSeq")&&app.includes("lexiflow:lookup-query-start"),"a new search must be allowed while an older request is running, and stale responses must not overwrite the newest query");
 assert(app.includes('state.lookupStatus==="loading"?"重新查询":"查询"')&&!app.includes('type="submit" ${state.lookupStatus==="loading"?"disabled":""}'),"the main lookup button must remain available for re-query while loading");

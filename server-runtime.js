@@ -85,6 +85,20 @@ function localPhraseResult(phrase, mode = "primary") {
   };
 }
 
+
+async function ensureWholePhrasePhonetic(result, phrase) {
+  if (!result || !/\s/.test(clean(phrase))) return result;
+  if (clean(result.phonetic) && result.wholeExpressionPhonetic === true) return result;
+  const phonetic = await composePhrasePhonetic(phrase);
+  if (!phonetic) return { ...result, phonetic:"", wholeExpressionPhonetic:false };
+  return {
+    ...result,
+    phonetic,
+    wholeExpressionPhonetic:true,
+    pronunciationSource:"composed-exact-word-ipa",
+  };
+}
+
 function localChineseResult(query) {
   return coreLexicon.lookupChinese(query);
 }
@@ -115,7 +129,7 @@ async function handleLocalDictionary(req, res, pathname, body) {
     if (queryKind === "word" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
       result = localLookupResult(query.toLowerCase(), "primary", query);
     } else if (queryKind === "phrase" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
-      result = localPhraseResult(query.toLowerCase(), "primary");
+      result = await ensureWholePhrasePhonetic(localPhraseResult(query.toLowerCase(), "primary"), query.toLowerCase());
     }
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, queryKind, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
@@ -129,7 +143,7 @@ async function handleLocalDictionary(req, res, pathname, body) {
     const mode = parsed.mode === "expanded" ? "expanded" : "primary";
     const queryKind = expressionQuery.classifyEnglishQuery(word);
     if (queryKind === "phrase") {
-      const localPhrase = localPhraseResult(word, mode);
+      const localPhrase = await ensureWholePhrasePhonetic(localPhraseResult(word, mode), word);
       if (localPhrase) {
         writeJson(res, 200, { ok:true, result:{ ...localPhrase, examplesPending:localPhrase.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
         console.log("LexiFlow phrase dictionary lookup: " + word);
@@ -224,7 +238,7 @@ async function handleEnglishExpression(res, body) {
   const queryKind = expressionQuery.classifyEnglishQuery(query);
   if (!new Set(["phrase", "sentence"]).has(queryKind)) return false;
   if (queryKind === "phrase") {
-    const localPhrase = localPhraseResult(query, "primary");
+    const localPhrase = await ensureWholePhrasePhonetic(localPhraseResult(query, "primary"), query);
     if (localPhrase) {
       writeJson(res, 200, { ok:true, result:localPhrase });
       console.log(`LexiFlow phrase dictionary: ${query}`);

@@ -27,7 +27,7 @@ assert.strictEqual(expressionQuery.classifyEnglishQuery("Could you give me a han
 
 assert(runtime.includes('require("./lib/expression-query")')&&runtime.includes('require("./lib/phrase-dictionary")'), "server runtime must own phrase dictionary plus whole-expression fallback routing");
 assert(runtime.includes("handleEnglishExpression"), "server runtime must expose whole-expression handling");
-assert(!runtime.includes('result = coreLexicon.lookupExact(query.toLowerCase(), "primary"')&&runtime.includes('result = localPhraseResult(query.toLowerCase(), "primary")'), "multiword search must use the curated local phrase dictionary rather than raw Core/ECDICT phrase semantics");
+assert(!runtime.includes('result = coreLexicon.lookupExact(query.toLowerCase(), "primary"')&&runtime.includes('ensureWholePhrasePhonetic(localPhraseResult(query.toLowerCase(), "primary")'), "multiword search must use the curated local phrase dictionary and complete whole-phrase IPA before returning");
 const localIndex = runtime.indexOf("handleLocalDictionary(req, res, url.pathname, body)");
 const expressionIndex = runtime.indexOf("handleEnglishExpression(res, body)", localIndex);
 const forwardIndex = runtime.indexOf("return forward(req, res, body)", expressionIndex);
@@ -40,7 +40,7 @@ assert(kokoro.includes("playSystemFallback"), "system speech must only remain as
 assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");
 assert(app.includes("async function playDictionaryAudio")&&app.includes("for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean))))")&&app.includes("return true;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
-assert(runtime.includes('const localPhrase = localPhraseResult(word, mode)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary first and AI whole-expression resolution only as fallback");
+assert(runtime.includes('const localPhrase = await ensureWholePhrasePhonetic(localPhraseResult(word, mode), word)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary with complete IPA first and AI whole-expression resolution only as fallback");
 assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('let phrasePhonetic = clean(local?.phonetic)'), "multiword phrases must use only verified local whole-phrase IPA before composing a complete fallback");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
 assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true")&&hydration.includes("wholeExpressionPhonetic:true"), "phrase lookup must reject partial phonetics and compose a complete fallback only when whole-expression IPA is unavailable");

@@ -42,6 +42,27 @@
     return !current || current === normalizeWord(word);
   }
 
+
+  function phoneticSourceRank(source) {
+    const value=clean(source).toLowerCase();
+    if(/merriam|wiktionary|wikimedia|open-dictionary/.test(value))return 40;
+    if(/composed-exact-word-ipa/.test(value))return 35;
+    if(/core/.test(value))return 30;
+    if(/ecdict/.test(value))return 10;
+    return 20;
+  }
+
+  function shouldAdoptPhonetic(result, pronunciation, phonetic, isPhrase, wholePhrasePhonetic) {
+    if(!phonetic)return false;
+    if(isPhrase)return wholePhrasePhonetic;
+    const existing=clean(result?.phonetic);
+    if(!existing)return true;
+    const incomingSource=clean(pronunciation?.pronunciationSource);
+    const existingSource=clean(result?.pronunciationSource);
+    if(/ecdict/i.test(incomingSource))return false;
+    return phoneticSourceRank(incomingSource)>=phoneticSourceRank(existingSource);
+  }
+
   function patchPronunciation(result, pronunciation) {
     if (!result || !pronunciation) return;
     const phonetic = clean(pronunciation.phonetic);
@@ -50,7 +71,7 @@
     const isPhrase = /\s/.test(normalizeWord(result.word));
 
     const wholePhrasePhonetic = !isPhrase || pronunciation.wholeExpressionPhonetic === true;
-    if (phonetic && wholePhrasePhonetic) result.phonetic = phonetic;
+    if (shouldAdoptPhonetic(result, pronunciation, phonetic, isPhrase, wholePhrasePhonetic)) result.phonetic = phonetic;
 
     if (isPhrase) {
       const verified = pronunciation.dictionaryAudio === true && pronunciation.wholeExpressionAudio === true && pronunciation.exactMatch === true;

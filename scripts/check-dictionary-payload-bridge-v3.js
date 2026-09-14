@@ -5,6 +5,7 @@ const vm=require("vm");
 function assert(condition,message){if(!condition)throw new Error(message);}
 const root=path.join(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const {normalizePhonetic}=require("../lib/ecdict");
 
 function fakeResponse(payload){
   return {
@@ -16,6 +17,8 @@ function fakeResponse(payload){
     clone(){return fakeResponse(payload);},
   };
 }
+
+assert(normalizePhonetic(",selfə'ʃuəd; ?(@)-'?rd")==="/ˌselfəˈʃuəd/","ECDICT must keep the clean IPA candidate and discard garbled alternates");
 
 (async()=>{
   const englishPayload={
