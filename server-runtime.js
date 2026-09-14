@@ -203,7 +203,10 @@ async function handlePronunciation(res, body) {
     return true;
   }
 
-  const local = localLookupResult(word, "primary", word);
+  const queryKind = expressionQuery.classifyEnglishQuery(word);
+  const local = queryKind === "phrase"
+    ? coreLexicon.lookupExact(word, "primary", { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase-pronunciation" })
+    : localLookupResult(word, "primary", word);
   if (local?.audioUrl) {
     writeJson(res, 200, {
       ok: true,

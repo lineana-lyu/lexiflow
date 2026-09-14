@@ -610,20 +610,34 @@
     try{return Boolean(await player(value));}catch{return false;}
   }
 
-  async function speak(word,audioUrl="",audioUrls=[]){
-    const segments=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
-    if(audioUrl) segments.unshift(audioUrl);
-    if(segments.length){
-      for(const src of Array.from(new Set(segments))){
-        try{
-          await new Promise((resolve,reject)=>{
-            const audio=new Audio(src);audio.onended=resolve;audio.onerror=reject;audio.play().catch(reject);
-          });
-          return;
-        }catch{}
-      }
+  async function playDictionaryAudio(segments=[]){
+    for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean)))){
+      try{
+        await new Promise((resolve,reject)=>{
+          const audio=new Audio(src);audio.onended=resolve;audio.onerror=reject;audio.play().catch(reject);
+        });
+        return true;
+      }catch{}
     }
-    if(await playNaturalTts(word))return;
+    return false;
+  }
+
+  async function speak(word,audioUrl="",audioUrls=[]){
+    const value=String(word||"").trim();
+    if(!value)return;
+    const supplied=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
+    if(audioUrl)supplied.unshift(audioUrl);
+    if(await playDictionaryAudio(supplied))return;
+
+    try{
+      const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:value}});
+      const result=payload?.result||{};
+      const resolved=Array.isArray(result.audioUrls)?result.audioUrls.filter(Boolean):[];
+      if(result.audioUrl)resolved.unshift(result.audioUrl);
+      if(await playDictionaryAudio(resolved))return;
+    }catch{}
+
+    if(await playNaturalTts(value))return;
     toast("当前没有可用的自然发音，请稍后重试");
   }
 

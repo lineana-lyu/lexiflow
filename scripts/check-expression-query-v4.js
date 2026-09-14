@@ -14,6 +14,7 @@ const hydration = fs.readFileSync(path.join(root, "public", "example-hydration.j
 const memorize = fs.readFileSync(path.join(root, "public", "memorize-stage-v3.js"), "utf8");
 const review = fs.readFileSync(path.join(root, "public", "review-session-v3.js"), "utf8");
 const productUx = fs.readFileSync(path.join(root, "public", "product-ux.js"), "utf8");
+const productCss = fs.readFileSync(path.join(root, "public", "product-ux.css"), "utf8");
 
 assert.strictEqual(expressionQuery.classifyEnglishQuery("address"), "word", "single headword must remain a word query");
 assert.strictEqual(expressionQuery.classifyEnglishQuery("take it for granted"), "phrase", "multiword expression must remain a whole phrase query");
@@ -34,7 +35,7 @@ assert(!transport.includes("speakPhraseContinuously"), "transport must not steal
 assert(!transport.includes("shouldUseUnifiedPhraseVoice"), "transport must not classify phrase voice playback");
 assert(kokoro.includes("playSystemFallback"), "system speech must only remain as an explicit fallback owned by Kokoro voice layer");
 assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");
-assert(app.includes("for(const src of Array.from(new Set(segments)))")&&app.includes("audio.play().catch(reject);\n          });\n          return;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
+assert(app.includes("async function playDictionaryAudio")&&app.includes("for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean))))")&&app.includes("return true;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
 assert(runtime.includes('queryKind === "phrase"\n      ? coreLexicon.lookupExact'), "direct dictionary lookup must also avoid raw ECDICT as authoritative phrase semantics");
 assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
@@ -43,4 +44,7 @@ assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhr
 assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
 assert(productUx.includes('[data-m2=\\"speak\\"]')&&productUx.includes("subtree: true"), "speaker decoration must reach nested learning surfaces");
 assert(memorize.includes('saving=false;\n      if(window.LexiFlowStudySessionV3?.advanceWithinBucket?.(card.id,"memorize"))return;'), "Memorize must release its save lock before rotating to the next recall card");
+assert(app.includes('api("/api/dictionary/pronunciation",{method:"POST",body:{word:value}})')&&app.includes("playDictionaryAudio"), "shared word pronunciation must actively try dictionary audio before synthesized speech when a card has no cached recording");
+assert(runtime.includes('queryKind === "phrase"\n    ? coreLexicon.lookupExact(word, "primary", { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase-pronunciation" })'), "phrase pronunciation must not re-enter raw ECDICT component semantics");
+assert(productCss.includes("width:38px!important")&&productCss.includes("border:1px solid var(--line)!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must use the same canonical card-creation speaker surface");
 console.log("Expression query V4 checks passed");
