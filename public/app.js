@@ -440,7 +440,6 @@
         <nav class="nav">
           ${navButton("home","⌂","今日学习")}
           ${navButton("add","＋","选词制卡")}
-          ${navButton("review","↻","复习中心")}
           ${navButton("library","▤","单词库")}
           ${navButton("stats","▥","学习统计")}
           ${navButton("settings","⚙","设置")}
@@ -496,6 +495,8 @@
   function homePage(){
     const plan=currentDailyPlan();
     const review=Array.isArray(plan?.review)?plan.review.length:0;
+    const reviewRecent=Math.max(0,Number(plan?.reviewCriticalCount||0));
+    const reviewLongTerm=Math.max(0,Number(plan?.reviewStableScheduledCount||0));
     const learning=["memorize","visualize","apply","select"].reduce((sum,key)=>sum+(Array.isArray(plan?.[key])?plan[key].length:0),0);
     const cards=state.data.cards.length;
     const today=uniqueLearnedToday();
@@ -515,7 +516,7 @@
       header("","今日学习","",`<button class="btn" data-route="add">＋ 添加单词</button>`)
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">今日推进记录</div></div>
-        <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${review}</div><div class="stat-hint">系统今天已安排</div></div>
+        <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${review}</div><div class="stat-hint">${reviewRecent} 个近期巩固 · ${reviewLongTerm} 个长期巩固</div></div>
         <div class="card stat"><div class="stat-label">学习中</div><div class="stat-value">${learning}</div><div class="stat-hint">今天可推进的学习任务</div></div>
         <div class="card stat"><div class="stat-label">长期稳定</div><div class="stat-value">${stable}</div><div class="stat-hint">已进入长期维护复习</div></div>
       </div>
@@ -1390,7 +1391,7 @@
     if(state.route==="home") html=homePage();
     else if(state.route==="add") html=addPage();
     else if(state.route==="study") html=studyPage();
-    else if(state.route==="review") html=reviewPage();
+    else if(state.route==="review"){state.route="home";html=homePage();}
     else if(state.route==="library") html=libraryPage();
     else if(state.route==="library-edit") html=libraryEditPage();
     else if(state.route==="stats") html=statsPage();
