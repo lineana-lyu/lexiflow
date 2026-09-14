@@ -93,4 +93,20 @@ const complete = compactEntry({
 });
 assert.strictEqual(complete.phoneticUs, "lʊk ˈfɔrwərd tə", "a verified full three-word IPA should be retained");
 
+
+const duplicateIds = rowToResult({
+  normalized_headword:"ride or die",
+  headword:"ride or die",
+  phonetic_us:"raɪd ɔr daɪ",
+  phonetic_any:"raɪd ɔr daɪ",
+  senses_json:JSON.stringify([
+    {id:"shared-upstream-id",pos:"adj",meaningZh:"不离不弃的；坚定支持的",exampleEn:"She's ride or die for her best friend.",exampleZh:"她对自己最好的朋友始终不离不弃。",priority:"core"},
+    {id:"shared-upstream-id",pos:"noun",meaningZh:"忠实伙伴；不离不弃的人",exampleEn:"My sister is my ride or die.",exampleZh:"我姐姐是那个永远支持我的人。",priority:"common"},
+    {id:"shared-upstream-id",pos:"verb",meaningZh:"坚定支持；不离不弃地站在某人一边",exampleEn:"I'll ride or die for my friends.",exampleZh:"我会始终坚定地支持我的朋友们。",priority:"common"},
+  ]),
+}, "expanded");
+assert.strictEqual(duplicateIds.senses.length, 3, "expanded phrase should expose three learner senses");
+assert.strictEqual(new Set(duplicateIds.senses.map(s=>s.id)).size, 3, "UI sense ids must be unique even when the upstream dictionary repeats sense_id");
+assert.deepStrictEqual(duplicateIds.senses.map(s=>s.id), ["phrase-ride-or-die-1","phrase-ride-or-die-2","phrase-ride-or-die-3"], "phrase sense ids should remain deterministic between primary and expanded lookup");
+
 console.log("Phrase dictionary V5 checks passed");

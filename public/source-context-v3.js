@@ -12,6 +12,7 @@
   let latestData=null;
   let scheduled=false;
   let activeLibraryCardId="";
+  let activeLookupKey="";
   const sourceMap=new Map();
   const pendingDraftCardIds=new Set();
 
@@ -33,6 +34,22 @@
   }
   function saveDraft(next){try{localStorage.setItem(DRAFT_KEY,JSON.stringify(next));}catch{}}
   function clearDraft(){try{localStorage.removeItem(DRAFT_KEY);}catch{}}
+  function queryKey(value){return String(value||"").trim().toLowerCase().replace(/\s+/g," ");}
+  function emptyLookupDraft(key=""){return{lookupQuery:key,sourceType:"other",sourceTitle:"",sourceContext:""};}
+  function scopedDraft(){
+    const draft=loadDraft();
+    if(!activeLookupKey)return draft;
+    return queryKey(draft.lookupQuery)===activeLookupKey?draft:emptyLookupDraft(activeLookupKey);
+  }
+  function beginLookup(query){
+    const key=queryKey(query);
+    if(!key)return;
+    const draft=loadDraft();
+    if(queryKey(draft.lookupQuery)!==key)saveDraft(emptyLookupDraft(key));
+    activeLookupKey=key;
+    schedule();
+  }
+  function resetLookupDraft(){activeLookupKey="";clearDraft();schedule();}
 
   function sourceFields(card){
     return{
@@ -84,7 +101,8 @@
     const current=context.current?.cards?core.normalizeData(context.current):(latestData||null);
     const known=new Set((current?.cards||[]).map(card=>String(card.id)));
     const draft=loadDraft();
-    const canAttachDraft=hasDraftSource(draft);
+    const draftLookupKey=queryKey(draft.lookupQuery);
+    const canAttachDraft=hasDraftSource(draft)&&Boolean(draftLookupKey);
     const next={...body,data:{...body.data,cards:body.data.cards.map(card=>({...card}))}};
 
     for(const card of next.data.cards){
@@ -93,7 +111,7 @@
         Object.assign(card,remembered);
         continue;
       }
-      if(!known.has(String(card.id))&&core.canonicalStage(card)==="select"&&canAttachDraft){
+      if(!known.has(String(card.id))&&core.canonicalStage(card)==="select"&&canAttachDraft&&draftLookupKey===queryKey(card.sourceQuery||card.word)){
         const fields={
           sourceType:String(draft.sourceType||"other"),
           sourceTitle:String(draft.sourceTitle||"").trim(),
@@ -121,7 +139,7 @@
       pendingDraftCardIds.delete(id);
       committedDraft=true;
     }
-    if(committedDraft)clearDraft();
+    if(committedDraft){activeLookupKey="";clearDraft();}
   }
 
   gateway.registerOutgoingMutator(outgoingMutator);
@@ -140,7 +158,7 @@
   }
 
   function sourceEditorHtml(){
-    const draft=loadDraft();
+    const draft=scopedDraft();
     const type=String(draft.sourceType||"other");
     return `<div class="lexi-source-box" id="lexi-source-box"><div class="lexi-source-box-head"><strong>你在哪里遇到这个词？</strong><span>可选。保留真实语境后，Visualize 和 Apply 会优先提醒这个场景。</span></div><div class="lexi-source-grid"><div class="field"><label>来源</label><select class="input" id="lexi-source-type">${Object.entries(labels).map(([key,label])=>`<option value="${key}" ${key===type?"selected":""}>${label}</option>`).join("")}</select></div><div class="field"><label>来源名称</label><input class="input" id="lexi-source-title" value="${esc(draft.sourceTitle||"")}" placeholder="例如：某个 B 站视频、一本书、一场会议" /></div><div class="field lexi-source-context-field"><label>当时的原句 / 场景</label><textarea class="textarea" id="lexi-source-context" placeholder="例如：老师说 The room was enormous，我当时想到学校最大的报告厅。">${esc(draft.sourceContext||"")}</textarea></div></div></div>`;
   }
@@ -229,7 +247,8 @@
   function persistDraftFromUi(){
     const type=document.getElementById("lexi-source-type"),title=document.getElementById("lexi-source-title"),context=document.getElementById("lexi-source-context");
     if(!type&&!title&&!context)return;
-    saveDraft({sourceType:String(type?.value||"other"),sourceTitle:String(title?.value||""),sourceContext:String(context?.value||"")});
+    const lookupQuery=activeLookupKey||queryKey(document.getElementById("word-input")?.value||"");
+    saveDraft({lookupQuery,sourceType:String(type?.value||"other"),sourceTitle:String(title?.value||""),sourceContext:String(context?.value||"")});
   }
 
   document.addEventListener("click",event=>{
@@ -248,6 +267,8 @@
 
   document.addEventListener("input",event=>{if(["lexi-source-title","lexi-source-context"].includes(event.target?.id))persistDraftFromUi();},true);
   document.addEventListener("change",event=>{if(event.target?.id==="lexi-source-type")persistDraftFromUi();},true);
+  window.addEventListener("lexiflow:lookup-query-start",event=>beginLookup(event.detail?.query));
+  window.addEventListener("lexiflow:lookup-cleared",resetLookupDraft);
 
   function decorate(){injectStyle();decorateAdd();decorateStudy();decorateLibraryEditor();}
   function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;syncFromGateway();decorate();});}

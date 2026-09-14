@@ -33,4 +33,10 @@ assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydrat
 assert(kokoro.includes("if(!isExpression && (audio || audios.length))return;"),"startup fallback must synthesize expressions instead of trusting supplied component audio");
 assert(runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("wholeExpressionAudio:false")&&runtime.includes("composePhrasePhonetic"),"runtime phrase pronunciation must expose full IPA metadata but never component dictionary audio");
 assert(app.includes("normalizedDiff")&&app.includes("targetWordForms(head)"),"phrase result UX must hide identical auto-resolution and accept inflected phrase examples");
+
+assert(app.includes("lookupRequestSeq")&&app.includes("requestId!==state.lookupRequestSeq")&&app.includes("lexiflow:lookup-query-start"),"a new search must be allowed while an older request is running, and stale responses must not overwrite the newest query");
+assert(app.includes('state.lookupStatus==="loading"?"重新查询":"查询"')&&!app.includes('type="submit" ${state.lookupStatus==="loading"?"disabled":""}'),"the main lookup button must remain available for re-query while loading");
+assert(app.includes("prepareLookupResult")&&app.includes("seen.has(id)"),"lookup results must defensively de-duplicate sense ids before selection state is rendered");
+assert(source.includes("lookupQuery")&&source.includes("lexiflow:lookup-query-start")&&source.includes("lexiflow:lookup-cleared")&&source.includes("draftLookupKey===queryKey(card.sourceQuery||card.word)"),"source context drafts must be scoped to the word or phrase that created them and cleared for a different lookup");
+
 console.log("User surface V4 checks passed.");

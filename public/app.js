@@ -18,6 +18,7 @@
     librarySearch: "",
     libraryEditor: null,
     lookupStatus: "idle",
+    lookupRequestSeq: 0,
     providerStatus: null,
     providerChecks: { dictionary:null, ai:null },
     loadingMoreSenses: false,
@@ -370,6 +371,31 @@
 
   function normalizeSearchText(v){return String(v||"").trim().toLowerCase();}
 
+  function prepareLookupResult(result){
+    if(!result||typeof result!=="object")return result;
+    const senses=Array.isArray(result.senses)?result.senses:[];
+    const seen=new Set();
+    const normalized=senses.map((sense,index)=>{
+      const sourceId=String(sense?.id||`sense-${index+1}`).trim()||`sense-${index+1}`;
+      let id=sourceId;
+      if(seen.has(id)){
+        let suffix=index+1;
+        do{id=`${sourceId}-${suffix++}`;}while(seen.has(id));
+      }
+      seen.add(id);
+      return {...sense,id};
+    });
+    return {...result,senses:normalized};
+  }
+
+  function announceLookupQuery(query,requestId){
+    try{window.dispatchEvent(new CustomEvent("lexiflow:lookup-query-start",{detail:{query,requestId}}));}catch{}
+  }
+
+  function announceLookupCleared(){
+    try{window.dispatchEvent(new CustomEvent("lexiflow:lookup-cleared"));}catch{}
+  }
+
   function levenshtein(a,b){
     const s=Array.from(normalizeSearchText(a)),t=Array.from(normalizeSearchText(b));
     const prev=Array.from({length:t.length+1},(_,i)=>i);
@@ -541,7 +567,7 @@
       + `<div class="card search-hero-card">
         <form id="lookup-form" class="search-command-bar">
           <div class="search-input-wrap"><span class="search-input-icon">⌕</span><input class="input" id="word-input" placeholder="输入英文或中文，例如 keyboard、键盘、wrok" value="${escapeHtml(state.lookup?.query||"")}" autocomplete="off" /></div>
-          <button class="btn primary" type="submit" ${state.lookupStatus==="loading"?"disabled":""}>${state.lookupStatus==="loading"?"正在查询…":"查询"}</button>
+          <button class="btn primary" type="submit">${state.lookupStatus==="loading"?"重新查询":"查询"}</button>
           ${state.lookup?.query?`<button class="btn ghost" type="button" data-action="clear-lookup">清空</button>`:""}
         </form>
         <div class="search-helper"><span>支持中文</span><span>支持英文</span><span>支持拼写纠错</span><span>默认只生成一个核心学习词义</span></div>
@@ -1345,10 +1371,11 @@
     const lookupForm=document.getElementById("lookup-form");
     if(lookupForm) lookupForm.addEventListener("submit",async e=>{
       e.preventDefault();
-      if(state.lookupStatus==="loading")return;
       const input=document.getElementById("word-input");
       const q=input.value.trim();
       if(!q){showNotice("请输入单词或中文词义","例如 keyboard、键盘、wrok 或少量中文错别字。","warn");return;}
+      const requestId=++state.lookupRequestSeq;
+      announceLookupQuery(q,requestId);
 
       state.notice=null;
       state.lookup={query:q,result:null};
@@ -1370,6 +1397,7 @@
         // previously mis-resolved translation and must not shadow the verified resolver.
         const exactLocal=Boolean(saved&&!containsChinese(q)&&!/\s/.test(qNormalized)&&normalizeSearchText(saved.word)===qNormalized);
         if(exactLocal){
+          if(requestId!==state.lookupRequestSeq)return;
           if(saved){
             state.lookup={query:q,result:{
               word:saved.word,
@@ -1398,11 +1426,14 @@
         }
 
         const payload=await api("/api/search/smart",{method:"POST",body:{query:q}});
-        state.lookup={query:q,result:payload.result};
-        state.selectedSenseId=payload.result?.senses?.[0]?.id||null;
+        if(requestId!==state.lookupRequestSeq)return;
+        const result=prepareLookupResult(payload.result);
+        state.lookup={query:q,result};
+        state.selectedSenseId=result?.senses?.[0]?.id||null;
         state.lookupStatus="idle";
         render();
       }catch(err){
+        if(requestId!==state.lookupRequestSeq)return;
         state.lookupStatus="idle";
         state.lookup={query:q,result:null};
         if(err.code==="DICTIONARY_KEY_MISSING"){
@@ -1429,7 +1460,8 @@
       state.lookup={query:q,result:null};state.lookupStatus="loading";render();
       try{
         const payload=await api("/api/dictionary/lookup",{method:"POST",body:{word:q,mode:"primary"}});
-        state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+        const result=prepareLookupResult(payload.result);
+        state.lookup={query:q,result};state.selectedSenseId=result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
       }catch(err){state.lookupStatus="idle";showErrorNotice(err,"暂时没有查到这个词");render();}
     }));
 
@@ -1440,7 +1472,8 @@
       state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
       try{
         const payload=await api("/api/search/smart",{method:"POST",body:{query:sourceQuery,preferredWord}});
-        state.lookup={query:sourceQuery,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+        const result=prepareLookupResult(payload.result);
+        state.lookup={query:sourceQuery,result};state.selectedSenseId=result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
       }catch(err){state.lookupStatus="idle";showErrorNotice(err,"这个表达暂时没有可靠结果");render();}
     }));
 
@@ -1528,7 +1561,8 @@
       state.lookupStatus="loading";state.lookupAlternativesOpen=false;render();
       try{
         const payload=await api("/api/search/smart",{method:"POST",body:{query:q,forceRefresh:true}});
-        state.lookup={query:q,result:payload.result};state.selectedSenseId=payload.result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
+        const result=prepareLookupResult(payload.result);
+        state.lookup={query:q,result};state.selectedSenseId=result?.senses?.[0]?.id||null;state.lookupStatus="idle";render();
       }catch(err){state.lookupStatus="idle";showErrorNotice(err,"重新识别没有完成");render();}
       return;
     }
@@ -1616,8 +1650,8 @@
       }
       return;
     }
-    if(action==="clear-lookup"){state.lookup=null;state.lookupStatus="idle";state.lookupAlternativesOpen=false;state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
-    if(action==="lookup-again"){state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
+    if(action==="clear-lookup"){state.lookupRequestSeq+=1;announceLookupCleared();state.lookup=null;state.lookupStatus="idle";state.lookupAlternativesOpen=false;state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
+    if(action==="lookup-again"){state.lookupRequestSeq+=1;announceLookupCleared();state.lookup=null;state.lookupStatus="idle";state.loadingMoreSenses=false;state.selectedSenseId=null;state.addDraft=null;render();return;}
     if(action==="speak"){let segments=[];try{segments=JSON.parse(el.dataset.audios||"[]");}catch{}speak(el.dataset.word,el.dataset.audio||"",segments);return;}
     if(action==="speak-sentence"){speakSentence(el.dataset.sentence||"");return;}
     if(action==="load-more-senses"){
@@ -1632,8 +1666,9 @@
           method:"POST",
           body:{word:q,mode:"expanded"}
         });
-        state.lookup={query:q,result:payload.result};
-        state.selectedSenseId=payload.result?.senses?.[0]?.id||null;
+        const result=prepareLookupResult(payload.result);
+        state.lookup={query:q,result};
+        state.selectedSenseId=result?.senses?.[0]?.id||null;
         state.addDraft=null;
       }catch(err){
         toast(err.message||"加载其它词义失败");
