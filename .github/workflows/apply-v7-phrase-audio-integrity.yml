@@ -1,0 +1,46 @@
+name: Apply V7 Phrase Audio Integrity
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-phrase-audio-integrity.py
+      - .github/workflows/apply-v7-phrase-audio-integrity.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Apply phrase audio integrity repair
+        run: python scripts/apply-v7-phrase-audio-integrity.py
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run repository checks
+        run: npm run check
+
+      - name: Commit verified repair and remove one-shot files
+        run: |
+          rm -f scripts/apply-v7-phrase-audio-integrity.py .github/workflows/apply-v7-phrase-audio-integrity.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/app.js public/example-hydration.js public/kokoro-voice.js server-runtime.js scripts/check-user-surface-v4.js
+          git add -u scripts/apply-v7-phrase-audio-integrity.py .github/workflows/apply-v7-phrase-audio-integrity.yml
+          git commit -m "fix: require verified whole-expression phrase audio"
+          git push origin HEAD:feat/v7-airy-luminous-ui
