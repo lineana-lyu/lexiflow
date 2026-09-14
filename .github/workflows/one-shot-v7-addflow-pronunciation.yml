@@ -1,0 +1,37 @@
+name: One Shot V7 Add Flow Pronunciation
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: tmp-v7-addflow-pronunciation
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: npm
+      - run: npm ci
+      - name: Apply migration
+        run: python scripts/migrate-v7-addflow-pronunciation.py
+      - name: Syntax checks
+        run: |
+          node --check public/app.js
+          node --check public/today-plan-v3.js
+          node --check public/select-stage-v3.js
+          node --check scripts/check-today-plan-v3.js
+          node --check scripts/check-select-stage-v3.js
+      - name: Full repository checks
+        run: npm run check
+      - name: Commit verified business changes
+        run: |
+          git config user.name "lineana"
+          git config user.email "17570875940@163.com"
+          git add public/app.js public/today-plan-v3.js public/select-stage-v3.js scripts/check-today-plan-v3.js scripts/check-select-stage-v3.js
+          git diff --cached --quiet && exit 0
+          git commit -m "feat: simplify Today add flow and unify pronunciation"
+          git push origin HEAD:tmp-v7-addflow-pronunciation
