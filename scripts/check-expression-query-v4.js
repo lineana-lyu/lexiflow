@@ -45,6 +45,10 @@ assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPr
 assert(productUx.includes('[data-m2=\\"speak\\"]')&&productUx.includes("subtree: true"), "speaker decoration must reach nested learning surfaces");
 assert(memorize.includes('saving=false;\n      if(window.LexiFlowStudySessionV3?.advanceWithinBucket?.(card.id,"memorize"))return;'), "Memorize must release its save lock before rotating to the next recall card");
 assert(app.includes('api("/api/dictionary/pronunciation",{method:"POST",body:{word:value}})')&&app.includes("playDictionaryAudio"), "shared word pronunciation must actively try dictionary audio before synthesized speech when a card has no cached recording");
+const speakIndex=app.indexOf('async function speak(word,audioUrl="",audioUrls=[])');
+const dictionaryAttemptIndex=app.indexOf('api("/api/dictionary/pronunciation"',speakIndex);
+const naturalFallbackIndex=app.indexOf('playNaturalTts(value)',dictionaryAttemptIndex);
+assert(speakIndex>=0&&dictionaryAttemptIndex>speakIndex&&naturalFallbackIndex>dictionaryAttemptIndex,"word pronunciation order must remain dictionary audio -> natural synthesis -> system fallback");
 assert(runtime.includes('queryKind === "phrase"\n    ? coreLexicon.lookupExact(word, "primary", { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase-pronunciation" })'), "phrase pronunciation must not re-enter raw ECDICT component semantics");
 assert(productCss.includes("width:38px!important")&&productCss.includes("border:1px solid var(--line)!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must use the same canonical card-creation speaker surface");
 console.log("Expression query V4 checks passed");
