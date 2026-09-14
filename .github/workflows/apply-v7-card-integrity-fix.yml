@@ -1,0 +1,41 @@
+name: Apply V7 Card Integrity Fix
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - scripts/apply-v7-card-integrity-fix.py
+      - .github/workflows/apply-v7-card-integrity-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout V7
+        uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+      - name: Apply card integrity repair
+        run: python scripts/apply-v7-card-integrity-fix.py
+      - name: Install dependencies
+        run: npm ci
+      - name: Run repository checks
+        run: npm run check
+      - name: Commit verified repair and remove one-shot files
+        run: |
+          rm -f scripts/apply-v7-card-integrity-fix.py .github/workflows/apply-v7-card-integrity-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/ecdict.js server-runtime.js public/example-hydration.js public/app.js scripts/check-dictionary-payload-bridge-v3.js scripts/check-user-surface-v4.js
+          git add -u scripts/apply-v7-card-integrity-fix.py .github/workflows/apply-v7-card-integrity-fix.yml
+          git commit -m "fix: keep lookup cards internally consistent"
+          git push origin HEAD:feat/v7-airy-luminous-ui
