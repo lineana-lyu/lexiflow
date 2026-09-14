@@ -25,7 +25,7 @@ patch(
 const testFile=path.join(root,"scripts","check-expression-query-v4.js");
 let test=fs.readFileSync(testFile,"utf8");
 const marker='assert(kokoro.includes("Component recordings for a"), "Kokoro voice layer must document whole-expression ownership over component recordings");';
-const replacement=`${marker}\nassert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");\nassert(app.includes("for(const src of Array.from(new Set(segments)))")&&app.includes("audio.play().catch(reject);\\n          });\\n          return;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");`;
+const replacement='assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");\nassert(app.includes("for(const src of Array.from(new Set(segments)))")&&app.includes("audio.play().catch(reject);\\n          });\\n          return;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");';
 if(!test.includes(marker))throw new Error("pronunciation regression marker not found");
 test=test.replace(marker,replacement);fs.writeFileSync(testFile,test,"utf8");
 console.log("Global pronunciation ownership fixed.");
