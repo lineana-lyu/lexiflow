@@ -176,7 +176,7 @@
       if(!ids.length)return false;
       for(const id of ids){
         const card=next.cards.find(item=>item.id===id);
-        if(!card||card.inboxPending!==true||core.canonicalStage(card)!==="select")continue;
+        if(!card||card.inboxPending!==true||core.canonicalStage(card)!=="select")continue;
         if(promoteToTomorrow(card,now))appendSelectActivity(next,card,now,"today-picker");
       }
       picked.clear();
@@ -202,7 +202,7 @@
       let changed=false;
       for(const id of ids){
         const card=next.cards.find(item=>item.id===id);
-        if(!card||card.inboxPending===true||core.canonicalStage(card)!==="select")continue;
+        if(!card||card.inboxPending===true||core.canonicalStage(card)!=="select")continue;
         if(promoteToTomorrow(card,now)){
           appendSelectActivity(next,card,now,"legacy-selected-repair");
           changed=true;
