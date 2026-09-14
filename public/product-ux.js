@@ -16,7 +16,8 @@
     document.querySelectorAll(".speaker,.sentence-speaker,[data-m2=\"speak\"],[data-r3=\"speak\"]").forEach(button => {
       if (button.dataset.lexiSpeakerDecorated === "1") return;
       button.dataset.lexiSpeakerDecorated = "1";
-      button.classList.add("speaker","lexi-speaker-button");
+      if(!button.classList.contains("sentence-speaker"))button.classList.add("speaker");
+      button.classList.add("lexi-speaker-button");
       button.innerHTML = speakerSvg();
       button.addEventListener("click", () => {
         button.classList.remove("lexi-speaker-playing");

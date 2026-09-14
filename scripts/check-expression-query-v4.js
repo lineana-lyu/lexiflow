@@ -24,7 +24,7 @@ assert.strictEqual(expressionQuery.classifyEnglishQuery("Could you give me a han
 
 assert(runtime.includes('require("./lib/expression-query")'), "server runtime must own whole-expression routing");
 assert(runtime.includes("handleEnglishExpression"), "server runtime must expose whole-expression handling");
-assert(runtime.includes('queryKind === "phrase"')&&runtime.includes('lookupPath: "core-phrase"'), "uncurated phrases must not be accepted from raw ECDICT before whole-expression resolution");
+assert(!runtime.includes('result = coreLexicon.lookupExact(query.toLowerCase(), "primary"'), "multiword search must not short-circuit through local Core/ECDICT phrase semantics before expression resolution");
 const localIndex = runtime.indexOf("handleLocalDictionary(req, res, url.pathname, body)");
 const expressionIndex = runtime.indexOf("handleEnglishExpression(res, body)", localIndex);
 const forwardIndex = runtime.indexOf("return forward(req, res, body)", expressionIndex);
@@ -37,7 +37,7 @@ assert(kokoro.includes("playSystemFallback"), "system speech must only remain as
 assert(kokoro.includes("LexiFlowPronunciationV3")&&kokoro.includes("audioUrl:audio,audioUrls:audios"), "all dynamic word speakers must delegate to the shared dictionary-first pronunciation bridge");
 assert(app.includes("async function playDictionaryAudio")&&app.includes("for(const src of Array.from(new Set((Array.isArray(segments)?segments:[]).filter(Boolean))))")&&app.includes("return true;"), "dictionary pronunciation must stop after the first successful exact recording instead of playing every variant");
 
-assert(runtime.includes('queryKind === "phrase"\n      ? coreLexicon.lookupExact'), "direct dictionary lookup must also avoid raw ECDICT as authoritative phrase semantics");
+assert(runtime.includes('if (queryKind === "phrase")')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct dictionary phrase lookup must use whole-expression semantics rather than raw ECDICT");
 assert(runtime.includes('local?.phonetic && !/\\s/.test(word)'), "multiword phrases must not display a one-component ECDICT phonetic fallback");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
 assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!pronunciation?.dictionaryAudio)"), "phrase lookup must show complete phrase phonetics without stitching component audio");
@@ -49,6 +49,6 @@ const speakIndex=app.indexOf('async function speak(word,audioUrl="",audioUrls=[]
 const dictionaryAttemptIndex=app.indexOf('api("/api/dictionary/pronunciation"',speakIndex);
 const naturalFallbackIndex=app.indexOf('playNaturalTts(value)',dictionaryAttemptIndex);
 assert(speakIndex>=0&&dictionaryAttemptIndex>speakIndex&&naturalFallbackIndex>dictionaryAttemptIndex,"word pronunciation order must remain dictionary audio -> natural synthesis -> system fallback");
-assert(runtime.includes('queryKind === "phrase"\n    ? coreLexicon.lookupExact(word, "primary", { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase-pronunciation" })'), "phrase pronunciation must not re-enter raw ECDICT component semantics");
-assert(productCss.includes("width:38px!important")&&productCss.includes("border:1px solid var(--line)!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must use the same canonical card-creation speaker surface");
+assert(runtime.includes('const local = queryKind === "phrase" ? null : localLookupResult')&&runtime.includes('const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true')&&runtime.includes('wholeExpressionAudio'), "phrase pronunciation must reject component recordings and reserve audio ownership for exact whole-expression recordings");
+assert(productCss.includes("width:38px!important")&&productCss.includes("flex:0 0 38px!important")&&productCss.includes("aspect-ratio:1/1!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must keep the same non-deforming canonical card-creation geometry");
 console.log("Expression query V4 checks passed");

@@ -42,6 +42,12 @@
   place-items:center;
   width:38px!important;
   height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  flex:0 0 38px!important;
+  aspect-ratio:1/1!important;
+  box-sizing:border-box!important;
+  line-height:1!important;
   padding:0!important;
   border:1px solid var(--line)!important;
   border-radius:50%!important;
@@ -50,7 +56,7 @@
   cursor:pointer!important;
 }
 .lexi-speaker-button:hover{border-color:#bdd0f6!important;background:var(--blue-soft)!important;color:var(--blue)!important}
-.lexi-speaker-svg{width:20px;height:20px;display:block;overflow:visible}
+.lexi-speaker-svg{width:20px;height:20px;min-width:20px;min-height:20px;flex:0 0 20px;display:block;overflow:visible}
 .lexi-speaker-body{fill:#42585c;transition:fill .18s ease,transform .18s ease;transform-origin:12px 14px}
 .lexi-speaker-wave{fill:none;stroke-linecap:round;stroke-width:1.75;transition:opacity .18s ease}
 .lexi-speaker-wave.wave-one{stroke:#6f86cf}

@@ -92,15 +92,6 @@ async function handleLocalDictionary(req, res, pathname, body) {
     let result = null;
     if (queryKind === "word" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
       result = localLookupResult(query.toLowerCase(), "primary", query);
-    } else if (queryKind === "phrase" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
-      // Only curated Core phrases may short-circuit whole-expression semantics.
-      // Raw ECDICT phrase rows can put a literal/component sense first
-      // (`hang out -> 挂出`), so they are not authoritative here.
-      result = coreLexicon.lookupExact(query.toLowerCase(), "primary", {
-        sourceQuery: query,
-        autoResolved: false,
-        lookupPath: "core-phrase",
-      });
     }
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, queryKind, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
@@ -113,12 +104,30 @@ async function handleLocalDictionary(req, res, pathname, body) {
     if (!/^[a-z][a-z '-]*$/i.test(word)) return false;
     const mode = parsed.mode === "expanded" ? "expanded" : "primary";
     const queryKind = expressionQuery.classifyEnglishQuery(word);
-    const result = queryKind === "phrase"
-      ? coreLexicon.lookupExact(word, mode, { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase" })
-      : localLookupResult(word, mode, word);
+    if (queryKind === "phrase") {
+      try {
+        const result = await expressionQuery.resolveEnglishExpression(word);
+        if (!result) return false;
+        writeJson(res, 200, { ok: true, result: { ...result, localLookup: false, expressionLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
+        console.log("LexiFlow expression dictionary lookup: " + word);
+      } catch (err) {
+        writeJson(res, 503, {
+          ok: false,
+          code: err?.code || "EXPRESSION_QUERY_UNAVAILABLE",
+          error: "完整短语暂时没有解析完成",
+          userError: {
+            code: err?.code || "EXPRESSION_QUERY_UNAVAILABLE",
+            title: "短语解析暂时不可用",
+            message: "LexiFlow 不会退回逐词字面义。请确认 AI 连接后重试。",
+          },
+        });
+      }
+      return true;
+    }
+    const result = localLookupResult(word, mode, word);
     if (!result) return false;
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
-    console.log(`LexiFlow lookup [${result.lookupPath || result.dictionarySource || "local"}] ${result.lookupMs ?? "?"}ms: ${word}`);
+    console.log("LexiFlow lookup [" + (result.lookupPath || result.dictionarySource || "local") + "] " + (result.lookupMs ?? "?") + "ms: " + word);
     return true;
   }
 
@@ -204,9 +213,9 @@ async function handlePronunciation(res, body) {
   }
 
   const queryKind = expressionQuery.classifyEnglishQuery(word);
-  const local = queryKind === "phrase"
-    ? coreLexicon.lookupExact(word, "primary", { sourceQuery: word, autoResolved: false, lookupPath: "core-phrase-pronunciation" })
-    : localLookupResult(word, "primary", word);
+  // Multi-word expressions must never inherit a single component's local ECDICT phonetic/audio.
+  // Whole-phrase exact dictionary audio is resolved remotely; otherwise synthesize the complete expression.
+  const local = queryKind === "phrase" ? null : localLookupResult(word, "primary", word);
   if (local?.audioUrl) {
     writeJson(res, 200, {
       ok: true,
@@ -229,14 +238,26 @@ async function handlePronunciation(res, body) {
       timeoutMs: 10000,
     });
     const pronunciation = remote.payload?.result;
-    const hasAudio = Boolean(clean(pronunciation?.audioUrl) || (Array.isArray(pronunciation?.audioUrls) && pronunciation.audioUrls.some(Boolean)));
+    const rawAudioUrl = clean(pronunciation?.audioUrl);
+    const rawAudioUrls = Array.isArray(pronunciation?.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
+    const hasAudio = Boolean(rawAudioUrl || rawAudioUrls.length);
+    const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true;
+    const safeAudioUrl = componentOnly ? "" : rawAudioUrl;
+    const safeAudioUrls = componentOnly ? [] : (rawAudioUrls.length ? rawAudioUrls : (safeAudioUrl ? [safeAudioUrl] : []));
+    const dictionaryAudio = Boolean(!componentOnly && (safeAudioUrl || safeAudioUrls.length));
     if (remote.status >= 200 && remote.status < 300 && pronunciation && (hasAudio || clean(pronunciation.phonetic))) {
       writeJson(res, 200, {
         ok: true,
         result: {
           ...pronunciation,
           phonetic: clean(pronunciation.phonetic) || local?.phonetic || "",
-          dictionaryAudio: hasAudio,
+          audioUrl: safeAudioUrl,
+          audioUrls: safeAudioUrls,
+          pronunciationSource: componentOnly && clean(pronunciation.phonetic)
+            ? "merriam-webster-components-phonetic"
+            : clean(pronunciation.pronunciationSource),
+          dictionaryAudio,
+          wholeExpressionAudio: queryKind !== "phrase" || pronunciation?.exactMatch === true,
           localLookup: false,
         },
       });
