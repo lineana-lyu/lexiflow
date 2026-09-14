@@ -128,6 +128,7 @@
       data.activities.push({id:uid(),type:"stage-complete",cardId:c.id,stage:"memorize",round:s.round,initialMemoryWeak:initialWeak,finalRoundPassed,commandId:cmd,at:now.toISOString(),authority:"memorize-stage-v3"});
       await save(data);
       clearSession(card.id);
+      saving=false;
       if(window.LexiFlowStudySessionV3?.advanceWithinBucket?.(card.id,"memorize"))return;
       location.reload();
     }catch(err){
