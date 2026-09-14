@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/one-shot-v7-addflow-pronunciation.yml
       - scripts/migrate-v7-addflow-pronunciation.py
+      - scripts/migrate-v7-addflow-authority-fix.py
 permissions:
   contents: write
 jobs:
@@ -22,7 +23,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply migration
-        run: python scripts/migrate-v7-addflow-pronunciation.py
+        run: |
+          python scripts/migrate-v7-addflow-pronunciation.py
+          python scripts/migrate-v7-addflow-authority-fix.py
       - name: Syntax checks
         run: |
           node --check public/app.js
