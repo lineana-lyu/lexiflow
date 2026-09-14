@@ -671,7 +671,7 @@
     const candidates=audioCandidates(result);
     // One click must produce one continuous recording. Never concatenate
     // multiple dictionary files with different voices/pauses into a phrase.
-    return candidates.length?[candidates[0]]:[];
+    return candidates.length===1?[candidates[0]]:[];
   }
 
   async function speak(word,audioUrl="",audioUrls=[]){

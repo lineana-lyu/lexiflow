@@ -65,7 +65,24 @@ function localLookupResult(word, mode = "primary", sourceQuery = "") {
 }
 
 function localPhraseResult(phrase, mode = "primary") {
-  return phraseDictionary.lookupExact(phrase, mode, { sourceQuery:phrase });
+  const curated = phraseDictionary.lookupExact(phrase, mode, { sourceQuery:phrase });
+  if (curated) return curated;
+  // ECDICT has broad exact multi-word coverage. Use it only for phrase semantics;
+  // its legacy phonetic field is not trusted for a whole expression because some
+  // rows contain only the first component pronunciation.
+  const fallback = ecdict.lookupExact(phrase, mode, { sourceQuery:phrase });
+  if (!fallback || !/\s/.test(String(fallback.word || ""))) return null;
+  return {
+    ...fallback,
+    phonetic:"",
+    audioUrl:"",
+    audioUrls:[],
+    pronunciationSource:"",
+    phraseCard:true,
+    queryKind:"phrase",
+    dictionarySource:`${fallback.dictionarySource || "ECDICT"} · phrase fallback`,
+    phraseFallback:true,
+  };
 }
 
 function localChineseResult(query) {
@@ -177,6 +194,24 @@ function requestInnerJson(pathname, { method = "GET", body = null, timeoutMs = 5
   });
 }
 
+async function runInnerAiText(prompt, timeoutMs = 30000) {
+  const safeTimeout = Math.max(5000, Math.min(Number(timeoutMs) || 30000, 90000));
+  const response = await requestInnerJson("/api/internal/codex", {
+    method:"POST",
+    body:{ prompt:String(prompt || ""), timeoutMs:safeTimeout },
+    timeoutMs:safeTimeout + 8000,
+  });
+  if (response.status < 200 || response.status >= 300 || !response.payload?.ok) {
+    const err = new Error(clean(response.payload?.userError?.message || response.payload?.error || "AI transport unavailable"));
+    err.code = clean(response.payload?.code) || "AI_TRANSPORT_UNAVAILABLE";
+    throw err;
+  }
+  return String(response.payload.stdout || "");
+}
+
+if (typeof expressionQuery.setAiRunner === "function") expressionQuery.setAiRunner(runInnerAiText);
+if (typeof exampleEnrichment.setAiRunner === "function") exampleEnrichment.setAiRunner(runInnerAiText);
+
 async function handleEnglishExpression(res, body) {
   let parsed;
   try {
@@ -218,6 +253,39 @@ async function handleEnglishExpression(res, body) {
   }
 }
 
+function phoneticToken(value) {
+  return clean(value).replace(/^\/+|\/+$/g, "").replace(/^\[+|\]+$/g, "").trim();
+}
+
+function phraseParts(value) {
+  return clean(value)
+    .split(/\s+/)
+    .map(part => part.replace(/^[^A-Za-z'-]+|[^A-Za-z'-]+$/g, ""))
+    .filter(Boolean);
+}
+
+async function composePhrasePhonetic(expression) {
+  const parts = phraseParts(expression);
+  if (parts.length < 2 || parts.length > 10) return "";
+  const tokens = [];
+  for (const part of parts) {
+    let token = phoneticToken(localLookupResult(part.toLowerCase(), "primary", part)?.phonetic);
+    if (!token) {
+      try {
+        const remote = await requestInnerJson("/api/dictionary/pronunciation", {
+          method:"POST",
+          body:{ word:part.toLowerCase() },
+          timeoutMs:7000,
+        });
+        token = phoneticToken(remote.payload?.result?.phonetic);
+      } catch {}
+    }
+    if (!token) return "";
+    tokens.push(token);
+  }
+  return `/${tokens.join(" ")}/`;
+}
+
 async function handlePronunciation(res, body) {
   let parsed;
   try {
@@ -234,58 +302,102 @@ async function handlePronunciation(res, body) {
   }
 
   const queryKind = expressionQuery.classifyEnglishQuery(word);
-  // Multi-word expressions get whole-phrase IPA from the local Open Dictionary subset.
-  // Audio still prefers an exact whole-expression dictionary recording; component recordings never own phrase playback.
   const local = queryKind === "phrase" ? localPhraseResult(word, "primary") : localLookupResult(word, "primary", word);
-  if (local?.audioUrl) {
+
+  if (queryKind === "phrase") {
+    let remotePronunciation = null;
+    try {
+      const remote = await requestInnerJson("/api/dictionary/pronunciation", {
+        method:"POST",
+        body:{ word },
+        timeoutMs:10000,
+      });
+      if (remote.status >= 200 && remote.status < 300) remotePronunciation = remote.payload?.result || null;
+    } catch {}
+
+    const remoteExact = remotePronunciation?.exactMatch === true;
+    const rawAudio = [
+      clean(remotePronunciation?.audioUrl),
+      ...(Array.isArray(remotePronunciation?.audioUrls) ? remotePronunciation.audioUrls.map(clean) : []),
+    ].filter(Boolean);
+    const uniqueAudio = Array.from(new Set(rawAudio));
+    // Phrase dictionary playback has a single-owner rule: only one exact whole
+    // expression recording may play. Component arrays are never exposed.
+    const exactWholeAudio = remoteExact && uniqueAudio.length ? uniqueAudio[0] : "";
+
+    let phrasePhonetic = clean(local?.phonetic);
+    let phoneticSource = phrasePhonetic ? clean(local?.pronunciationSource) : "";
+    if (!phrasePhonetic && remoteExact && clean(remotePronunciation?.phonetic)) {
+      phrasePhonetic = clean(remotePronunciation.phonetic);
+      phoneticSource = clean(remotePronunciation.pronunciationSource) || "merriam-webster-whole-expression";
+    }
+    if (!phrasePhonetic) {
+      phrasePhonetic = await composePhrasePhonetic(word);
+      if (phrasePhonetic) phoneticSource = "composed-exact-word-ipa";
+    }
+
     writeJson(res, 200, {
-      ok: true,
-      result: {
-        phonetic: local.phonetic || "",
-        audioUrl: local.audioUrl,
-        audioUrls: Array.isArray(local.audioUrls) ? local.audioUrls : [local.audioUrl],
-        pronunciationSource: local.pronunciationSource || "wikimedia-commons",
-        exactMatch: true,
-        dictionaryAudio: true,
-        localLookup: true,
+      ok:true,
+      result:{
+        phonetic:phrasePhonetic,
+        audioUrl:exactWholeAudio,
+        audioUrls:exactWholeAudio ? [exactWholeAudio] : [],
+        pronunciationSource:exactWholeAudio
+          ? (clean(remotePronunciation?.pronunciationSource) || "merriam-webster-whole-expression")
+          : phoneticSource,
+        exactMatch:Boolean(local?.dictionaryExact || remoteExact),
+        wholeExpressionPhonetic:Boolean(phrasePhonetic),
+        dictionaryAudio:Boolean(exactWholeAudio),
+        wholeExpressionAudio:Boolean(exactWholeAudio),
+        localLookup:Boolean(local),
+        pronunciationPolicy:"whole-expression-v2",
       },
     });
     return true;
   }
+
+  if (local?.audioUrl) {
+    writeJson(res, 200, {
+      ok:true,
+      result:{
+        phonetic:local.phonetic || "",
+        audioUrl:local.audioUrl,
+        audioUrls:Array.isArray(local.audioUrls) ? local.audioUrls : [local.audioUrl],
+        pronunciationSource:local.pronunciationSource || "wikimedia-commons",
+        exactMatch:true,
+        dictionaryAudio:true,
+        wholeExpressionAudio:true,
+        wholeExpressionPhonetic:Boolean(local.phonetic),
+        localLookup:true,
+      },
+    });
+    return true;
+  }
+
   try {
     const remote = await requestInnerJson("/api/dictionary/pronunciation", {
-      method: "POST",
-      body: { word },
-      timeoutMs: 10000,
+      method:"POST",
+      body:{ word },
+      timeoutMs:10000,
     });
     const pronunciation = remote.payload?.result;
-    const rawAudioUrl = clean(pronunciation?.audioUrl);
-    const rawAudioUrls = Array.isArray(pronunciation?.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
-    const hasAudio = Boolean(rawAudioUrl || rawAudioUrls.length);
-    const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true;
-    const candidateAudioUrls = Array.from(new Set([rawAudioUrl, ...rawAudioUrls].filter(Boolean)));
-    // One dictionary recording owns one expression. Even if an upstream sends
-    // several audio files, never concatenate them into a single phrase playback.
-    const singleAudio = componentOnly ? "" : (candidateAudioUrls[0] || "");
-    const safeAudioUrl = singleAudio;
-    const safeAudioUrls = singleAudio ? [singleAudio] : [];
-    const dictionaryAudio = Boolean(singleAudio);
-    if (remote.status >= 200 && remote.status < 300 && pronunciation && (hasAudio || clean(pronunciation.phonetic))) {
+    const candidates = Array.from(new Set([
+      clean(pronunciation?.audioUrl),
+      ...(Array.isArray(pronunciation?.audioUrls) ? pronunciation.audioUrls.map(clean) : []),
+    ].filter(Boolean)));
+    if (remote.status >= 200 && remote.status < 300 && pronunciation && (candidates.length || clean(pronunciation.phonetic))) {
+      const singleAudio = candidates[0] || "";
       writeJson(res, 200, {
-        ok: true,
-        result: {
+        ok:true,
+        result:{
           ...pronunciation,
-          phonetic: queryKind === "phrase"
-            ? (clean(local?.phonetic) || clean(pronunciation.phonetic))
-            : (clean(pronunciation.phonetic) || clean(local?.phonetic)),
-          audioUrl: safeAudioUrl,
-          audioUrls: safeAudioUrls,
-          pronunciationSource: componentOnly && clean(pronunciation.phonetic)
-            ? "merriam-webster-components-phonetic"
-            : clean(pronunciation.pronunciationSource),
-          dictionaryAudio,
-          wholeExpressionAudio: queryKind !== "phrase" || (pronunciation?.exactMatch === true && Boolean(singleAudio)),
-          localLookup: false,
+          phonetic:clean(pronunciation.phonetic) || clean(local?.phonetic),
+          audioUrl:singleAudio,
+          audioUrls:singleAudio ? [singleAudio] : [],
+          dictionaryAudio:Boolean(singleAudio),
+          wholeExpressionAudio:true,
+          wholeExpressionPhonetic:Boolean(clean(pronunciation.phonetic) || clean(local?.phonetic)),
+          localLookup:false,
         },
       });
       return true;
@@ -294,16 +406,17 @@ async function handlePronunciation(res, body) {
 
   if (local?.phonetic) {
     writeJson(res, 200, {
-      ok: true,
-      result: {
-        phonetic: local.phonetic,
-        audioUrl: "",
-        audioUrls: [],
-        pronunciationSource: queryKind === "phrase" ? (local.pronunciationSource || "open-dictionary-wiktionary-ipa") : "ecdict-phonetic",
-        exactMatch: true,
-        wholeExpressionAudio: queryKind !== "phrase",
-        dictionaryAudio: false,
-        localLookup: true,
+      ok:true,
+      result:{
+        phonetic:local.phonetic,
+        audioUrl:"",
+        audioUrls:[],
+        pronunciationSource:"ecdict-phonetic",
+        exactMatch:true,
+        wholeExpressionAudio:true,
+        wholeExpressionPhonetic:true,
+        dictionaryAudio:false,
+        localLookup:true,
       },
     });
     return true;
@@ -585,6 +698,7 @@ async function forwardStatus(req, res) {
         const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
         const local = ecdict.status();
         const core = coreLexicon.status();
+        const phrases = phraseDictionary.status();
         payload.dictionary = {
           ...(payload.dictionary || {}),
           provider: core.available ? "LexiFlow Core + ECDICT + Merriam-Webster 增强" : (local.available ? "ECDICT 本地词典 + Merriam-Webster / AI 例句补全" : "Merriam-Webster's Learner's Dictionary（本地词库未准备）"),
@@ -596,6 +710,9 @@ async function forwardStatus(req, res) {
           coreSenses: core.senses,
           coreChineseAliases: core.zhAliases,
           coreDatabase: core.path ? path.basename(core.path) : "",
+          phraseAvailable: phrases.available,
+          phraseEntries: phrases.phrases,
+          phraseDatabase: phrases.path ? path.basename(phrases.path) : "",
           fallbackConfigured: Boolean(payload.dictionary?.configured),
           configured: core.available || local.available || Boolean(payload.dictionary?.configured),
           exampleHydration: true,
@@ -619,6 +736,9 @@ function createProxy() {
     }
 
     const url = new URL(req.url, `http://${HOST}:${OUTER_PORT}`);
+    if (url.pathname.startsWith("/api/internal/")) {
+      return writeJson(res, 404, { ok:false, code:"NOT_FOUND", error:"Not found" });
+    }
     if (req.method === "OPTIONS") {
       const origin = String(req.headers.origin || "");
       if (origin) res.setHeader("Access-Control-Allow-Origin", origin);

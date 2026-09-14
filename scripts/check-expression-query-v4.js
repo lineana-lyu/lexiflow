@@ -15,6 +15,9 @@ const memorize = fs.readFileSync(path.join(root, "public", "memorize-stage-v3.js
 const review = fs.readFileSync(path.join(root, "public", "review-session-v3.js"), "utf8");
 const productUx = fs.readFileSync(path.join(root, "public", "product-ux.js"), "utf8");
 const productCss = fs.readFileSync(path.join(root, "public", "product-ux.css"), "utf8");
+const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
+const expressionSource = fs.readFileSync(path.join(root, "lib", "expression-query.js"), "utf8");
+const enrichmentSource = fs.readFileSync(path.join(root, "lib", "example-enrichment.js"), "utf8");
 
 assert.strictEqual(expressionQuery.classifyEnglishQuery("address"), "word", "single headword must remain a word query");
 assert.strictEqual(expressionQuery.classifyEnglishQuery("take it for granted"), "phrase", "multiword expression must remain a whole phrase query");
@@ -40,7 +43,7 @@ assert(app.includes("async function playDictionaryAudio")&&app.includes("for(con
 assert(runtime.includes('const localPhrase = localPhraseResult(word, mode)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary first and AI whole-expression resolution only as fallback");
 assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('if (local?.phonetic)'), "multiword phrases must prefer exact local whole-phrase IPA instead of a one-component ECDICT phonetic");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
-assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!clean(pronunciation?.phonetic))"), "phrase lookup must prefer whole-expression IPA and only compose component IPA when whole-expression IPA is unavailable");
+assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true")&&hydration.includes("wholeExpressionPhonetic:true"), "phrase lookup must reject partial phonetics and compose a complete fallback only when whole-expression IPA is unavailable");
 assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
 assert(productUx.includes('[data-m2=\\"speak\\"]')&&productUx.includes("subtree: true"), "speaker decoration must reach nested learning surfaces");
 assert(memorize.includes('saving=false;\n      if(window.LexiFlowStudySessionV3?.advanceWithinBucket?.(card.id,"memorize"))return;'), "Memorize must release its save lock before rotating to the next recall card");
@@ -49,6 +52,11 @@ const speakIndex=app.indexOf('async function speak(word,audioUrl="",audioUrls=[]
 const dictionaryAttemptIndex=app.indexOf('api("/api/dictionary/pronunciation"',speakIndex);
 const naturalFallbackIndex=app.indexOf('playNaturalTts(value)',dictionaryAttemptIndex);
 assert(speakIndex>=0&&dictionaryAttemptIndex>speakIndex&&naturalFallbackIndex>dictionaryAttemptIndex,"word pronunciation order must remain dictionary audio -> natural synthesis -> system fallback");
-assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true')&&runtime.includes('wholeExpressionAudio'), "phrase pronunciation must combine exact whole-phrase IPA with exact-recording-only audio ownership");
+assert(runtime.includes("composePhrasePhonetic")&&runtime.includes('pronunciationPolicy:"whole-expression-v2"')&&runtime.includes("phraseFallback:true"), "phrase pronunciation must compose a complete IPA when necessary and keep phrase semantics on an exact local fallback");
+assert(runtime.includes("expressionQuery.setAiRunner(runInnerAiText)")&&runtime.includes("exampleEnrichment.setAiRunner(runInnerAiText)"), "all outer-runtime AI helpers must share the inner verified AI gateway");
+assert(server.includes('/api/internal/codex')&&server.includes('runCodex(prompt, { timeoutMs, workspaceWrite:false })'), "the inner AI gateway must use the same runCodex transport verified by Settings");
+assert(expressionSource.includes("externalAiRunner")&&expressionSource.includes("setAiRunner"), "expression lookup must support shared AI transport injection");
+assert(enrichmentSource.includes("externalAiRunner")&&enrichmentSource.includes("setAiRunner"), "example enrichment must support shared AI transport injection");
+assert(server.includes('"Cache-Control": "no-store"'), "local UI assets must not stay on a stale cached JavaScript build after pull/restart");
 assert(productCss.includes("width:38px!important")&&productCss.includes("flex:0 0 38px!important")&&productCss.includes("aspect-ratio:1/1!important")&&productCss.includes("border-radius:50%!important"), "all decorated speaker buttons must keep the same non-deforming canonical card-creation geometry");
 console.log("Expression query V4 checks passed");

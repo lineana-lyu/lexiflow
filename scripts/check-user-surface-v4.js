@@ -29,7 +29,7 @@ assert(enrichment.includes("runCodex(prompt, 28000)"),"example translation must 
 assert(electron.includes('path.join(__dirname, "public", "icon.png")')&&electron.includes("nativeImage.createFromPath"),"desktop window must use the same source icon as the app UI");
 assert(!electron.includes("APP_ICON_DATA_URL"),"stale embedded desktop icon must not return");
 assert(app.includes("verifiedWholeExpressionAudio")&&app.includes("if(!isExpression){")&&app.includes("target.audioUrl=nextAudioUrl"),"phrase playback must revalidate exact whole-expression audio and clear stale saved audio");
-assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydration.includes("result.audioUrl = first")&&hydration.includes("if(isPhrase&&!clean(pronunciation?.phonetic))"),"lookup hydration must remove component audio and preserve whole-expression IPA priority");
+assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydration.includes("result.audioUrl = first")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true"),"lookup hydration must remove component audio and reject partial phrase IPA");
 assert(kokoro.includes("if(!isExpression && (audio || audios.length))return;"),"startup fallback must synthesize expressions instead of trusting supplied component audio");
-assert(runtime.includes('const singleAudio = componentOnly ? "" : (candidateAudioUrls[0] || "")')&&runtime.includes("Boolean(singleAudio)"),"runtime must expose at most one verified continuous phrase recording");
+assert(runtime.includes('pronunciationPolicy:"whole-expression-v2"')&&runtime.includes("exactWholeAudio")&&runtime.includes("composePhrasePhonetic"),"runtime must expose one verified phrase recording or synthesize the complete expression");
 console.log("User surface V4 checks passed.");

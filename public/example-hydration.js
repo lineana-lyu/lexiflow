@@ -49,7 +49,8 @@
     const rawAudioUrls = Array.isArray(pronunciation.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
     const isPhrase = /\s/.test(normalizeWord(result.word));
 
-    if (phonetic) result.phonetic = phonetic;
+    const wholePhrasePhonetic = !isPhrase || pronunciation.wholeExpressionPhonetic === true;
+    if (phonetic && wholePhrasePhonetic) result.phonetic = phonetic;
 
     if (isPhrase) {
       const verified = pronunciation.dictionaryAudio === true && pronunciation.wholeExpressionAudio === true && pronunciation.exactMatch === true;
@@ -69,7 +70,7 @@
     if (pronunciation.pronunciationSource) result.pronunciationSource = clean(pronunciation.pronunciationSource);
     if (!currentLookupMatches(result.word)) return;
     const phoneticNode = document.querySelector(".learning-card-wordtop .phonetic");
-    if (phoneticNode && phonetic) phoneticNode.textContent = phonetic.startsWith("/") || phonetic.startsWith("[") ? phonetic : `/${phonetic}/`;
+    if (phoneticNode && phonetic && wholePhrasePhonetic) phoneticNode.textContent = phonetic.startsWith("/") || phonetic.startsWith("[") ? phonetic : `/${phonetic}/`;
     const speaker = document.querySelector(".learning-card-wordtop .speaker[data-action=\"speak\"]");
     if (speaker) {
       speaker.dataset.audio = clean(result.audioUrl);
@@ -117,9 +118,9 @@
       pronunciation=await requestPronunciation(result.word);
       if(pronunciation)patchPronunciation(result,pronunciation);
     }
-    if(isPhrase&&!clean(pronunciation?.phonetic)){
+    if(isPhrase&&pronunciation?.wholeExpressionPhonetic!==true){
       const composite=await composePhrasePhonetic(result.word);
-      if(composite)patchPronunciation(result,{phonetic:composite});
+      if(composite)patchPronunciation(result,{phonetic:composite,wholeExpressionPhonetic:true,dictionaryAudio:false,wholeExpressionAudio:false,exactMatch:false});
     }
   }
 

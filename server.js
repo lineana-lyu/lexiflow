@@ -2171,7 +2171,7 @@ async function serveFile(res, baseDir, relativePath) {
   try {
     const stat = await fsp.stat(filePath);
     if (!stat.isFile()) throw new Error("not file");
-    res.writeHead(200, { "Content-Type": mimeType(filePath), "Content-Length": stat.size });
+    res.writeHead(200, { "Content-Type": mimeType(filePath), "Content-Length": stat.size, "Cache-Control": "no-store" });
     fs.createReadStream(filePath).pipe(res);
   } catch {
     sendText(res, 404, "Not found");
@@ -2399,6 +2399,21 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, err.code === "DICTIONARY_KEY_MISSING" ? 400 : 502, {
           ok: false, code: friendly.code, error: friendly.message, userError: friendly
         });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/internal/codex") {
+      const body = await readJsonBody(req, 128 * 1024);
+      const prompt = String(body.prompt || "").trim();
+      if (!prompt) return sendJson(res, 400, { ok:false, code:"AI_PROMPT_REQUIRED", error:"缺少 AI 请求内容" });
+      const requestedTimeout = Number(body.timeoutMs || 30000);
+      const timeoutMs = Math.max(5000, Math.min(Number.isFinite(requestedTimeout) ? requestedTimeout : 30000, 90000));
+      try {
+        const result = await runCodex(prompt, { timeoutMs, workspaceWrite:false });
+        return sendJson(res, 200, { ok:true, stdout:String(result.stdout || ""), transport:result.transport || "" });
+      } catch (err) {
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok:false, code:friendly.code, error:friendly.message, userError:friendly });
       }
     }
 
