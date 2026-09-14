@@ -263,9 +263,13 @@ async function handlePronunciation(res, body) {
     const rawAudioUrls = Array.isArray(pronunciation?.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
     const hasAudio = Boolean(rawAudioUrl || rawAudioUrls.length);
     const componentOnly = queryKind === "phrase" && pronunciation?.exactMatch !== true;
-    const safeAudioUrl = componentOnly ? "" : rawAudioUrl;
-    const safeAudioUrls = componentOnly ? [] : (rawAudioUrls.length ? rawAudioUrls : (safeAudioUrl ? [safeAudioUrl] : []));
-    const dictionaryAudio = Boolean(!componentOnly && (safeAudioUrl || safeAudioUrls.length));
+    const candidateAudioUrls = Array.from(new Set([rawAudioUrl, ...rawAudioUrls].filter(Boolean)));
+    // One dictionary recording owns one expression. Even if an upstream sends
+    // several audio files, never concatenate them into a single phrase playback.
+    const singleAudio = componentOnly ? "" : (candidateAudioUrls[0] || "");
+    const safeAudioUrl = singleAudio;
+    const safeAudioUrls = singleAudio ? [singleAudio] : [];
+    const dictionaryAudio = Boolean(singleAudio);
     if (remote.status >= 200 && remote.status < 300 && pronunciation && (hasAudio || clean(pronunciation.phonetic))) {
       writeJson(res, 200, {
         ok: true,
@@ -280,7 +284,7 @@ async function handlePronunciation(res, body) {
             ? "merriam-webster-components-phonetic"
             : clean(pronunciation.pronunciationSource),
           dictionaryAudio,
-          wholeExpressionAudio: queryKind !== "phrase" || pronunciation?.exactMatch === true,
+          wholeExpressionAudio: queryKind !== "phrase" || (pronunciation?.exactMatch === true && Boolean(singleAudio)),
           localLookup: false,
         },
       });

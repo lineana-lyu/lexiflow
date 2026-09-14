@@ -45,19 +45,35 @@
   function patchPronunciation(result, pronunciation) {
     if (!result || !pronunciation) return;
     const phonetic = clean(pronunciation.phonetic);
-    const audioUrl = clean(pronunciation.audioUrl);
-    const audioUrls = Array.isArray(pronunciation.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
+    const rawAudioUrl = clean(pronunciation.audioUrl);
+    const rawAudioUrls = Array.isArray(pronunciation.audioUrls) ? pronunciation.audioUrls.map(clean).filter(Boolean) : [];
+    const isPhrase = /\s/.test(normalizeWord(result.word));
+
     if (phonetic) result.phonetic = phonetic;
-    if (audioUrl) result.audioUrl = audioUrl;
-    if (audioUrls.length) result.audioUrls = audioUrls;
+
+    if (isPhrase) {
+      const verified = pronunciation.dictionaryAudio === true && pronunciation.wholeExpressionAudio === true && pronunciation.exactMatch === true;
+      const first = verified ? (rawAudioUrl || rawAudioUrls[0] || "") : "";
+      // Important: assign empty values too. This actively removes legacy
+      // component audio that may already be attached to the phrase result.
+      result.audioUrl = first;
+      result.audioUrls = first ? [first] : [];
+      result.dictionaryAudio = Boolean(first);
+      result.wholeExpressionAudio = Boolean(first);
+      result.pronunciationExactMatch = pronunciation.exactMatch === true;
+    } else {
+      if (rawAudioUrl) result.audioUrl = rawAudioUrl;
+      if (rawAudioUrls.length) result.audioUrls = rawAudioUrls;
+    }
+
     if (pronunciation.pronunciationSource) result.pronunciationSource = clean(pronunciation.pronunciationSource);
     if (!currentLookupMatches(result.word)) return;
     const phoneticNode = document.querySelector(".learning-card-wordtop .phonetic");
     if (phoneticNode && phonetic) phoneticNode.textContent = phonetic.startsWith("/") || phonetic.startsWith("[") ? phonetic : `/${phonetic}/`;
     const speaker = document.querySelector(".learning-card-wordtop .speaker[data-action=\"speak\"]");
     if (speaker) {
-      speaker.dataset.audio = audioUrl;
-      speaker.dataset.audios = JSON.stringify(audioUrls);
+      speaker.dataset.audio = clean(result.audioUrl);
+      speaker.dataset.audios = JSON.stringify(Array.isArray(result.audioUrls) ? result.audioUrls : []);
     }
   }
 
@@ -101,7 +117,7 @@
       pronunciation=await requestPronunciation(result.word);
       if(pronunciation)patchPronunciation(result,pronunciation);
     }
-    if(isPhrase&&!pronunciation?.dictionaryAudio){
+    if(isPhrase&&!clean(pronunciation?.phonetic)){
       const composite=await composePhrasePhonetic(result.word);
       if(composite)patchPronunciation(result,{phonetic:composite});
     }

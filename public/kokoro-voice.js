@@ -151,7 +151,7 @@
     // If the shared bridge is unavailable during startup, retain the old fallback:
     // exact dictionary recordings remain owned by the base surface; expressions
     // without an exact recording use whole-expression natural synthesis.
-    if(audio || (!isExpression && audios.length))return;
+    if(!isExpression && (audio || audios.length))return;
     event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
     await play(word,speaker);
   },true);

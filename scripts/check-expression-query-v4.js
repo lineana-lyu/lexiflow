@@ -40,7 +40,7 @@ assert(app.includes("async function playDictionaryAudio")&&app.includes("for(con
 assert(runtime.includes('const localPhrase = localPhraseResult(word, mode)')&&runtime.includes('expressionQuery.resolveEnglishExpression(word)'), "direct phrase lookup must use local phrase dictionary first and AI whole-expression resolution only as fallback");
 assert(runtime.includes('const local = queryKind === "phrase" ? localPhraseResult(word, "primary")')&&runtime.includes('if (local?.phonetic)'), "multiword phrases must prefer exact local whole-phrase IPA instead of a one-component ECDICT phonetic");
 assert(app.includes('!/\\s/.test(qNormalized)'), "saved-card fast path must be limited to one-word English headwords so stale phrases cannot shadow whole-expression resolution");
-assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!pronunciation?.dictionaryAudio)"), "phrase lookup must show complete phrase phonetics without stitching component audio");
+assert(hydration.includes("composePhrasePhonetic")&&hydration.includes("if(isPhrase&&!clean(pronunciation?.phonetic))"), "phrase lookup must prefer whole-expression IPA and only compose component IPA when whole-expression IPA is unavailable");
 assert(memorize.includes("LexiFlowPronunciationV3")&&review.includes("LexiFlowPronunciationV3"), "Memorize and Review must reuse the shared dictionary-first pronunciation bridge");
 assert(productUx.includes('[data-m2=\\"speak\\"]')&&productUx.includes("subtree: true"), "speaker decoration must reach nested learning surfaces");
 assert(memorize.includes('saving=false;\n      if(window.LexiFlowStudySessionV3?.advanceWithinBucket?.(card.id,"memorize"))return;'), "Memorize must release its save lock before rotating to the next recall card");

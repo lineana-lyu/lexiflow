@@ -289,20 +289,47 @@
     const cardId=String(card?.id||"");
     const word=String(card?.word||"").trim();
     const existingAudios=Array.isArray(card?.audioUrls)?card.audioUrls.filter(Boolean):[];
-    if(!cardId || !word || card.audioUrl || existingAudios.length || state.pronunciationHydration[cardId]) return;
+    const isPhrase=isMultiWordExpression(word);
+    if(!cardId || !word || state.pronunciationHydration[cardId]) return;
+    // A saved phrase may contain legacy component audio (for example hang.mp3
+    // stored on a "hang out" card). Never treat its mere presence as proof that
+    // the recording belongs to the whole expression. Phrases are always
+    // revalidated once per session; single words retain the fast path.
+    if(!isPhrase && (card.audioUrl || existingAudios.length)) return;
     state.pronunciationHydration[cardId]="loading";
     try{
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word}});
       const target=getCard(cardId);
       if(!target){state.pronunciationHydration[cardId]="done";return;}
-      const phonetic=String(payload.result?.phonetic||"").trim();
-      const audioUrl=String(payload.result?.audioUrl||"").trim();
-      const audioUrls=Array.isArray(payload.result?.audioUrls)?payload.result.audioUrls.map(String).filter(Boolean):[];
-      if(phonetic) target.phonetic=phonetic;
-      if(audioUrl && !target.audioUrl) target.audioUrl=audioUrl;
-      if(audioUrls.length) target.audioUrls=audioUrls;
-      if(payload.result?.pronunciationSource) target.pronunciationSource=String(payload.result.pronunciationSource);
-      if(phonetic || audioUrl || audioUrls.length){target.updatedAt=new Date().toISOString();saveData();}
+      const result=payload?.result||{};
+      const phonetic=String(result.phonetic||"").trim();
+      let changed=false;
+      if(phonetic && target.phonetic!==phonetic){target.phonetic=phonetic;changed=true;}
+
+      if(isPhrase){
+        const verified=verifiedWholeExpressionAudio(result);
+        const nextAudioUrl=verified[0]||"";
+        const nextAudioUrls=nextAudioUrl?[nextAudioUrl]:[];
+        if(String(target.audioUrl||"")!==nextAudioUrl){target.audioUrl=nextAudioUrl;changed=true;}
+        if(JSON.stringify(Array.isArray(target.audioUrls)?target.audioUrls.filter(Boolean):[])!==JSON.stringify(nextAudioUrls)){
+          target.audioUrls=nextAudioUrls;changed=true;
+        }
+        const exact=Boolean(nextAudioUrl);
+        if(target.dictionaryAudio!==exact){target.dictionaryAudio=exact;changed=true;}
+        if(target.wholeExpressionAudio!==exact){target.wholeExpressionAudio=exact;changed=true;}
+        if(target.pronunciationExactMatch!==(result.exactMatch===true)){target.pronunciationExactMatch=result.exactMatch===true;changed=true;}
+        const source=String(result.pronunciationSource||"").trim();
+        if(String(target.pronunciationSource||"")!==source){target.pronunciationSource=source;changed=true;}
+      }else{
+        const audioUrl=String(result.audioUrl||"").trim();
+        const audioUrls=Array.isArray(result.audioUrls)?result.audioUrls.map(String).filter(Boolean):[];
+        if(audioUrl && !target.audioUrl){target.audioUrl=audioUrl;changed=true;}
+        if(audioUrls.length && JSON.stringify(target.audioUrls||[])!==JSON.stringify(audioUrls)){target.audioUrls=audioUrls;changed=true;}
+        if(result.pronunciationSource && target.pronunciationSource!==String(result.pronunciationSource)){
+          target.pronunciationSource=String(result.pronunciationSource);changed=true;
+        }
+      }
+      if(changed){target.updatedAt=new Date().toISOString();saveData();}
       state.pronunciationHydration[cardId]="done";
       render();
     }catch{
@@ -622,21 +649,59 @@
     return false;
   }
 
+  function isMultiWordExpression(value){
+    return /\s/.test(String(value||"").trim());
+  }
+
+  function audioCandidates(result){
+    const list=[];
+    const direct=String(result?.audioUrl||"").trim();
+    if(direct)list.push(direct);
+    if(Array.isArray(result?.audioUrls)){
+      for(const src of result.audioUrls){const value=String(src||"").trim();if(value&&!list.includes(value))list.push(value);}
+    }
+    return list;
+  }
+
+  function verifiedWholeExpressionAudio(result){
+    // Transferable dictionary rule: audio belongs to an expression only when
+    // the dictionary matched that exact headword and explicitly marks the
+    // recording as whole-expression audio. Component recordings never qualify.
+    if(result?.dictionaryAudio!==true || result?.wholeExpressionAudio!==true || result?.exactMatch!==true)return [];
+    const candidates=audioCandidates(result);
+    // One click must produce one continuous recording. Never concatenate
+    // multiple dictionary files with different voices/pauses into a phrase.
+    return candidates.length?[candidates[0]]:[];
+  }
+
   async function speak(word,audioUrl="",audioUrls=[]){
     const value=String(word||"").trim();
     if(!value)return;
-    const supplied=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
-    if(audioUrl)supplied.unshift(audioUrl);
-    if(await playDictionaryAudio(supplied))return;
+    const isExpression=isMultiWordExpression(value);
+
+    // Existing/saved audio is trusted only for a single lexical word. A phrase
+    // may carry stale per-word recordings from older builds, so it must first
+    // be revalidated by the pronunciation endpoint.
+    if(!isExpression){
+      const supplied=Array.isArray(audioUrls)?audioUrls.filter(Boolean):[];
+      if(audioUrl)supplied.unshift(audioUrl);
+      if(await playDictionaryAudio(supplied))return;
+    }
 
     try{
       const payload=await api("/api/dictionary/pronunciation",{method:"POST",body:{word:value}});
       const result=payload?.result||{};
-      const resolved=Array.isArray(result.audioUrls)?result.audioUrls.filter(Boolean):[];
-      if(result.audioUrl)resolved.unshift(result.audioUrl);
-      if(await playDictionaryAudio(resolved))return;
+      if(isExpression){
+        const verified=verifiedWholeExpressionAudio(result);
+        if(await playDictionaryAudio(verified))return;
+      }else{
+        const resolved=audioCandidates(result);
+        if(await playDictionaryAudio(resolved))return;
+      }
     }catch{}
 
+    // No verified whole-expression dictionary recording: synthesize the entire
+    // expression in one TTS request so voice, prosody and timing stay coherent.
     if(await playNaturalTts(value))return;
     toast("当前没有可用的自然发音，请稍后重试");
   }
