@@ -31,6 +31,14 @@ jobs:
           raw=source[start:end].splitlines()
           code="\n".join(line[10:] if line.startswith("          ") else line for line in raw)
           exec(compile(code,'visualize-product-fix','exec'),{})
+
+          check_path=Path('scripts/check-stage-renderers-v3.js')
+          check=check_path.read_text(encoding='utf-8')
+          old='assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner\'s existing association instead of inventing the first one");'
+          new='assert(visual.includes("userScene:note"),"Visualize AI assistance must anchor refinement on the learner\'s own scene instead of treating it as an old scene to avoid");'
+          if old not in check:
+              raise SystemExit('renderer user-scene assertion target not found')
+          check_path.write_text(check.replace(old,new,1),encoding='utf-8')
           PY
 
       - name: Validate product fix
@@ -41,6 +49,7 @@ jobs:
           node --check public/visualize-actions-v3.js
           node --check public/stage-transition-v3.js
           node --check server.js
+          node --check scripts/check-stage-renderers-v3.js
           node scripts/check-visualize-product-flow-v3.js
           npm run check:learning
 
