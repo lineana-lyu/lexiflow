@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - release/v0.8.5-publish
-    paths:
-      - .github/workflows/one-shot-publish-v0.8.5.yml
 
 permissions:
   contents: write
@@ -17,17 +15,17 @@ jobs:
     timeout-minutes: 60
     env:
       GH_TOKEN: ${{ github.token }}
-      TARGET_SHA: 9e7d74dde97bba38630c1668efa73c9559982fb8
-      BUILD_RUN_ID: "34937534638"
-      LEARNING_RUN_ID: "34937534558"
+      TARGET_SHA: 1621c3797c7351137ca257d9a44d7afd0c87f7d1
+      BUILD_RUN_ID: "34937733337"
+      LEARNING_RUN_ID: "34937733261"
       TAG: v0.8.5
     steps:
-      - name: Wait for release-candidate checks
+      - name: Verify release-candidate checks
         shell: bash
         run: |
           set -euo pipefail
-          gh run watch "$LEARNING_RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
-          gh run watch "$BUILD_RUN_ID" --repo "$GITHUB_REPOSITORY" --exit-status
+          test "$(gh run view "$LEARNING_RUN_ID" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion')" = "success"
+          test "$(gh run view "$BUILD_RUN_ID" --repo "$GITHUB_REPOSITORY" --json conclusion --jq '.conclusion')" = "success"
 
       - name: Download unsigned Windows artifacts
         shell: bash
