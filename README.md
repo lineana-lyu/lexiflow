@@ -1,4 +1,8 @@
-# LexiFlow V7
+# LexiFlow
+
+**Local-first English vocabulary learning desktop app for Windows.**
+
+LexiFlow is an open-source Windows desktop application designed to help learners move beyond memorizing word definitions and actively understand, recall, pronounce, visualize, and use vocabulary in context.
 
 LexiFlow 是一款面向 Windows 的本地优先英语词汇学习桌面应用。它把查词、选义、记忆、联想、应用和复习串成一条学习路径；“今天”是唯一的每日学习入口，系统自动安排新词和需要巩固的词。
 
@@ -52,15 +56,22 @@ npm run build:win
 - Codex 认证：始终由本机 Codex CLI 管理；LexiFlow 不读取、复制或输出 token。
 - 可选 Merriam-Webster Key：在 Electron 环境下通过系统安全存储加密后落盘，仅作为本地词典之外的补充来源。
 
-## 开源与代码签名
+## Code signing policy / 代码签名政策
 
-LexiFlow 源代码采用 [Apache License 2.0](LICENSE) 发布。词典数据、模型与
-第三方组件可能适用各自的许可证，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+**Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).**
 
-- [隐私政策](PRIVACY.md)
-- [代码签名政策](CODE_SIGNING_POLICY.md)
-- [贡献指南](CONTRIBUTING.md)
-- [安全报告方式](SECURITY.md)
+LexiFlow is applying to the SignPath Foundation open-source code-signing program. The current public Windows release was published before approval and is intentionally unsigned. No LexiFlow binary should be considered SignPath-signed until the project has been approved and the automated signing workflow is enabled.
 
-项目正在准备申请 SignPath Foundation 的免费开源代码签名。申请获批并完成
-自动构建集成前，Windows 安装包仍属于未签名版本。
+Signed releases will be produced only from this public repository through the automated GitHub Actions build process and will require manual signing approval. Team roles, release restrictions, and signing requirements are documented in the [Code signing policy](CODE_SIGNING_POLICY.md).
+
+- Committer and reviewer: [lineana-lyu](https://github.com/lineana-lyu)
+- Signing approver: [lineana-lyu](https://github.com/lineana-lyu)
+- [Privacy policy](PRIVACY.md)
+- [Security policy](SECURITY.md)
+- [Contribution guide](CONTRIBUTING.md)
+
+## 开源许可与下载
+
+LexiFlow 源代码采用 [Apache License 2.0](LICENSE) 发布。词典数据、模型与第三方组件可能适用各自的许可证，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+公开 Windows 版本可在 [GitHub Releases](https://github.com/lineana-lyu/lexiflow/releases) 下载。
