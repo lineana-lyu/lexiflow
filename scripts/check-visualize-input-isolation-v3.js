@@ -2,12 +2,16 @@ const fs=require("fs");
 const path=require("path");
 
 function assert(condition,message){if(!condition)throw new Error(message);}
-const source=fs.readFileSync(path.join(__dirname,"..","public","visualize-stage-v3.js"),"utf8").replace(/\r\n/g,"\n");
+const root=path.join(__dirname,"..");
+const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8").replace(/\r\n/g,"\n");
+const guard=fs.readFileSync(path.join(root,"public","visualize-input-guard-v3.js"),"utf8").replace(/\r\n/g,"\n");
 
-assert(source.includes('if(event.target?.id!=="visual-note")return;'),"Visualize V3 must own the visual-note input");
-assert(source.includes('event.stopImmediatePropagation();\n    const card=currentCard();'),"Visualize note input must stop legacy/global input handlers from remounting the stage");
-assert(source.includes('setDraft(card.id,event.target.value);'),"Visualize note input must preserve its local draft");
-assert(source.includes('if(assist)assist.disabled=empty||interactionBusy;'),"Visualize note input must keep AI action state live without rerendering");
-assert(source.includes('if(generateButton)generateButton.disabled=empty||interactionBusy;'),"Visualize note input must keep generate action state live without rerendering");
+assert(index.includes('<script src="./visualize-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'),"Visualize input guard must load before the legacy app shell");
+assert(guard.includes('if(input?.id!=="visual-note")return;'),"Visualize input guard must scope itself to visual-note only");
+assert(guard.includes("event.stopImmediatePropagation();"),"Visualize note input must stop legacy/global input handlers from remounting the stage");
+assert(guard.includes("drafts.set(cardId,String(input.value||\"\"));"),"Visualize input guard must retain the current draft across incidental remounts");
+assert(guard.includes("new MutationObserver(()=>queueMicrotask(restore))"),"Visualize input guard must restore an in-progress draft after an unrelated remount");
+assert(guard.includes('const assist=root.querySelector?.(\'[data-visual-v3="assist"]\');'),"Visualize input guard must keep AI action state live without rerendering");
+assert(guard.includes('const generate=root.querySelector?.(\'[data-visual-v3="generate"]\');'),"Visualize input guard must keep image generation state live without rerendering");
 
 console.log("Visualize input isolation checks passed.");
