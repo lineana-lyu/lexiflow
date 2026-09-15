@@ -51,3 +51,16 @@ npm run build:win
 - 生成图片：`userData/app-data/generated/`
 - Codex 认证：始终由本机 Codex CLI 管理；LexiFlow 不读取、复制或输出 token。
 - 可选 Merriam-Webster Key：在 Electron 环境下通过系统安全存储加密后落盘，仅作为本地词典之外的补充来源。
+
+## 开源与代码签名
+
+LexiFlow 源代码采用 [Apache License 2.0](LICENSE) 发布。词典数据、模型与
+第三方组件可能适用各自的许可证，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+- [隐私政策](PRIVACY.md)
+- [代码签名政策](CODE_SIGNING_POLICY.md)
+- [贡献指南](CONTRIBUTING.md)
+- [安全报告方式](SECURITY.md)
+
+项目正在准备申请 SignPath Foundation 的免费开源代码签名。申请获批并完成
+自动构建集成前，Windows 安装包仍属于未签名版本。
