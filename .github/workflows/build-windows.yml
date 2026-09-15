@@ -17,6 +17,7 @@ on:
       - public/**
       - build/**
       - scripts/**
+      - .gitattributes
       - .github/workflows/build-windows.yml
 
 permissions:
