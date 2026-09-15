@@ -103,17 +103,20 @@
       const data=await loadData(); const card=currentStudyCard(data); if(!card)return false;
       if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天开始造句");setTimeout(()=>location.reload(),80);return true;}
       if(core.canonicalStage(card)!=="visualize")return false;
-      const hasImage=Boolean(card.imageData||card.imageUrl); if(!hasImage)return false;
+      const hasImage=Boolean(card.imageData||card.imageUrl);
+      const imagePending=card.imageGeneration?.status==="generating";
+      if(!hasImage&&!imagePending)return false;
       const prev={...card,learningStage:"visualize"};
       const note=String(document.getElementById("visual-note")?.value||card.visualNote||"").trim();
       card.visualNote=note;
       card.visualSkipped=false;
-      card.visualImageConfirmed=true;
-      card.visualImageConfirmedAt=now.toISOString();
+      card.visualImageConfirmed=hasImage;
+      card.visualImagePendingAtAdvance=!hasImage&&imagePending;
+      if(hasImage)card.visualImageConfirmedAt=now.toISOString();
       card.stage="apply";
       card.learningStage="apply";
       Object.assign(card,core.crossDayPatch(prev,{stage:"apply",learningStage:"apply"},now)||{});
-      card.updatedAt=now.toISOString(); appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:true,nextStage:"apply",commandId});
+      card.updatedAt=now.toISOString(); appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:hasImage,imagePending:!hasImage&&imagePending,nextStage:"apply",commandId});
       busy(button,"已完成 · 明天开始造句"); await persist(data); location.reload(); return true;
     }finally{endStageWrite(write);}
   }

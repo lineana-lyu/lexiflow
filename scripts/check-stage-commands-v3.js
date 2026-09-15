@@ -16,7 +16,7 @@ assert(transition.includes("const snapshot=force?null:gatewaySnapshot();")&&tran
 assert(transition.includes('fetch("/api/learning-data",{cache:"no-store"})'),"Stage Transition V3 must retain a cold-start GET fallback when no Gateway snapshot exists");
 assert(transition.includes("commandCommitted"),"normal stage completion must explicitly tolerate a retried command");
 assert(transition.includes('appendActivity(data,card.id,"select",{nextStage:"memorize",commandId})'),"Select completion must persist its command ID and canonical next stage");
-assert(transition.includes('appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:true,nextStage:"apply",commandId})'),"normal Visualize completion must persist its shared command ID and image confirmation outcome");
+assert(transition.includes('appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:hasImage,imagePending:!hasImage&&imagePending,nextStage:"apply",commandId})'),"Visualize completion must persist its shared command ID plus completed-vs-pending image outcome");
 assert(transition.includes('appendActivity(data,card.id,"apply",{sentence,skipped:false,nextStage:"review",commandId})'),"normal Apply completion must persist its command ID");
 assert(transition.includes('stageTransitionAuthority:"v3"'),"normal stage persistence must identify Stage Transition V3 authority");
 assert(transition.includes('authority:"stage-transition-v3"'),"normal stage activities must identify Stage Transition V3 authority");
@@ -25,7 +25,7 @@ assert(!transition.includes('card.stage="memorize1"'),"Stage Transition V3 must 
 assert(transition.includes("beginStageWrite")&&transition.includes("endStageWrite"),"Stage Transition V3 must expose one shared stage-write lock for competing outcomes");
 assert(transition.includes("terminalCommandId:stageCommandId"),"shared command identity must remain discoverable through the V3 transition bridge");
 assert(transition.includes('beginStageWrite(cardId,"visualize",now)')&&transition.includes('beginStageWrite(cardId,"apply",now)'),"normal Visualize and Apply completion must enter the shared write scope before loading mutable data");
-assert(transition.includes("card.visualImageConfirmed=true"),"Visualize image must become confirmed only in terminal Visualize completion");
+assert(transition.includes("card.visualImageConfirmed=hasImage"),"Visualize completion must confirm only an image that already exists, while allowing a pending background image");
 assert(transition.includes("card.visualImageConfirmedAt=now.toISOString()"),"Visualize completion must timestamp the image confirmation checkpoint");
 
 assert(memorize.includes("function commandId("),"Memorize completion must have a deterministic command ID");
