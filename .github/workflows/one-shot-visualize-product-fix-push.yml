@@ -42,17 +42,25 @@ jobs:
 
           commands_path=Path('scripts/check-stage-commands-v3.js')
           commands=commands_path.read_text(encoding='utf-8')
-          replacements={
+          command_replacements={
             'assert(transition.includes(\'appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:true,nextStage:"apply",commandId})\'),"normal Visualize completion must persist its shared command ID and image confirmation outcome");':
             'assert(transition.includes(\'appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:hasImage,imagePending:!hasImage&&imagePending,nextStage:"apply",commandId})\'),"Visualize completion must persist its shared command ID plus completed-vs-pending image outcome");',
             'assert(transition.includes("card.visualImageConfirmed=true"),"Visualize image must become confirmed only in terminal Visualize completion");':
             'assert(transition.includes("card.visualImageConfirmed=hasImage"),"Visualize completion must confirm only an image that already exists, while allowing a pending background image");'
           }
-          for old,new in replacements.items():
+          for old,new in command_replacements.items():
               if old not in commands:
                   raise SystemExit('stage-command assertion target not found: '+old[:80])
               commands=commands.replace(old,new,1)
           commands_path.write_text(commands,encoding='utf-8')
+
+          isolation_path=Path('scripts/check-visualize-input-isolation-v3.js')
+          isolation=isolation_path.read_text(encoding='utf-8')
+          old_isolation='assert(guard.includes("drafts.set(cardId,String(input.value||\\\"\\\"));"),"Visualize input guard must retain the current draft across incidental remounts");'
+          new_isolation='assert(guard.includes("setDraft(cardId,input.value);")&&guard.includes("function clearDraft(cardId)"),"Visualize input guard must retain the current draft through the shared draft authority and be able to clear stale residue");'
+          if old_isolation not in isolation:
+              raise SystemExit('input isolation draft assertion target not found')
+          isolation_path.write_text(isolation.replace(old_isolation,new_isolation,1),encoding='utf-8')
           PY
 
       - name: Validate product fix
@@ -65,6 +73,7 @@ jobs:
           node --check server.js
           node --check scripts/check-stage-renderers-v3.js
           node --check scripts/check-stage-commands-v3.js
+          node --check scripts/check-visualize-input-isolation-v3.js
           node scripts/check-visualize-product-flow-v3.js
           npm run check:learning
 
