@@ -43,6 +43,7 @@ assert(app.includes("prepareLookupResult")&&app.includes("seen.has(id)"),"lookup
 assert(source.includes("lookupQuery")&&source.includes("lexiflow:lookup-query-start")&&source.includes("lexiflow:lookup-cleared")&&source.includes("draftLookupKey===queryKey(card.sourceQuery||card.word)"),"source context drafts must be scoped to the word or phrase that created them and cleared for a different lookup");
 
 assert(!app.includes('navButton("review","↻","复习中心")'),"Review Center must not remain a top-level navigation destination");
+assert(!app.includes("function reviewPage(")&&!app.includes("复习中心"),"removed Review Center UI must not survive as unreachable renderer code");
 assert(app.includes('reviewRecent')&&app.includes('reviewLongTerm')&&app.includes('近期巩固')&&app.includes('长期巩固'),"Today must surface the review breakdown inside the daily plan");
 assert(app.includes('else if(state.route==="review"){state.route="home";html=homePage();}'),"legacy review routes must redirect into Today instead of reopening a second learning entrance");
 console.log("User surface V4 checks passed.");

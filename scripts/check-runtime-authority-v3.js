@@ -107,9 +107,10 @@ assert(reviewSession.includes('data-r3="rate"'),"Review Session V3 must own rati
 assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session V3 must not depend on legacy review-rate controls");
 assert(reviewSession.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review Session V3 must expose a narrow runtime bridge");
 assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app Review entry fallback must delegate to Review Session V3");
-assert(!app.includes('reviewMode==="all"')&&!app.includes('reviewMode==="custom"'),"app Review page must not display retired all/custom cap modes after Review V4");
-assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截断"),"app Review page must not expose internal Review workload terminology");
-assert(app.includes("系统会自动安排今天真正需要巩固的词")&&app.includes("你不需要手动管理复习日期"),"app Review page must explain automatic scheduling in learner-facing language");
+assert(!app.includes('reviewMode==="all"')&&!app.includes('reviewMode==="custom"'),"app shell must not retain retired all/custom Review cap modes");
+assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截断"),"app shell must not expose internal Review workload terminology");
+assert(!app.includes("function reviewPage("),"the removed standalone Review page must not survive as unreachable code");
+assert(app.includes("今天安排了 ${review} 个复习词，完成后再继续新学习。"),"Today must explain its automatic Review queue in learner-facing language");
 for(const legacy of ["function startReview(","function reviewSessionPage(","function rateReview(","function stageInitialReview(","function enterInitialReview(","function finishInitialReview("]){assert(!app.includes(legacy),`legacy Review implementation must be removed from app.js: ${legacy}`);}
 assert(!app.includes("reviewQueue"),"app.js must not keep a second Review queue");
 assert(!app.includes("reviewIndex"),"app.js must not keep a second Review cursor");

@@ -106,6 +106,10 @@ function createCoreFixture(file){
     INSERT INTO words(word,phonetic,audio_url,learner_rank,pos_summary,tags,collins,oxford,bnc,frq,source)
     VALUES(?,?,?,?,?,?,?,?,?,?,?)
   `).run("address","əˈdres","",620,"noun|verb","cet4 cet6",5,1,900,1200,"runtime-smoke");
+  db.prepare(`
+    INSERT INTO words(word,phonetic,audio_url,learner_rank,pos_summary,tags,collins,oxford,bnc,frq,source)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+  `).run("response","rɪˈspɒns","",900,"noun|word","cet4",5,1,700,1000,"runtime-smoke");
 
   const sense=db.prepare(`
     INSERT INTO senses(word,pos,definition_en,meaning_zh,example_en,sense_rank,source)
@@ -113,16 +117,18 @@ function createCoreFixture(file){
   `);
   sense.run("address","noun","the details of where someone lives","地址","Please write your address here.",900,"runtime-smoke");
   sense.run("address","verb","to deal with a problem or difficult situation","处理；应对","We need to address the problem.",500,"runtime-smoke");
+  sense.run("response","noun","something said or done as a reaction","反应；回应","Her response was immediate.",800,"runtime-smoke");
 
   const alias=db.prepare("INSERT INTO zh_aliases(alias,word,rank,source) VALUES(?,?,?,?)");
   alias.run("地址","address",1200,"runtime-smoke");
-  alias.run("应对","address",1180,"runtime-smoke");
+  alias.run("对付","address",1180,"runtime-smoke");
+  alias.run("应对","response",1970,"cc-cedict");
 
   const meta=db.prepare("INSERT INTO metadata(key,value) VALUES(?,?)");
   meta.run("schema","lexiflow-core-v3");
-  meta.run("word_count","1");
-  meta.run("sense_count","2");
-  meta.run("zh_alias_count","2");
+  meta.run("word_count","2");
+  meta.run("sense_count","3");
+  meta.run("zh_alias_count","3");
   meta.run("prepared_at",new Date(0).toISOString());
   db.close();
 }
@@ -190,7 +196,7 @@ async function jsonRequest(base,pathname,{method="GET",body=null}={}){
     });
     assert(chinese.status===200&&chinese.payload?.ok===true,"Chinese smart search must resolve through the local Core lexicon");
     const zhResult=chinese.payload?.result||{};
-    assert(zhResult.word==="address","Chinese alias lookup must resolve the intended English headword");
+    assert(zhResult.word==="address","Chinese intent lookup must prefer the matching verb over a misleading exact noun alias");
     assert(zhResult.dictionarySource==="LexiFlow Core"&&zhResult.lookupPath==="core-zh"&&zhResult.localLookup===true,"Chinese lookup must stay on the offline Core path");
     assert(zhResult.sourceQuery==="应对"&&zhResult.normalizedQuery==="应对"&&zhResult.autoResolved===true,"Chinese lookup must retain the learner's original query identity");
     assert(zhResult.chineseSenseMatched===true,"Chinese lookup must confirm a semantic sense match rather than only a word-level alias hit");

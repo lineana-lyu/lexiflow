@@ -5,12 +5,18 @@ on:
   push:
     branches:
       - main
+      - feat/v7-airy-luminous-ui
     paths:
       - package.json
       - package-lock.json
       - electron-main.js
       - server.js
+      - server-runtime.js
+      - server-image-runtime.js
+      - lib/**
       - public/**
+      - build/**
+      - scripts/**
       - .github/workflows/build-windows.yml
 
 permissions:

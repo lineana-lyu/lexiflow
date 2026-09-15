@@ -965,23 +965,6 @@
     return `<div data-study-stage-host-v3="${escapeHtml(card.id)}"></div>`;
   }
 
-  function reviewPage(){
-    const plan=currentDailyPlan();
-    const due=planCards("review");
-    const stableTotal=stableCount();
-    const recent=Math.max(0,Number(plan?.reviewCriticalCount||0));
-    const longTerm=Math.max(0,Number(plan?.reviewStableScheduledCount||0));
-    return shell(
-      header("","复习中心","系统会自动安排今天真正需要巩固的词。",due.length?`<button class="btn primary" data-action="start-review">开始复习 (${due.length})</button>`:"")
-      + `<div class="grid cols-3">
-        <div class="card stat"><div class="stat-label">今日复习</div><div class="stat-value">${due.length}</div><div class="stat-hint">${recent} 个近期巩固 · ${longTerm} 个长期巩固</div></div>
-        <div class="card stat"><div class="stat-label">累计主动回忆</div><div class="stat-value">${state.data.activities.filter(a=>a.type==="review").length}</div><div class="stat-hint">所有已完成的复习记录</div></div>
-        <div class="card stat"><div class="stat-label">已掌握</div><div class="stat-value">${stableTotal}</div><div class="stat-hint">进入长期巩固的词</div></div>
-      </div>
-      <div class="section card pad">${due.length?`<div class="table-wrap"><table class="table"><thead><tr><th>单词</th><th>中文释义</th><th>已复习</th><th>安排日期</th></tr></thead><tbody>${due.map(c=>`<tr><td><strong>${escapeHtml(c.word)}</strong><div class="phonetic">${escapeHtml(formatPhonetic(c.phonetic))}</div></td><td>${escapeHtml(c.meaningZh)}</td><td>${c.reviewCount||0} 次</td><td>${c.nextReviewAt?new Date(c.nextReviewAt).toLocaleDateString():"—"}</td></tr>`).join("")}</tbody></table></div>`
-      :`<div class="empty"><div class="empty-icon">✓</div><strong>今天没有需要复习的内容</strong><span>需要巩固时会自动出现在这里，你不需要手动管理复习日期。</span></div>`}</div>`
-    );
-  }
   function libraryPage(){
     const q=state.librarySearch.trim().toLowerCase();
     const list=state.data.cards.filter(c=>!q||c.word.toLowerCase().includes(q)||c.meaningZh.includes(q));
