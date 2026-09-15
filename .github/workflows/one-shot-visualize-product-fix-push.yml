@@ -1,0 +1,56 @@
+name: One-shot Visualize product fix push
+
+on:
+  push:
+    branches:
+      - fix/visualize-user-scene-and-background-generation
+    paths:
+      - .github/workflows/one-shot-visualize-product-fix-push.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/visualize-user-scene-and-background-generation
+          fetch-depth: 0
+
+      - name: Execute product patch source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import textwrap
+          source=Path('.github/workflows/one-shot-visualize-product-fix.yml').read_text(encoding='utf-8')
+          marker="          python - <<'PY'\n"
+          start=source.index(marker)+len(marker)
+          end=source.index("\n          PY",start)
+          code=textwrap.dedent(source[start:end])
+          exec(compile(code,'visualize-product-fix','exec'),{})
+          PY
+
+      - name: Validate product fix
+        run: |
+          node --check public/ai-assist-v3.js
+          node --check public/visualize-input-guard-v3.js
+          node --check public/visualize-stage-v3.js
+          node --check public/visualize-actions-v3.js
+          node --check public/stage-transition-v3.js
+          node --check server.js
+          node scripts/check-visualize-product-flow-v3.js
+          npm run check:learning
+
+      - name: Commit product fix and remove one-shot workflows
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-visualize-product-fix.yml
+          rm .github/workflows/one-shot-visualize-product-fix-push.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: align Visualize with user scene and background generation"
+          git push origin HEAD:fix/visualize-user-scene-and-background-generation
