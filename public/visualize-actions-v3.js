@@ -48,15 +48,15 @@
     const note=document.getElementById("visual-note"),footer=document.querySelector(".learning-stage-footer");
     if(!note||!footer)return;
     const current=card();if(!current)return;
-    const hasImage=Boolean(current.imageData||current.imageUrl),busy=stageBusy();
+    const hasImage=Boolean(current.imageData||current.imageUrl),pending=current.imageGeneration?.status==="generating",busy=stageBusy();
     const next=footer.querySelector('[data-action="finish-visual"]');
     let skip=footer.querySelector('[data-visual-actions-v3="skip"]');
-    if(hasImage){
+    if(hasImage||pending){
       skip?.remove();
       if(next){
         next.disabled=busy;
-        next.textContent=busy?"正在保存当前联想…":"完成视觉联想 · 明天开始造句";
-        next.title=busy?"当前联想正在保存，完成后再进入下一阶段。":"";
+        next.textContent=busy?"正在保存当前联想…":pending?"图片后台生成中 · 完成视觉联想":"完成视觉联想 · 明天开始造句";
+        next.title=busy?"当前联想正在保存，完成后再进入下一阶段。":pending?"可以继续学习；图片完成后会自动保存到这张单词卡。":"";
       }
       return;
     }

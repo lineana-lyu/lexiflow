@@ -55,7 +55,7 @@ assert(apply.includes('core.canonicalStage(card)==="apply"'),"Apply renderer mus
 
 assert(visual.includes("先用你自己的记忆和经历想画面"),"Visualize must keep learner association before AI assistance");
 assert(visual.includes('data-visual-v3="assist"'),"Visualize AI assistance must be an explicit user action");
-assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner's existing association instead of inventing the first one");
+assert(visual.includes("userScene:note"),"Visualize AI assistance must anchor refinement on the learner's own scene instead of treating it as an old scene to avoid");
 assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize Stage V3 must call the explicit AI Assist V3 authority directly");
 assert(ai.includes('postJson("/api/ai/visual-scene"'),"AI Assist V3 must own the real Visualize AI request path");
 assert(!transport.includes("/api/ai/visual-scene")&&!transport.includes("/api/ai/practice-prompt"),"transport must not own Stage AI endpoints once AI Assist V3 is the sole frontend authority");

@@ -1939,17 +1939,35 @@ async function visualSceneAssist(body){
   const meaningZh=String(body.meaningZh||"").trim();
   const exampleEn=String(body.exampleEn||"").trim();
   const senseIntentEn=String(body.senseIntentEn||"").trim();
-  const previousScene=String(body.previousScene||"").trim();
-  if(!word)throw new Error("INVALID_INPUT");
+  const userScene=String(body.userScene||body.previousScene||"").trim();
+  const previousSuggestion=String(body.previousSuggestion||"").trim();
+  const revisionInstruction=String(body.revisionInstruction||"").trim();
+  if(!word||!userScene)throw new Error("INVALID_INPUT");
   const settings=await loadSettings();
-  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn].join("|");
-  if(!previousScene&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
-  const prompt=`为英语学习者设计一个视觉记忆场景和一个个人化造句问题。\n单词：${word}\n词义：${meaningZh}\n例句：${exampleEn}\n准确语义：${senseIntentEn}\n${previousScene?`不要重复这个旧场景：${previousScene}`:""}\n要求：\n1. 场景必须具体、生活化、可直接画成图片，严格对应当前词义。\n2. 场景只能依靠人物、动作、环境和物体表达含义，绝不能依靠画面中的文字来提示答案。\n3. scene 中不要出现“写着/标着/印着/标签/招牌/logo/屏幕文字”等设计，也不要出现目标英文单词、中文释义、字母、数字或引号中的文案。\n4. 如果涉及瓶子、包装、书本、屏幕、菜单、路牌等容易带字的物体，明确写成“无标签、无品牌、无可读文字”的版本。\n5. 优先一个清晰动作和一个视觉焦点，避免堆砌物件。尽量避开超市密集货架、广告墙、街道路牌、电脑界面等天然文字很多的构图；若语义需要这些环境，只保留无品牌、无可读文字的简化背景。\n6. 问题要让用户自然说出与自己有关的话，不给答案。\n只输出 JSON：{"scene":"一句中文具体画面，不含任何画面文字要求","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
+  const cacheKey=[settings.codexModel||DEFAULT_CODEX_MODEL,word.toLowerCase(),meaningZh,exampleEn,senseIntentEn,userScene].join("|");
+  if(!previousSuggestion&&visualSceneCache.has(cacheKey))return visualSceneCache.get(cacheKey);
+  const prompt=`你在帮助英语学习者把“他自己已经想到的联想画面”变得更具体。你的任务不是重新创作另一个故事。
+目标词：${word}
+词义：${meaningZh}
+例句：${exampleEn}
+准确语义：${senseIntentEn}
+用户原始联想（最高优先级，必须保留）：${userScene}
+${previousSuggestion?`上一版 AI 建议：${previousSuggestion}`:""}
+${revisionInstruction?`修正要求：${revisionInstruction}`:""}
+要求：
+1. 必须保留用户原始联想里已经出现的主体/人物类型、地点、核心动作或关系、关键物体。只能在这些元素上补充可见细节，不能换人物、换地点、换故事。
+2. 用户写得抽象时，把抽象属性转成同一场景里可看见的动作、队形、表情、姿态或物体关系；例如用户写的是某类人物，就继续围绕这类人物具体化，不能替换成另一类人物。
+3. 场景必须严格对应当前词义，并且一眼能画出来；不要添加与用户原始联想无关的新主角或新情节。
+4. scene 中不得出现目标英文单词、中文释义、标签、招牌、logo、屏幕文字、字母或数字。
+5. 如果涉及包装、书本、屏幕、菜单或路牌，只保留无品牌、无可读文字的版本。
+6. 优先一个清晰动作和一个视觉焦点，保持自然生活感。
+7. cue 只概括用户自己的记忆钩子；practiceQuestion 可以围绕同一真实场景追问，不要另起场景。
+只输出 JSON：{"scene":"在用户原始联想基础上具体化的一句中文画面","cue":"6~16字记忆钩子","practiceQuestion":"一句简短中文问题"}`;
   const result=await runCodexFastText(prompt,{timeoutMs:30000,reasoningEffortOverride:"low"});
   const parsed=extractJson(result.stdout);
   const assist={scene:String(parsed.scene||"").trim(),cue:String(parsed.cue||"").trim(),practiceQuestion:String(parsed.practiceQuestion||"").trim()};
   if(!assist.scene)throw new Error("EMPTY_VISUAL_SCENE");
-  if(!previousScene)putSmallCache(visualSceneCache,cacheKey,assist);
+  if(!previousSuggestion)putSmallCache(visualSceneCache,cacheKey,assist);
   return assist;
 }
 
@@ -2034,6 +2052,40 @@ async function sentenceFeedback(body) {
 
 function safeFileStem(input) {
   return String(input || "word").toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "word";
+}
+
+async function attachVisualGenerationToCard(body,image,errorInfo=null){
+  const cardId=String(body?.cardId||"").trim();
+  const requestId=String(body?.requestId||"").trim();
+  if(!cardId)return;
+  try{
+    const learning=await loadLearningData();
+    const card=learning.cards.find(item=>String(item.id)===cardId);
+    if(!card)return;
+    const activeRequest=String(card.imageGeneration?.requestId||"");
+    if(requestId&&activeRequest&&activeRequest!==requestId)return;
+    const now=new Date().toISOString();
+    if(errorInfo){
+      card.visualImagePendingAtAdvance=false;
+      card.imageGeneration={status:"error",phase:"error",message:String(errorInfo.message||"这次图片没有生成成功，可以稍后重试。"),code:String(errorInfo.code||"IMAGE_GENERATION_FAILED"),requestId,finishedAt:now};
+    }else if(image?.url){
+      const stage=String(card.learningStage||card.stage||"").toLowerCase();
+      const autoConfirm=stage!=="visualize"&&card.visualImagePendingAtAdvance===true;
+      card.imageData="";
+      card.imageUrl=String(image.url);
+      card.generatedVisualScene=String(image.visualNote||body.visualNote||body.suggestedScene||"").trim();
+      card.visualImageSource="generated";
+      card.visualImagePreparedAt=now;
+      card.visualImageConfirmed=autoConfirm?true:false;
+      if(autoConfirm)card.visualImageConfirmedAt=now;
+      card.visualImagePendingAtAdvance=false;
+      card.imageGeneration={status:"success",phase:"done",message:autoConfirm?"联想图已在后台生成并保存到单词卡。":"联想图已生成并保存为 Visualize 草稿。",code:"",requestId,finishedAt:now};
+    }
+    card.updatedAt=now;
+    await saveLearningData(learning);
+  }catch(err){
+    console.warn("background visual attachment skipped:",err?.message||err);
+  }
 }
 
 async function generateVisual(body) {
@@ -2518,10 +2570,12 @@ const server = http.createServer(async (req, res) => {
       const body = await readJsonBody(req);
       try {
         const image = await generateVisual(body);
+        await attachVisualGenerationToCard(body,image);
         return sendJson(res, 200, { ok: true, image });
       } catch (err) {
         console.error("image AI failed:", err?.message || err);
         const friendly = friendlyError(err, "image");
+        await attachVisualGenerationToCard(body,null,{code:friendly.code,message:friendly.message});
         return sendJson(res, 502, { ok: false, code: friendly.code, error: friendly.message, userError: friendly });
       }
     }

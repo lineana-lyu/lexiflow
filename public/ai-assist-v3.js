@@ -55,32 +55,45 @@
     return payload;
   }
 
-  function sceneAvoidance(note,previous,failed=""){
-    const items=[note,...(previous||[]),failed].map(clean).filter(Boolean).slice(0,5);
-    if(!items.length)return clean(note);
-    return `${items.join("；")}。请基于用户自己的联想继续具体化，但必须换一个明显不同的地点、动作或物体组合；不要出现英文单词、标签、招牌或其他可读文字。`;
-  }
+  function sceneHistoryKey(body){
+  return `${historyKey(body)}|${normalizeForSimilarity(body?.userScene||body?.previousScene).slice(0,120)}`;
+}
 
-  async function visualScene(body={}){
-    const key=historyKey(body),known=Array.isArray(sceneHistory[key])?[...sceneHistory[key]]:[];
-    let failed="",last=null;
-    for(let attempt=0;attempt<3;attempt++){
-      const request={...body,previousScene:attempt===0?clean(body.previousScene):sceneAvoidance(body.previousScene,known,failed)};
-      const payload=await postJson("/api/ai/visual-scene",request);last=payload;
-      const raw=clean(payload?.assist?.scene);const scene=sceneNeedsCleanup(raw,body.word)?sanitizeScene(raw,body):raw;
-      const valid=sceneIsConcrete(scene)&&!tooSimilar(scene,known,.72);
-      if(valid){
-        remember(sceneHistory,SCENE_HISTORY_KEY,key,scene);
-        return {...payload,assist:{...(payload.assist||{}),scene}};
-      }
-      failed=scene;if(scene)known.unshift(scene);
+function sceneRevisionInstruction(failed=""){
+  const prior=clean(failed);
+  if(!prior)return "";
+  return `上一版建议是：${prior}。请只修正具体度、可视化细节或无文字要求，必须继续保留用户原始联想里的主体、地点、核心动作/关系和关键物体，不得换成另一个故事。`;
+}
+
+async function visualScene(body={}){
+  const userScene=clean(body.userScene||body.previousScene);
+  if(!userScene)throw new Error("VISUAL_SCENE_SOURCE_REQUIRED");
+  const key=sceneHistoryKey({...body,userScene});
+  let failed="",last=null;
+  for(let attempt=0;attempt<2;attempt++){
+    const request={
+      ...body,
+      userScene,
+      previousSuggestion:attempt===0?clean(body.previousSuggestion):failed,
+      revisionInstruction:attempt===0?"":sceneRevisionInstruction(failed),
+    };
+    delete request.previousScene;
+    const payload=await postJson("/api/ai/visual-scene",request);last=payload;
+    const raw=clean(payload?.assist?.scene);
+    const scene=sceneNeedsCleanup(raw,body.word)?sanitizeScene(raw,body):raw;
+    if(sceneIsConcrete(scene)){
+      remember(sceneHistory,SCENE_HISTORY_KEY,key,scene);
+      return {...payload,assist:{...(payload.assist||{}),scene}};
     }
-    if(last?.assist){
-      const raw=clean(last.assist.scene);const scene=sceneNeedsCleanup(raw,body.word)?sanitizeScene(raw,body):raw;
-      if(scene){remember(sceneHistory,SCENE_HISTORY_KEY,key,scene);return {...last,assist:{...last.assist,scene}};}
-    }
-    throw new Error("VISUAL_SCENE_EMPTY");
+    failed=scene;
   }
+  if(last?.assist){
+    const raw=clean(last.assist.scene);
+    const scene=sceneNeedsCleanup(raw,body.word)?sanitizeScene(raw,body):raw;
+    if(scene){remember(sceneHistory,SCENE_HISTORY_KEY,key,scene);return {...last,assist:{...last.assist,scene}};}
+  }
+  throw new Error("VISUAL_SCENE_EMPTY");
+}
 
   function promptAvoidance(previous,known,failed=""){
     const items=[previous,...(known||[]),failed].map(clean).filter(Boolean).slice(0,5);
