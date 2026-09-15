@@ -1,0 +1,69 @@
+name: One-shot fix Visualize input focus
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-shot-fix-visual-input-focus.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Patch Visualize renderer and regression checks
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          visual = Path('public/visualize-stage-v3.js')
+          text = visual.read_text(encoding='utf-8')
+          old = '''    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",confirmed:card.visualImageConfirmed===true,status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
+    if(host.dataset.visualizeStageV3===signature)return;'''
+          new = '''    const mounted=host.querySelector(".lexi-v3-visual[data-visualize-stage-v3]");
+    const signature=JSON.stringify({id:card.id,image:card.imageData||card.imageUrl||"",confirmed:card.visualImageConfirmed===true,status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
+    if(host.dataset.visualizeStageV3===signature&&mounted?.dataset.visualizeStageV3===String(card.id))return;'''
+          if old in text:
+              text = text.replace(old, new, 1)
+          elif new not in text:
+              raise SystemExit('Visualize render block did not match expected source')
+          visual.write_text(text, encoding='utf-8')
+
+          checks = Path('scripts/check-stage-renderers-v3.js')
+          c = checks.read_text(encoding='utf-8')
+          marker = 'assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Visualize DOM mutations must redraw from memory instead of GETing learning data");\n'
+          addition = marker + 'assert(visual.includes(\'const mounted=host.querySelector(".lexi-v3-visual[data-visualize-stage-v3]")\'),"Visualize renderer must confirm that its mounted root still exists before skipping a redraw");\nassert(!visual.includes("id:card.id,note:draftFor(card),image:"),"Visualize typing draft must not participate in the structural render signature or each keystroke can recreate the textarea");\nassert(visual.includes("host.dataset.visualizeStageV3===signature&&mounted?.dataset.visualizeStageV3===String(card.id)"),"Visualize redraw guard must preserve the live textarea while the same card and structural state remain mounted");\n'
+          if addition not in c:
+              if marker not in c:
+                  raise SystemExit('Stage renderer check insertion point not found')
+              c = c.replace(marker, addition, 1)
+          checks.write_text(c, encoding='utf-8')
+
+          for file in ('package.json','package-lock.json'):
+              p=Path(file)
+              s=p.read_text(encoding='utf-8')
+              s=s.replace('"version": "0.8.6"','"version": "0.8.7"')
+              p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Commit patched source
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No patch changes required"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/visualize-stage-v3.js scripts/check-stage-renderers-v3.js package.json package-lock.json
+          git commit -m "fix: preserve Visualize textarea focus"
+          git push origin HEAD:${{ github.head_ref }}
