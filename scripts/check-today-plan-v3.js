@@ -4,7 +4,7 @@ const vm=require("vm");
 
 function assert(condition,message){if(!condition)throw new Error(message);}
 const root=path.join(__dirname,"..");
-const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8").replace(/\r\n/g,"\n");
 const exists=name=>fs.existsSync(path.join(root,name));
 
 const index=read("public/index.html");
