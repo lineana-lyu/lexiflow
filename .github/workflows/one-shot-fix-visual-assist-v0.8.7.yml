@@ -1,0 +1,87 @@
+name: One-shot fix Visualize AI assist
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/one-shot-fix-visual-assist-v0.8.7.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+
+      - name: Patch Visualize AI assist timeout and feedback
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+
+          const serverPath='server.js';
+          let server=fs.readFileSync(serverPath,'utf8');
+          const oldTimeout='const result=await runCodexFastText(prompt,{timeoutMs:10000,reasoningEffortOverride:"low"});';
+          const newTimeout='const result=await runCodexFastText(prompt,{timeoutMs:30000,reasoningEffortOverride:"low"});';
+          if(!server.includes(oldTimeout)) throw new Error('visualSceneAssist timeout target not found');
+          server=server.replace(oldTimeout,newTimeout);
+          fs.writeFileSync(serverPath,server);
+
+          const visualPath='public/visualize-stage-v3.js';
+          let visual=fs.readFileSync(visualPath,'utf8');
+          if(!visual.includes('let uploadBusy=false;')) throw new Error('assist state target not found');
+          visual=visual.replace('let uploadBusy=false;','let uploadBusy=false;\n  let assistError="";');
+
+          const oldActions='<div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||interactionBusy?"disabled":""}>${assistBusy?"AI 正在优化…":suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>\n          ${suggestion?';
+          const newActions='<div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||interactionBusy?"disabled":""}>${assistBusy?"AI 正在优化…":suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>\n          ${assistError?`<div class="lexi-v3-visual-error">${esc(assistError)}</div>`:""}\n          ${suggestion?';
+          if(!visual.includes(oldActions)) throw new Error('assist action UI target not found');
+          visual=visual.replace(oldActions,newActions);
+
+          const oldStart='setDraft(card.id,note);assistBusy=true;render();';
+          const newStart='setDraft(card.id,note);assistError="";assistBusy=true;render();';
+          if(!visual.includes(oldStart)) throw new Error('assist start target not found');
+          visual=visual.replace(oldStart,newStart);
+
+          const oldCatch='}catch(err){console.error("Visualize V3 assist failed",err);}\n    finally{assistBusy=false;';
+          const newCatch='}catch(err){assistError=String(err?.payload?.userError?.message||err?.payload?.error||err?.message||"这次 AI 建议没有生成成功，请重试。");console.error("Visualize V3 assist failed",err);}\n    finally{assistBusy=false;';
+          if(!visual.includes(oldCatch)) throw new Error('assist catch target not found');
+          visual=visual.replace(oldCatch,newCatch);
+          fs.writeFileSync(visualPath,visual);
+
+          const checkPath='scripts/check-visual-assist-resilience-v3.js';
+          fs.writeFileSync(checkPath,`const fs=require("fs");\nconst path=require("path");\nfunction assert(v,m){if(!v)throw new Error(m);}\nconst root=path.join(__dirname,"..");\nconst server=fs.readFileSync(path.join(root,"server.js"),"utf8").replace(/\\r\\n/g,"\\n");\nconst visual=fs.readFileSync(path.join(root,"public","visualize-stage-v3.js"),"utf8").replace(/\\r\\n/g,"\\n");\nassert(server.includes('runCodexFastText(prompt,{timeoutMs:30000,reasoningEffortOverride:"low"})'),"Visual scene assist needs a realistic Codex timeout");\nassert(visual.includes('let assistError="";'),"Visual scene assist must track visible error state");\nassert(visual.includes('err?.payload?.userError?.message'),"Visual scene assist must surface the friendly backend error");\nassert(visual.includes('assistError?\\`<div class="lexi-v3-visual-error">'),"Visual scene assist must render failures in the stage");\nconsole.log("Visual assist resilience checks passed.");\n`);
+
+          const packagePath='package.json';
+          const pkg=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+          const check='node scripts/check-visual-assist-resilience-v3.js';
+          if(!pkg.scripts['check:learning'].includes(check)) pkg.scripts['check:learning'] += ' && ' + check;
+          fs.writeFileSync(packagePath,JSON.stringify(pkg,null,2)+'\n');
+
+          const lockPath='package-lock.json';
+          const lock=JSON.parse(fs.readFileSync(lockPath,'utf8'));
+          lock.version=pkg.version;
+          if(lock.packages&&lock.packages['']) lock.packages[''].version=pkg.version;
+          fs.writeFileSync(lockPath,JSON.stringify(lock,null,2)+'\n');
+          NODE
+
+      - name: Validate patch
+        run: |
+          node --check server.js
+          node --check public/visualize-stage-v3.js
+          node scripts/check-visual-assist-resilience-v3.js
+
+      - name: Remove one-shot workflow and commit patch
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-fix-visual-assist-v0.8.7.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server.js public/visualize-stage-v3.js scripts/check-visual-assist-resilience-v3.js package.json package-lock.json .github/workflows/one-shot-fix-visual-assist-v0.8.7.yml
+          git commit -m "fix: make Visualize AI assist resilient to Codex latency"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
