@@ -1,0 +1,62 @@
+name: One-shot SignPath public metadata
+
+on:
+  push:
+    branches:
+      - automation/signpath-public-metadata
+    paths:
+      - .github/workflows/one-shot-signpath-public-metadata.yml
+
+permissions:
+  contents: write
+
+jobs:
+  update-public-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update v0.8.5 release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > release-notes.md <<'EOF'
+          ## LexiFlow v0.8.5
+
+          This is LexiFlow's first public downloadable release and the public baseline for the project's code-signing application.
+
+          ### Windows downloads
+          - Installer (`LexiFlow.Setup.0.8.5.exe`)
+          - Portable executable (`LexiFlow.0.8.5.exe`)
+
+          ### Code signing policy
+
+          **Free code signing provided by SignPath.io, certificate by SignPath Foundation.**
+
+          LexiFlow is applying to the SignPath Foundation open-source code-signing program. The binaries in this v0.8.5 release were published before approval and are intentionally **unsigned**. No LexiFlow binary should be considered SignPath-signed until the project has been approved and the automated signing workflow is enabled.
+
+          Signed releases will be produced only from the public `lineana-lyu/lexiflow` repository through its automated GitHub Actions build process and will require manual signing approval. The project's full Code signing policy is available at:
+          https://github.com/lineana-lyu/lexiflow/blob/main/CODE_SIGNING_POLICY.md
+
+          **Current signing status:** because this release is unsigned, Windows may show an Unknown Publisher or Microsoft Defender SmartScreen warning.
+
+          The release artifacts were built automatically from the tagged `main` commit by the repository's Windows build workflow with automatic certificate discovery disabled.
+
+          ### Highlights
+          - Local-first dictionary and learning data flow
+          - Structured vocabulary learning with daily planning and review
+          - Pronunciation and sentence audio support
+          - Windows desktop packaging with installer and portable builds
+          - Public Apache-2.0 licensing, privacy, security, contribution, and code-signing policy documentation
+
+          Source code for this release is available through the GitHub-generated source archives below.
+          EOF
+
+          gh release edit v0.8.5 --repo "$GITHUB_REPOSITORY" --notes-file release-notes.md
+
+      - name: Update repository description
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh repo edit "$GITHUB_REPOSITORY" \
+            --description "Local-first Windows desktop app for active English vocabulary learning, pronunciation, contextual use, and review." \
+            --homepage "https://github.com/lineana-lyu/lexiflow"
