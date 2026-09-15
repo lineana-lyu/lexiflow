@@ -1,9 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, nativeImage } = require("electron");
 
 app.setName("LexiFlow");
 if (process.platform === "win32") app.setAppUserModelId("com.lexiflow.desktop");
+
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
@@ -11,6 +12,21 @@ if (!gotLock) app.quit();
 let mainWindow = null;
 let backend = null;
 let runtimePaths = null;
+
+function getAppIcon() {
+  const candidates = [
+    path.join(__dirname, "public", "icon.png"),
+    path.join(__dirname, "build", "icon.ico"),
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (!fs.existsSync(candidate)) continue;
+      const image = nativeImage.createFromPath(candidate);
+      if (!image.isEmpty()) return image;
+    } catch {}
+  }
+  return undefined;
+}
 
 function configureRuntimePaths() {
   const userData = app.getPath("userData");
@@ -26,24 +42,21 @@ function configureRuntimePaths() {
   process.env.LEXIFLOW_DATA_DIR = appDataDir;
   process.env.LEXIFLOW_GENERATED_DIR = generatedDir;
   process.env.LEXIFLOW_RUNTIME_CWD = appDataDir;
-  process.env.LEXIFLOW_ECDICT_DB = app.isPackaged
-    ? path.join(process.resourcesPath, "ecdict.sqlite")
-    : path.join(__dirname, "resources", "ecdict.sqlite");
   return { userData, appDataDir, generatedDir };
 }
 
 function createBrowserWindow() {
-  const iconPath = path.join(__dirname, "public", "icon.png");
+  const appIcon = getAppIcon();
   const win = new BrowserWindow({
     width: 1440,
     height: 920,
     minWidth: 1080,
     minHeight: 720,
-    backgroundColor: "#f5f7fb",
+    backgroundColor: "#fafbf9",
     autoHideMenuBar: true,
     show: true,
     title: "LexiFlow · 英语词汇学习",
-    icon: fs.existsSync(iconPath) ? iconPath : undefined,
+    icon: appIcon,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -52,6 +65,7 @@ function createBrowserWindow() {
     },
   });
   win.setMenuBarVisibility(false);
+  if (appIcon && typeof win.setIcon === "function") win.setIcon(appIcon);
   return win;
 }
 
@@ -65,7 +79,7 @@ async function createWindow() {
   });
 
   try {
-    backend = require("./server-entry");
+    backend = require("./server-runtime");
     const started = await backend.startServer();
     mainWindow.webContents.on("will-navigate", (event, url) => {
       if (!url.startsWith(started.address)) {
@@ -75,10 +89,12 @@ async function createWindow() {
     });
     await mainWindow.loadURL(started.address);
     mainWindow.setTitle("LexiFlow · 英语词汇学习");
+    const appIcon = getAppIcon();
+    if (appIcon && typeof mainWindow.setIcon === "function") mainWindow.setIcon(appIcon);
     console.log(`LexiFlow desktop data: ${runtimePaths.appDataDir}`);
   } catch (err) {
     console.error("LexiFlow desktop startup failed:", err);
-    const html = `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#f5f7fb;font-family:Segoe UI,Microsoft YaHei,sans-serif;display:grid;place-items:center;height:100vh;color:#172033"><div style="text-align:center"><h2>LexiFlow</h2><p>应用没有正常启动，请关闭后重试。</p></div></body>`;
+    const html = `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#fafbf9;font-family:Segoe UI,Microsoft YaHei,sans-serif;display:grid;place-items:center;height:100vh;color:#172033"><div style="text-align:center"><h2>LexiFlow</h2><p>应用没有正常启动，请关闭后重试。</p></div></body>`;
     await mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`).catch(()=>{});
   }
 

@@ -1,0 +1,170 @@
+const fs = require("fs");
+const path = require("path");
+const vm = require("vm");
+
+function assert(condition,message){ if(!condition) throw new Error(message); }
+function eq(actual,expected,message){
+  const a=JSON.stringify(actual), e=JSON.stringify(expected);
+  if(a!==e) throw new Error(`${message}\nexpected: ${e}\nactual:   ${a}`);
+}
+function date(y,m,d,h=12){ return new Date(y,m-1,d,h,0,0,0); }
+function diffDays(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+
+const root=path.join(__dirname,"..");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const exists=name=>fs.existsSync(path.join(root,name));
+const sandbox={window:{},console,Date,setTimeout,clearTimeout};
+vm.createContext(sandbox);
+vm.runInContext(read("public/learning-core-v3.js"),sandbox,{filename:"learning-core-v3.js"});
+const core=sandbox.window.LexiFlowLearningCore;
+assert(core,"learning core did not initialize");
+
+eq(core.REVIEW_INTERVALS,[1,3,7,16,21],"Review ladder changed unexpectedly");
+eq(core.STABLE_INTERVALS,[30,45,68,90],"Stable ladder changed unexpectedly");
+eq(core.STABLE_WINDOWS,[2,3,4,5],"Stable maintenance windows changed unexpectedly");
+eq(core.TODAY_ORDER,["review","memorize","visualize","apply","select"],"Today order changed unexpectedly");
+assert(core.PLAN_VERSION===5,"DailyPlan version must include Review V4 workload semantics");
+assert(core.reviewPolicy({reviewMode:"custom",reviewCustomCap:1}).mode==="adaptive-v4","legacy Review cap settings must not override Review V4");
+assert(core.adaptiveNewWordGoal(3,17)===0,"heavy review pressure must pause new-word intake before dropping critical review");
+assert(core.canonicalStage("memorize1")==="memorize"&&core.canonicalStage("memorize2")==="memorize","legacy Memorize stages must collapse to one canonical stage");
+
+const index=read("public/index.html");
+const runtimeOrder=[
+  "learning-core-v3.js","learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js",
+  "today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","app.js","select-intake-v3.js","study-stage-surface-v3.js","study-session-v3.js",
+  "visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js",
+  "apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"
+];
+let previous=-1;
+for(const file of runtimeOrder){
+  const i=index.indexOf(file);
+  assert(i>=0,`${file} is not loaded by public/index.html`);
+  assert(i>previous,`${file} is loaded out of order in public/index.html`);
+  previous=i;
+}
+assert(!index.includes("select-stage-v3.js"),"duplicate Select confirmation renderer must not execute in the V3 runtime");
+assert(!exists("public/select-stage-v3.js"),"duplicate Select confirmation renderer must stay physically deleted");
+for(const retired of ["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
+  assert(!index.includes(`<script src="./${retired}"></script>`),`${retired} must not execute in the V3 runtime`);
+  if(["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"].includes(retired))assert(!exists(`public/${retired}`),`${retired} must stay deleted after V3 promotion`);
+}
+
+const gateway=read("public/learning-data-gateway-v3.js");
+assert(gateway.includes("core.normalizeData"),"Learning Data Gateway V3 must normalize learning data");
+assert(gateway.includes("core.crossDayPatch"),"Learning Data Gateway V3 must preserve deterministic cross-day guards");
+assert(gateway.includes('learningDataAuthority:source.learningDataAuthority||"gateway-v3"'),"Learning Data Gateway V3 writes must identify V3 authority");
+assert(gateway.includes("repairLegacyMeanings"),"Learning Data Gateway V3 must own safe legacy meaning repair");
+assert(gateway.includes("registerOutgoingMutator")&&gateway.includes("registerAfterPersist"),"Learning Data Gateway V3 must expose explicit feature hooks instead of forcing feature fetch wrappers");
+assert(gateway.includes("if(response.ok&&body?.data?.cards)commitSnapshot"),"Learning Data Gateway V3 must advance its in-memory snapshot only after a successful POST");
+assert(!gateway.includes("/api/ai/visual-scene"),"Learning Data Gateway V3 must not own Visualize AI behavior");
+const stageTransition=read("public/stage-transition-v3.js");
+assert(stageTransition.includes('stageTransitionAuthority:"v3"'),"Stage Transition V3 writes must identify V3 authority");
+assert(stageTransition.includes('card.stage="memorize"')&&!stageTransition.includes('card.stage="memorize1"'),"Select completion must write canonical Memorize directly");
+const advance=read("public/advance-learning-v3.js");
+assert(advance.includes('advanceLearningAuthority:"v3"'),"Advance Learning V3 writes must identify V3 authority");
+assert(!advance.includes('return"review"'),"Advance Learning V3 must never unlock Review early");
+const sourceContext=read("public/source-context-v3.js");
+assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
+assert(sourceContext.includes('DRAFT_KEY="lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve the prior draft key for upgrades");
+assert(!sourceContext.includes("window.fetch=")&&!sourceContext.includes("window.fetch ="),"Source Context V3 must use gateway hooks instead of rewriting global fetch");
+assert(sourceContext.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context V3 must preserve source fields through the gateway outgoing hook");
+assert(sourceContext.includes("gateway.registerAfterPersist(afterPersist)"),"Source Context V3 must clear pending source drafts only after a successful persistence callback");
+const applyGuard=read("public/apply-guard-v3.js");
+assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit Study card identity");
+assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer target word from DOM text");
+const planPersistence=read("public/daily-plan-persistence-v3.js");
+assert(!planPersistence.includes("window.fetch="),"DailyPlan persistence must be explicit rather than a global fetch side effect");
+assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan persistence writes must identify V3 authority");
+const studyDayBoundary=read("public/studyday-boundary-v3.js");
+assert(studyDayBoundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay boundary must own the V3 runtime-day marker");
+assert(studyDayBoundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay boundary must migrate the prior runtime-day marker");
+
+const todayUi=read("public/today-plan-v3.js");
+assert(todayUi.includes('if(!count)return ""'),"Today UI must hide zero-count task rows");
+assert(todayUi.includes('class="lexi-today-progress"'),"Today progress must be integrated into the compact Today card");
+assert(todayUi.includes('data-library-filter="${key}"'),"Word Library must own the pending/learning/stable filters");
+assert(todayUi.includes("待学习"),"collected words must be presented as Pending inside Word Library");
+assert(!todayUi.includes('id="lexi-inbox"'),"Home must not expose a separate Inbox panel");
+assert(todayUi.includes("next.dailyPlan.initialTaskIds=next.dailyPlan.initialTaskIds.filter"),"moving a selected word back to Pending must remove it from the frozen progress denominator rather than count it as completed");
+assert(todayUi.includes('todayPlanAuthority:"v3"'),"Today Plan writes must identify V3 authority");
+assert(!todayUi.includes("window.fetch =")&&!todayUi.includes("window.fetch="),"Today Plan V3 must not rewrite global fetch");
+
+const d1=date(2026,9,1), d2=date(2026,9,2);
+const collected=core.normalizeCard({id:"inbox",stage:"select",createdAt:d1.toISOString()},d1);
+assert(collected.inboxPending===true,"newly collected cards must enter internal pending state");
+const selected=core.normalizeCard({id:"picked",stage:"select",todaySelectedOn:"2026-09-01",createdAt:d1.toISOString()},d1);
+assert(selected.inboxPending===false,"Today-selected cards must leave internal pending state");
+const legacyMem=core.normalizeCard({id:"legacy-m",stage:"memorize2",memorizeRound:2,createdAt:d1.toISOString()},d1);
+assert(legacyMem.stage==="memorize"&&legacyMem.learningStage==="memorize","legacy persisted memorize2 cards must physically expose one canonical Memorize stage");
+assert(legacyMem.memorizeRound===2,"canonical stage normalization must preserve Memorize round progress");
+
+const selectPatch=core.crossDayPatch({stage:"select"},{stage:"memorize"},d1);
+assert(diffDays(d1,selectPatch.stageEligibleOn)===1,"Select -> Memorize must wait until next StudyDay");
+const memorizePatch=core.crossDayPatch({stage:"memorize2"},{stage:"visualize"},d1);
+assert(diffDays(d1,memorizePatch.stageEligibleOn)===1,"legacy Memorize -> Visualize must use the canonical cross-day gate");
+const applyPatch=core.crossDayPatch({stage:"apply"},{stage:"review"},d1);
+assert(applyPatch.initialReviewPending===false,"Apply must not open same-day initial Review");
+assert(diffDays(d1,applyPatch.nextReviewAt)===1,"first Review must be scheduled for next StudyDay");
+
+let patch=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:0},"good",d1);
+assert(patch.reviewStep===1&&diffDays(d1,patch.nextReviewAt)===3,"Review step 0 success must schedule +3d");
+patch=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:4},"good",d1);
+assert(patch.memoryState==="stable"&&diffDays(d1,patch.nextReviewAt)===30,"21d success must enter Stable at +30d");
+patch=core.reviewSchedulePatch({memoryState:"stable",stableStep:0,reviewStep:4},"good",d1);
+assert(patch.stableStep===1&&diffDays(d1,patch.nextReviewAt)===45,"Stable success must advance 30 -> 45");
+
+const failed=core.reviewSchedulePatch({memoryState:"reinforcing",reviewStep:3},"again",d1);
+assert(failed.memoryState==="review_again","failed first recall must enter Review Again");
+assert(core.valueDayKey(failed.nextReviewAt)===core.dayKey(d1),"first failure must remain eligible for same-day repair");
+const repaired=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d1);
+assert(repaired.memoryState==="review_again"&&diffDays(d1,repaired.nextReviewAt)===1,"same-day repair success must still require next-day validation");
+const recovered=core.reviewSchedulePatch({...failed,reviewStep:3},"good",d2);
+assert(recovered.memoryState==="reinforcing"&&recovered.reviewStep===2,"next-day validation must recover one step lower");
+const validationFailed=core.reviewSchedulePatch({...failed,reviewStep:3},"again",d2);
+assert(validationFailed.memoryState==="review_again","failed next-day validation must remain Review Again");
+assert(diffDays(d2,validationFailed.nextReviewAt)===1,"failed next-day validation must wait until the next StudyDay, not create another same-day repair loop");
+
+const reviewUi=read("public/review-session-v3.js");
+assert(reviewUi.includes('kind==="scheduled"||kind==="stable-maintenance"'),"only a normal scheduled first-recall failure may create the one same-day repair tail");
+assert(reviewUi.includes("没记住，明天再练"),"next-day validation failure copy must tell the learner to return tomorrow rather than promise another same-day repair");
+assert(!reviewUi.includes("没记住，明天再验证"),"retired internal validation wording must not return to the user surface");
+assert(!reviewUi.includes("settings.reviewTypes"),"Review question types must be system-owned after removing the user-facing review-method setting");
+assert(!reviewUi.includes("settings.reviewTypeWeights"),"Review question weights must be system-owned after removing the user-facing review-method setting");
+
+const morning=date(2026,9,10,8);
+const noon=date(2026,9,10,12);
+assert(core.isDue({stage:"review",nextReviewAt:noon.toISOString()},morning)===true,"Review due semantics must be StudyDay-based, not clock-time-based");
+
+const data=core.normalizeData({settings:{dailyGoal:3},cards:[
+  {id:"r",stage:"review",memoryState:"reinforcing",reviewStep:0,nextReviewAt:morning.toISOString(),createdAt:d1.toISOString()},
+  {id:"m",stage:"memorize1",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"v",stage:"visualize",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"a",stage:"apply",stageEligibleOn:morning.toISOString(),inboxPending:false,createdAt:d1.toISOString()},
+  {id:"s",stage:"select",todaySelectedOn:"2026-09-10",inboxPending:false,createdAt:d1.toISOString()},
+]},morning);
+assert(core.firstPlanStage(data.dailyPlan)==="review","Review must remain first in Today Plan");
+eq([data.dailyPlan.review.length,data.dailyPlan.memorize.length,data.dailyPlan.visualize.length,data.dailyPlan.apply.length,data.dailyPlan.select.length],[1,1,1,1,1],"Today Plan stage buckets are incorrect");
+assert(data.cards.find(card=>card.id==="m").stage==="memorize"&&data.cards.find(card=>card.id==="m").learningStage==="memorize","Today data must physically expose canonical Memorize even for legacy storage input");
+assert(data.dailyPlan.noVocabularyDebt===true,"DailyPlan must preserve No Vocabulary Debt");
+assert(data.dailyPlan.taskTotal===5&&data.dailyPlan.taskRemaining===5&&data.dailyPlan.taskCompleted===0,"new frozen plan must capture its initial task total");
+
+const progressed=JSON.parse(JSON.stringify(data));
+const reviewCard=progressed.cards.find(card=>card.id==="r");
+reviewCard.nextReviewAt=core.addDaysIso(morning,1);
+const progressedData=core.normalizeData(progressed,new Date(2026,8,10,18,0,0,0));
+assert(progressedData.dailyPlan.taskTotal===5,"same-day progress must preserve the frozen original task total");
+assert(progressedData.dailyPlan.taskRemaining===4&&progressedData.dailyPlan.taskCompleted===1,"Today progress must reflect completed frozen tasks");
+
+
+const goalDay=date(2026,9,11,9);
+const goalFive=core.normalizeData({settings:{dailyGoal:5},cards:[]},goalDay);
+assert(goalFive.dailyPlan.selectGoal===5&&goalFive.dailyPlan.reviewPressure===0,"fresh zero-review day must preserve the configured five-word goal");
+const goalThreeSameDay=core.normalizeData({settings:{dailyGoal:3},cards:[],dailyPlan:goalFive.dailyPlan},new Date(2026,8,11,10,0,0,0));
+assert(goalThreeSameDay.dailyPlan.selectMaxGoal===3&&goalThreeSameDay.dailyPlan.selectGoal===3,"explicit same-day daily-goal changes must update new-word capacity immediately");
+assert(goalThreeSameDay.dailyPlan.reviewPressure===0,"changing the daily goal must not invent Review pressure");
+const appSource=read("public/app.js"),serverSource=read("server.js");
+assert(appSource.includes('settings: { dailyGoal: 3, ttsVoice: "af_bella" }'),"app fresh-data default must be three words");
+assert(!appSource.includes('dailyGoal: 5')&&!appSource.includes('dailyGoal:5'),"five-word app default must not return");
+assert(serverSource.includes('settings: { dailyGoal: 3 }')&&!serverSource.includes('dailyGoal: 5'),"server fresh-data default must be three words");
+
+console.log("Learning Engine V3 runtime contract checks passed.");

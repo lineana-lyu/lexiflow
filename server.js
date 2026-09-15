@@ -3,7 +3,7 @@ const fs = require("fs");
 const fsp = fs.promises;
 const path = require("path");
 const os = require("os");
-const { spawn, spawnSync, exec } = require("child_process");
+const { spawn, exec } = require("child_process");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -123,7 +123,7 @@ function defaultLearningData() {
     version: 1,
     cards: [],
     activities: [],
-    settings: { dailyGoal: 5 },
+    settings: { dailyGoal: 3 },
     createdAt: new Date().toISOString(),
   };
 }
@@ -135,7 +135,7 @@ async function loadLearningData() {
     return {
       ...defaultLearningData(),
       ...parsed,
-      settings: { dailyGoal: 5, ...(parsed.settings || {}) },
+      settings: { dailyGoal: 3, ...(parsed.settings || {}) },
     };
   } catch {
     return defaultLearningData();
@@ -151,7 +151,7 @@ async function saveLearningData(value) {
   const clean = {
     ...defaultLearningData(),
     ...value,
-    settings: { dailyGoal: 5, ...(value.settings || {}) },
+    settings: { dailyGoal: 3, ...(value.settings || {}) },
   };
   await writeJsonAtomic(LEARNING_FILE, clean);
   return clean;
@@ -362,13 +362,21 @@ function commandNeedsShell(command) {
   return /\.(cmd|bat)$/i.test(command);
 }
 
-function runSync(command, args) {
-  return spawnSync(command, args, {
-    encoding: "utf8",
-    windowsHide: true,
-    shell: commandNeedsShell(command),
-    timeout: 8000,
-  });
+function commandAvailableWithoutSpawn(command) {
+  const value = String(command || "").trim();
+  if (!value) return false;
+  if (path.isAbsolute(value)) return Boolean(existingFile(value));
+  const pathValue = String(process.env.PATH || "");
+  if (!pathValue) return false;
+  const names = process.platform === "win32"
+    ? [value, `${value}.exe`, `${value}.cmd`, `${value}.bat`]
+    : [value];
+  for (const dir of pathValue.split(path.delimiter).filter(Boolean)) {
+    for (const name of names) {
+      if (existingFile(path.join(dir, name))) return true;
+    }
+  }
+  return false;
 }
 
 function parseCodexConfig() {
@@ -427,21 +435,16 @@ function codexStatus(force = false) {
 
   const resolved = resolveCodexExecutable();
   const executable = resolved.command;
-  const probe = runSync(executable, ["--version"]);
   const cfg = parseCodexConfig();
   const authFound = fs.existsSync(CODEX_AUTH);
-
-  if (probe.status !== 0) {
-    const detail = String(probe.stderr || probe.error?.message || probe.stdout || "").trim();
-    if (detail) console.warn("Codex probe failed:", detail.slice(0, 800));
-  }
+  const cliAvailable = commandAvailableWithoutSpawn(executable);
 
   const value = {
     executable: path.isAbsolute(executable) ? executable : "codex (PATH)",
     executableSource: resolved.source,
-    cliAvailable: probe.status === 0,
-    version: probe.status === 0 ? String(probe.stdout || probe.stderr || "").trim() : "",
-    probeError: probe.status === 0 ? "" : "Codex CLI 启动检测未通过",
+    cliAvailable,
+    version: "",
+    probeError: cliAvailable ? "" : "未在本机可执行路径中检测到 Codex CLI",
     authPath: CODEX_AUTH,
     authFound,
     configPath: CODEX_CONFIG,
@@ -1992,10 +1995,11 @@ async function sentenceFeedback(body) {
 
 规则：
 1. 中文输入：翻译成自然、简洁英文；必须自然使用目标词或常见词形，并保持当前词义。不要新增用户没表达的信息。如果无法在不编造信息的前提下加入目标词，approved=false。
-2. 英文输入：检查是否自然、语法是否基本正确、是否使用目标词/词形且符合当前词义。正确时 suggestion 为空；需要修改时只做最小修改。
-3. 如果英文完全没包含目标词，只有在不改变原意时才补入；否则 approved=false，并在 tips 中提醒用户重写。
-4. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
-5. suggestion 如果非空，应当是可直接保存的最终英文；如果 suggestion 已经修正完成，则 level=good、approved=true。
+2. 英文输入：检查是否自然、语法是否基本正确、是否使用目标词/词形且符合当前词义。完全正确时 suggestion 为空；只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出一条完整、自然、可直接使用的修正版，而不是只指出问题。
+3. 修正时尽量保持用户原意并做最小改动。若原句是无法独立成句的残句（例如主系表缺少表语），允许补充最少量、日常且中性的内容使句子完整，但不要大幅扩写或改变主题。
+4. 如果英文完全没包含目标词，优先在不改变原意的前提下自然补入目标词；如果确实无法合理补入，再 approved=false 并解释原因。
+5. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
+6. suggestion 如果非空，应当是可直接保存的最终英文；修正版本身正确且含目标词时，level=good、approved=true。不要出现“判定有问题但不给修正句”的情况。
 
 只输出 JSON：
 {"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"suggestion":"最终英文或空字符串","keyword":"最终英文中实际目标词/词形"}`;
@@ -2167,7 +2171,7 @@ async function serveFile(res, baseDir, relativePath) {
   try {
     const stat = await fsp.stat(filePath);
     if (!stat.isFile()) throw new Error("not file");
-    res.writeHead(200, { "Content-Type": mimeType(filePath), "Content-Length": stat.size });
+    res.writeHead(200, { "Content-Type": mimeType(filePath), "Content-Length": stat.size, "Cache-Control": "no-store" });
     fs.createReadStream(filePath).pipe(res);
   } catch {
     sendText(res, 404, "Not found");
@@ -2395,6 +2399,21 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, err.code === "DICTIONARY_KEY_MISSING" ? 400 : 502, {
           ok: false, code: friendly.code, error: friendly.message, userError: friendly
         });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/internal/codex") {
+      const body = await readJsonBody(req, 128 * 1024);
+      const prompt = String(body.prompt || "").trim();
+      if (!prompt) return sendJson(res, 400, { ok:false, code:"AI_PROMPT_REQUIRED", error:"缺少 AI 请求内容" });
+      const requestedTimeout = Number(body.timeoutMs || 30000);
+      const timeoutMs = Math.max(5000, Math.min(Number.isFinite(requestedTimeout) ? requestedTimeout : 30000, 90000));
+      try {
+        const result = await runCodex(prompt, { timeoutMs, workspaceWrite:false });
+        return sendJson(res, 200, { ok:true, stdout:String(result.stdout || ""), transport:result.transport || "" });
+      } catch (err) {
+        const friendly = friendlyError(err, "text");
+        return sendJson(res, 502, { ok:false, code:friendly.code, error:friendly.message, userError:friendly });
       }
     }
 

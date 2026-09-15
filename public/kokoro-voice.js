@@ -1,0 +1,163 @@
+(() => {
+  "use strict";
+
+  const API_ORIGIN = location.protocol === "file:" ? "http://127.0.0.1:4177" : "";
+  const DEFAULT_VOICE = "af_bella";
+  let activeAudio = null;
+  let activeButton = null;
+  let fallbackUtterance = null;
+
+  function clean(v){ return String(v || "").trim(); }
+  function selectedVoice(){
+    return clean(document.documentElement.dataset.lexiflowTtsVoice) || clean(localStorage.getItem("lexiflow-tts-voice")) || DEFAULT_VOICE;
+  }
+
+  function showToast(message,duration=3200){
+    const text=clean(message);if(!text)return;
+    const existing=document.querySelector(".toast[data-tts-toast='1']");
+    if(existing)existing.remove();
+    const toast=document.createElement("div");
+    toast.className="toast";
+    toast.dataset.ttsToast="1";
+    toast.textContent=text;
+    document.body.appendChild(toast);
+    setTimeout(()=>toast.remove(),duration);
+  }
+
+  function setBusy(button,busy){
+    if(!button||!button.isConnected)return;
+    button.classList.toggle("tts-loading",busy);
+    button.setAttribute("aria-busy",busy?"true":"false");
+    if(busy) button.dataset.ttsOriginalTitle=button.getAttribute("title")||"";
+    if(busy) button.setAttribute("title","正在后台准备本地自然语音…");
+    else if(Object.prototype.hasOwnProperty.call(button.dataset,"ttsOriginalTitle")){
+      const original=button.dataset.ttsOriginalTitle;
+      if(original)button.setAttribute("title",original);else button.removeAttribute("title");
+      delete button.dataset.ttsOriginalTitle;
+    }
+  }
+
+  function systemVoiceScore(voice){
+    const lang=clean(voice?.lang).toLowerCase();
+    const name=clean(voice?.name).toLowerCase();
+    let score=0;
+    if(lang==="en-us")score+=100;else if(lang.startsWith("en"))score+=60;
+    if(/natural|neural|online/.test(name))score+=40;
+    if(/aria|jenny|ava|guy|david|zira|samantha/.test(name))score+=12;
+    return score;
+  }
+
+  function playSystemFallback(text,button=null){
+    const value=clean(text);
+    if(!value||!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window))return false;
+    try{window.speechSynthesis.cancel();}catch{}
+    const utterance=new SpeechSynthesisUtterance(value);
+    utterance.lang="en-US";
+    utterance.rate=.9;
+    utterance.pitch=1;
+    const voices=window.speechSynthesis.getVoices?.()||[];
+    const voice=voices.filter(v=>clean(v.lang).toLowerCase().startsWith("en")).sort((a,b)=>systemVoiceScore(b)-systemVoiceScore(a))[0];
+    if(voice)utterance.voice=voice;
+    fallbackUtterance=utterance;
+    setBusy(button,true);
+    utterance.onend=()=>{fallbackUtterance=null;setBusy(button,false);};
+    utterance.onerror=()=>{fallbackUtterance=null;setBusy(button,false);};
+    window.speechSynthesis.speak(utterance);
+    return true;
+  }
+
+  async function play(text,button=null){
+    const value=clean(text); if(!value)return false;
+    const voice=selectedVoice();
+    setBusy(activeButton,false);
+    activeButton=button||null;
+    setBusy(activeButton,true);
+    let slowNoticeTimer=setTimeout(()=>{
+      showToast("首次自然发音正在后台准备，你可以继续查词或切换页面。",4200);
+    },700);
+    try{
+      const response=await fetch(`${API_ORIGIN}/api/tts/kokoro`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({text:value,voice,speed:.94})
+      });
+      clearTimeout(slowNoticeTimer);slowNoticeTimer=null;
+      const payload=await response.json().catch(()=>({}));
+      if(!response.ok||!payload?.ok||!payload.audioDataUrl){
+        const err=new Error(payload?.userError?.message||payload?.error||"本地自然语音暂时不可用");
+        err.payload=payload;
+        throw err;
+      }
+      try{activeAudio?.pause();}catch{}
+      try{if(fallbackUtterance)window.speechSynthesis?.cancel?.();}catch{}
+      fallbackUtterance=null;
+      activeAudio=new Audio(payload.audioDataUrl);
+      activeAudio.addEventListener("ended",()=>setBusy(button,false),{once:true});
+      activeAudio.addEventListener("error",()=>setBusy(button,false),{once:true});
+      await activeAudio.play();
+      return true;
+    }catch(err){
+      console.warn("Kokoro playback failed",err);
+      clearTimeout(slowNoticeTimer);slowNoticeTimer=null;
+      const fallback=playSystemFallback(value,button);
+      if(fallback){
+        showToast("本地自然语音暂时不可用，已使用系统语音兜底。",3200);
+        return true;
+      }
+      document.dispatchEvent(new CustomEvent("lexiflow:tts-error",{detail:{message:err?.message||"本地自然语音暂时不可用"}}));
+      return false;
+    }finally{
+      if(slowNoticeTimer)clearTimeout(slowNoticeTimer);
+      if((!activeAudio||activeAudio.paused)&&!fallbackUtterance)setBusy(button,false);
+    }
+  }
+
+  window.LexiFlowNaturalTts=Object.freeze({
+    play,
+    selectedVoice,
+  });
+
+  document.addEventListener("change",event=>{
+    const select=event.target?.closest?.("#tts-voice");
+    if(!select)return;
+    const voice=clean(select.value)||DEFAULT_VOICE;
+    localStorage.setItem("lexiflow-tts-voice",voice);
+    document.documentElement.dataset.lexiflowTtsVoice=voice;
+  },true);
+
+  document.addEventListener("click",async event=>{
+    const sentence=event.target?.closest?.("[data-hydrated-sentence], .sentence-speaker");
+    if(sentence){
+      const text=clean(sentence.dataset.hydratedSentence || sentence.closest(".sentence-audio-line")?.querySelector(".sentence-audio-text")?.textContent);
+      if(!text)return;
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+      await play(text,sentence);
+      return;
+    }
+
+    const speaker=event.target?.closest?.('[data-action="speak"]');
+    if(!speaker)return;
+    const word=clean(speaker.dataset.word || speaker.closest(".word-line")?.querySelector("h2")?.textContent || speaker.closest(".learning-card-wordtop")?.querySelector("h2")?.textContent || speaker.closest(".library-editor-word-line")?.querySelector(".library-editor-word")?.textContent);
+    if(!word)return;
+    const audio=clean(speaker.dataset.audio);
+    let audios=[];try{audios=JSON.parse(speaker.dataset.audios||"[]").filter(Boolean);}catch{}
+    const pronunciation=window.LexiFlowPronunciationV3;
+    if(typeof pronunciation?.playWord==="function"){
+      event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+      await pronunciation.playWord(word,{audioUrl:audio,audioUrls:audios});
+      return;
+    }
+    const isExpression=/\s/.test(word) || /[.!?,;:]/.test(word);
+    // If the shared bridge is unavailable during startup, retain the old fallback:
+    // exact dictionary recordings remain owned by the base surface; expressions
+    // without an exact recording use whole-expression natural synthesis.
+    if(!isExpression && (audio || audios.length))return;
+    event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();
+    await play(word,speaker);
+  },true);
+
+  document.addEventListener("lexiflow:tts-error",event=>{
+    const message=clean(event.detail?.message);
+    if(message)showToast(message,3200);
+  });
+})();

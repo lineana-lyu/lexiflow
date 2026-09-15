@@ -93,7 +93,7 @@ function isValidDatabase(filePath) {
   }
 }
 
-async function importCsvToSqlite(csvPath, outputPath) {
+async function importCsvToSqlite(csvPath, outputPath, sourceLabel = DEFAULT_SOURCE_URL) {
   await fsp.mkdir(path.dirname(outputPath), { recursive: true });
   const tempDb = `${outputPath}.${process.pid}.tmp`;
   await fsp.rm(tempDb, { force: true });
@@ -183,7 +183,7 @@ async function importCsvToSqlite(csvPath, outputPath) {
 
     const meta = db.prepare("INSERT OR REPLACE INTO metadata(key, value) VALUES (?, ?)");
     meta.run("entry_count", String(count));
-    meta.run("source", DEFAULT_SOURCE_URL);
+    meta.run("source", String(sourceLabel || DEFAULT_SOURCE_URL));
     meta.run("schema", "lexiflow-ecdict-v1");
     meta.run("prepared_at", new Date().toISOString());
     db.exec("ANALYZE");
@@ -221,7 +221,7 @@ async function prepareEcdictDatabase({ source = DEFAULT_SOURCE_URL, outputPath =
   }
 
   try {
-    const result = await importCsvToSqlite(csvPath, resolvedOutput);
+    const result = await importCsvToSqlite(csvPath, resolvedOutput, source);
     return { ...result, reused: false };
   } finally {
     if (temporaryCsv) await fsp.rm(csvPath, { force: true }).catch(() => {});

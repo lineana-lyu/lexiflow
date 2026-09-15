@@ -1,0 +1,24 @@
+name: Learning Engine Check
+
+on:
+  push:
+    branches:
+      - main
+      - feat/v7-airy-luminous-ui
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run repository checks
+        run: npm run check

@@ -1,0 +1,37 @@
+name: One-shot Explicit Apply Quality Bridge
+
+on:
+  push:
+    branches:
+      - feat/v7-airy-luminous-ui
+    paths:
+      - .github/workflows/one-shot-explicit-apply-quality-bridge.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v7-airy-luminous-ui
+          fetch-depth: 0
+      - name: Move Apply Quality from fetch interception to explicit bridge
+        run: python scripts/make-apply-quality-explicit.py
+      - name: Verify migration
+        run: |
+          node --check public/apply-quality-v3.js
+          node --check public/apply-stage-v3.js
+          node --check scripts/check-apply-quality-v3.js
+          npm run check
+      - name: Commit migration
+        shell: bash
+        run: |
+          git config user.name "lexiflow-refactor-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/apply-quality-v3.js public/apply-stage-v3.js scripts/check-apply-quality-v3.js
+          git commit -m "refactor: make Apply Quality an explicit bridge [apply-quality-bridge]"
+          git push origin HEAD:feat/v7-airy-luminous-ui

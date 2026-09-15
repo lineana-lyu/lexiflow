@@ -1,0 +1,239 @@
+const fs = require("fs");
+const path = require("path");
+
+function assert(condition,message){ if(!condition) throw new Error(message); }
+const root=path.join(__dirname,"..");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+const exists=name=>fs.existsSync(path.join(root,name));
+
+const index=read("public/index.html");
+const gateway=read("public/learning-data-gateway-v3.js");
+const reviewSession=read("public/review-session-v3.js");
+const reviewTransaction=read("public/review-transaction-v3.js");
+const reviewPolicy=read("public/review-policy-v3.js");
+const planPersistence=read("public/daily-plan-persistence-v3.js");
+const todayPlan=read("public/today-plan-v3.js");
+const advance=read("public/advance-learning-v3.js");
+const studySession=read("public/study-session-v3.js");
+const studyDrafts=read("public/study-drafts-v3.js");
+const studySurface=read("public/study-stage-surface-v3.js");
+const visualActions=read("public/visualize-actions-v3.js");
+const applyActions=read("public/apply-actions-v3.js");
+const applyGuard=read("public/apply-guard-v3.js");
+const sourceContext=read("public/source-context-v3.js");
+const boundary=read("public/studyday-boundary-v3.js");
+const stageTransition=read("public/stage-transition-v3.js");
+const memorize=read("public/memorize-stage-v3.js");
+const safety=read("public/safety-controls.js");
+const app=read("public/app.js");
+
+function before(a,b){
+  const ai=index.indexOf(a),bi=index.indexOf(b);
+  assert(ai>=0,`${a} missing from index.html`);
+  assert(bi>=0,`${b} missing from index.html`);
+  assert(ai<bi,`${a} must load before ${b}`);
+}
+
+before("learning-core-v3.js","learning-data-gateway-v3.js");
+before("learning-data-gateway-v3.js","studyday-boundary-v3.js");
+before("studyday-boundary-v3.js","stage-transition-v3.js");
+before("stage-transition-v3.js","today-plan-v3.js");
+before("today-plan-v3.js","daily-plan-persistence-v3.js");
+before("daily-plan-persistence-v3.js","advance-learning-v3.js");
+before("advance-learning-v3.js","source-context-v3.js");
+before("source-context-v3.js","app.js");
+before("app.js","select-intake-v3.js");
+before("select-intake-v3.js","study-stage-surface-v3.js");
+before("study-stage-surface-v3.js","study-session-v3.js");
+before("study-session-v3.js","review-transaction-v3.js");
+before("review-transaction-v3.js","review-session-v3.js");
+before("apply-actions-v3.js","review-policy-v3.js");
+before("review-policy-v3.js","visualize-actions-v3.js");
+before("visualize-actions-v3.js","apply-guard-v3.js");
+
+for(const active of ["learning-core-v3.js","learning-data-gateway-v3.js","studyday-boundary-v3.js","stage-transition-v3.js","today-plan-v3.js","daily-plan-persistence-v3.js","advance-learning-v3.js","source-context-v3.js","select-intake-v3.js","study-stage-surface-v3.js","study-session-v3.js","visualize-stage-v3.js","apply-stage-v3.js","review-transaction-v3.js","review-session-v3.js","memorize-stage-v3.js","study-drafts-v3.js","apply-actions-v3.js","review-policy-v3.js","visualize-actions-v3.js","apply-guard-v3.js"]){
+  assert(index.includes(`<script src="./${active}"></script>`),`${active} must be active`);
+}
+assert(!index.includes('<script src="./select-stage-v3.js"></script>'),"obsolete duplicate Select renderer must not be active");
+assert(!exists("public/select-stage-v3.js"),"obsolete duplicate Select renderer must stay deleted");
+
+for(const retiredScript of ["learning-core-v2.js","learning-engine-v2.js","legacy-data-fix.js","studyday-boundary-v2.js","stage-transition-v2.js","today-plan-v2.js","daily-plan-persistence-v2.js","advance-learning-v2.js","study-entry-v3.js","review-transition-v2.js","review-v2.js","review-session-state-v2.js","study-resume-v2.js","visualize-v2.js","memorize-v2.js","source-context-v2.js","review-policy-v2.js","apply-guard-v2.js"]){
+  assert(!index.includes(`<script src="./${retiredScript}"></script>`),`${retiredScript} must be retired from runtime`);
+}
+for(const retired of ["public/learning-core-v2.js","public/learning-engine-v2.js","public/legacy-data-fix.js","public/studyday-boundary-v2.js","public/stage-transition-v2.js","public/today-plan-v2.js","public/daily-plan-persistence-v2.js","public/advance-learning-v2.js","public/study-entry-v3.js","public/review-transition-v2.js","public/review-v2.js","public/review-session-state-v2.js","public/study-resume-v2.js","public/visualize-v2.js","public/memorize-v2.js","public/source-context-v2.js","public/review-policy-v2.js","public/apply-guard-v2.js"]){
+  assert(!exists(retired),`retired runtime source must stay deleted: ${retired}`);
+}
+
+assert(gateway.includes("LexiFlowLearningDataGatewayV3=Object.freeze"),"Learning Data Gateway V3 must expose a narrow bridge");
+assert(gateway.includes("core.normalizeData")&&gateway.includes("core.crossDayPatch"),"Learning Data Gateway V3 must normalize data and preserve cross-day guards");
+assert(gateway.includes("repairLegacyMeanings"),"legacy safe meaning repair must live inside the V3 data gateway");
+assert(!gateway.includes("/api/ai/visual-scene"),"Learning Data Gateway V3 must not own stage AI behavior");
+
+assert(sourceContext.includes("core.canonicalStage(card)"),"Source Context V3 must use canonical stage identity");
+assert(sourceContext.includes('DRAFT_KEY = "lexiflow-source-context-draft-v2"'),"Source Context V3 must preserve existing draft storage during upgrade");
+assert(!sourceContext.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
+assert(!reviewPolicy.includes("复习与学习负荷")&&!reviewPolicy.includes("settingsHtml")&&!reviewPolicy.includes("decorateSettings"),"Core-owned Review workload policy must stay out of user Settings because it is not configurable");
+assert(reviewPolicy.includes("function syncFromGateway")&&reviewPolicy.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review hint surface must read the shared Gateway snapshot");
+assert(!reviewPolicy.includes("data-review-mode")&&!reviewPolicy.includes("review-custom-cap")&&!reviewPolicy.includes("persistSettings"),"Review V4 must not restore manual daily Review caps or a second settings writer");
+assert(applyGuard.includes("LexiFlowStudyRenderer?.currentCardId"),"Apply Guard V3 must use explicit current card identity");
+assert(applyGuard.includes('core.canonicalStage(card)==="apply"'),"Apply Guard V3 must validate canonical Apply stage identity");
+assert(!applyGuard.includes('document.querySelector(".apply-word-hero .target-word-text'),"Apply Guard V3 must not infer card identity from rendered word text");
+
+assert(planPersistence.includes("LexiFlowDailyPlanPersistenceV3=Object.freeze"),"DailyPlan Persistence V3 must expose a narrow explicit bridge");
+assert(planPersistence.includes('dailyPlanAuthority:"v3"'),"DailyPlan Persistence V3 must identify persisted writes");
+assert(!planPersistence.includes("window.fetch="),"DailyPlan Persistence V3 must not mutate global fetch or hide writes behind GET interception");
+assert(todayPlan.includes("LexiFlowTodayPlanV3=Object.freeze"),"Today Plan V3 must expose a narrow explicit bridge");
+assert(todayPlan.includes('todayPlanAuthority:"v3"'),"Today Plan V3 must identify its writes");
+assert(todayPlan.includes("if(!syncFromGateway())latestData=normalized;"),"Today Plan V3 local state must follow the Gateway-confirmed write result");
+assert(reviewSession.includes("if(!syncFromGateway())data=normalized;"),"Review Session V3 local state must follow the Gateway-confirmed write result");
+assert(!todayPlan.includes("window.fetch =")&&!todayPlan.includes("window.fetch="),"Today Plan V3 must not mutate global fetch");
+assert(todayPlan.includes("selectFromPending")&&todayPlan.includes("moveBackToPending"),"Today Plan V3 must explicitly own Pending ↔ Today selection");
+assert(advance.includes("LexiFlowAdvanceLearningV3=Object.freeze"),"Advance Learning V3 must expose a narrow explicit bridge");
+assert(advance.includes('advanceLearningAuthority:"v3"'),"Advance Learning V3 must identify persisted writes");
+assert(!advance.includes('return"review"'),"Advance Learning V3 must never unlock Review early");
+
+assert(boundary.includes('RUNTIME_KEY="lexiflow-studyday-runtime-v3"'),"StudyDay Boundary V3 must own the current runtime-day marker");
+assert(boundary.includes('LEGACY_RUNTIME_KEY="lexiflow-studyday-runtime-v2"'),"StudyDay Boundary V3 must migrate the legacy runtime-day marker");
+assert(boundary.includes("localStorage.removeItem(LEGACY_RUNTIME_KEY)"),"StudyDay Boundary V3 must clean the legacy marker after migration");
+assert(boundary.includes("LexiFlowStudyDayBoundaryV3=Object.freeze"),"StudyDay Boundary V3 must expose a narrow diagnostics bridge");
+
+assert(reviewSession.includes('reviewAuthority:"v3"'),"Review Session V3 must mark authoritative writes");
+assert(reviewSession.includes("core.reviewSchedulePatch"),"Review Session V3 must delegate scheduling to Learning Core");
+assert(reviewSession.includes("plannedQueue()"),"Review Session V3 must derive its queue from DailyPlan.review");
+assert(reviewSession.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Review Session V3 reads must prefer the canonical Gateway snapshot");
+assert(studySession.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Study Session V3 reads must prefer the canonical Gateway snapshot");
+assert(reviewSession.includes("repairTail"),"Review Session V3 must own the same-day repair tail");
+assert(reviewSession.includes('data-r3="rate"'),"Review Session V3 must own rating actions rather than legacy review-rate buttons");
+assert(!reviewSession.includes("[data-action=\"review-rate\"]"),"Review Session V3 must not depend on legacy review-rate controls");
+assert(reviewSession.includes("window.LexiFlowReviewSessionV3=Object.freeze"),"Review Session V3 must expose a narrow runtime bridge");
+assert(app.includes("window.LexiFlowReviewSessionV3?.open"),"app Review entry fallback must delegate to Review Session V3");
+assert(!app.includes('reviewMode==="all"')&&!app.includes('reviewMode==="custom"'),"app shell must not retain retired all/custom Review cap modes");
+assert(!app.includes("自适应负荷")&&!app.includes("关键复习不截断"),"app shell must not expose internal Review workload terminology");
+assert(!app.includes("function reviewPage("),"the removed standalone Review page must not survive as unreachable code");
+assert(app.includes("今天安排了 ${review} 个复习词，完成后再继续新学习。"),"Today must explain its automatic Review queue in learner-facing language");
+for(const legacy of ["function startReview(","function reviewSessionPage(","function rateReview(","function stageInitialReview(","function enterInitialReview(","function finishInitialReview("]){assert(!app.includes(legacy),`legacy Review implementation must be removed from app.js: ${legacy}`);}
+assert(!app.includes("reviewQueue"),"app.js must not keep a second Review queue");
+assert(!app.includes("reviewIndex"),"app.js must not keep a second Review cursor");
+assert(!app.includes("initial-review-rate"),"legacy initial Review controls must be removed");
+assert(!app.includes("function dueCards("),"app shell must not rebuild Review membership outside DailyPlan");
+assert(app.includes("function currentDailyPlan()"),"app shell must read the frozen Today Plan for fallback rendering");
+assert(!app.includes("function streak("),"streak logic must stay removed from the V1 product surface");
+assert(!app.includes("连续学习"),"streak copy must stay removed from app.js");
+
+assert(reviewTransaction.includes("pendingCommit"),"Review transaction layer must persist an in-flight commit marker");
+assert(reviewTransaction.includes("storageConfirms"),"Review transaction layer must verify persistence before cursor recovery");
+assert(reviewTransaction.includes('authority==="review-session-v3"'),"Review transaction recovery must verify the V3 Review activity authority");
+assert(reviewTransaction.includes("expectedReviewCount"),"Review transaction recovery must be reviewCount-idempotent");
+
+assert(stageTransition.includes("core.crossDayPatch"),"learning stage transitions must use Learning Core");
+assert(stageTransition.includes("LexiFlowLearningDataGatewayV3?.current?.()")&&stageTransition.includes("if(snapshot)return snapshot;"),"Stage Transition V3 reads must prefer the canonical Gateway snapshot while retaining network fallback");
+assert(stageTransition.includes('stageTransitionAuthority:"v3"'),"normal stage writes must identify Stage Transition V3 authority");
+assert(stageTransition.includes('authority:"stage-transition-v3"'),"normal stage activity history must identify Stage Transition V3 authority");
+assert(stageTransition.includes('button.matches(\'[data-action="pass-apply"]\')'),"Apply completion must be intercepted before legacy same-day Review logic");
+assert(stageTransition.includes("card.initialReviewPending=false"),"Apply completion must retire legacy same-day initial Review");
+assert(stageTransition.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"stage completion must resolve the exact Study Session card ID");
+assert(!stageTransition.includes("cardForDom"),"stage completion must not infer the card by DOM word text");
+assert(stageTransition.includes("resync(button)"),"failed stage identity resolution must resync instead of silently repeating the same confirmation");
+assert(stageTransition.includes('card.stage="memorize"')&&!stageTransition.includes('card.stage="memorize1"'),"Select completion must write canonical Memorize directly");
+assert(stageTransition.includes("LexiFlowStageTransitionV3=Object.freeze"),"Stage Transition V3 must expose a narrow bridge");
+
+assert(memorize.includes("window.LexiFlowStudyRenderer?.currentCardId?.()"),"Memorize Stage V3 must resolve the exact Study Session renderer card ID");
+assert(memorize.includes("if(!syncFromGateway())data=normalized;"),"Memorize Stage V3 local state must follow the Gateway-confirmed write result");
+assert(visualActions.includes("if(!syncFromGateway())data=normalized;"),"Visualize Actions V3 local state must follow the Gateway-confirmed write result");
+assert(applyActions.includes("if(!syncFromGateway())data=normalized;"),"Apply Actions V3 local state must follow the Gateway-confirmed write result");
+assert(memorize.includes('core.canonicalStage(card)==="memorize"'),"Memorize Stage V3 must own one canonical Memorize stage");
+assert(!memorize.includes("chinese-memory-prompt"),"Memorize must not infer its card from legacy DOM content");
+assert(!memorize.includes('[data-action=\"memory-rate\"]'),"Memorize must not depend on legacy memory-rate controls");
+for(const legacy of ["function stageMem1(","function stageMem2(","function advanceStage("]){assert(!app.includes(legacy),`legacy learning-stage authority must be removed from app.js: ${legacy}`);}
+assert(!app.includes('if(action===\"memory-rate\")'),"app.js must not retain legacy Memorize rating authority");
+assert(!app.includes('if(action===\"reveal\")'),"app.js must not retain legacy Memorize reveal state");
+assert(app.includes("data-study-stepper-v3-host"),"app.js must expose only the generic V3 progress host");
+assert(app.includes("data-study-stage-host-v3"),"app.js must expose only the generic V3 stage render host");
+assert(!app.includes("const STAGES = ["),"app.js must not retain a parallel legacy stage model");
+assert(!app.includes("return stageSelect(card)")&&!app.includes("return stageVisual(card)")&&!app.includes("return stageApply(card)"),"app.js must not dispatch into retired stage renderers");
+assert(app.includes("state.study={cardId:card.id};"),"app.js Study bridge state must contain only the exact card identity");
+assert(!app.includes("buildDailyPlan"),"app.js must not construct Today membership; frozen DailyPlan is owned by V3");
+assert(!app.includes("const DICTIONARY ="),"app.js must not carry the retired in-memory demo dictionary");
+assert(!app.includes("Merriam-Webster Learner's Dictionary"),"app.js base Settings surface must not present the optional online fallback as the primary dictionary");
+assert(app.includes("本地词典负责快速查词；配置在线词典后，会自动补充真人发音和例句。"),"Settings must explain local-first dictionary behavior in learner-facing language");
+assert(app.includes("dictMaskedKey")&&app.includes("密钥已保存")&&app.includes("本地词典可用"),"Settings must expose saved dictionary-key and local dictionary readiness without revealing the credential");
+assert(app.includes("providerChecks: { dictionary:null, ai:null }")&&app.includes("正在连接在线词典…")&&app.includes("在线词典连接失败"),"dictionary connection state must remain visible on Settings");
+assert(app.includes("verifyProviderConnectionsOnStartup")&&app.includes('/api/dictionary/test')&&app.includes('/api/ai/test'),"provider connections must be verified automatically with real service calls on startup");
+assert(app.includes("正在连接 AI…")&&app.includes("AI 已连接")&&app.includes("AI 连接失败"),"AI connection state must expose checking/success/failure without diagnostic jargon");
+for(const internalLabel of ["CLI 已检测","CLI 未检测","真实 AI 请求验证","Fast transport","运行连接已验证"]){assert(!app.includes(internalLabel),`Settings must not expose internal diagnostic label: ${internalLabel}`);}
+for(const retiredSettingsSurface of ["<h3>AI 服务</h3>","<h3>模型与思考强度</h3>","<h3>图片生成</h3>","advanced-diagnostics"]){
+  assert(!app.includes(retiredSettingsSurface),`app.js base Settings surface must not retain a runtime-removed legacy block: ${retiredSettingsSurface}`);
+}
+assert(app.includes("<h3>AI 辅助</h3>")&&app.includes("<h3>AI 模型</h3>"),"app.js Settings surface must use learner-facing AI labels");
+assert(!app.includes('data-action="refresh-provider"'),"Settings base surface must not render the retired manual provider refresh control");
+assert(app.includes("连接信息只保存在当前设备")&&app.includes("settings-security-icon"),"Settings base surface must own the final credential privacy banner markup");
+assert(app.includes("<h3>自然发音</h3>")&&app.includes("优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。")&&app.includes('id="tts-voice"'),"app.js must directly own learner-facing Voice Settings and the voice selector");
+assert(!exists("public/settings-surface.js"),"retired Settings mutation decorator must stay deleted");
+assert(!index.includes('<script src="./settings-surface.js"></script>'),"retired Settings mutation decorator must not load at runtime");
+assert(app.includes('data-settings-advanced="1"')&&app.includes("data-settings-advanced-body"),"app.js must natively own the Advanced Settings disclosure layout");
+assert(app.includes("备份单词卡、学习进度和复习记录。")&&app.includes("从此前导出的备份恢复学习数据。"),"Settings base surface must own backup/restore descriptions");
+const productUx=read("public/product-ux.js");
+for(const retiredDecorator of ["decorateDictionarySettings","mergeAiSettings","ai-unified-setting"]){
+  assert(!productUx.includes(retiredDecorator),`product-ux must not retain a Settings decorator whose source structure no longer exists: ${retiredDecorator}`);
+}
+assert(!productUx.includes("decorateDailyGoal")&&!productUx.includes("CUSTOM_GOAL_KEY")&&!productUx.includes('/api/learning-data'),"product-ux must not own Daily Goal state or duplicate learning-data reads");
+assert(app.includes('data-daily-goal-editor')&&app.includes('data-daily-goal-step="-1"')&&app.includes('data-daily-goal-step="1"'),"app.js must natively own the Daily Goal number editor");
+assert(!productUx.includes("applyAppIcon")&&!productUx.includes("APP_ICON_URL"),"product-ux must not patch the static brand icon after render");
+assert(app.includes("lexi-brand-icon-image")&&app.includes('src="./icon.png"'),"app.js must natively render the approved LexiFlow brand icon");
+assert(index.includes('<link rel="icon" type="image/png" href="./icon.png" />'),"index favicon must keep the approved LexiFlow icon asset");
+assert(!productUx.includes("decorateSecurityBanner"),"product-ux must not re-decorate the Settings security banner once app.js owns final markup");
+assert(app.includes('api("/api/dictionary/lookup"'),"front-end lookup must use the dictionary service boundary");
+for(const legacyStage of ["memorize1","memorize2","mastered"]){
+  assert(!app.includes(legacyStage),`app.js must not expose a historical product stage: ${legacyStage}`);
+}
+assert(app.includes("core.canonicalStage(card)"),"app.js display labels must reuse canonical stage normalization");
+assert(app.includes("return plan?.frozen===true&&plan.date===todayKey()?plan:null;"),"app.js may only read the already-frozen current DailyPlan");
+assert(!app.includes("stageIndex("),"app.js must not retain or call a legacy stage-order helper");
+assert(app.includes("window.LexiFlowStudyStageSurfaceV3?.stages"),"Study shell motion ordering must reuse the V3 stage surface authority");
+for(const retiredBody of ["stageKicker","stageTop","stageSelect","ensureVisualSceneSuggestion","ensurePracticePrompt","stageVisual","stageApply","localFeedback"]){
+  assert(!app.includes(`function ${retiredBody}(`)&&!app.includes(`async function ${retiredBody}(`),`retired stage body must be physically removed from app.js: ${retiredBody}`);
+}
+for(const retiredAction of ["complete-stage","toggle-visual-scene","generate-visual","finish-visual","submit-apply","adopt-ai-sentence","edit-apply","refresh-visual-scene","refresh-practice-prompt","restore-original-apply","pass-apply"]){
+  assert(!app.includes(`if(action===\"${retiredAction}\")`)&&!app.includes(`if(action==\"${retiredAction}\")`),`retired stage action must be removed from app.js: ${retiredAction}`);
+}
+for(const retiredHook of ["visualProgressTimers","document.getElementById(\"visual-file\")","state.visualSceneExpanded"]){
+  assert(!app.includes(retiredHook),`retired stage event hook must be removed from app.js: ${retiredHook}`);
+}
+assert(app.includes('const libraryImageFile=document.getElementById("library-image-file")'),"Word Library image upload must survive stage cleanup");
+assert(app.includes('if(action==="regenerate-library-image")'),"Word Library image regeneration must survive stage cleanup");
+assert(app.includes('api("/api/ai/image"'),"Word Library image generation transport must survive stage cleanup");
+
+assert(studySurface.includes("data-study-stage-host-v3"),"Study Surface V3 must quarantine legacy stage bodies while authoritative renderers load");
+assert(studySurface.includes("const ROOTS=Object.freeze"),"Study Surface V3 must recognize the active stage renderer roots");
+assert(studySession.includes("plannedLearningIds"),"Study Session V3 must build learning work from the frozen Today Plan");
+assert(studySession.includes("window.LexiFlowStudyRenderer"),"Study Session V3 must call the explicit renderer bridge");
+assert(studySession.includes("view.openCard(card.id)"),"Study Session V3 must open the exact planned card ID");
+assert(!studySession.includes("legacyFirstActiveId"),"Study Session V3 must not consult a legacy first-active selector");
+assert(studySession.includes("event.stopImmediatePropagation()"),"Study Session V3 must intercept the old continue-learning authority");
+assert(studySession.includes("pauseSession"),"Study Session V3 must own user pause semantics");
+assert(studySession.includes("maybeResume"),"Study Session V3 must own same-day crash/reload resume");
+assert(!studySession.includes("activeLearningCards()[0]"),"Study Session V3 must not select work through the old active-learning queue");
+assert(app.includes("window.LexiFlowStudyRenderer=Object.freeze"),"app.js must expose only a narrow Study renderer bridge");
+assert(!app.includes("cardId?getCard(cardId):activeLearningCards()[0]"),"app renderer must not fall back to legacy queue selection");
+assert(app.includes("window.LexiFlowStudySessionV3?.open"),"legacy button handler must delegate to Study Session V3 instead of choosing work itself");
+assert(!studyDrafts.includes("resumeIfNeeded"),"draft recovery must not compete with Study Session V3 for auto-resume");
+assert(!studyDrafts.includes("setActive("),"draft recovery must not persist a second active-study authority");
+assert(studyDrafts.includes("core.canonicalStage(card)"),"Study Drafts V3 must bind recovery to the canonical stage model");
+assert(visualActions.includes('core.canonicalStage(current)==="visualize"'),"Visualize Actions V3 must use canonical stage identity");
+assert(visualActions.includes('data-visual-actions-v3="skip"'),"Visualize Actions V3 must own the explicit skip action marker");
+
+assert(boundary.includes('const STUDY_SESSION_V3_KEY="lexiflow-study-session-v3"'),"StudyDay boundary must know the Study Session V3 key");
+assert(boundary.includes("purgeSingle(STUDY_SESSION_V3_KEY"),"StudyDay boundary must expire stale Study Session V3 state");
+assert(boundary.includes('const REVIEW_SESSION_V3_KEY="lexiflow-review-session-v3"'),"StudyDay boundary must know the V3 Review session key");
+assert(boundary.includes("purgeSingle(REVIEW_SESSION_V3_KEY"),"StudyDay boundary must expire stale V3 Review sessions");
+assert(boundary.includes('const REVIEW_SESSION_KEY="lexiflow-review-session-state-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review session residue during migration");
+assert(boundary.includes('const REVIEW_ATTEMPT_KEY="lexiflow-review-resume-v2"'),"StudyDay boundary should temporarily clean legacy V2 Review attempt residue during migration");
+
+assert(safety.includes("verifiedReset"),"clear-data control must own a verified reset flow");
+assert(safety.includes('method:"POST"'),"clear-data flow must write an empty learning dataset to persistent storage");
+assert(safety.includes("RESET_VERIFICATION_FAILED"),"clear-data flow must verify persistent storage before reporting success");
+assert(safety.includes("lexiflow-study-session-v3"),"clear-data flow must remove Study Session local residue");
+assert(safety.includes("lexiflow-review-session-v3"),"clear-data flow must remove Review Session local residue");
+assert(!safety.includes("window.prompt"),"clear-data flow should use the visible confirmation modal rather than a fragile prompt-only action");
+
+console.log("Runtime Authority V3 checks passed.");

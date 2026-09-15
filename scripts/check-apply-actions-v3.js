@@ -1,0 +1,75 @@
+const fs=require("fs");
+const path=require("path");
+
+function assert(condition,message){if(!condition)throw new Error(message);}
+const root=path.join(__dirname,"..");
+const read=name=>fs.readFileSync(path.join(root,name),"utf8");
+
+const index=read("public/index.html");
+const apply=read("public/apply-actions-v3.js");
+const transition=read("public/stage-transition-v3.js");
+const visual=read("public/visualize-actions-v3.js");
+const drafts=read("public/study-drafts-v3.js");
+const source=read("public/source-context-v3.js");
+const gateway=read("public/learning-data-gateway-v3.js");
+const fresh=read("public/new-user-defaults-v3.js");
+
+assert(index.includes("apply-actions-v3.js"),"Apply Actions V3 must be loaded by index.html");
+assert(index.indexOf("app.js")<index.indexOf("apply-actions-v3.js"),"Apply actions must decorate after the app renderer exists");
+assert(apply.includes('data-apply-v3="draft"'),"Apply must expose an explicit save-draft action");
+assert(apply.includes('data-apply-v3="skip"'),"Apply must expose an explicit skip action");
+assert(apply.includes("applyDraftSavedAt"),"saving a draft must persist a durable draft checkpoint");
+assert(apply.includes("restoreDurableDraft"),"saved Apply drafts must restore from durable learning data");
+assert(apply.includes("applySkipped=true"),"skip must be recorded explicitly instead of being confused with completion");
+assert(apply.includes('skipped:true'),"Apply skip activity must be distinguishable in history");
+assert(apply.includes("core.crossDayPatch"),"Apply skip must use the same deterministic cross-day transition authority");
+assert(apply.includes("LexiFlowStudySessionV3?.pause"),"saving a draft must pause the resumable Study Session");
+assert(apply.includes("再次点击确认跳过"),"Apply skip must require an explicit second confirmation click");
+assert(apply.includes("beginApplyWrite")&&apply.includes('beginStageWrite?.(id,"apply",now)'),"Apply draft and skip writes must serialize with normal completion through the shared stage-write lock");
+assert(!apply.includes("apply-skip"),"Apply skip must share the canonical Apply command ID with normal completion");
+assert(apply.includes("commandCommitted"),"Apply skip must be safe to retry without double completion");
+assert(apply.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Apply Actions V3 must reuse the learning-data gateway snapshot for decoration/draft restore");
+assert(apply.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Apply action decoration must not GET learning data on every DOM mutation");
+assert(apply.includes('applyActionsAuthority:"v3"'),"Apply action writes must declare their V3 authority");
+
+assert(transition.includes("currentStudyCardId"),"Stage Transition V3 must resolve the exact rendered card ID");
+assert(!transition.includes("function domWord("),"Stage Transition V3 must not infer Apply identity from DOM word text");
+assert(transition.includes('card.applySkipped=false'),"successful Apply completion must clear a previous skip marker");
+assert(transition.includes('card.applyDraft=""'),"successful Apply completion must clear the durable draft field");
+assert(transition.includes("stageCommandId"),"Select, Visualize and Apply completion must use deterministic command ids");
+assert(transition.includes("commandCommitted"),"stage completion must explicitly tolerate a retried command");
+assert(transition.includes("beginStageWrite")&&transition.includes("endStageWrite"),"normal terminal completion must participate in the shared stage-write lock");
+assert(transition.includes("copyNorm(card.exampleEn"),"authoritative Apply completion must independently reject a copied reference example");
+assert(transition.includes('stageTransitionAuthority:"v3"'),"normal Apply completion must persist through Stage Transition V3");
+assert(transition.includes('authority:"stage-transition-v3"'),"normal Apply completion history must identify Stage Transition V3 authority");
+
+assert(visual.includes("LexiFlowStudyRenderer?.currentCardId"),"Visualize skip must bind to the exact study card ID");
+assert(!visual.includes(".trim().toLowerCase()===word"),"Visualize must not resolve cards by word text");
+assert(visual.includes('beginStageWrite?.(id,"visualize",now)'),"Visualize skip must serialize with normal completion through the shared stage-write lock");
+assert(!visual.includes("visualize-skip"),"Visualize skip must share the canonical Visualize command ID with normal completion");
+assert(visual.includes('data-visual-actions-v3="skip"'),"Visualize skip must be owned by the V3 action surface");
+assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize Actions V3 must reuse the learning-data gateway snapshot for decoration");
+assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Visualize action decoration must not GET learning data on every DOM mutation");
+assert(visual.includes('visualizeActionsAuthority:"v3"'),"Visualize skip writes must declare their V3 authority");
+assert(!visual.includes("footer.querySelector('[data-visual-actions-v3=\"skip\"]')?.remove();"),"Visualize skip decoration must not delete/recreate the same button on every mutation");
+
+assert(drafts.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Study Drafts V3 must restore/cleanup against the gateway snapshot");
+assert(drafts.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Study Drafts V3 must not GET learning data on every DOM mutation");
+assert(!drafts.includes("requestAnimationFrame(async()=>{queued=false;await refresh();decorate();});"),"Study Drafts V3 must not restore mutation-driven network refreshes");
+
+assert(source.includes("LexiFlowStudyRenderer?.currentCardId"),"source reminders must bind to the exact study card ID");
+assert(source.includes("core.canonicalStage(card)"),"Source Context V3 must branch on canonical learning stages");
+assert(!source.includes("const stage=String(card.stage"),"Source Context V3 must not branch on raw legacy stage values");
+assert(!source.includes("trim().toLowerCase()===word"),"source reminders must not resolve the learning card by word text");
+assert(source.includes("data-library-source-editor"),"Word Library editor must expose editable source context");
+assert(source.includes("captureLibrarySourceDraft"),"Word Library source edits must enter the authoritative source map before save");
+assert(source.includes("Object.assign(card,remembered)"),"later card saves must preserve edited source metadata through the outgoing source map");
+assert(source.includes("gateway.registerOutgoingMutator(outgoingMutator)"),"Source Context V3 must attach source preservation through the central learning-data gateway");
+assert(!source.includes("window.fetch=")&&!source.includes("window.fetch ="),"Source Context V3 must not restore a competing global fetch wrapper");
+assert(gateway.includes("registerOutgoingMutator"),"Learning Data Gateway V3 must expose the source-preservation hook used by Source Context");
+
+assert(index.includes("new-user-defaults-v3.js"),"fresh-user defaults must be loaded by index.html");
+assert(fresh.includes('payload.hasStoredData!==false'),"three-word migration must only touch a genuinely fresh data store");
+assert(fresh.includes("TARGET_GOAL=3"),"fresh users must start with the three-word target");
+
+console.log("Apply Actions V3 checks passed.");
