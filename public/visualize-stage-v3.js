@@ -10,6 +10,7 @@
   let assistBusy=false;
   let imageBusy=false;
   let uploadBusy=false;
+  let assistError="";
   const localDrafts=new Map();
 
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
@@ -110,6 +111,7 @@
           <h3>我的联想场景</h3><p>尽量写具体的人、地点、动作或物体。越和你自己的经历有关，越容易记住。</p>
           <textarea class="textarea scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="例如：我第一次去东京时，在车站看到一个巨大到让我停下来的广告牌。">${esc(note)}</textarea>
           <div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||interactionBusy?"disabled":""}>${assistBusy?"AI 正在优化…":suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>
+          ${assistError?`<div class="lexi-v3-visual-error">${esc(assistError)}</div>`:""}
           ${suggestion?`<div class="lexi-v3-ai-suggestion"><small>AI 建议 · 仅供参考</small><span>${esc(suggestion)}</span>${cue?`<small>记忆提示：${esc(cue)}</small>`:""}<div><button class="text-action" type="button" data-visual-v3="adopt" ${interactionBusy?"disabled":""}>采用这个建议</button></div></div>`:""}
         </aside>
       </div>
@@ -165,7 +167,7 @@
     const authority=window.LexiFlowAiAssistV3?.visualScene;
     if(typeof authority!=="function"){console.error("Visualize V3 AI authority unavailable");return;}
     const guard=beginVisualWrite(card.id);if(!guard)return;
-    setDraft(card.id,note);assistBusy=true;render();
+    setDraft(card.id,note);assistError="";assistBusy=true;render();
     try{
       const payload=await authority({word:card.word,meaningZh:card.meaningZh,exampleEn:card.exampleEn,senseIntentEn:card.senseIntentEn||"",previousScene:note});
       const scene=String(payload?.assist?.scene||"").trim();
@@ -175,7 +177,7 @@
         c.visualSceneSuggestion={scene,cue};
         if(question)c.practicePrompt={question};
       });
-    }catch(err){console.error("Visualize V3 assist failed",err);}
+    }catch(err){assistError=String(err?.payload?.userError?.message||err?.payload?.error||err?.message||"这次 AI 建议没有生成成功，请重试。");console.error("Visualize V3 assist failed",err);}
     finally{assistBusy=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
