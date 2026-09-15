@@ -71,7 +71,7 @@
   }
 
   const wordBlock = c => `<div class="lexi-m2-word" data-lexi-mem-word="${esc(c.word)}"><div><strong>${esc(c.word)}</strong><button type="button" class="speaker lexi-m2-speaker" data-m2="speak" title="播放美式发音" aria-label="播放 ${esc(c.word)} 的发音">🔊</button></div><small>${esc(phonetic(c.phonetic))} · ${esc(c.pos||"")}</small></div>`;
-  const example = c => `<div class="lexi-m2-example"><small>例句</small><div>${esc(c.exampleEn||"")}</div><p>${esc(c.exampleZh||"")}</p></div>`;
+  const example = c => `<div class="lexi-m2-example"><small>例句</small><div class="lexi-m2-example-line"><span>${esc(c.exampleEn||"")}</span>${c.exampleEn?`<button type="button" class="sentence-speaker" data-m2="speak-example" aria-label="播放例句">🔊</button>`:""}</div><p>${esc(c.exampleZh||"")}</p></div>`;
   const head = s => `<div class="lexi-m2-head"><strong>记忆 · 第 ${s.round} 轮 / 2</strong><span>${s.round===1?"双向主动回忆":"最后一轮强化，不无限重复"}</span></div>`;
 
   function html(card,s){
@@ -87,7 +87,7 @@
   function style(){
     if(document.getElementById("lexi-m2-style"))return;
     const el=document.createElement("style"); el.id="lexi-m2-style";
-    el.textContent=`.lexi-m2{min-height:500px;padding:4px}.lexi-m2-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.lexi-m2-head span,.lexi-m2-center>p{color:var(--muted);font-size:13px}.lexi-m2-center{width:min(640px,100%);margin:34px auto 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}.lexi-m2-direction{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.08em}.lexi-m2-word>div{display:flex;align-items:center;justify-content:center;gap:8px}.lexi-m2-word strong{font-size:40px}.lexi-m2-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-m2-word small{color:var(--muted)}.lexi-m2-meaning{font-size:30px;font-weight:750}.lexi-m2-card{width:min(540px,100%);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}.lexi-m2-card>strong{font-size:21px}.lexi-m2-card>span{color:var(--muted)}.lexi-m2-example{padding-top:12px;border-top:1px solid var(--line);text-align:left;font-size:14px;line-height:1.65}.lexi-m2-example small,.lexi-m2-example p{color:var(--muted)}.lexi-m2-example p{margin:4px 0 0}.lexi-m2-input{display:flex;gap:10px;width:min(560px,100%)}.lexi-m2-input input{flex:1;min-width:0;text-align:center;font-size:18px}.lexi-m2-input .btn{flex:0 0 auto;min-width:116px;white-space:nowrap;padding-inline:18px}.lexi-m2-actions{display:flex;gap:10px;width:min(420px,100%)}.lexi-m2-actions .btn{flex:1}@media(max-width:700px){.lexi-m2-input{flex-direction:column}.lexi-m2-input .btn{width:100%}.lexi-m2-word strong{font-size:34px}}`;
+    el.textContent=`.lexi-m2{min-height:500px;padding:4px}.lexi-m2-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.lexi-m2-head span,.lexi-m2-center>p{color:var(--muted);font-size:13px}.lexi-m2-center{width:min(640px,100%);margin:34px auto 0;display:flex;flex-direction:column;align-items:center;text-align:center;gap:18px}.lexi-m2-direction{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.08em}.lexi-m2-word>div{display:flex;align-items:center;justify-content:center;gap:8px}.lexi-m2-word strong{font-size:40px}.lexi-m2-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-m2-word small{color:var(--muted)}.lexi-m2-meaning{font-size:30px;font-weight:750}.lexi-m2-card{width:min(540px,100%);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}.lexi-m2-card>strong{font-size:21px}.lexi-m2-card>span{color:var(--muted)}.lexi-m2-example{padding-top:12px;border-top:1px solid var(--line);text-align:left;font-size:14px;line-height:1.65}.lexi-m2-example-line{display:flex;align-items:center;justify-content:space-between;gap:10px}.lexi-m2-example-line span{min-width:0}.lexi-m2-example small,.lexi-m2-example p{color:var(--muted)}.lexi-m2-example p{margin:4px 0 0}.lexi-m2-input{display:flex;gap:10px;width:min(560px,100%)}.lexi-m2-input input{flex:1;min-width:0;text-align:center;font-size:18px}.lexi-m2-input .btn{flex:0 0 auto;min-width:116px;white-space:nowrap;padding-inline:18px}.lexi-m2-actions{display:flex;gap:10px;width:min(420px,100%)}.lexi-m2-actions .btn{flex:1}@media(max-width:700px){.lexi-m2-input{flex-direction:column}.lexi-m2-input .btn{width:100%}.lexi-m2-word strong{font-size:34px}}`;
     document.head.appendChild(el);
   }
 
@@ -148,6 +148,14 @@
           return;
         }
         if(typeof window.LexiFlowNaturalTts?.play==="function"&&await window.LexiFlowNaturalTts.play(card.word,btn))return;
+      }catch{}
+      return;
+    }
+    if(a==="speak-example"){
+      try{
+        const pronunciation=window.LexiFlowPronunciationV3;
+        if(typeof pronunciation?.playSentence==="function")await pronunciation.playSentence(card.exampleEn||"");
+        else if(typeof window.LexiFlowNaturalTts?.play==="function")await window.LexiFlowNaturalTts.play(card.exampleEn||"",btn);
       }catch{}
       return;
     }

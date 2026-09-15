@@ -98,7 +98,7 @@
     const preparedUnconfirmed=Boolean(image&&card.visualImageConfirmed!==true);
     return `<div class="lexi-v3-visual" data-visualize-stage-v3="${esc(card.id)}">
       <div class="lexi-v3-visual-head">
-        <div><div class="lexi-v3-visual-kicker">VISUALIZE · 视觉联想</div><div class="lexi-v3-visual-word"><strong>${esc(card.word)}</strong><button type="button" data-visual-v3="speak" aria-label="播放发音">🔊</button></div><div class="lexi-v3-visual-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""} · ${esc(card.meaningZh||"")}</div></div>
+        <div><div class="lexi-v3-visual-kicker">VISUALIZE · 视觉联想</div><div class="lexi-v3-visual-word"><strong>${esc(card.word)}</strong><button type="button" class="speaker" data-visual-v3="speak" aria-label="播放发音">🔊</button></div><div class="lexi-v3-visual-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""} · ${esc(card.meaningZh||"")}</div></div>
         <div class="lexi-v3-visual-principle">先用你自己的记忆和经历想画面。AI 可以帮你把画面变得更具体，但不会替你完成第一次联想。</div>
       </div>
       <div class="lexi-v3-visual-grid">
@@ -145,6 +145,13 @@
 
   async function speak(){
     const card=currentCard();if(!card)return;
+    try{
+      const pronunciation=window.LexiFlowPronunciationV3;
+      if(typeof pronunciation?.playWord==="function"){
+        await pronunciation.playWord(card.word,{audioUrl:card.audioUrl||"",audioUrls:Array.isArray(card.audioUrls)?card.audioUrls:[]});
+        return;
+      }
+    }catch{}
     try{if(typeof window.LexiFlowNaturalTts?.play==="function"&&await window.LexiFlowNaturalTts.play(card.word))return;}catch{}
     try{const utterance=new SpeechSynthesisUtterance(card.word);utterance.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(utterance);}catch{}
   }

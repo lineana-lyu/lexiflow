@@ -106,7 +106,7 @@
     const chinese=/[\u3400-\u9fff]/.test(text);
     const missing=Boolean(text.trim()&&!chinese&&!usesTarget(text,card.word));
     return `<div class="apply-learning-stage lexi-apply-stage-v3" data-apply-stage-v3-root="${esc(card.id)}">
-      <div class="lexi-apply-v3-head apply-word-hero"><div class="lexi-apply-v3-word"><strong class="target-word-text">${esc(card.word)}</strong><button type="button" data-apply-stage-v3="speak-word" aria-label="播放发音">🔊</button></div><div class="lexi-apply-v3-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""}</div><span class="lexi-apply-v3-meaning">${esc(card.meaningZh||"")}</span></div>
+      <div class="lexi-apply-v3-head apply-word-hero"><div class="lexi-apply-v3-word"><strong class="target-word-text">${esc(card.word)}</strong><button type="button" class="speaker" data-apply-stage-v3="speak-word" aria-label="播放发音">🔊</button></div><div class="lexi-apply-v3-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""}</div><span class="lexi-apply-v3-meaning">${esc(card.meaningZh||"")}</span></div>
       <div class="lexi-apply-v3-prompt ai-practice-prompt"><div><small>先自己表达，再让 AI 检查</small><strong>${esc(prompt)}</strong></div><button class="text-action" type="button" data-apply-stage-v3="refresh-prompt" ${s.promptLoading||s.submitting?"disabled":""}>${s.promptLoading?"正在换一个…":"换一个话题"}</button></div>
       <div class="lexi-apply-v3-composer apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" placeholder="中文或英文都可以，先写你真正想表达的话…">${esc(text)}</textarea><div class="lexi-apply-v3-composer-bottom"><span>Enter 检查 · Shift + Enter 换行</span><button class="btn primary" type="button" data-action="submit-apply" data-apply-stage-v3="submit" ${s.submitting||!text.trim()?"disabled":""}>${s.submitting?"AI 正在检查…":"检查表达"}</button></div></div>
       <div id="apply-keyword-warning" class="lexi-apply-v3-warning apply-keyword-warning" ${missing?"":"hidden"}>还没有用到目标词 “${esc(card.word)}”。先自己尝试把它自然地放进句子里。</div>
@@ -129,8 +129,15 @@
     mutate(card,latest);card.updatedAt=new Date().toISOString();await persist(latest);return data?.cards?.find(item=>String(item.id)===String(cardId))||card;
   }
 
-  async function speak(text){
-    const value=norm(text);if(!value)return;
+  async function speak(card){
+    const value=norm(card?.word);if(!value)return;
+    try{
+      const pronunciation=window.LexiFlowPronunciationV3;
+      if(typeof pronunciation?.playWord==="function"){
+        await pronunciation.playWord(value,{audioUrl:card.audioUrl||"",audioUrls:Array.isArray(card.audioUrls)?card.audioUrls:[]});
+        return;
+      }
+    }catch{}
     try{if(typeof window.LexiFlowNaturalTts?.play==="function"&&await window.LexiFlowNaturalTts.play(value))return;}catch{}
     try{const utterance=new SpeechSynthesisUtterance(value);utterance.lang="en-US";speechSynthesis.cancel();speechSynthesis.speak(utterance);}catch{}
   }
@@ -200,7 +207,7 @@
     const button=event.target?.closest?.("[data-apply-stage-v3]");if(!button)return;
     event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.applyStageV3;
     const card=currentCard();
-    if(action==="speak-word"&&card)void speak(card.word);
+    if(action==="speak-word"&&card)void speak(card);
     if(action==="submit")void submit();
     if(action==="adopt")adopt();
     if(action==="edit")document.getElementById("apply-text")?.focus();

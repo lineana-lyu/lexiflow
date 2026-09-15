@@ -13,6 +13,11 @@ const enrichment=fs.readFileSync(path.join(root,"lib","example-enrichment.js"),"
 const electron=fs.readFileSync(path.join(root,"electron-main.js"),"utf8");
 const runtime=fs.readFileSync(path.join(root,"server-runtime.js"),"utf8");
 const kokoro=fs.readFileSync(path.join(root,"public","kokoro-voice.js"),"utf8");
+const today=fs.readFileSync(path.join(root,"public","today-plan-v3.js"),"utf8");
+const memorize=fs.readFileSync(path.join(root,"public","memorize-stage-v3.js"),"utf8");
+const visualize=fs.readFileSync(path.join(root,"public","visualize-stage-v3.js"),"utf8");
+const apply=fs.readFileSync(path.join(root,"public","apply-stage-v3.js"),"utf8");
+const reviewSession=fs.readFileSync(path.join(root,"public","review-session-v3.js"),"utf8");
 
 assert(app.includes("verifyProviderConnectionsOnStartup"),"app must verify provider connections automatically");
 assert(app.includes("setTimeout(()=>{void verifyProviderConnectionsOnStartup();},0)"),"automatic provider verification must start after initial render");
@@ -31,6 +36,15 @@ assert(!electron.includes("APP_ICON_DATA_URL"),"stale embedded desktop icon must
 assert(app.includes("A phrase is a single pronunciation unit")&&app.includes("完整短语发音")&&app.includes("if(isExpression){"),"phrase playback must bypass component audio and synthesize the whole expression as one unit");
 assert(hydration.includes("pronunciation.wholeExpressionAudio === true")&&hydration.includes("result.audioUrl = first")&&hydration.includes("pronunciation?.wholeExpressionPhonetic!==true"),"lookup hydration must remove component audio and reject partial phrase IPA");
 assert(kokoro.includes("if(!isExpression && (audio || audios.length))return;"),"startup fallback must synthesize expressions instead of trusting supplied component audio");
+assert(app.includes('data-tp-add-today="1">＋ 添加新词')&&!app.includes('header("","今日学习","",`<button class="btn" data-route="add">'),"every visible Today add entry must use the explicit direct-to-Today flow");
+assert(today.includes("LexiFlowAddFlowV3?.openForToday?.()"),"Today add actions must preserve their direct-to-Today intent");
+for(const [name,source] of [["Visualize",visualize],["Apply",apply]]){
+  assert(source.includes("LexiFlowPronunciationV3")&&source.includes("audioUrl:card.audioUrl")&&source.includes("audioUrls:Array.isArray(card.audioUrls)"),`${name} word playback must reuse the shared dictionary-first pronunciation payload`);
+}
+assert(memorize.includes('data-m2="speak-example"')&&memorize.includes("pronunciation?.playSentence"),"Memorize examples must expose shared sentence playback after the answer is visible");
+assert(reviewSession.includes('data-r3="speak-example"')&&reviewSession.includes("pronunciation?.playSentence")&&reviewSession.includes("lexi-r3-phonetic"),"Review must expose phonetics, word playback and sentence playback without leaking the answer early");
+assert(app.includes('if(!String(sense.exampleEn||"").trim()){')&&!app.includes('if(!String(sense.exampleEn||"").trim()||!String(sense.exampleZh||"").trim()){'),"missing Chinese example translation must remain background work instead of blocking card save");
+assert(app.includes("本机 LexiFlow 中的全部单词卡"),"destructive-data copy must describe the desktop storage location accurately");
 assert(runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("wholeExpressionAudio:false")&&runtime.includes("composePhrasePhonetic"),"runtime phrase pronunciation must expose full IPA metadata but never component dictionary audio");
 assert(app.includes("normalizedDiff")&&app.includes("targetWordForms(head)"),"phrase result UX must hide identical auto-resolution and accept inflected phrase examples");
 assert(app.includes("prepareLookupForSave")&&app.includes("mergeActiveLookupHydration"),"lookup save must await hydrated examples/pronunciation and merge them into active state");

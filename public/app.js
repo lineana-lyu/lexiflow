@@ -503,6 +503,9 @@
     const goal=Number(plan?.selectGoal ?? state.data.settings.dailyGoal ?? 3);
     const stable=stableCount();
     const inbox=Array.isArray(plan?.inbox)?plan.inbox.length:state.data.cards.filter(card=>card.inboxPending).length;
+    const addTodayAction=Number(plan?.remainingSelectSlots||0)>0
+      ? `<button class="btn" data-tp-add-today="1">＋ 添加新词</button>`
+      : "";
     const primary=review
       ? `<button class="btn primary" data-action="start-review">开始复习</button>`
       : learning
@@ -513,7 +516,7 @@
             ? `<button class="btn primary" data-route="add">添加第一个单词</button>`
             : `<button class="btn primary" disabled>今天的计划已完成</button>`;
     return shell(
-      header("","今日学习","",`<button class="btn" data-route="add">＋ 添加单词</button>`)
+      header("","今日学习","",addTodayAction)
       + `<div class="grid cols-4">
         <div class="card stat"><div class="stat-label">今日完成</div><div class="stat-value">${today}<span style="font-size:14px;color:var(--muted)"> / ${goal}</span></div><div class="stat-hint">今日推进记录</div></div>
         <div class="card stat"><div class="stat-label">待复习</div><div class="stat-value">${review}</div><div class="stat-hint">${reviewRecent} 个近期巩固 · ${reviewLongTerm} 个长期巩固</div></div>
@@ -614,7 +617,7 @@
         <div class="example-pair">
           <div class="example-label">例句</div>
           ${primarySense.exampleEn?sentenceExample(primarySense.exampleEn,"example-en"):`<div class="example-en">暂无例句，请手动编辑</div>`}
-          <div class="example-zh">${escapeHtml(primarySense.exampleZh||"暂无翻译，请手动编辑")}</div>
+          <div class="example-zh">${escapeHtml(primarySense.exampleZh||(primarySense.exampleEn?"中文翻译正在后台补充，可先保存":"暂无翻译，请手动编辑"))}</div>
         </div>
       </div>`:"";
 
@@ -841,7 +844,10 @@
 
   async function prepareLookupForSave(result, sense){
     if(!result||!sense)return sense;
-    if(!String(sense.exampleEn||"").trim()||!String(sense.exampleZh||"").trim()){
+    // English examples are required to learn the word, so wait only when that
+    // content is missing. Chinese translation hydration remains background work
+    // and must never block saving a usable card.
+    if(!String(sense.exampleEn||"").trim()){
       try{
         const payload=await api("/api/dictionary/examples",{method:"POST",body:{
           word:result.word,
@@ -1053,7 +1059,7 @@
           <div class="library-editor-word-block">
             <div class="library-editor-word-line">
               <strong class="library-editor-word">${escapeHtml(d.word)}</strong>
-              <button class="speaker library-editor-speaker" data-action="speak" data-word="${escapeHtml(d.word)}" data-audio="${escapeHtml(card.audioUrl||"")}" aria-label="播放 ${escapeHtml(d.word)} 的发音">🔊</button>
+              <button class="speaker library-editor-speaker" data-action="speak" data-word="${escapeHtml(d.word)}" data-audio="${escapeHtml(card.audioUrl||"")}" data-audios="${escapeHtml(JSON.stringify(Array.isArray(card.audioUrls)?card.audioUrls:[]))}" aria-label="播放 ${escapeHtml(d.word)} 的发音">🔊</button>
               <span class="pill blue library-editor-pos">${escapeHtml(d.pos||"word")}</span>
             </div>
             <div class="library-editor-phonetic">${escapeHtml(phonetic)}</div>
@@ -1329,7 +1335,7 @@
     );
   }
   function renderModal(){
-    if(state.modal==="reset") return `<div class="modal-backdrop"><div class="modal"><h2>确认清空全部数据？</h2><p>这会删除当前浏览器里的全部单词卡、学习进度和统计记录，而且无法撤销。</p><div class="modal-actions"><button class="btn" data-action="close-modal">取消</button><button class="btn danger" data-action="reset-data">确认清空</button></div></div></div>`;
+    if(state.modal==="reset") return `<div class="modal-backdrop"><div class="modal"><h2>确认清空全部数据？</h2><p>这会删除本机 LexiFlow 中的全部单词卡、学习进度和统计记录，而且无法撤销。</p><div class="modal-actions"><button class="btn" data-action="close-modal">取消</button><button class="btn danger" data-action="reset-data">确认清空</button></div></div></div>`;
     return "";
   }
 

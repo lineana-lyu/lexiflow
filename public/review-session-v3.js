@@ -155,7 +155,7 @@
   function injectStyle(){
     if(document.getElementById("lexi-review-v3-style"))return;
     const style=document.createElement("style");style.id="lexi-review-v3-style";
-    style.textContent=`.lexi-r3-screen{min-height:100vh;background:var(--bg);padding:26px}.lexi-r3-shell{width:min(900px,100%);margin:0 auto}.lexi-r3-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}.lexi-r3-top-left{display:grid;gap:4px}.lexi-r3-top-left strong{font-size:15px}.lexi-r3-top-left span{font-size:12px;color:var(--muted)}.lexi-r3-card{width:min(660px,100%);margin:34px auto 0;padding:34px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:var(--shadow-sm,0 8px 30px rgba(34,48,43,.04));display:grid;gap:22px;text-align:center}.lexi-r3-kicker{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted)}.lexi-r3-word{font-size:42px;font-weight:800;line-height:1.12}.lexi-r3-meaning{font-size:30px;font-weight:760;line-height:1.4}.lexi-r3-meta{color:var(--muted);font-size:13px}.lexi-r3-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.lexi-r3-input{display:flex;gap:10px;width:min(560px,100%);margin:0 auto}.lexi-r3-input input{flex:1;min-width:0;text-align:center;font-size:18px}.lexi-r3-input .btn{flex:0 0 auto;min-width:116px;white-space:nowrap;padding-inline:18px}.lexi-r3-result{border-top:1px solid var(--line);padding-top:20px;display:grid;gap:12px}.lexi-r3-result strong{font-size:20px}.lexi-r3-result span{color:var(--muted);font-size:13px}.lexi-r3-image{width:min(390px,82vw);aspect-ratio:4/3;object-fit:cover;border-radius:18px;border:1px solid var(--line);margin:0 auto}.lexi-r3-empty{width:min(620px,100%);margin:70px auto;padding:30px;text-align:center}.lexi-r3-error{width:min(620px,100%);margin:70px auto;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface);display:grid;gap:12px}@media(max-width:700px){.lexi-r3-screen{padding:18px 14px}.lexi-r3-card{padding:24px 18px;margin-top:20px}.lexi-r3-input{flex-direction:column}.lexi-r3-input .btn{width:100%}.lexi-r3-word{font-size:35px}.lexi-r3-meaning{font-size:25px}}`;
+    style.textContent=`.lexi-r3-screen{min-height:100vh;background:var(--bg);padding:26px}.lexi-r3-shell{width:min(900px,100%);margin:0 auto}.lexi-r3-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:24px}.lexi-r3-top-left{display:grid;gap:4px}.lexi-r3-top-left strong{font-size:15px}.lexi-r3-top-left span{font-size:12px;color:var(--muted)}.lexi-r3-card{width:min(660px,100%);margin:34px auto 0;padding:34px;border:1px solid var(--line);border-radius:24px;background:var(--surface);box-shadow:var(--shadow-sm,0 8px 30px rgba(34,48,43,.04));display:grid;gap:22px;text-align:center}.lexi-r3-kicker{font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--muted)}.lexi-r3-word-line{display:flex;align-items:center;justify-content:center;gap:10px}.lexi-r3-word{font-size:42px;font-weight:800;line-height:1.12}.lexi-r3-phonetic{color:var(--muted);font-size:13px}.lexi-r3-example{display:flex;align-items:center;justify-content:center;gap:9px;color:var(--muted);font-size:13px}.lexi-r3-meaning{font-size:30px;font-weight:760;line-height:1.4}.lexi-r3-meta{color:var(--muted);font-size:13px}.lexi-r3-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}.lexi-r3-input{display:flex;gap:10px;width:min(560px,100%);margin:0 auto}.lexi-r3-input input{flex:1;min-width:0;text-align:center;font-size:18px}.lexi-r3-input .btn{flex:0 0 auto;min-width:116px;white-space:nowrap;padding-inline:18px}.lexi-r3-result{border-top:1px solid var(--line);padding-top:20px;display:grid;gap:12px}.lexi-r3-result strong{font-size:20px}.lexi-r3-result span{color:var(--muted);font-size:13px}.lexi-r3-image{width:min(390px,82vw);aspect-ratio:4/3;object-fit:cover;border-radius:18px;border:1px solid var(--line);margin:0 auto}.lexi-r3-empty{width:min(620px,100%);margin:70px auto;padding:30px;text-align:center}.lexi-r3-error{width:min(620px,100%);margin:70px auto;padding:24px;border:1px solid var(--line);border-radius:18px;background:var(--surface);display:grid;gap:12px}@media(max-width:700px){.lexi-r3-screen{padding:18px 14px}.lexi-r3-card{padding:24px 18px;margin-top:20px}.lexi-r3-input{flex-direction:column}.lexi-r3-input .btn{width:100%}.lexi-r3-word{font-size:35px}.lexi-r3-meaning{font-size:25px}}`;
     document.head.appendChild(style);
   }
 
@@ -170,7 +170,7 @@
     const active=activeFor(card,session),kind=reviewKind(card,new Date());
     let body="";
     if(active.type==="en-zh"){
-      body=`<div class="lexi-r3-kicker">英文 → 中文 · 主动回忆</div><div class="lexi-r3-word">${esc(card.word)}</div><div class="lexi-r3-meta">先在脑中说出当前词义，再查看答案。</div>${active.revealed?`<div class="lexi-r3-result"><strong>${esc(card.meaningZh||"")}</strong><span>${esc(card.exampleEn||"")}</span><div class="lexi-r3-actions"><button class="btn" type="button" data-r3="rate" data-quality="again">没想起来</button><button class="btn primary" type="button" data-r3="rate" data-quality="good">我想起来了</button></div></div>`:`<div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="reveal">查看答案</button></div>`}`;
+      body=`<div class="lexi-r3-kicker">英文 → 中文 · 主动回忆</div><div class="lexi-r3-word-line"><div class="lexi-r3-word">${esc(card.word)}</div><button class="speaker lexi-r3-speaker" type="button" data-r3="speak" title="播放美式发音" aria-label="播放当前单词的发音">🔊</button></div><div class="lexi-r3-phonetic">${answerMeta(card).split(" · ")[0]}</div><div class="lexi-r3-meta">先在脑中说出当前词义，再查看答案。</div>${active.revealed?`<div class="lexi-r3-result"><strong>${esc(card.meaningZh||"")}</strong>${card.exampleEn?`<div class="lexi-r3-example"><span>${esc(card.exampleEn)}</span><button class="sentence-speaker" type="button" data-r3="speak-example" title="播放例句" aria-label="播放例句">🔊</button></div>`:""}<div class="lexi-r3-actions"><button class="btn" type="button" data-r3="rate" data-quality="again">没想起来</button><button class="btn primary" type="button" data-r3="rate" data-quality="good">我想起来了</button></div></div>`:`<div class="lexi-r3-actions"><button class="btn primary" type="button" data-r3="reveal">查看答案</button></div>`}`;
     }else{
       const prompt=active.type==="image-en"?`<div class="lexi-r3-kicker">图片 → 英文 · 主动回忆</div><img class="lexi-r3-image" src="${esc(card.imageData||card.imageUrl||"")}" alt="联想图"/>`:`<div class="lexi-r3-kicker">中文 → 英文 · 主动回忆</div><div class="lexi-r3-meaning">${esc(card.meaningZh||"")}</div>`;
       const failLabel=kind==="next-day-validation"?"没记住，明天再练":"没记住，进入修复";
@@ -254,6 +254,15 @@
     }catch{}
   }
 
+  async function speakExample(){
+    const session=reconcile(loadSession()),card=cardById(currentId(session));if(!card?.exampleEn)return;
+    try{
+      const pronunciation=window.LexiFlowPronunciationV3;
+      if(typeof pronunciation?.playSentence==="function")await pronunciation.playSentence(card.exampleEn);
+      else if(typeof window.LexiFlowNaturalTts?.play==="function")await window.LexiFlowNaturalTts.play(card.exampleEn);
+    }catch{}
+  }
+
   document.addEventListener("click",event=>{
     const start=event.target?.closest?.('[data-action="start-review"]');
     if(start){event.preventDefault();event.stopImmediatePropagation();void openSession({resume:true});return;}
@@ -263,6 +272,7 @@
     if(action==="reload"){location.reload();return;}
     if(action==="pause"){const session=loadSession();if(session){session.paused=true;saveSession(session);}location.reload();return;}
     if(action==="speak"){void speakCurrent();return;}
+    if(action==="speak-example"){void speakExample();return;}
     const session=reconcile(loadSession()),card=cardById(currentId(session));if(!card)return;
     const active=activeFor(card,session);
     if(action==="reveal"){active.revealed=true;session.active=active;saveSession(session);renderSession();return;}
