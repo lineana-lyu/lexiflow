@@ -32,13 +32,27 @@ jobs:
           code="\n".join(line[10:] if line.startswith("          ") else line for line in raw)
           exec(compile(code,'visualize-product-fix','exec'),{})
 
-          check_path=Path('scripts/check-stage-renderers-v3.js')
-          check=check_path.read_text(encoding='utf-8')
-          old='assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner\'s existing association instead of inventing the first one");'
-          new='assert(visual.includes("userScene:note"),"Visualize AI assistance must anchor refinement on the learner\'s own scene instead of treating it as an old scene to avoid");'
-          if old not in check:
+          renderer_path=Path('scripts/check-stage-renderers-v3.js')
+          renderer=renderer_path.read_text(encoding='utf-8')
+          old_renderer='assert(visual.includes("previousScene:note"),"Visualize AI assistance must refine the learner\'s existing association instead of inventing the first one");'
+          new_renderer='assert(visual.includes("userScene:note"),"Visualize AI assistance must anchor refinement on the learner\'s own scene instead of treating it as an old scene to avoid");'
+          if old_renderer not in renderer:
               raise SystemExit('renderer user-scene assertion target not found')
-          check_path.write_text(check.replace(old,new,1),encoding='utf-8')
+          renderer_path.write_text(renderer.replace(old_renderer,new_renderer,1),encoding='utf-8')
+
+          commands_path=Path('scripts/check-stage-commands-v3.js')
+          commands=commands_path.read_text(encoding='utf-8')
+          replacements={
+            'assert(transition.includes(\'appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:true,nextStage:"apply",commandId})\'),"normal Visualize completion must persist its shared command ID and image confirmation outcome");':
+            'assert(transition.includes(\'appendActivity(data,card.id,"visualize",{skipped:false,imageConfirmed:hasImage,imagePending:!hasImage&&imagePending,nextStage:"apply",commandId})\'),"Visualize completion must persist its shared command ID plus completed-vs-pending image outcome");',
+            'assert(transition.includes("card.visualImageConfirmed=true"),"Visualize image must become confirmed only in terminal Visualize completion");':
+            'assert(transition.includes("card.visualImageConfirmed=hasImage"),"Visualize completion must confirm only an image that already exists, while allowing a pending background image");'
+          }
+          for old,new in replacements.items():
+              if old not in commands:
+                  raise SystemExit('stage-command assertion target not found: '+old[:80])
+              commands=commands.replace(old,new,1)
+          commands_path.write_text(commands,encoding='utf-8')
           PY
 
       - name: Validate product fix
@@ -50,6 +64,7 @@ jobs:
           node --check public/stage-transition-v3.js
           node --check server.js
           node --check scripts/check-stage-renderers-v3.js
+          node --check scripts/check-stage-commands-v3.js
           node scripts/check-visualize-product-flow-v3.js
           npm run check:learning
 
