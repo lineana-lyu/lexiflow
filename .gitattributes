@@ -1,0 +1,10 @@
+# Keep JavaScript source byte-for-byte consistent across Linux and Windows CI.
+# Several release checks intentionally inspect exact source sequences, so CRLF
+# conversion must not change the checked-out representation.
+*.js text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Native Windows helper scripts remain conventional CRLF files.
+*.bat text eol=crlf
