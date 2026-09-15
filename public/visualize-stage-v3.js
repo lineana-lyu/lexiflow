@@ -127,8 +127,9 @@
     const card=currentCard();
     if(!host||!card)return;
     const generation=imageGeneration(card);
-    const signature=JSON.stringify({id:card.id,note:draftFor(card),image:card.imageData||card.imageUrl||"",confirmed:card.visualImageConfirmed===true,status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
-    if(host.dataset.visualizeStageV3===signature)return;
+    const mounted=host.querySelector(".lexi-v3-visual[data-visualize-stage-v3]");
+    const signature=JSON.stringify({id:card.id,image:card.imageData||card.imageUrl||"",confirmed:card.visualImageConfirmed===true,status:generation.status||"",message:generation.message||"",suggestion:card.visualSceneSuggestion?.scene||"",cue:card.visualSceneSuggestion?.cue||"",assistBusy,imageBusy,uploadBusy});
+    if(host.dataset.visualizeStageV3===signature&&mounted?.dataset.visualizeStageV3===String(card.id))return;
     host.dataset.visualizeStageV3=signature;
     host.innerHTML=html(card);
   }

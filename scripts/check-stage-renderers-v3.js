@@ -69,6 +69,9 @@ assert(visual.includes("LexiFlowLearningDataGatewayV3?.current?.()"),"Visualize 
 assert(visual.includes("if(!syncFromGateway())data=normalized;"),"Visualize renderer writes must continue from the Gateway-confirmed persisted snapshot");
 assert(visual.includes("loadData(true)"),"Visualize async card patches must retain a fresh source read before mutation");
 assert(visual.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});"),"Visualize DOM mutations must redraw from memory instead of GETing learning data");
+assert(visual.includes('const mounted=host.querySelector(".lexi-v3-visual[data-visualize-stage-v3]")'),"Visualize renderer must confirm that its mounted root still exists before skipping a redraw");
+assert(!visual.includes("id:card.id,note:draftFor(card),image:"),"Visualize typing draft must not participate in the structural render signature or each keystroke can recreate the textarea");
+assert(visual.includes("host.dataset.visualizeStageV3===signature&&mounted?.dataset.visualizeStageV3===String(card.id)"),"Visualize redraw guard must preserve the live textarea while the same card and structural state remain mounted");
 assert(visual.includes('beginStageWrite?.(cardId,"visualize",now)'),"Visualize async AI/image writes must serialize with terminal stage completion");
 assert(visual.includes('core.canonicalStage(card)!=="visualize"'),"Visualize async patches must fail closed if the card has already left Visualize");
 assert(visual.includes("LexiFlowVisualizeStageV3=Object.freeze({isBusy})"),"Visualize stage must expose only its busy state for action-surface coordination");
