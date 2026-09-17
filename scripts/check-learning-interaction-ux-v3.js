@@ -1,0 +1,18 @@
+const fs=require("fs");
+const path=require("path");
+const root=path.join(__dirname,"..");
+const read=p=>fs.readFileSync(path.join(root,p),"utf8").replace(/\r\n/g,"\n");
+const assert=(value,message)=>{if(!value)throw new Error(message);};
+const index=read("public/index.html");
+const guard=read("public/apply-input-guard-v3.js");
+const apply=read("public/apply-stage-v3.js");
+const visual=read("public/visualize-stage-v3.js");
+const memorize=read("public/memorize-stage-v3.js");
+assert(index.includes('<script src="./apply-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'),"Apply input guard must load before legacy app.js");
+assert(guard.includes('event.stopImmediatePropagation();')&&guard.includes('input.setSelectionRange(start,end)'),"Apply guard must prevent remount-driven caret reversal and preserve selection");
+assert(apply.includes('handleInput(input){handleComposerInput(input);}')&&apply.includes('LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text)'),"Apply stage must share draft authority with the pre-app guard");
+assert(!visual.includes('placeholder="例如：我第一次去东京时'),"Visualize scene editor must not contain a default example sentence");
+assert(visual.includes('aria-label="写下你的联想场景"'),"Visualize editor must retain an accessible label after removing the example placeholder");
+assert(!memorize.includes('答对了')&&!memorize.includes('你主动写出了'),"Memorize success feedback must remove redundant prose");
+assert(memorize.includes('lexi-m2-result-status ${s.correct?"success":"retry"}')&&memorize.includes('回忆成功'),"Memorize result must use a distinct success/retry status marker");
+console.log("Learning interaction UX regression checks passed.");

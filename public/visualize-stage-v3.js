@@ -132,7 +132,7 @@
         </div>
         <aside class="lexi-v3-visual-panel scene-panel">
           <h3>我的联想场景</h3><p>尽量写具体的人、地点、动作或物体。越和你自己的经历有关，越容易记住。</p>
-          <textarea class="textarea scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} placeholder="例如：我第一次去东京时，在车站看到一个巨大到让我停下来的广告牌。">${esc(note)}</textarea>
+          <textarea class="textarea scene-editor" id="visual-note" ${generating?"readonly aria-readonly=\"true\"":""} aria-label="写下你的联想场景">${esc(note)}</textarea>
           <div class="lexi-v3-ai-actions"><button class="btn" type="button" data-visual-v3="assist" ${!String(note).trim()||assetBusy?"disabled":""}>${assistBusy?"AI 正在优化…":suggestion?"重新给一个 AI 建议":"让 AI 帮我把画面变具体"}</button></div>
           ${assistError?`<div class="lexi-v3-visual-error">${esc(assistError)}</div>`:""}
           ${suggestion?`<div class="lexi-v3-ai-suggestion"><small>AI 建议 · 仅供参考</small><span>${esc(suggestion)}</span>${cue?`<small>记忆提示：${esc(cue)}</small>`:""}<div><button class="text-action" type="button" data-visual-v3="adopt" ${assetBusy?"disabled":""}>采用这个建议</button></div></div>`:""}
