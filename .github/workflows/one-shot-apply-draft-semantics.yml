@@ -1,0 +1,80 @@
+name: One-shot Apply draft semantics
+
+on:
+  push:
+    branches:
+      - fix/apply-draft-restoration-semantics
+    paths:
+      - .github/workflows/one-shot-apply-draft-semantics.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/apply-draft-restoration-semantics
+          fetch-depth: 0
+
+      - name: Fix Apply draft restoration semantics
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # Apply editor: only explicitly saved unfinished drafts may prefill a new session.
+          p=Path('public/apply-stage-v3.js')
+          s=p.read_text(encoding='utf-8')
+          old='''  function session(card){\n    let value=sessions.get(card.id);\n    if(!value){value={text:String(card.applyDraft||card.userSentence||""),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}\n    return value;\n  }'''
+          new='''  function restorableDraft(card){\n    const savedAt=String(card?.applyDraftSavedAt||"").trim();\n    return savedAt?String(card?.applyDraft||""):"";\n  }\n  function session(card){\n    let value=sessions.get(card.id);\n    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}\n    return value;\n  }'''
+          if old not in s:
+              raise SystemExit('apply session initializer target not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # Apply actions: never fall back to historical userSentence; restore only explicit saved drafts.
+          p=Path('public/apply-actions-v3.js')
+          s=p.read_text(encoding='utf-8')
+          old='''  function currentDraft(card){\n    return String(document.getElementById("apply-text")?.value??card?.applyDraft??card?.userSentence??"").trim();\n  }'''
+          new='''  function explicitSavedDraft(card){\n    return String(card?.applyDraftSavedAt||"").trim()?String(card?.applyDraft||""):"";\n  }\n  function currentDraft(card){\n    const input=document.getElementById("apply-text");\n    return String(input?input.value:explicitSavedDraft(card)).trim();\n  }'''
+          if old not in s:
+              raise SystemExit('apply currentDraft target not found')
+          s=s.replace(old,new,1)
+          old='''    const card=currentApplyCard();\n    const draft=String(card?.applyDraft||"");\n    if(!draft)return;'''
+          new='''    const card=currentApplyCard();\n    const draft=explicitSavedDraft(card);\n    if(!draft)return;'''
+          if old not in s:
+              raise SystemExit('durable draft restore target not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # Extend the existing product regression contract.
+          p=Path('scripts/check-learning-interaction-ux-v3.js')
+          s=p.read_text(encoding='utf-8')
+          anchor='const apply=read("public/apply-stage-v3.js");\n'
+          if 'const applyActions=read("public/apply-actions-v3.js");' not in s:
+              s=s.replace(anchor,anchor+'const applyActions=read("public/apply-actions-v3.js");\n',1)
+          insert='''assert(apply.includes('function restorableDraft(card)')&&apply.includes('card?.applyDraftSavedAt')&&!apply.includes('card.applyDraft||card.userSentence'),"Apply must start blank unless the learner explicitly saved an unfinished draft");\nassert(applyActions.includes('function explicitSavedDraft(card)')&&applyActions.includes('card?.applyDraftSavedAt')&&!applyActions.includes('card?.userSentence'),"Apply draft restore must ignore historical userSentence and legacy unsaved residue");\n'''
+          marker='assert(!visual.includes(\'placeholder="例如：我第一次去东京时\'),"Visualize scene editor must not contain a default example sentence");\n'
+          if insert not in s:
+              if marker not in s:
+                  raise SystemExit('interaction check insertion marker not found')
+              s=s.replace(marker,insert+marker,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+
+      - name: Validate repository
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+
+      - name: Commit fix and remove temporary workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-apply-draft-semantics.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: restore only explicitly saved Apply drafts"
+          git push origin HEAD:fix/apply-draft-restoration-semantics
