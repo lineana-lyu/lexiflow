@@ -18,7 +18,7 @@
   function remember(input){
     const cardId=activeCardId(input);if(!cardId)return;
     setDraft(cardId,input.value,input.selectionStart,input.selectionEnd);
-    window.LexiFlowApplyStageV3?.handleInput?.(input);
+    window.LexiFlowApplyStageV3?.handleInput?.(input,{invalidateFeedback:true});
   }
 
   window.addEventListener("input",event=>{
@@ -35,7 +35,7 @@
     const cardId=activeCardId(input);if(!cardId)return;
     const draft=drafts.get(cardId);if(!draft)return;
     if(input.value!==draft.value)input.value=draft.value;
-    window.LexiFlowApplyStageV3?.handleInput?.(input);
+    window.LexiFlowApplyStageV3?.handleInput?.(input,{invalidateFeedback:false});
     if(document.activeElement!==input)return;
     const length=input.value.length;
     const start=Math.max(0,Math.min(length,Number(draft.selectionStart)||0));

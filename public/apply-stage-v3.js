@@ -196,9 +196,10 @@
     finally{s.promptLoading=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
-  function handleComposerInput(input){
+  function handleComposerInput(input,{invalidateFeedback=true}={}){
     if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;
+    s.text=String(input.value||"");
+    if(invalidateFeedback){s.feedback=null;s.approved=false;s.suggestionApproved=false;}
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
     const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
   }
@@ -231,6 +232,6 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
-  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input){handleComposerInput(input);}});
+  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input,options){handleComposerInput(input,options);}});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
