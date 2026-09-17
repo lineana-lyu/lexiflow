@@ -52,8 +52,12 @@
     return card&&core.canonicalStage(card)==="apply"?card:null;
   }
 
+  function explicitSavedDraft(card){
+    return String(card?.applyDraftSavedAt||"").trim()?String(card?.applyDraft||""):"";
+  }
   function currentDraft(card){
-    return String(document.getElementById("apply-text")?.value??card?.applyDraft??card?.userSentence??"").trim();
+    const input=document.getElementById("apply-text");
+    return String(input?input.value:explicitSavedDraft(card)).trim();
   }
 
   function appendActivity(source,cardId,type,extra={}){
@@ -84,7 +88,7 @@
     if(!input||String(input.value||"").trim()||restoring)return;
     syncFromGateway();
     const card=currentApplyCard();
-    const draft=String(card?.applyDraft||"");
+    const draft=explicitSavedDraft(card);
     if(!draft)return;
     restoring=true;
     try{
