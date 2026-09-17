@@ -1,0 +1,50 @@
+name: One-shot learning UX fix rerun
+
+on:
+  push:
+    branches:
+      - fix/learning-input-and-feedback-ux
+    paths:
+      - .github/workflows/one-shot-learning-ux-fix-rerun.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/learning-input-and-feedback-ux
+          fetch-depth: 0
+
+      - name: Execute original patch source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source=Path('.github/workflows/one-shot-learning-ux-fix.yml').read_text(encoding='utf-8')
+          marker="          python - <<'PY'\n"
+          start=source.index(marker)+len(marker)
+          end=source.index("\n          PY",start)
+          raw=source[start:end].splitlines()
+          code="\n".join(line[10:] if line.startswith("          ") else line for line in raw)
+          exec(compile(code,'learning-ux-fix','exec'),{})
+          PY
+
+      - name: Validate repository
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+
+      - name: Commit fixes and clean temporary workflows
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-learning-ux-fix.yml
+          rm .github/workflows/one-shot-learning-ux-fix-rerun.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: polish learning feedback and stabilize Apply input"
+          git push origin HEAD:fix/learning-input-and-feedback-ux
