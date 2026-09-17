@@ -66,9 +66,13 @@
     const write=transition?.beginStageWrite?.(cardId,"apply",now);
     return write?{transition,write}:null;
   }
+  function restorableDraft(card){
+    const savedAt=String(card?.applyDraftSavedAt||"").trim();
+    return savedAt?String(card?.applyDraft||""):"";
+  }
   function session(card){
     let value=sessions.get(card.id);
-    if(!value){value={text:String(card.applyDraft||card.userSentence||""),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}
+    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}
     return value;
   }
 
