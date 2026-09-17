@@ -120,6 +120,7 @@
     const s=session(card);const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading});
     if(host.dataset.applyStageV3===signature)return;
     host.dataset.applyStageV3=signature;host.innerHTML=html(card);
+    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);
     if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
   }
 
@@ -191,11 +192,15 @@
     finally{s.promptLoading=false;guard.transition?.endStageWrite?.(guard.write);syncFromGateway();render();}
   }
 
-  document.addEventListener("input",event=>{
-    if(event.target?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-    s.text=String(event.target.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;
+  function handleComposerInput(input){
+    if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
+    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
     const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
+  }
+
+  document.addEventListener("input",event=>{
+    if(event.target?.id!=="apply-text")return;handleComposerInput(event.target);
   },true);
 
   document.addEventListener("keydown",event=>{
@@ -222,6 +227,6 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
-  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);}});
+  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input){handleComposerInput(input);}});
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();
