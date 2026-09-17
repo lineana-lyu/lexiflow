@@ -1,0 +1,117 @@
+name: One-shot learning UX fix
+
+on:
+  push:
+    branches:
+      - fix/learning-input-and-feedback-ux
+    paths:
+      - .github/workflows/one-shot-learning-ux-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/learning-input-and-feedback-ux
+          fetch-depth: 0
+
+      - name: Apply interaction fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+
+          # 1) Memorize: turn verbose correctness copy into compact, vivid status markers.
+          p=Path('public/memorize-stage-v3.js')
+          s=p.read_text(encoding='utf-8')
+          old='${s.checked?`<div class="lexi-m2-card"><strong>${s.correct?"答对了":"这次没有完整想起来"}</strong><span>${s.correct?`你主动写出了 “${esc(card.word)}”。`:`正确答案是 “${esc(card.word)}”。`}</span>${wordBlock(card)}${example(card)}</div><button class="btn primary" type="button" data-m2="continue">继续</button>`:""}'
+          new='${s.checked?`<div class="lexi-m2-card lexi-m2-result-card"><div class="lexi-m2-result-status ${s.correct?"success":"retry"}"><span aria-hidden="true">${s.correct?"✓":"↻"}</span><strong>${s.correct?"回忆成功":"需要再强化"}</strong></div>${s.correct?"":`<div class="lexi-m2-answer-label">正确答案</div>`}${wordBlock(card)}${example(card)}</div><button class="btn primary" type="button" data-m2="continue">继续</button>`:""}'
+          if old not in s:
+              raise SystemExit('memorize result block target not found')
+          s=s.replace(old,new,1)
+          old_style='.lexi-m2-card>strong{font-size:21px}.lexi-m2-card>span{color:var(--muted)}'
+          new_style='.lexi-m2-card>strong{font-size:21px}.lexi-m2-card>span{color:var(--muted)}.lexi-m2-result-status{align-self:center;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:760;letter-spacing:.02em}.lexi-m2-result-status span{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;font-size:13px}.lexi-m2-result-status.success{color:#2f6f50;background:rgba(68,132,99,.12);border:1px solid rgba(68,132,99,.2)}.lexi-m2-result-status.success span{background:rgba(68,132,99,.16)}.lexi-m2-result-status.retry{color:#8a6420;background:rgba(181,137,54,.12);border:1px solid rgba(181,137,54,.2)}.lexi-m2-result-status.retry span{background:rgba(181,137,54,.16)}.lexi-m2-answer-label{align-self:center;color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.08em}'
+          if old_style not in s:
+              raise SystemExit('memorize style target not found')
+          p.write_text(s.replace(old_style,new_style,1),encoding='utf-8')
+
+          # 2) Visualize: no default example sentence inside the editor.
+          p=Path('public/visualize-stage-v3.js')
+          s=p.read_text(encoding='utf-8')
+          old='placeholder="例如：我第一次去东京时，在车站看到一个巨大到让我停下来的广告牌。"'
+          new='aria-label="写下你的联想场景"'
+          if old not in s:
+              raise SystemExit('visualize placeholder target not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # 3) Apply: centralize live input state so the pre-app guard can own keystrokes.
+          p=Path('public/apply-stage-v3.js')
+          s=p.read_text(encoding='utf-8')
+          old='host.dataset.applyStageV3=signature;host.innerHTML=html(card);\n    if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());'
+          new='host.dataset.applyStageV3=signature;host.innerHTML=html(card);\n    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);\n    if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());'
+          if old not in s:
+              raise SystemExit('apply render sync target not found')
+          s=s.replace(old,new,1)
+          old_listener='''  document.addEventListener("input",event=>{\n    if(event.target?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);\n    s.text=String(event.target.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;\n    const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\\u3400-\\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;\n    const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;\n  },true);'''
+          new_listener='''  function handleComposerInput(input){\n    if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);\n    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;\n    const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\\u3400-\\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;\n    const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;\n  }\n\n  document.addEventListener("input",event=>{\n    if(event.target?.id!=="apply-text")return;handleComposerInput(event.target);\n  },true);'''
+          if old_listener not in s:
+              raise SystemExit('apply input listener target not found')
+          s=s.replace(old_listener,new_listener,1)
+          old_export='window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);}});'
+          new_export='window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input){handleComposerInput(input);}});'
+          if old_export not in s:
+              raise SystemExit('apply export target not found')
+          p.write_text(s.replace(old_export,new_export,1),encoding='utf-8')
+
+          # 4) Add a pre-app input guard. It owns Apply keystrokes before legacy app.js.
+          guard='''(() => {\n  "use strict";\n\n  const drafts=new Map();\n\n  function activeCardId(input){\n    return String(input?.closest?.("[data-apply-stage-v3-root]")?.dataset?.applyStageV3Root||"");\n  }\n  function setDraft(cardId,value,selectionStart=null,selectionEnd=null){\n    const key=String(cardId||"");if(!key)return;\n    const text=String(value||"");\n    const start=Number.isInteger(selectionStart)?selectionStart:text.length;\n    const end=Number.isInteger(selectionEnd)?selectionEnd:start;\n    drafts.set(key,{value:text,selectionStart:start,selectionEnd:end});\n  }\n  function clearDraft(cardId){const key=String(cardId||"");if(key)drafts.delete(key);}\n\n  function remember(input){\n    const cardId=activeCardId(input);if(!cardId)return;\n    setDraft(cardId,input.value,input.selectionStart,input.selectionEnd);\n    window.LexiFlowApplyStageV3?.handleInput?.(input);\n  }\n\n  window.addEventListener("input",event=>{\n    const input=event.target;\n    if(input?.id!=="apply-text")return;\n    remember(input);\n    // Apply V3 owns this editor. Stop legacy app.js from remounting the composer\n    // after every keystroke, which otherwise resets the caret to the start.\n    event.stopImmediatePropagation();\n  },true);\n\n  function restore(){\n    const input=document.getElementById("apply-text");if(!input)return;\n    const cardId=activeCardId(input);if(!cardId)return;\n    const draft=drafts.get(cardId);if(!draft)return;\n    if(input.value!==draft.value)input.value=draft.value;\n    window.LexiFlowApplyStageV3?.handleInput?.(input);\n    if(document.activeElement!==input)return;\n    const length=input.value.length;\n    const start=Math.max(0,Math.min(length,Number(draft.selectionStart)||0));\n    const end=Math.max(start,Math.min(length,Number(draft.selectionEnd)||start));\n    try{input.setSelectionRange(start,end);}catch{}\n  }\n\n  function start(){\n    const app=document.getElementById("app");if(!app)return;\n    new MutationObserver(()=>queueMicrotask(restore)).observe(app,{childList:true,subtree:true});\n  }\n\n  window.LexiFlowApplyInputGuardV3=Object.freeze({setDraft,clearDraft});\n  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();\n})();\n'''
+          Path('public/apply-input-guard-v3.js').write_text(guard,encoding='utf-8')
+
+          # Load the guard before legacy app.js.
+          p=Path('public/index.html')
+          s=p.read_text(encoding='utf-8')
+          old='  <script src="./visualize-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'
+          new='  <script src="./visualize-input-guard-v3.js"></script>\n  <script src="./apply-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'
+          if old not in s:
+              raise SystemExit('index guard order target not found')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+
+          # Regression contract for all three reported issues.
+          check='''const fs=require("fs");\nconst path=require("path");\nconst root=path.join(__dirname,"..");\nconst read=p=>fs.readFileSync(path.join(root,p),"utf8").replace(/\\r\\n/g,"\\n");\nconst assert=(value,message)=>{if(!value)throw new Error(message);};\nconst index=read("public/index.html");\nconst guard=read("public/apply-input-guard-v3.js");\nconst apply=read("public/apply-stage-v3.js");\nconst visual=read("public/visualize-stage-v3.js");\nconst memorize=read("public/memorize-stage-v3.js");\nassert(index.includes('<script src="./apply-input-guard-v3.js"></script>\\n  <script src="./app.js"></script>'),"Apply input guard must load before legacy app.js");\nassert(guard.includes('event.stopImmediatePropagation();')&&guard.includes('input.setSelectionRange(start,end)'),"Apply guard must prevent remount-driven caret reversal and preserve selection");\nassert(apply.includes('handleInput(input){handleComposerInput(input);}')&&apply.includes('LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text)'),"Apply stage must share draft authority with the pre-app guard");\nassert(!visual.includes('placeholder="例如：我第一次去东京时'),"Visualize scene editor must not contain a default example sentence");\nassert(visual.includes('aria-label="写下你的联想场景"'),"Visualize editor must retain an accessible label after removing the example placeholder");\nassert(!memorize.includes('答对了')&&!memorize.includes('你主动写出了'),"Memorize success feedback must remove redundant prose");\nassert(memorize.includes('lexi-m2-result-status ${s.correct?"success":"retry"}')&&memorize.includes('回忆成功'),"Memorize result must use a distinct success/retry status marker");\nconsole.log("Learning interaction UX regression checks passed.");\n'''
+          Path('scripts/check-learning-interaction-ux-v3.js').write_text(check,encoding='utf-8')
+
+          # Wire the regression check into the normal repository gates.
+          p=Path('package.json')
+          pkg=json.loads(p.read_text(encoding='utf-8'))
+          learning=pkg['scripts']['check:learning']
+          cmd='node scripts/check-learning-interaction-ux-v3.js'
+          if cmd not in learning:
+              pkg['scripts']['check:learning']=learning+' && '+cmd
+          full=pkg['scripts']['check']
+          if 'node --check scripts/check-learning-interaction-ux-v3.js' not in full:
+              full=full.replace('node --check scripts/check-visualize-product-flow-v3.js','node --check scripts/check-visualize-product-flow-v3.js && node --check scripts/check-learning-interaction-ux-v3.js',1)
+          if 'node --check public/apply-input-guard-v3.js' not in full:
+              full=full.replace('node --check public/visualize-input-guard-v3.js','node --check public/visualize-input-guard-v3.js && node --check public/apply-input-guard-v3.js',1)
+          pkg['scripts']['check']=full
+          p.write_text(json.dumps(pkg,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+
+      - name: Validate repository
+        run: |
+          npm ci --no-audit --no-fund
+          npm run check
+
+      - name: Commit fixes and remove one-shot workflow
+        shell: bash
+        run: |
+          rm .github/workflows/one-shot-learning-ux-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "fix: polish learning feedback and stabilize Apply input"
+          git push origin HEAD:fix/learning-input-and-feedback-ux
