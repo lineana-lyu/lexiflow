@@ -28,17 +28,10 @@ jobs:
 
           stage = Path('public/apply-stage-v3.js')
           text = stage.read_text(encoding='utf-8')
-          old = '''  function handleComposerInput(input){
-            if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-            s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;
-          '''
-          new = '''  function handleComposerInput(input,{invalidateFeedback=true}={}){
-            if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-            s.text=String(input.value||"");
-            if(invalidateFeedback){s.feedback=null;s.approved=false;s.suggestionApproved=false;}
-          '''
-          assert old in text, 'Apply composer input block changed unexpectedly'
-          text = text.replace(old, new, 1)
+          assert 'function handleComposerInput(input){' in text, 'Apply composer handler signature changed unexpectedly'
+          assert 's.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;' in text, 'Apply feedback invalidation line changed unexpectedly'
+          text = text.replace('function handleComposerInput(input){', 'function handleComposerInput(input,{invalidateFeedback=true}={}){', 1)
+          text = text.replace('s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;', 's.text=String(input.value||"");\n    if(invalidateFeedback){s.feedback=null;s.approved=false;s.suggestionApproved=false;}', 1)
           old_export = 'window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input){handleComposerInput(input);}});'
           new_export = 'window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input,options){handleComposerInput(input,options);}});'
           assert old_export in text, 'Apply stage bridge export changed unexpectedly'
