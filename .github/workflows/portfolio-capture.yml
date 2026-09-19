@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - portfolio-capture
+    paths-ignore:
+      - 'portfolio-captures/**'
   workflow_dispatch:
 
 permissions:
