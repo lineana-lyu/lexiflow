@@ -30,7 +30,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v8-policy-severity-gate";
+const SENTENCE_FEEDBACK_SCHEMA = "v9-diagnostic-triage";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
 const visualSceneCache = new Map();
@@ -2167,8 +2167,8 @@ async function sentenceFeedback(body) {
     : [];
   feedback.issues = normalizeSentenceDiagnostics({
     sentence,
+    targetWord: word,
     issues: [...mechanicsIssues, ...feedback.issues],
-    changes: feedback.changes,
   });
 
   // Progression is a product policy, not a model opinion. The model proposes
