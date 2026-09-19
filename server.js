@@ -9,6 +9,7 @@ const {
   detectEnglishMechanics,
   normalizeSentenceDiagnostics,
 } = require("./lib/sentence-feedback-contract");
+const { buildSentenceFeedbackPrompt } = require("./lib/sentence-feedback-prompt");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -29,7 +30,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v6-atomic-evidence-reasons";
+const SENTENCE_FEEDBACK_SCHEMA = "v7-authority-separated-diagnostics";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
 const visualSceneCache = new Map();
@@ -2120,33 +2121,7 @@ async function sentenceFeedback(body) {
   const cached = sentenceFeedbackCache.get(cacheKey);
   if (cached) return { ...cached, cacheHit: true };
 
-  const prompt = `你是英语学习应用的快速造句审核器。只做必要检查，不扩写，不讲解过程。
-目标词：${word}
-当前词义：${meaningZh}
-用户输入：${sentence}
-
-规则：
-1. 中文输入：翻译成自然、简洁英文；必须自然使用目标词或常见词形，并保持当前词义。不要新增用户没表达的信息。如果无法在不编造信息的前提下加入目标词，approved=false。
-2. 英文输入：先判断“能不能正确使用”，再判断“是否还能更自然”。拼写、语法、词形、目标词误用、句子不完整、明显错误搭配属于必须修正的问题；语法成立、词义正确但可以更地道/更简洁，只属于可选优化。
-3. 修正时尽量保持用户原意并做最小改动。若原句是无法独立成句的残句（例如主系表缺少表语），允许补充最少量、日常且中性的内容使句子完整，但不要大幅扩写或改变主题。
-4. 如果英文完全没包含目标词，优先在不改变原意的前提下自然补入目标词；如果确实无法合理补入，再 approved=false 并解释原因。
-5. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
-6. approved 表示“用户原句是否已经可以正确使用”，只由必须修正的问题决定。若只有 improve/polish 建议，approved=true、level=good，用户可以保留原句继续；suggestion 可以非空，作为可选优化版本。若存在 blocking error，则 approved=false、level=warn。
-7. issues 最多 3 条，每条必须包含 span、reason、hint、replacement、severity、blocking。severity 只能是 "error"、"improve"、"polish"：
-- error：拼写、语法、词形、目标词词义误用、句子不完整、明显错误搭配；blocking=true，必须修正才能通过。
-- improve：原句语法成立、词义正确，但存在明显更常见/更自然且不改变原意的表达；blocking=false，可改可不改。
-- polish：只涉及简洁度、语气或风格偏好；blocking=false，可完全忽略。
-span 必须是用户原句中真实存在的一段连续文本，尽量选能唯一定位的最小片段；replacement 是可以直接替换 span 的最小修正文本。只有无法可靠做局部替换时 replacement 才允许为空。
-8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
-9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
-10. suggestion 可以用于两种情况：存在 error 时给出完整修正版；或者只有 improve/polish 时给出可选优化版。changes 只列 suggestion 相对原句的实际改动，最多 3 条；每条 from 必须是用户原句中真实存在的连续片段，不能使用已经局部修正后的中间句。reason 必须具体，不得只写“表达更自然”。没有 suggestion 时 changes 必须为空数组。
-11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。\n12. issues 必须按“独立可执行修改”拆分。两个错误发生在原句中不同的词或不同的连续片段时，即使可以用一个更长 replacement 一次改完，也必须拆成不同 issue；只有两个修正真正落在同一个不可分割片段、无法分别替换时才允许合并。issues 之间的 span 不得重叠。\n13. 即使同时存在 blocking error，也要继续检查其余不重叠片段；若存在真正有学习价值的自然度/地道度优化，最多额外返回 1 条 improve/polish。不要因为有红色错误就丢掉黄色建议。
-14. 一次检查要尽量把当前句子里所有明确的 blocking 问题同时找全，不要故意分轮暴露。尤其不要漏掉英文标点前后空格这类客观机械问题；系统还会用确定性规则并行复核这类问题。
-15. 每个 blocking issue 都必须尽量给出可直接替换的 replacement；若 changes 中已经有同一片段的修正，replacement 必须与之保持一致。
-16. reason 只能解释原句和 replacement 能直接支持的规则，不得臆测“句首、句中、从句、时态”等位置或语法条件。若规则与位置无关，就不要用位置作为理由。例如第一人称单数代词 “I” 无论位于句中何处都必须大写，不能把它解释成“因为在句首所以大写”。
-
-只输出 JSON：
-{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正","severity":"error|improve|polish","blocking":true}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释","severity":"error|improve|polish","blocking":true}],"keyword":"最终英文中实际目标词/词形"}`;
+  const prompt = buildSentenceFeedbackPrompt({ word, meaningZh, sentence });
 
   const result = await runCodexFastText(prompt, {
     turnTimeoutMs: 30000,
