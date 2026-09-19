@@ -13,6 +13,7 @@ const transport=read("public/transport-fixes.js");
 const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 const feedbackContract=require("../lib/sentence-feedback-contract");
+const {buildSentenceFeedbackPrompt}=require("../lib/sentence-feedback-prompt");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
 assert(index.includes("apply-guard-v3.js"),"Apply Guard V3 must load in index.html");
@@ -64,15 +65,13 @@ assert(!transition.includes('document.getElementById("apply-text")?.value||card.
 assert(!transport.includes('endpoint === "/api/ai/text"'),"transport layer must not reinterpret authoritative Apply feedback");
 assert(!transport.includes("softenNearIdenticalSentenceFeedback"),"transport layer must not downgrade required corrections into optional polish");
 assert(!transport.includes("optionalSuggestion"),"transport layer must not manufacture optional Apply suggestions");
-assert(server.includes("approved 表示“用户原句是否已经可以正确使用”")&&server.includes("若只有 improve/polish 建议，approved=true、level=good"),"server contract must allow a valid original sentence to pass even when optional optimization exists");
-assert(server.includes('severity 只能是 "error"、"improve"、"polish"')&&server.includes("blocking=true，必须修正才能通过"),"server contract must classify blocking errors separately from optional suggestions");
-assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释","severity":"error|improve|polish","blocking":true}]'),"server feedback contract must classify actual corrections so optional polish is not promoted into an error");
-assert(server.includes("不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论")&&server.includes("拼写问题要明确正确拼写或词形规则")&&server.includes("语法问题要指出具体结构关系"),"correction explanations must identify a concrete spelling, grammar, collocation, or meaning reason");
-assert(server.includes("不要把个人风格偏好伪装成 error")&&server.includes("可以作为 improve/polish issue 返回"),"optional stylistic polish must be represented as non-blocking feedback");
-assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"severity\":\"error|improve|polish\"")&&server.includes("\"blocking\":true"),"server feedback must locate problem spans and classify whether they block completion");
+assert(server.includes('require("./lib/sentence-feedback-prompt")')&&server.includes("buildSentenceFeedbackPrompt({ word, meaningZh, sentence })"),"server must consume the isolated generic Apply prompt policy rather than embed regression-specific prompt text");
 assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
 assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic English mechanics with AI diagnostics before approval");
-assert(server.includes("issues 必须按“独立可执行修改”拆分")&&server.includes("不同的词或不同的连续片段")&&server.includes("不得臆测“句首、句中、从句、时态”等位置或语法条件"),"AI contract must require atomic corrections and evidence-bound explanations instead of broad inferred grammar stories");
+const genericPrompt=buildSentenceFeedbackPrompt({word:"reliable",meaningZh:"可靠的",sentence:"I rely on her."});
+assert(genericPrompt.includes("必须修正")&&genericPrompt.includes("可选优化")&&genericPrompt.includes("独立、可执行的局部修改"),"production prompt must define generic correctness and atomic-action invariants");
+assert(genericPrompt.includes("不得加入原句和当前修改无法直接证明的")&&genericPrompt.includes("同一 span")&&genericPrompt.includes("replacement 必须一致"),"production prompt must require evidence-bound reasons and consistent replacements");
+assert(!genericPrompt.includes("第一人称单数代词")&&!genericPrompt.includes("ride-or-die")&&!genericPrompt.includes("montain"),"regression fixtures and grammar-specific examples must stay out of the production prompt");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
 assert(applyStage.includes("lexi-apply-v3-inline-issue.blocking")&&applyStage.includes("lexi-apply-v3-inline-issue.optional"),"Apply must visually distinguish blocking red errors from optional yellow suggestions");
@@ -116,24 +115,36 @@ const pronounI=pronounMechanics.find(issue=>issue.span==="i");
 assert(pronounI&&pronounI.replacement==="I","deterministic mechanics must catch lowercase first-person pronoun I anywhere in the sentence");
 assert(!pronounI.reason.includes("句首")&&pronounI.reason.includes("无论位于句中何处"),"pronoun-I explanation must state the actual rule instead of inventing a sentence-initial condition");
 
-const broadSentence="My ride-or-die is exuberant, and i often climb montain with her in sunday";
-const broadIssue={
-  span:"i often climb montain with her in sunday",
-  reason:"句首人称代词 I 必须大写；montain 拼写错误，应为 mountains；表示每周日应使用 on Sundays；修正大小写、拼写、名词单复数和时间介词",
-  hint:"统一修正大小写、拼写和介词",
-  replacement:"I often climb mountains with her on Sundays",
-  severity:"error",blocking:true,
-};
-const atomic=feedbackContract.normalizeSentenceDiagnostics(
-  broadSentence,
-  [...pronounMechanics,broadIssue],
+const duplicatedI=feedbackContract.normalizeSentenceDiagnostics(
+  "My friend and i hike.",
+  [
+    ...feedbackContract.detectEnglishMechanics("My friend and i hike."),
+    {span:"i",reason:"这里的人称代词要大写",hint:"改成 I",replacement:"I",severity:"error",blocking:true}
+  ],
+  [{from:"i",to:"I",reason:"把 i 改成 I",severity:"error",blocking:true}],
+  false,
+  "warn"
+);
+assert(duplicatedI.length===1&&duplicatedI[0].replacement==="I","same-span mechanics/model/change records must collapse to one issue");
+assert(duplicatedI[0].reason.includes("无论位于句中何处")&&!duplicatedI[0].reason.includes("；"),"deterministic mechanics must own the reason instead of concatenating duplicate model prose");
+
+const conflictingMountain=feedbackContract.normalizeSentenceDiagnostics(
+  "I often climb montain with her",
+  [{span:"montain",reason:"montain 拼写错误，应为 mountain",hint:"改正拼写",replacement:"mountain",severity:"error",blocking:true}],
+  [{from:"montain",to:"mountains",reason:"这里表示经常爬山，最终修正版采用复数 mountains",severity:"error",blocking:true}],
+  false,
+  "warn"
+);
+assert(conflictingMountain.length===1&&conflictingMountain[0].replacement==="mountains","same-span issue/change replacement conflicts must choose the final-suggestion change authority");
+assert(conflictingMountain[0].reason.includes("mountains")&&!conflictingMountain[0].reason.includes("应为 mountain；"),"conflicting replacement explanations must not be concatenated into contradictory guidance");
+
+const broadOnly=feedbackContract.normalizeSentenceDiagnostics(
+  "i climb montain",
+  [{span:"i climb montain",reason:"这部分包含多处错误",hint:"整体修正",replacement:"I climb mountains",severity:"error",blocking:true}],
   [],
   false,
   "warn"
 );
-assert(atomic.length===3&&atomic.every(issue=>issue.blocking),"one broad model correction with three independent edits must normalize into three blocking actions in the same review");
-assert(atomic[0].span==="i"&&atomic[0].replacement==="I"&&!atomic[0].reason.includes("句首"),"atomic normalization must replace unsupported positional explanations with the evidence-backed pronoun rule");
-assert(atomic.some(issue=>issue.span==="montain"&&issue.replacement==="mountains"),"atomic normalization must preserve the spelling/number edit as its own action");
-assert(atomic.some(issue=>issue.span==="in sunday"&&issue.replacement==="on Sundays"),"atomic normalization must preserve the time-preposition/day expression edit as its own action");
+assert(broadOnly.length===1&&broadOnly[0].span==="i climb montain","normalizer must not explode a broad model rewrite into extra blocking issues without independent evidence");
 
 console.log("Apply Quality V3 contract checks passed.");
