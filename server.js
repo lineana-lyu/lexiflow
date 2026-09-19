@@ -2177,17 +2177,6 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
   );
 
   if (!feedback.suggestion) feedback.changes = [];
-  if (!feedback.issues.length && feedback.suggestion && feedback.changes.length) {
-    const fallbackBlocking = feedback.approved === false || feedback.level !== "good";
-    feedback.issues = feedback.changes.slice(0, 3).map(change => ({
-      span: String(change.from || "").trim(),
-      reason: String(change.reason || "这部分表达可以调整。").trim(),
-      hint: change.to ? `建议改为 “${change.to}”` : "",
-      replacement: String(change.to || "").trim(),
-      severity: fallbackBlocking ? "error" : "improve",
-      blocking: fallbackBlocking,
-    })).filter(item => item.span && item.replacement);
-  }
   if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
   if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
 
