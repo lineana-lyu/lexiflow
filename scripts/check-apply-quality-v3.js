@@ -59,10 +59,15 @@ assert(server.includes("只要句子不完整、语法错误、搭配不自然�
 assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}]'),"server feedback contract must return concise explanations for actual corrections");
 assert(server.includes("不确定具体语法规则时，只说明更自然的实际用法，不要编造规则"),"correction explanations must prefer accurate usage guidance over invented grammar rules");
 assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"replacement\":\"可直接替换 span 的局部修正\""),"server feedback must locate exact problem spans and return a local one-click replacement");
+assert(server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)")&&server.includes('if (feedback.level === "good" && !feedback.suggestion) feedback.issues = [];'),"corrected suggestions must preserve or synthesize issue diagnostics instead of clearing them");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must highlight diagnosed sentence spans as interactive red issues");
+assert(applyStage.includes("lexi-apply-v3-review-composer")&&applyStage.includes('spellcheck="false"'),"Apply must enter an immediate diagnostic review state after checking and suppress the browser spelling-wave UI");
+assert(applyStage.includes("background:rgba(201,73,73,.12)")&&!applyStage.includes("border-bottom:2px solid rgba(194,74,74,.72)"),"diagnosed text must use a soft red background rather than a red underline");
+assert(applyStage.includes("if(direct.length)return direct;")&&applyStage.includes("return feedbackChanges(fb).map(change=>"),"Apply must fall back from changes to visible issues when the AI omits the issue array");
+assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为"),"each issue must show a clear reason and a local one-click replacement");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("setTimeout(()=>{")&&applyStage.includes("void submit();"),"one-click fixes must automatically recheck the corrected sentence");
-assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("已替换 · 正在自动复检"),"accepted fixes must show a short resolved-state animation while rechecking");
+assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("void submit();"),"accepted fixes must show a short resolved-state animation and automatically recheck");
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
 assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must retain concise reasons for full corrections");

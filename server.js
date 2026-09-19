@@ -2057,7 +2057,15 @@ async function sentenceFeedback(body) {
   };
 
   if (!feedback.suggestion) feedback.changes = [];
-  if (feedback.level === "good") feedback.issues = [];
+  if (!feedback.issues.length && feedback.suggestion && feedback.changes.length) {
+    feedback.issues = feedback.changes.slice(0, 2).map(change => ({
+      span: String(change.from || "").trim(),
+      reason: String(change.reason || "这部分表达需要调整。").trim(),
+      hint: change.to ? `建议改为 “${change.to}”` : "",
+      replacement: String(change.to || "").trim(),
+    })).filter(item => item.span && item.replacement);
+  }
+  if (feedback.level === "good" && !feedback.suggestion) feedback.issues = [];
   if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
   if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
 
