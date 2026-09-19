@@ -183,7 +183,7 @@
       const secondary=primary===current?candidate:current;
       result[overlapIndex]={
         ...primary,
-        reason:joinFeedbackReasons([primary.reason,secondary.reason]),
+        reason:feedbackCopy(primary.reason||secondary.reason),
         hint:feedbackCopy(primary.hint||secondary.hint),
         replacement:norm(primary.replacement||secondary.replacement),
         blocking:Boolean(current.blocking||candidate.blocking),
