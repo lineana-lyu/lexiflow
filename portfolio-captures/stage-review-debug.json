@@ -1,0 +1,114 @@
+{
+  "bodyText": "今天没有需要复习的内容\n\n需要巩固的词会由系统自动安排，你不需要手动管理复习日期。\n\n返回今日学习",
+  "dailyPlan": {
+    "date": "2026-09-19",
+    "planVersion": 5,
+    "frozen": true,
+    "noVocabularyDebt": true,
+    "noReviewDebt": true,
+    "review": [],
+    "memorize": [],
+    "visualize": [],
+    "apply": [],
+    "select": [],
+    "inbox": [],
+    "reviewMode": "adaptive-v4",
+    "reviewLoadMode": "adaptive-v4",
+    "reviewCap": null,
+    "reviewDueTotal": 0,
+    "reviewDeferredCount": 0,
+    "reviewCriticalCount": 0,
+    "reviewStableScheduledCount": 0,
+    "reviewStableUrgentCount": 0,
+    "reviewStableDeferredCount": 0,
+    "reviewStablePulledForwardCount": 0,
+    "reviewStableTarget": 6,
+    "reviewPressure": 0,
+    "selectMaxGoal": 3,
+    "selectGoal": 3,
+    "selectedToday": [
+      "f20c9c4e-7756-4713-904c-4f0a8d199dc5"
+    ],
+    "remainingSelectSlots": 2,
+    "initialTaskIds": [
+      "f20c9c4e-7756-4713-904c-4f0a8d199dc5"
+    ],
+    "taskTotal": 1,
+    "taskRemaining": 0,
+    "taskCompleted": 1,
+    "taskProgressPercent": 100
+  },
+  "card": {
+    "id": "f20c9c4e-7756-4713-904c-4f0a8d199dc5",
+    "word": "grow",
+    "lexeme": {
+      "schema": "lexeme-v1",
+      "lemma": "grow",
+      "candidateSurface": "grow",
+      "acceptedForms": [
+        "grow",
+        "grows",
+        "growing",
+        "grew",
+        "grown"
+      ],
+      "source": "LexiFlow Core"
+    },
+    "phonetic": "/ɡrəʊ/",
+    "audioUrl": "",
+    "audioUrls": [],
+    "pronunciationSource": "ecdict-phonetic",
+    "pos": "verb",
+    "meaningZh": "种植, 使长满",
+    "exampleEn": "In time, the boy grew into a man.",
+    "exampleZh": "",
+    "exampleTranslationPending": true,
+    "senseIntentEn": "When things grow they get bigger or change in other ways over time.",
+    "avoidVisualEn": [],
+    "wordFamily": [
+      {
+        "pos": "noun",
+        "label": "名词",
+        "words": [
+          "growth"
+        ]
+      },
+      {
+        "pos": "verb",
+        "label": "动词",
+        "words": [
+          "grow"
+        ]
+      }
+    ],
+    "sourceQuery": "grow",
+    "stage": "review",
+    "learningStage": "review",
+    "inboxPending": false,
+    "createdAt": "2026-09-19T08:35:02.121Z",
+    "updatedAt": "2026-09-19T08:35:13.028Z",
+    "reviewCount": 0,
+    "nextReviewAt": "2026-09-20T12:00:00.000Z",
+    "memoryHistory": [],
+    "visualNote": "",
+    "imageData": null,
+    "userSentence": "",
+    "memoryState": "reinforcing",
+    "reviewStep": 0,
+    "stableStep": 0,
+    "memorizeRound": 1,
+    "stageEligibleOn": "2026-09-20T12:00:00.000Z",
+    "selectedOn": "2026-09-19",
+    "imageUrl": "",
+    "visualSceneSuggestion": null,
+    "visualImageConfirmed": false,
+    "memorizeCompletedOn": "2026-09-19",
+    "practicePrompt": {
+      "question": "说说一个你想持续成长的真实目标。"
+    },
+    "visualizeCompletedOn": "2026-09-19",
+    "initialReviewPending": false,
+    "applyCompletedOn": "2026-09-19"
+  },
+  "reviewSession": null
+}

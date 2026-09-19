@@ -1,0 +1,15 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "今天没有需要复习的内容\n\n需要巩固的词会由系统自动安排，你不需要手动管理复习日期。\n\n返回今日学习",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "返回今日学习",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    }
+  ],
+  "links": [],
+  "inputs": []
+}

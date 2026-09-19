@@ -1,0 +1,78 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n学习会话\n\n正在学习：grow · /ɡrəʊ/\n\n退出会话\n✓\n选词确认\n2\n记忆\n3\n视觉联想\n4\n造句应用\n5\n复习巩固\n记忆 · 第 1 轮 / 2\n双向主动回忆\n英 → 中\ngrow\n/ɡrəʊ/ · verb\n\n先在脑中说出当前词义，再查看答案。看着眼熟不算主动记住。\n\n种植, 使长满\n例句\nIn time, the boy grew into a man.\n\n没想起来\n我想起来了\n本轮进度保存在本机，退出后会从这里继续。",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "退出会话",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    },
+    {
+      "index": 6,
+      "text": "",
+      "id": "",
+      "className": "speaker lexi-m2-speaker lexi-speaker-button",
+      "action": ""
+    },
+    {
+      "index": 7,
+      "text": "",
+      "id": "",
+      "className": "sentence-speaker lexi-speaker-button",
+      "action": ""
+    },
+    {
+      "index": 8,
+      "text": "没想起来",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    },
+    {
+      "index": 9,
+      "text": "我想起来了",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    }
+  ],
+  "links": [],
+  "inputs": []
+}
