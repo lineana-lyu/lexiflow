@@ -42,7 +42,8 @@
     if(!id||!Array.isArray(latestData?.cards))return null;
     return latestData.cards.find(card=>String(card.id)===id)||null;
   }
-  function currentSentence(){return normalize(document.getElementById("apply-text")?.value||"");}
+  function applyState(){return window.LexiFlowApplyStageV3?.currentState?.()||null;}
+  function currentSentence(){return normalize(applyState()?.text||document.getElementById("apply-text")?.value||"");}
   function isReferenceExampleCopy(){
     const sentence=copyNorm(currentSentence());
     const example=copyNorm(currentCard()?.exampleEn||"");
@@ -91,16 +92,17 @@
   }
 
   function qualityState(){
-    const sentence=currentSentence();
+    const live=applyState();
+    const sentence=normalize(live?.text||currentSentence());
     if(isReferenceExampleCopy())return{allowed:false,message:"这句话和词典参考例句相同。Apply 的目标是把单词用到你自己的表达里，请换一个真实场景再写一句。",referenceCopy:true};
-    const audit=auditForCurrent();
     if(!sentence)return{allowed:false,message:"先写一句英文，并完成 AI 检查。"};
+    if(live?.submitting)return{allowed:false,message:"AI 正在检查这句话，请稍候。"};
+    if(live?.approved)return{allowed:true,message:""};
+    const audit=auditForCurrent();
     if(!audit)return{allowed:false,message:"先点击“检查表达”，通过检查后再进入复习。"};
-    if(sentence===normalize(audit.inputSentence)&&audit.originalPass)return{allowed:true,message:""};
-    if(sentence===normalize(audit.suggestion)&&audit.suggestionPass)return{allowed:true,message:""};
     if(sentence!==normalize(audit.inputSentence)&&sentence!==normalize(audit.suggestion))return{allowed:false,message:"你修改了句子，需要重新检查后再继续。"};
     if(audit.inputLanguage==="zh")return{allowed:false,message:"最终需要采用或写出通过检查的英文句子。"};
-    return{allowed:false,message:"当前句子仍有问题。可以逐项一键修正，也可以采用完整修改建议。"};
+    return{allowed:false,message:"当前句子仍有问题。请先处理诊断结果，或继续修改后重新检查。"};
   }
 
   function warning(message){
@@ -118,8 +120,6 @@
   }
 
   function decorate(){
-    const input=document.getElementById("apply-text");
-    if(!input)return;
     const state=qualityState();
     document.querySelectorAll('[data-action="pass-apply"]').forEach(button=>{
       button.disabled=!state.allowed;
@@ -137,7 +137,7 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         warning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");
-        document.getElementById("apply-text")?.focus();
+        if(document.getElementById("apply-text"))document.getElementById("apply-text").focus();
         return;
       }
     }
@@ -150,7 +150,7 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     warning(state.message);
-    document.getElementById("apply-text")?.focus();
+    if(document.getElementById("apply-text"))document.getElementById("apply-text").focus();
   },true);
 
   document.addEventListener("input",event=>{
