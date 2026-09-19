@@ -133,7 +133,8 @@
   function feedbackHtml(card,s){
     if(s.submitting){
       const flash=s.lastFix?`<div class="lexi-apply-v3-diagnostic"><small>已替换 · 正在自动复检</small><div class="lexi-apply-v3-diagnostic-line">${diagnosticSentenceHtml(s.text,[],s.lastFix)}</div></div>`:"";
-      return `<div class="lexi-apply-v3-feedback">${flash}<div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>AI 正在重新检查你的表达</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">已保留当前句子，检查完成后会继续标出仍需修改的位置。</div></div>`;
+      const checkingCopy=s.lastFix?"AI 正在重新检查你的表达":"AI 正在检查你的表达";
+      return `<div class="lexi-apply-v3-feedback">${flash}<div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>${checkingCopy}</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">已保留当前句子，检查完成后会直接标出需要修改的位置。</div></div>`;
     }
     const fb=s.feedback;if(!fb)return"";
     const suggestion=norm(fb.suggestion);
@@ -146,7 +147,7 @@
     return `<div class="lexi-apply-v3-feedback ${good?"good":"warn"} ai-feedback-panel ${good?"good":"warn"}">
       <div class="lexi-apply-v3-feedback-head"><div><small>${good?"检查结果":"发现可改进位置"}</small><strong>${esc(title)}</strong></div></div>
       ${diagnostic}
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);return `<div class="lexi-apply-v3-issue" data-issue-card="${index}">${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p>${esc(issue.reason)}</p>`:""}${issue.hint?`<small>${esc(issue.hint)}</small>`:""}${replacement?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">改为 ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);return `<div class="lexi-apply-v3-issue" data-issue-card="${index}">${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p>${esc(issue.reason)}</p>`:""}${issue.hint?`<small>${esc(issue.hint)}</small>`:""}${replacement&&copyNorm(replacement)!==copyNorm(issue.span)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">改为 ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${suggestion?`<div class="lexi-apply-v3-complete-label">完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${suggestion&&changes.length?`<div class="lexi-apply-v3-changes"><strong>为什么这样改</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
