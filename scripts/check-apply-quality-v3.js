@@ -20,14 +20,14 @@ assert(!fs.existsSync(path.join(root,"public","feedback-fixes.js")),"retired fee
 assert(!index.includes('<script src="./apply-guard-v2.js"></script>'),"legacy Apply Guard V2 must not execute beside V3");
 assert(index.indexOf("apply-quality-v3.js")<index.indexOf("stage-transition-v3.js"),"Apply quality capture gate must register before authoritative stage completion");
 assert(index.indexOf("apply-quality-v3.js")<index.indexOf("apply-stage-v3.js"),"Apply Quality bridge must load before Apply Stage consumes AI feedback");
-assert(quality.includes("correctionHeldBack:true"),"early failed Apply rounds must hold back the full correction");
+assert(!quality.includes("correctionHeldBack")&&!quality.includes("feedbackRound"),"Apply must not use staged correction rounds after interactive diagnostics");
 assert(quality.includes("LexiFlowApplyQualityV3=Object.freeze")&&quality.includes("processFeedback(payload,body)"),"Apply Quality must expose a narrow explicit feedback-processing bridge");
 assert(!quality.includes("window.fetch=")&&!quality.includes("window.fetch ="),"Apply Quality must not wrap global fetch after Apply Stage adopts the explicit bridge");
 assert(!quality.includes("/api/learning-data"),"Apply Quality must use the Learning Data Gateway snapshot instead of observing learning-data transport");
 assert(quality.includes("registerAfterPersist?.(()=>schedule())"),"Apply Quality must redraw from Gateway-confirmed persistence events");
 assert(applyStage.includes('fetch("/api/ai/text"')&&applyStage.includes("LexiFlowApplyQualityV3?.processFeedback?."),"Apply Stage must own the AI request and explicitly pass its response through Apply Quality before interpretation");
-assert(quality.includes("round>=2"),"full correction may appear after one concrete self-correction attempt");
-assert(quality.includes("lastFailedInput"),"re-submitting the exact same sentence must not consume another feedback round");
+assert(quality.includes("function immediateFeedback(payload,body)")&&quality.includes("recordAudit(body,feedback);"),"Apply feedback must be available immediately for interactive diagnostics");
+assert(!quality.includes("lastFailedInput")&&!quality.includes("audit.round"),"Apply quality must not track correction rounds");
 assert(quality.includes("originalPass"),"gate must distinguish an approved original sentence from an approved correction");
 assert(quality.includes("suggestionPass"),"an adopted AI correction may pass only when that correction was approved");
 assert(quality.includes("event.stopImmediatePropagation()"),"unapproved Apply completion must stop before Stage Transition V3");
@@ -58,11 +58,13 @@ assert(server.includes("完全正确时 suggestion 为空"),"server contract mus
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
 assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}]'),"server feedback contract must return concise explanations for actual corrections");
 assert(server.includes("不确定具体语法规则时，只说明更自然的实际用法，不要编造规则"),"correction explanations must prefer accurate usage guidance over invented grammar rules");
-assert(quality.includes("changes:[]"),"the first self-correction step must not leak the held-back full correction");
-assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\""),"server feedback must locate concrete problem spans before asking the learner to self-correct");
-assert(applyStage.includes("问题位置：")&&applyStage.includes("修改方向："),"Apply UI must say exactly where the problem is and how to think about fixing it");
-assert(applyStage.includes("cardId:card.id"),"Apply feedback progress must send the exact card ID");
-assert(!applyStage.includes("/ 3 轮"),"Apply UI must not force a three-round correction ritual");
-assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must show concise reasons beside an actual correction");
+assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"replacement\":\"可直接替换 span 的局部修正\""),"server feedback must locate exact problem spans and return a local one-click replacement");
+assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must highlight diagnosed sentence spans as interactive red issues");
+assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
+assert(applyStage.includes("setTimeout(()=>{")&&applyStage.includes("void submit();"),"one-click fixes must automatically recheck the corrected sentence");
+assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("已替换 · 正在自动复检"),"accepted fixes must show a short resolved-state animation while rechecking");
+assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
+assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
+assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must retain concise reasons for full corrections");
 
 console.log("Apply Quality V3 contract checks passed.");

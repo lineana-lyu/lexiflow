@@ -56,27 +56,15 @@
     const approved=feedback.approved!==false&&feedback.level==="good";
     const inputLanguage=feedback.inputLanguage==="zh"||hasChinese(sentence)?"zh":"en";
     const key=keyOf(cardId,word,meaning);
-    const store=loadStore();
-    const previous=store[key]||{};
     const originalPass=Boolean(approved&&inputLanguage==="en"&&!suggestion);
     const suggestionPass=Boolean(approved&&suggestion);
-    let round=Number(previous.round||0);
-
-    if(originalPass){
-      round=0;
-    }else if(inputLanguage==="en"){
-      if(normalize(previous.lastFailedInput)!==sentence)round=Math.min(2,Math.max(0,round)+1);
-      else round=Math.max(1,round);
-    }
-
     const audit={
       key,cardId,word,meaning,inputSentence:sentence,inputLanguage,
       originalPass,suggestionPass,suggestion,
       approved:Boolean(approved),level:String(feedback.level||"warn"),
-      round,
-      lastFailedInput:originalPass?"":sentence,
       auditedAt:new Date().toISOString(),
     };
+    const store=loadStore();
     store[key]=audit;
     saveStore(store);
     latestAudit=audit;
@@ -84,36 +72,15 @@
     return audit;
   }
 
-  function progressiveFeedback(payload,body){
+  function immediateFeedback(payload,body){
     const feedback=payload?.feedback;
     if(!feedback||!body?.sentence)return payload;
-    const audit=recordAudit(body,feedback);
-    if(!audit||audit.originalPass||audit.inputLanguage!=="en")return payload;
-    if(audit.round>=2)return {...payload,feedback:{...feedback,feedbackRound:2,correctionHeldBack:false}};
-
-    const issues=Array.isArray(feedback.issues)?feedback.issues.slice(0,2):[];
-    const tips=Array.isArray(feedback.tips)?feedback.tips.map(String).filter(Boolean):[];
-    const selected=tips.slice(0,1);
-    if(!issues.length&&!selected.length)selected.push("这句话还有问题，但 AI 没有定位到具体片段。请再检查拼写、句子主干和目标词搭配。");
-    return {
-      ...payload,
-      feedback:{
-        ...feedback,
-        approved:false,
-        level:"warn",
-        suggestion:"",
-        changes:[],
-        feedbackRound:1,
-        correctionHeldBack:true,
-        title:"先根据问题位置改一次",
-        tips:selected,
-        issues,
-      },
-    };
+    recordAudit(body,feedback);
+    return payload;
   }
 
   window.LexiFlowApplyQualityV3=Object.freeze({
-    processFeedback(payload,body){return progressiveFeedback(payload,body);},
+    processFeedback(payload,body){return immediateFeedback(payload,body);},
   });
 
   function auditForCurrent(){
@@ -133,8 +100,7 @@
     if(sentence===normalize(audit.suggestion)&&audit.suggestionPass)return{allowed:true,message:""};
     if(sentence!==normalize(audit.inputSentence)&&sentence!==normalize(audit.suggestion))return{allowed:false,message:"你修改了句子，需要重新检查后再继续。"};
     if(audit.inputLanguage==="zh")return{allowed:false,message:"最终需要采用或写出通过检查的英文句子。"};
-    if(audit.round<2)return{allowed:false,message:"已指出具体问题位置。请先自己修改一次，再重新检查。"};
-    return{allowed:false,message:"修改后仍未通过。可以采用完整修改建议，或继续自己修改并重新检查。"};
+    return{allowed:false,message:"当前句子仍有问题。可以逐项一键修正，也可以采用完整修改建议。"};
   }
 
   function warning(message){
@@ -160,13 +126,6 @@
       button.title=state.allowed?"":state.message;
       if(!state.allowed&&button.textContent.includes("保留原句"))button.textContent="原句未通过，不能继续";
     });
-    const audit=auditForCurrent();
-    const panel=document.querySelector(".ai-feedback-panel.warn");
-    if(panel&&audit?.inputLanguage==="en"&&audit.round===1){
-      let note=panel.querySelector(".lexi-apply-round-note");
-      if(!note){note=document.createElement("div");note.className="lexi-apply-round-note";note.style.cssText="font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px";panel.appendChild(note);}
-      note.textContent="先根据上面的具体问题自己改一次；修改后若仍未通过，下一次检查会直接给完整修改建议。";
-    }
     if(state.allowed)warning("");
   }
 
