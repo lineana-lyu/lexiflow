@@ -102,7 +102,7 @@
   }
 
   function feedbackChanges(fb){
-    return Array.isArray(fb?.changes)?fb.changes.slice(0,3).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:norm(item?.reason)})).filter(item=>item.from||item.to||item.reason):[];
+    return Array.isArray(fb?.changes)?fb.changes.slice(0,3).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:norm(item?.reason),severity:norm(item?.severity).toLowerCase(),blocking:typeof item?.blocking==="boolean"?item.blocking:null})).filter(item=>item.from||item.to||item.reason):[];
   }
   function normalizeIssue(item,{blockingFallback=true}={}){
     const rawSeverity=norm(item?.severity).toLowerCase();
@@ -121,14 +121,18 @@
     const direct=Array.isArray(fb?.issues)?fb.issues.slice(0,3).map(item=>normalizeIssue(item,{blockingFallback:fb?.approved===false||fb?.level!=="good"})).filter(item=>item.span||item.reason||item.hint||item.replacement):[];
     if(direct.length)return direct;
     const fallbackBlocking=fb?.approved===false||fb?.level!=="good";
-    return feedbackChanges(fb).map(change=>normalizeIssue({
-      span:change.from,
-      reason:change.reason||"这部分表达可以调整。",
-      hint:change.to?`建议改为 “${change.to}”`:"",
-      replacement:change.to,
-      severity:fallbackBlocking?"error":"improve",
-      blocking:fallbackBlocking,
-    },{blockingFallback:fallbackBlocking})).filter(item=>item.span&&item.replacement);
+    return feedbackChanges(fb).map(change=>{
+      const explicitSeverity=["error","improve","polish"].includes(change.severity)?change.severity:"";
+      const inferredBlocking=explicitSeverity?explicitSeverity==="error":(typeof change.blocking==="boolean"?change.blocking:fallbackBlocking);
+      return normalizeIssue({
+        span:change.from,
+        reason:change.reason||"这部分表达可以调整。",
+        hint:change.to?`建议改为 “${change.to}”`:"",
+        replacement:change.to,
+        severity:explicitSeverity||(inferredBlocking?"error":"improve"),
+        blocking:inferredBlocking,
+      },{blockingFallback:inferredBlocking});
+    }).filter(item=>item.span&&item.replacement);
   }
   function blockingIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking===true);}
   function optionalIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking!==true);}
@@ -147,24 +151,42 @@
   function survivingIssues(text,issues=[]){
     return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue?.span));
   }
-  function mergeBlockingIssues(text,fresh=[],carryover=[]){
+  function coalesceIssues(text,issues=[]){
+    const prepared=(Array.isArray(issues)?issues:[]).map(issue=>{
+      const range=issueRange(text,issue?.span);return range?{...issue,_range:range}:null;
+    }).filter(Boolean).sort((a,b)=>a._range.start-b._range.start||((b._range.end-b._range.start)-(a._range.end-a._range.start)));
     const result=[];
-    for(const issue of [...blockingIssues(fresh),...survivingIssues(text,blockingIssues(carryover))]){
-      const span=norm(issue?.span);if(!span)continue;
-      const key=copyNorm(span);
-      if(result.some(item=>copyNorm(item.span)===key))continue;
-      result.push({...issue,severity:"error",blocking:true});
+    for(const candidate of prepared){
+      const overlapIndex=result.findIndex(item=>candidate._range.start<item._range.end&&candidate._range.end>item._range.start);
+      if(overlapIndex<0){result.push(candidate);continue;}
+      const current=result[overlapIndex];
+      const currentLength=current._range.end-current._range.start;
+      const candidateLength=candidate._range.end-candidate._range.start;
+      const primary=(current.blocking!==candidate.blocking)
+        ?(current.blocking?current:candidate)
+        :(candidateLength>currentLength&&candidate.replacement?candidate:current);
+      const secondary=primary===current?candidate:current;
+      const reasons=[primary.reason,secondary.reason].filter(Boolean);
+      result[overlapIndex]={
+        ...primary,
+        reason:reasons.filter((value,index)=>reasons.indexOf(value)===index).join("；"),
+        blocking:Boolean(current.blocking||candidate.blocking),
+        severity:(current.blocking||candidate.blocking)?"error":(primary.severity==="polish"&&secondary.severity==="polish"?"polish":"improve"),
+      };
     }
-    return result.slice(0,3);
+    return result.map(({_range,...issue})=>issue).slice(0,3);
   }
-  function mergeDisplayIssues(blocking,optional){
-    const result=[...(Array.isArray(blocking)?blocking:[])];
-    for(const issue of Array.isArray(optional)?optional:[]){
-      const key=copyNorm(issue?.span);
-      if(!key||result.some(item=>copyNorm(item.span)===key))continue;
-      result.push(issue);
-    }
-    return result.slice(0,3);
+  function mergeBlockingIssues(text,fresh=[],carryover=[]){
+    return coalesceIssues(text,[
+      ...blockingIssues(fresh),
+      ...survivingIssues(text,blockingIssues(carryover)),
+    ]).filter(issue=>issue.blocking).slice(0,2);
+  }
+  function mergeDisplayIssues(text,blocking,optional){
+    const merged=coalesceIssues(text,[...(Array.isArray(blocking)?blocking:[]),...(Array.isArray(optional)?optional:[])]);
+    const required=blockingIssues(merged).slice(0,2);
+    const suggestions=optionalIssues(merged).slice(0,1);
+    return [...required,...suggestions];
   }
   function diagnosticSentenceHtml(text,issues,lastFix=null){
     const source=String(text||""),ranges=[];
@@ -298,7 +320,7 @@
       const freshIssues=feedbackIssues(fb);
       const mergedBlocking=mergeBlockingIssues(text,freshIssues,s.pendingIssues);
       const freshOptional=optionalIssues(freshIssues);
-      const displayIssues=mergeDisplayIssues(mergedBlocking,freshOptional);
+      const displayIssues=mergeDisplayIssues(text,mergedBlocking,freshOptional);
       const originalApproved=Boolean(inputLanguage==="en"&&fb.approved!==false&&fb.level==="good"&&originalKeywordOk&&mergedBlocking.length===0);
       s.pendingIssues=mergedBlocking;
       s.approved=originalApproved;
