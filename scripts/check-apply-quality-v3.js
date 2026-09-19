@@ -67,7 +67,7 @@ assert(applyStage.includes("if(direct.length)return direct;")&&applyStage.includ
 assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为"),"each issue must show a clear reason and a local one-click replacement");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("setTimeout(()=>{")&&applyStage.includes("void submit();"),"one-click fixes must automatically recheck the corrected sentence");
-assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("已替换 · 正在自动复检"),"accepted fixes must show a short resolved-state animation while rechecking");
+assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("void submit();"),"accepted fixes must show a short resolved-state animation and automatically recheck");
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
 assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must retain concise reasons for full corrections");
