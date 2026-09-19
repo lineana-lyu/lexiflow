@@ -5,15 +5,10 @@ const path = require("path");
 const BASE = process.env.LEXIFLOW_CAPTURE_URL || "http://127.0.0.1:4177";
 const OUT = path.resolve(process.env.LEXIFLOW_CAPTURE_DIR || "portfolio-screenshots");
 
-function ensureDir() {
-  fs.mkdirSync(OUT, { recursive: true });
-}
-
-async function waitForText(page, text) {
-  await page.getByText(text, { exact: true }).first().waitFor({ state: "visible", timeout: 30000 });
-}
+fs.mkdirSync(OUT, { recursive: true });
 
 async function shot(page, name) {
+  console.log("[capture] screenshot", name);
   await page.screenshot({
     path: path.join(OUT, name),
     type: "png",
@@ -22,64 +17,81 @@ async function shot(page, name) {
   });
 }
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 (async () => {
-  ensureDir();
+  const hardStop = setTimeout(() => {
+    console.error("[capture] hard timeout");
+    process.exit(124);
+  }, 110000);
+  hardStop.unref();
 
   const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 900 },
-    deviceScaleFactor: 1,
-    colorScheme: "light",
-    locale: "zh-CN",
-  });
-  const page = await context.newPage();
+  try {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      deviceScaleFactor: 1,
+      colorScheme: "light",
+      locale: "zh-CN",
+    });
+    const page = await context.newPage();
+    page.setDefaultTimeout(7000);
 
-  page.on("console", msg => console.log("[browser]", msg.type(), msg.text()));
-  page.on("pageerror", err => console.error("[pageerror]", err.message));
+    page.on("console", msg => console.log("[browser]", msg.type(), msg.text()));
+    page.on("pageerror", err => console.error("[pageerror]", err.message));
 
-  await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 60000 });
-  await waitForText(page, "今日学习");
-  await shot(page, "01-today-empty.png");
+    console.log("[capture] open app");
+    await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await sleep(3500);
+    await shot(page, "01-today.png");
 
-  const firstWord = page.getByRole("button", { name: "添加第一个单词" });
-  if (await firstWord.count()) {
-    await firstWord.click();
-  } else {
-    await page.locator('[data-route="add"]').first().click();
+    console.log("[capture] open add page");
+    const addButton = page.locator('[data-route="add"]').first();
+    if (await addButton.isVisible().catch(() => false)) {
+      await addButton.click().catch(err => console.warn("[capture] add click:", err.message));
+      await sleep(1200);
+      await shot(page, "02-add-word.png");
+    }
+
+    console.log("[capture] lookup grow");
+    const input = page.locator("#word-input");
+    if (await input.isVisible().catch(() => false)) {
+      await input.fill("grow").catch(err => console.warn("[capture] fill:", err.message));
+      await page.locator("#lookup-form").evaluate(form => form.requestSubmit()).catch(err => console.warn("[capture] submit:", err.message));
+      await sleep(4500);
+      await shot(page, "03-lookup-grow.png");
+    }
+
+    console.log("[capture] save card");
+    const save = page.locator('[data-action="save-card"]').first();
+    if (await save.isVisible().catch(() => false) && !(await save.isDisabled().catch(() => true))) {
+      await save.click().catch(err => console.warn("[capture] save:", err.message));
+      await sleep(1800);
+      await shot(page, "04-today-with-word.png");
+    }
+
+    console.log("[capture] open library");
+    const library = page.locator('[data-route="library"]').first();
+    if (await library.isVisible().catch(() => false)) {
+      await library.click().catch(err => console.warn("[capture] library:", err.message));
+      await sleep(1400);
+      await shot(page, "05-library.png");
+
+      const edit = page.locator('[data-action="open-library-editor"]').first();
+      if (await edit.isVisible().catch(() => false)) {
+        await edit.click().catch(err => console.warn("[capture] editor:", err.message));
+        await sleep(1000);
+        await shot(page, "06-library-editor.png");
+      }
+    }
+
+    console.log("[capture] complete");
+  } finally {
+    await browser.close().catch(() => {});
   }
-
-  await waitForText(page, "选词制卡");
-  await page.locator("#word-input").fill("grow");
-  await page.locator("#lookup-form").evaluate(form => form.requestSubmit());
-  await page.locator(".word-result").waitFor({ state: "visible", timeout: 30000 });
-  await page.getByText("grow", { exact: true }).first().waitFor({ state: "visible", timeout: 30000 });
-  await page.waitForTimeout(800);
-  await shot(page, "02-lookup-grow.png");
-
-  const save = page.locator('[data-action="save-card"]');
-  await save.waitFor({ state: "visible", timeout: 15000 });
-  await save.click();
-
-  await waitForText(page, "今日学习");
-  await page.waitForTimeout(800);
-  await shot(page, "03-today-with-word.png");
-
-  await page.locator('[data-route="library"]').first().click();
-  await waitForText(page, "单词库");
-  await page.getByText("grow", { exact: true }).first().waitFor({ state: "visible", timeout: 15000 });
-  await page.waitForTimeout(500);
-  await shot(page, "04-library.png");
-
-  const edit = page.locator('[data-action="open-library-editor"]').first();
-  if (await edit.count()) {
-    await edit.click();
-    await page.waitForTimeout(600);
-    await shot(page, "05-library-editor.png");
-  }
-
-  await browser.close();
-  console.log("Saved screenshots to", OUT);
 })().catch(err => {
-  console.error(err);
+  console.error("[capture] fatal", err);
   process.exitCode = 1;
 });
