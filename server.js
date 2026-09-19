@@ -2120,7 +2120,7 @@ async function sentenceFeedback(body) {
 span 必须是用户原句中真实存在的一段连续文本，尽量选能唯一定位的最小片段；replacement 是可以直接替换 span 的最小修正文本。只有无法可靠做局部替换时 replacement 才允许为空。
 8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
 9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
-10. suggestion 可以用于两种情况：存在 error 时给出完整修正版；或者只有 improve/polish 时给出可选优化版。changes 只列 suggestion 相对原句的实际改动，最多 3 条。reason 必须具体，不得只写“表达更自然”。没有 suggestion 时 changes 必须为空数组。
+10. suggestion 可以用于两种情况：存在 error 时给出完整修正版；或者只有 improve/polish 时给出可选优化版。changes 只列 suggestion 相对原句的实际改动，最多 3 条；每条 from 必须是用户原句中真实存在的连续片段，不能使用已经局部修正后的中间句。reason 必须具体，不得只写“表达更自然”。没有 suggestion 时 changes 必须为空数组。
 11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。\n12. issues 之间的 span 不得重叠，也不得一个包含另一个。如果两个修改落在同一片段，或者一个 replacement 能同时解决另一个问题，必须合并成一条 issue：使用原句中能覆盖这些问题的完整 span，只给一个 replacement，并在 reason 中把两个原因一起说清。禁止把“studing → studying”和“Keeping studing every day → Studying every day”拆成两条；应合并为“Keeping studing every day → Studying every day”。\n13. 即使同时存在 blocking error，也要继续检查其余不重叠片段；若存在真正有学习价值的自然度/地道度优化，最多额外返回 1 条 improve/polish。不要因为有红色错误就丢掉黄色建议。
 
 只输出 JSON：
@@ -2175,6 +2175,17 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
     feedback.approved,
     feedback.level
   );
+
+  if (feedback.inputLanguage === "en" && feedback.issues.length) {
+    const hasBlockingIssue = feedback.issues.some(item => item.blocking === true || item.severity === "error");
+    if (hasBlockingIssue) {
+      feedback.approved = false;
+      feedback.level = "warn";
+    } else {
+      feedback.approved = true;
+      feedback.level = "good";
+    }
+  }
 
   if (!feedback.suggestion) feedback.changes = [];
   if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
