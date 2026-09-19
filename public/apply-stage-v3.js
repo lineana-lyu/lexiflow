@@ -129,12 +129,12 @@
   function normalizeIssue(item){
     const severity=normalizedSeverity(item?.severity);
     return{
+      id:norm(item?.id),
       span:norm(item?.span),
       start:Number.isInteger(item?.start)?item.start:null,
       end:Number.isInteger(item?.end)?item.end:null,
       reason:feedbackCopy(item?.reason),
       hint:feedbackCopy(item?.hint),
-      replacement:norm(item?.replacement),
       category:norm(item?.category).toLowerCase(),
       severity,
       blocking:item?.blocking===true||severity==="error",
@@ -142,13 +142,28 @@
   }
   function feedbackIssues(fb){
     return Array.isArray(fb?.issues)
-      ?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.span||item.reason||item.hint||item.replacement)
+      ?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.id&&item.span)
+      :[];
+  }
+  function feedbackActions(fb){
+    return Array.isArray(fb?.actions)
+      ?fb.actions.map(item=>({
+        issueId:norm(item?.issueId),
+        start:Number.isInteger(item?.start)?item.start:null,
+        end:Number.isInteger(item?.end)?item.end:null,
+        before:String(item?.before??""),
+        replacement:String(item?.replacement??""),
+        verified:item?.verified===true,
+      })).filter(item=>item.issueId&&item.verified&&Number.isInteger(item.start)&&Number.isInteger(item.end))
       :[];
   }
   function blockingIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking===true);}
   function optionalIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking!==true);}
-  function issueReplacement(issue){
-    return norm(issue?.replacement);
+  function actionForIssue(issue,actions){
+    return (Array.isArray(actions)?actions:[]).find(action=>action.issueId===issue?.id&&action.verified===true)||null;
+  }
+  function issueReplacement(issue,actions){
+    return String(actionForIssue(issue,actions)?.replacement??"");
   }
   function wordLikeSpan(value){return /^[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*$/.test(norm(value));}
   function wordChar(value){return Boolean(value&&/[A-Za-z0-9'’-]/.test(value));}
