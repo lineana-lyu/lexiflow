@@ -29,7 +29,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v5-actionable-mechanics";
+const SENTENCE_FEEDBACK_SCHEMA = "v6-atomic-evidence-reasons";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
 const visualSceneCache = new Map();
@@ -2140,9 +2140,10 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
 8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
 9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
 10. suggestion 可以用于两种情况：存在 error 时给出完整修正版；或者只有 improve/polish 时给出可选优化版。changes 只列 suggestion 相对原句的实际改动，最多 3 条；每条 from 必须是用户原句中真实存在的连续片段，不能使用已经局部修正后的中间句。reason 必须具体，不得只写“表达更自然”。没有 suggestion 时 changes 必须为空数组。
-11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。\n12. issues 之间的 span 不得重叠，也不得一个包含另一个。如果两个修改落在同一片段，或者一个 replacement 能同时解决另一个问题，必须合并成一条 issue：使用原句中能覆盖这些问题的完整 span，只给一个 replacement，并在 reason 中把两个原因一起说清。禁止把“studing → studying”和“Keeping studing every day → Studying every day”拆成两条；应合并为“Keeping studing every day → Studying every day”。\n13. 即使同时存在 blocking error，也要继续检查其余不重叠片段；若存在真正有学习价值的自然度/地道度优化，最多额外返回 1 条 improve/polish。不要因为有红色错误就丢掉黄色建议。
+11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。\n12. issues 必须按“独立可执行修改”拆分。两个错误发生在原句中不同的词或不同的连续片段时，即使可以用一个更长 replacement 一次改完，也必须拆成不同 issue；只有两个修正真正落在同一个不可分割片段、无法分别替换时才允许合并。issues 之间的 span 不得重叠。\n13. 即使同时存在 blocking error，也要继续检查其余不重叠片段；若存在真正有学习价值的自然度/地道度优化，最多额外返回 1 条 improve/polish。不要因为有红色错误就丢掉黄色建议。
 14. 一次检查要尽量把当前句子里所有明确的 blocking 问题同时找全，不要故意分轮暴露。尤其不要漏掉英文标点前后空格这类客观机械问题；系统还会用确定性规则并行复核这类问题。
 15. 每个 blocking issue 都必须尽量给出可直接替换的 replacement；若 changes 中已经有同一片段的修正，replacement 必须与之保持一致。
+16. reason 只能解释原句和 replacement 能直接支持的规则，不得臆测“句首、句中、从句、时态”等位置或语法条件。若规则与位置无关，就不要用位置作为理由。例如第一人称单数代词 “I” 无论位于句中何处都必须大写，不能把它解释成“因为在句首所以大写”。
 
 只输出 JSON：
 {"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正","severity":"error|improve|polish","blocking":true}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释","severity":"error|improve|polish","blocking":true}],"keyword":"最终英文中实际目标词/词形"}`;
