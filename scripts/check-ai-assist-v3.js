@@ -11,6 +11,7 @@ const ai=read("public/ai-assist-v3.js");
 const transport=read("public/transport-fixes.js");
 const visual=read("public/visualize-stage-v3.js");
 const apply=read("public/apply-stage-v3.js");
+const server=read("server.js");
 
 const transportIndex=index.indexOf("transport-fixes.js");
 const aiIndex=index.indexOf("ai-assist-v3.js");
@@ -42,5 +43,13 @@ assert(visual.includes("LexiFlowAiAssistV3?.visualScene"),"Visualize V3 must cal
 assert(!visual.includes('fetch("/api/ai/visual-scene"'),"Visualize V3 must not route its primary AI assist through the global fetch compatibility chain");
 assert(apply.includes("LexiFlowAiAssistV3?.practicePrompt"),"Apply V3 must call the explicit AI Assist authority directly for prompt refresh");
 assert(!apply.includes('fetch("/api/ai/practice-prompt"'),"Apply V3 must not route prompt refresh through the global fetch compatibility chain");
+
+assert(server.includes('codexAppServerRequest("model/list"')&&server.includes("supportedReasoningEfforts"),"Codex fast-text runtime must discover model capabilities instead of assuming every effort is valid");
+assert(server.includes('"CODEX_TIMEOUT"')&&server.includes("shouldFallbackFromCodexAppServer"),"Codex app-server turn timeouts must be eligible for the independent exec fallback");
+assert(server.includes("turnTimeoutMs")&&server.includes("fallbackTimeoutMs")&&server.includes("waitForCodexTurn(turnId, turnTimeoutMs)"),"fast-text runtime must give model generation its own timeout budget separate from bootstrap");
+assert(!server.includes("timeoutMs - (Date.now() - startedAt)"),"bootstrap/thread startup must not consume the model generation timeout");
+assert(server.includes('transport: "exec-fallback"')&&server.includes("fallbackReason: appServerCode"),"fast-text runtime must record when app-server recovery used the one-shot CLI transport");
+assert(server.includes("modelCatalogReady")&&server.includes("lastRun: codexAppServerState.lastFastTextRun"),"runtime status must expose non-secret fast-text transport telemetry for diagnosis");
+assert(server.includes("turnTimeoutMs: 30000")&&server.includes("fallbackTimeoutMs: 30000"),"Apply sentence review must use explicit resilient fast-text budgets rather than the old 15s all-in timeout");
 
 console.log("AI Assist V3 authority checks passed.");
