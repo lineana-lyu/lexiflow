@@ -30,7 +30,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v9-diagnostic-triage";
+const SENTENCE_FEEDBACK_SCHEMA = "v10-positional-diagnostics";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
 const visualSceneCache = new Map();
@@ -2138,6 +2138,8 @@ async function sentenceFeedback(body) {
     issues: Array.isArray(parsed.issues)
       ? parsed.issues.slice(0, 3).map(item => ({
           span: String(item?.span || "").trim().slice(0, 100),
+          start: Number.isInteger(Number(item?.start)) ? Number(item.start) : null,
+          end: Number.isInteger(Number(item?.end)) ? Number(item.end) : null,
           reason: normalizeFeedbackCopy(item?.reason).slice(0, 160),
           hint: normalizeFeedbackCopy(item?.hint).slice(0, 160),
           replacement: String(item?.replacement || "").trim().slice(0, 120),
