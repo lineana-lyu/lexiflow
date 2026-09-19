@@ -105,6 +105,7 @@
         approved:false,
         level:"warn",
         suggestion:"",
+        changes:[],
         feedbackRound:round,
         correctionHeldBack:true,
         title:round===1?"先自己改一次":"再自己改一次",
