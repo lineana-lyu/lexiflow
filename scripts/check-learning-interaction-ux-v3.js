@@ -9,6 +9,9 @@ const apply=read("public/apply-stage-v3.js");
 const applyActions=read("public/apply-actions-v3.js");
 const visual=read("public/visualize-stage-v3.js");
 const memorize=read("public/memorize-stage-v3.js");
+const app=read("public/app.js");
+const ecdict=read("lib/ecdict.js");
+const runtime=read("server-runtime.js");
 assert(index.includes('<script src="./apply-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'),"Apply input guard must load before legacy app.js");
 assert(guard.includes('event.stopImmediatePropagation();')&&guard.includes('input.setSelectionRange(start,end)'),"Apply guard must prevent remount-driven caret reversal and preserve selection");
 assert(guard.includes('Only a real input event carries')&&guard.includes('A DOM remount is not a learner edit.'),"Apply guard must distinguish learner edits from DOM remount restoration");
@@ -21,4 +24,8 @@ assert(!visual.includes('placeholder="例如：我第一次去东京时'),"Visua
 assert(visual.includes('aria-label="写下你的联想场景"'),"Visualize editor must retain an accessible label after removing the example placeholder");
 assert(!memorize.includes('答对了')&&!memorize.includes('你主动写出了'),"Memorize success feedback must remove redundant prose");
 assert(memorize.includes('lexi-m2-result-status ${s.correct?"success":"retry"}')&&memorize.includes('回忆成功'),"Memorize result must use a distinct success/retry status marker");
+assert(ecdict.includes('function parseExchange(value)')&&ecdict.includes('["p", "过去式"]')&&ecdict.includes('["0", "原形"]'),"ECDICT exchange must be normalized into learner-facing word forms");
+assert(runtime.includes("const morphology = ecdict.lookupExact")&&runtime.includes("wordForms: Array.isArray(morphology?.wordForms)"),"local Core Lexicon results must inherit ECDICT morphology without replacing lexical content");
+assert(app.includes("function wordFormsMarkup(")&&app.includes("词形变化"),"word cards must render compact morphology when available");
+assert(app.includes("wordForms:normalizeWordForms(r.wordForms)")&&app.includes("void ensureCardWordForms(card);"),"saved and existing cards must retain or lazily hydrate local word forms");
 console.log("Learning interaction UX regression checks passed.");
