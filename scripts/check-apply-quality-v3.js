@@ -75,6 +75,7 @@ assert(server.includes("targetWord: word")&&!server.includes("changes: feedback.
 const genericPrompt=buildSentenceFeedbackPrompt({word:"reliable",meaningZh:"可靠的",sentence:"I rely on her."});
 assert(genericPrompt.includes("这不是作文润色器，也不是排版检查器")&&genericPrompt.includes("明确拼错的英文单词使用 category=spelling、severity=error"),"production prompt must be usage-focused while treating definite spelling mistakes as correctness errors");
 assert(genericPrompt.includes("不要把大小写、标点、空格、排版等表层书写问题输出为 issue")&&genericPrompt.includes("changes 只是完整 suggestion 的变更摘要，不是诊断来源"),"production prompt must suppress low-value mechanics and separate diagnostics from suggestion edits");
+assert(genericPrompt.includes("start/end 是该 span 在用户原句中的 0-based 字符区间")&&genericPrompt.includes('"start":0,"end":1'),"production prompt must require positional diagnostic identity instead of span text alone");
 assert(!genericPrompt.includes("第一人称单数代词")&&!genericPrompt.includes("ride-or-die")&&!genericPrompt.includes("montain"),"regression fixtures and grammar-specific examples must stay out of the production prompt");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
@@ -86,6 +87,9 @@ assert(applyStage.includes("function coalesceIssues(text,issues=[])")&&applyStag
 assert(applyStage.includes("filter(issue=>issue.blocking).slice(0,3)")&&applyStage.includes("blockingIssues(merged).slice(0,3)")&&applyStage.includes("3-required.length"),"all three review slots must be available to blocking errors so the checker does not reveal hidden required fixes in later rounds");
 assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键优化为"),"blocking errors and optional suggestions must expose actionable fixes");
 assert(applyStage.includes("function issueReplacement(issue)")&&!applyStage.includes("find(change=>norm(change.from).toLowerCase()===span"),"local issue fixes must come only from the diagnostic replacement, never from full-suggestion changes");
+assert(applyStage.includes("start:Number.isInteger(item?.start)?item.start:null")&&applyStage.includes("function issueRange(text,issue)"),"Apply UI must preserve server diagnostic offsets and resolve issues by range identity");
+assert(applyStage.includes("rebaseIssuesAfterEdit")&&applyStage.includes("start:range.start+delta")&&applyStage.includes("end:range.end+delta"),"remaining diagnostic ranges must rebase after a one-click edit instead of being rediscovered by text search");
+assert(applyStage.includes("wordLikeSpan(target)")&&applyStage.includes("!wordChar(source[start-1])")&&applyStage.includes("!wordChar(source[end])"),"fallback diagnostic lookup must respect token boundaries and never match a letter inside a larger word");
 assert(!applyStage.includes("return feedbackChanges(fb).map(change=>normalizeIssue"),"full-suggestion changes must not be synthesized into diagnostics when issues are absent");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("const surfaceNorm=")&&applyStage.includes("const hasSurfaceEdit="),"Apply must distinguish visible edits from semantic-copy normalization");
@@ -102,6 +106,16 @@ assert(!applyStage.includes("state.lastFix=null;render();"),"automatic recheck m
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
 assert(applyStage.includes("修改原因")&&applyStage.includes("lexi-apply-v3-changes"),"Apply fallback full correction must retain concise reasons when local diagnostics are unavailable");
+
+const rangeSentence="My ride or die is exuberant, because i often climb.";
+const standaloneI=rangeSentence.indexOf(" i ")+1;
+const resolvedI=feedbackContract.feedbackSpanRange(rangeSentence,"i");
+assert(resolvedI&&resolvedI.start===standaloneI&&resolvedI.end===standaloneI+1,"single-token diagnostics must resolve the standalone token, not the i inside ride");
+const rideInnerI=rangeSentence.indexOf("ride")+1;
+const rejectedInner=feedbackContract.validatedExplicitRange(rangeSentence,"i",rideInnerI,rideInnerI+1);
+assert(rejectedInner===null,"an explicit model offset pointing inside ride must be rejected for standalone i");
+const mechanicsI=feedbackContract.detectEnglishMechanics(rangeSentence).find(issue=>issue.span==="i");
+assert(mechanicsI&&mechanicsI.start===standaloneI&&mechanicsI.end===standaloneI+1,"deterministic mechanics must carry the canonical source range from detection time");
 
 const mechanics=feedbackContract.detectEnglishMechanics("My boss is very dependable,because he never makes any mistakes");
 assert(mechanics.length===1&&mechanics[0].category==="spacing","deterministic mechanics may detect spacing internally");
