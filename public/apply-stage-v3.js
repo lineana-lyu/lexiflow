@@ -334,11 +334,12 @@
     const tips=Array.isArray(fb.tips)?fb.tips.map(String).filter(Boolean):[];
     const changes=feedbackChanges(fb);
     const issues=feedbackIssues(fb);
+    const actions=feedbackActions(fb);
     const blockers=blockingIssues(issues);
     const optional=optionalIssues(issues);
     const good=Boolean(s.approved&&blockers.length===0);
-    const hasUnactionableBlocking=blockers.some(issue=>!issueReplacement(issue));
-    const showFallback=Boolean(suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
+    const hasUnactionableBlocking=blockers.some(issue=>!actionForIssue(issue,actions));
+    const showFallback=Boolean(fb.inputLanguage==="zh"&&suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
     const title=blockers.length
       ?`发现 ${blockers.length} 处必须修改`
       :optional.length
@@ -347,7 +348,7 @@
     const panelTone=blockers.length?"warn":(optional.length?"suggest":"good");
     return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
       <div class="lexi-apply-v3-feedback-head"><div><small>${blockers.length?"需要修改":optional.length?"可选优化":"检查结果"}</small><strong>${esc(title)}</strong></div></div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${hasSurfaceEdit(issue.span,replacement)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,actions);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${replacement?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${showFallback?`<div class="lexi-apply-v3-complete-label">AI 无法安全拆成局部修改，给出完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${showFallback&&changes.length?`<div class="lexi-apply-v3-changes"><strong>修改原因</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${!issues.length&&tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
