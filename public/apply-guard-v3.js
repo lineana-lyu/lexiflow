@@ -61,10 +61,12 @@
     return card&&core.canonicalStage(card)==="apply"?card:null;
   }
 
+  function applyState(){return window.LexiFlowApplyStageV3?.currentState?.()||null;}
+
   function status(){
-    const input=document.getElementById("apply-text");
+    const live=applyState();
     const card=currentCard();
-    const value=String(input?.value||"").trim();
+    const value=String(live?.text||document.getElementById("apply-text")?.value||"").trim();
     if(!card)return{ok:false,msg:"当前学习卡还没有准备好，请稍后重试。"};
     if(!value)return{ok:false,msg:"先写一句你真正想表达的话。"};
     if(containsChinese(value))return{ok:false,msg:"最后需要用英文完成这句话。可以采用 AI 的英文建议，或自己改写后再继续。"};
@@ -87,15 +89,14 @@
   }
 
   function decorate(){
-    const input=document.getElementById("apply-text");
-    if(!input)return;
     const result=status();
+    const value=String(applyState()?.text||document.getElementById("apply-text")?.value||"");
     document.querySelectorAll('[data-action="pass-apply"]').forEach(button=>{
       if(!result.ok){
         button.disabled=true;
         button.title=result.msg;
-        if(containsChinese(input.value))button.textContent="先完成英文表达";
-        else if(input.value.trim())button.textContent="先使用目标词";
+        if(containsChinese(value))button.textContent="先完成英文表达";
+        else if(value.trim())button.textContent="先使用目标词";
       }else{
         button.title="";
       }
@@ -112,7 +113,7 @@
     event.preventDefault();
     event.stopImmediatePropagation();
     warning(result.msg);
-    document.getElementById("apply-text")?.focus();
+    if(document.getElementById("apply-text"))document.getElementById("apply-text").focus();
   },true);
 
   document.addEventListener("input",event=>{
