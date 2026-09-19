@@ -56,7 +56,7 @@ assert(!drafts.includes("setActive("),"study-drafts-v3 must not persist a compet
 assert(!drafts.includes('[data-action="continue-learning"]'),"draft recovery must not click the learning entry button");
 assert(drafts.includes("lexiflow-study-drafts-v2"),"V3 draft recovery must retain the existing durable draft key for migration continuity");
 assert(drafts.includes("core.canonicalStage(card)"),"draft recovery must follow the canonical stage model rather than raw legacy stage names");
-assert(drafts.includes('stage==="visualize"')&&drafts.includes('stage==="apply"'),"draft recovery must remain scoped to Visualize and Apply only");
+assert(drafts.includes('stage==="visualize"')&&!drafts.includes('stage==="apply"'),"legacy draft recovery must remain Visualize-only; Apply drafts are owned by the explicit save-draft contract");
 assert(!drafts.includes('card.stage==="visualize"')&&!drafts.includes('card.stage==="apply"'),"draft recovery must not regress to raw stage comparisons");
 assert(!exists("public/study-resume-v2.js"),"retired Study Resume V2 source must stay deleted after V3 draft migration");
 assert(!exists("public/studyday-boundary-v2.js"),"retired StudyDay Boundary V2 source must stay deleted");
