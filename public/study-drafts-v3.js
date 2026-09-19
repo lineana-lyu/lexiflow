@@ -49,11 +49,6 @@
       visual.value=draft.visual;
       visual.dispatchEvent(new Event("input",{bubbles:true}));
     }
-    const apply=document.getElementById("apply-text");
-    if(apply&&stage==="apply"&&!apply.value&&draft.apply){
-      apply.value=draft.apply;
-      apply.dispatchEvent(new Event("input",{bubbles:true}));
-    }
   }
 
   function cleanup(){
@@ -65,7 +60,10 @@
       if(!card){delete all[id];changed=true;continue;}
       const stage=core.canonicalStage(card);
       if(draft.visual&&stage!=="visualize"){delete draft.visual;changed=true;}
-      if(draft.apply&&stage!=="apply"){delete draft.apply;changed=true;}
+      // Apply V3 has an explicit “save draft and exit” contract. Old automatic
+      // localStorage drafts can otherwise resurrect stale test text (for example
+      // a previous random input) as if it were the default sentence.
+      if(draft.apply){delete draft.apply;changed=true;}
       if(!Object.keys(draft).filter(key=>key!=="updatedAt").length){delete all[id];changed=true;}
     }
     if(changed)save(all);
@@ -79,7 +77,6 @@
     if(!card)return;
     const stage=core.canonicalStage(card);
     if(element.id==="visual-note"&&stage==="visualize")patch(card.id,{visual:element.value});
-    if(element.id==="apply-text"&&stage==="apply")patch(card.id,{apply:element.value});
   },true);
 
   document.addEventListener("click",event=>{
