@@ -2018,8 +2018,10 @@ async function sentenceFeedback(body) {
 4. 如果英文完全没包含目标词，优先在不改变原意的前提下自然补入目标词；如果确实无法合理补入，再 approved=false 并解释原因。
 5. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
 6. suggestion 如果非空，应当是可直接保存的最终英文；修正版本身正确且含目标词时，level=good、approved=true。不要出现“判定有问题但不给修正句”的情况。
-7. 英文输入只要没有完全通过，就必须返回 issues，最多 2 条。每条 issue 必须包含 span、reason、hint、replacement：span 必须是用户原句中真实存在的一段连续文本，尽量选能唯一定位的最小片段；reason 用一句简洁中文说明问题属于拼写、语法、搭配或表达关系中的哪一种以及为什么；hint 给修改方向；replacement 是可以直接替换 span 的最小修正文本。只有无法可靠做局部替换时 replacement 才允许为空。不要只说“检查语法/搭配/目标词”，必须指出具体位置。
-8. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~2 个“实际发生的改动”，每条包含 from、to、reason。reason 必须是简洁、准确的一句中文，只解释为什么这样改（拼写、语法、搭配或自然度），不要泛泛讲语法课，不要解释没有改动的内容；不确定具体语法规则时，只说明更自然的实际用法，不要编造规则。suggestion 为空时 changes 必须为空数组。
+7. 英文输入只要没有完全通过，就必须返回 issues，最多 3 条。每条 issue 必须包含 span、reason、hint、replacement：span 必须是用户原句中真实存在的一段连续文本，尽量选能唯一定位的最小片段；replacement 是可以直接替换 span 的最小修正文本。只有无法可靠做局部替换时 replacement 才允许为空。
+8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
+9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
+10. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~3 个“实际发生的改动”，每条包含 from、to、reason。reason 同样必须具体，不得只写“表达更自然”。suggestion 为空时 changes 必须为空数组。
 
 只输出 JSON：
 {"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正"}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}],"keyword":"最终英文中实际目标词/词形"}`;
@@ -2036,7 +2038,7 @@ async function sentenceFeedback(body) {
     title: String(parsed.title || "审核完成"),
     tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(String) : [],
     issues: Array.isArray(parsed.issues)
-      ? parsed.issues.slice(0, 2).map(item => ({
+      ? parsed.issues.slice(0, 3).map(item => ({
           span: String(item?.span || "").trim().slice(0, 100),
           reason: String(item?.reason || "").trim().slice(0, 160),
           hint: String(item?.hint || "").trim().slice(0, 160),
@@ -2045,7 +2047,7 @@ async function sentenceFeedback(body) {
       : [],
     suggestion: String(parsed.suggestion || "").trim(),
     changes: Array.isArray(parsed.changes)
-      ? parsed.changes.slice(0, 2).map(item => ({
+      ? parsed.changes.slice(0, 3).map(item => ({
           from: String(item?.from || "").trim().slice(0, 80),
           to: String(item?.to || "").trim().slice(0, 80),
           reason: String(item?.reason || "").trim().slice(0, 120),
@@ -2058,7 +2060,7 @@ async function sentenceFeedback(body) {
 
   if (!feedback.suggestion) feedback.changes = [];
   if (!feedback.issues.length && feedback.suggestion && feedback.changes.length) {
-    feedback.issues = feedback.changes.slice(0, 2).map(change => ({
+    feedback.issues = feedback.changes.slice(0, 3).map(change => ({
       span: String(change.from || "").trim(),
       reason: String(change.reason || "这部分表达需要调整。").trim(),
       hint: change.to ? `建议改为 “${change.to}”` : "",
