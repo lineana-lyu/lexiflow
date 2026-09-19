@@ -11,6 +11,15 @@ const {
 } = require("./lib/sentence-feedback-contract");
 const { buildSentenceFeedbackPrompt } = require("./lib/sentence-feedback-prompt");
 const {
+  buildSentenceActionPrompt,
+  buildSentenceActionValidationPrompt,
+} = require("./lib/sentence-feedback-action-prompt");
+const {
+  normalizeActionCandidate,
+  deterministicActionForIssue,
+  finalizeVerifiedActions,
+} = require("./lib/sentence-feedback-actions");
+const {
   stableFeedbackKey,
   PersistentSentenceFeedbackStore,
 } = require("./lib/sentence-feedback-store");
@@ -35,7 +44,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v11-stable-review";
+const SENTENCE_FEEDBACK_SCHEMA = "v12-diagnostic-code-actions";
 let lookupCache = null;
 const sentenceFeedbackStore = new PersistentSentenceFeedbackStore({
   filePath: SENTENCE_FEEDBACK_CACHE_FILE,
@@ -2179,7 +2188,66 @@ async function sentenceFeedback(body) {
     sentence,
     targetWord: word,
     issues: [...mechanicsIssues, ...feedback.issues],
-  });
+  }).map((item, index) => ({ ...item, id: `issue-${index + 1}` }));
+
+  // Diagnostics describe what is wrong. One-click edits are a separate code
+  // action layer and are never taken directly from generative diagnostic text.
+  feedback.actions = [];
+  if (feedback.inputLanguage === "en" && feedback.issues.length) {
+    const deterministicActions = feedback.issues
+      .map(issue => deterministicActionForIssue(sentence, issue))
+      .filter(Boolean);
+    const deterministicIds = new Set(deterministicActions.map(action => action.issueId));
+    const actionIssues = feedback.issues.filter(issue => !deterministicIds.has(issue.id));
+
+    let generatedCandidates = [];
+    if (actionIssues.length) {
+      try {
+        const actionPrompt = buildSentenceActionPrompt({
+          sentence,
+          word,
+          meaningZh,
+          issues: actionIssues,
+        });
+        const actionResult = await runCodexFastText(actionPrompt, {
+          turnTimeoutMs: 20000,
+          fallbackTimeoutMs: 20000,
+          reasoningEffortOverride: "low",
+        });
+        const actionPayload = extractJson(actionResult.stdout);
+        generatedCandidates = (Array.isArray(actionPayload?.actions) ? actionPayload.actions : [])
+          .map(candidate => {
+            const issue = actionIssues.find(item => item.id === String(candidate?.issueId || ""));
+            return issue ? normalizeActionCandidate(sentence, issue, candidate) : null;
+          })
+          .filter(Boolean);
+
+        if (generatedCandidates.length) {
+          const validationPrompt = buildSentenceActionValidationPrompt({
+            sentence,
+            word,
+            meaningZh,
+            issues: actionIssues,
+            actions: generatedCandidates,
+          });
+          const validationResult = await runCodexFastText(validationPrompt, {
+            turnTimeoutMs: 20000,
+            fallbackTimeoutMs: 20000,
+            reasoningEffortOverride: "low",
+          });
+          const validationPayload = extractJson(validationResult.stdout);
+          generatedCandidates = finalizeVerifiedActions(
+            generatedCandidates,
+            Array.isArray(validationPayload?.verdicts) ? validationPayload.verdicts : []
+          );
+        }
+      } catch (err) {
+        console.warn("Apply code-action planning failed:", err?.code || err?.message || err);
+        generatedCandidates = [];
+      }
+    }
+    feedback.actions = [...deterministicActions, ...generatedCandidates];
+  }
 
   // Progression is a product policy, not a model opinion. The model proposes
   // diagnostics; the normalized severity policy decides whether learning is

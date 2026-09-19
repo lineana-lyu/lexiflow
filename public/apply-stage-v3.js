@@ -129,12 +129,12 @@
   function normalizeIssue(item){
     const severity=normalizedSeverity(item?.severity);
     return{
+      id:norm(item?.id),
       span:norm(item?.span),
       start:Number.isInteger(item?.start)?item.start:null,
       end:Number.isInteger(item?.end)?item.end:null,
       reason:feedbackCopy(item?.reason),
       hint:feedbackCopy(item?.hint),
-      replacement:norm(item?.replacement),
       category:norm(item?.category).toLowerCase(),
       severity,
       blocking:item?.blocking===true||severity==="error",
@@ -142,13 +142,28 @@
   }
   function feedbackIssues(fb){
     return Array.isArray(fb?.issues)
-      ?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.span||item.reason||item.hint||item.replacement)
+      ?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.id&&item.span)
+      :[];
+  }
+  function feedbackActions(fb){
+    return Array.isArray(fb?.actions)
+      ?fb.actions.map(item=>({
+        issueId:norm(item?.issueId),
+        start:Number.isInteger(item?.start)?item.start:null,
+        end:Number.isInteger(item?.end)?item.end:null,
+        before:String(item?.before??""),
+        replacement:String(item?.replacement??""),
+        verified:item?.verified===true,
+      })).filter(item=>item.issueId&&item.verified&&Number.isInteger(item.start)&&Number.isInteger(item.end))
       :[];
   }
   function blockingIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking===true);}
   function optionalIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking!==true);}
-  function issueReplacement(issue){
-    return norm(issue?.replacement);
+  function actionForIssue(issue,actions){
+    return (Array.isArray(actions)?actions:[]).find(action=>action.issueId===issue?.id&&action.verified===true)||null;
+  }
+  function issueReplacement(issue,actions){
+    return String(actionForIssue(issue,actions)?.replacement??"");
   }
   function wordLikeSpan(value){return /^[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*$/.test(norm(value));}
   function wordChar(value){return Boolean(value&&/[A-Za-z0-9'’-]/.test(value));}
@@ -174,8 +189,24 @@
     }
     return spanRange(source,target);
   }
+  function actionRange(text,action){
+    const source=String(text||"");if(!action||!Number.isInteger(action.start)||!Number.isInteger(action.end))return null;
+    if(action.start<0||action.end<action.start||action.end>source.length)return null;
+    const before=source.slice(action.start,action.end);
+    return before===String(action.before??"")?{start:action.start,end:action.end}:null;
+  }
   function survivingIssues(text,issues=[]){
     return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue));
+  }
+  function rebaseActionsAfterEdit(oldText,actions,editRange,replacementLength,removedIssueId){
+    const delta=Number(replacementLength||0)-(editRange.end-editRange.start);
+    return (Array.isArray(actions)?actions:[]).map(action=>{
+      if(action.issueId===removedIssueId)return null;
+      const range=actionRange(oldText,action);if(!range)return null;
+      if(range.end<=editRange.start)return{...action,start:range.start,end:range.end};
+      if(range.start>=editRange.end)return{...action,start:range.start+delta,end:range.end+delta};
+      return null;
+    }).filter(Boolean);
   }
   function rebaseIssuesAfterEdit(oldText,issues,editRange,replacementLength){
     const delta=Number(replacementLength||0)-(editRange.end-editRange.start);
@@ -197,13 +228,9 @@
       const current=result[overlapIndex];
       const currentLength=current._range.end-current._range.start;
       const candidateLength=candidate._range.end-candidate._range.start;
-      const currentActionable=Boolean(norm(current.replacement));
-      const candidateActionable=Boolean(norm(candidate.replacement));
       const primary=(current.blocking!==candidate.blocking)
         ?(current.blocking?current:candidate)
-        :(currentActionable!==candidateActionable)
-          ?(candidateActionable?candidate:current)
-          :(candidateLength>currentLength?candidate:current);
+        :(candidateLength<currentLength?candidate:current);
       const secondary=primary===current?candidate:current;
       result[overlapIndex]={
         ...primary,
@@ -303,11 +330,12 @@
     const tips=Array.isArray(fb.tips)?fb.tips.map(String).filter(Boolean):[];
     const changes=feedbackChanges(fb);
     const issues=feedbackIssues(fb);
+    const actions=feedbackActions(fb);
     const blockers=blockingIssues(issues);
     const optional=optionalIssues(issues);
     const good=Boolean(s.approved&&blockers.length===0);
-    const hasUnactionableBlocking=blockers.some(issue=>!issueReplacement(issue));
-    const showFallback=Boolean(suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
+    const hasUnactionableBlocking=blockers.some(issue=>!actionForIssue(issue,actions));
+    const showFallback=Boolean(fb.inputLanguage==="zh"&&suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
     const title=blockers.length
       ?`发现 ${blockers.length} 处必须修改`
       :optional.length
@@ -316,7 +344,7 @@
     const panelTone=blockers.length?"warn":(optional.length?"suggest":"good");
     return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
       <div class="lexi-apply-v3-feedback-head"><div><small>${blockers.length?"需要修改":optional.length?"可选优化":"检查结果"}</small><strong>${esc(title)}</strong></div></div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${hasSurfaceEdit(issue.span,replacement)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,actions);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${replacement?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${showFallback?`<div class="lexi-apply-v3-complete-label">AI 无法安全拆成局部修改，给出完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${showFallback&&changes.length?`<div class="lexi-apply-v3-changes"><strong>修改原因</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${!issues.length&&tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
@@ -438,21 +466,22 @@
 
   function applyIssueFix(index){
     const card=currentCard();if(!card)return;const s=session(card);
-    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
+    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),actions=feedbackActions(s.feedback),issue=issues[Number(index)];
     if(!issue)return;
-    const replacement=issueReplacement(issue),range=issueRange(s.text,issue);
-    if(!replacement||!range||!hasSurfaceEdit(issue.span,replacement))return;
+    const action=actionForIssue(issue,actions),range=actionRange(s.text,action),replacement=String(action?.replacement??"");
+    if(!action||!replacement||!range||!hasSurfaceEdit(action.before,replacement))return;
     if(s.text&&!s.originalText)s.originalText=s.text;
 
-    // One AI check creates one correction transaction. Applying an AI-proposed
-    // local fix consumes that issue from the same transaction; it must not
-    // silently start a fresh generative review and move the goalposts.
+    // Diagnostics and code actions are separate. The highlighted diagnostic can
+    // be broader than the verified edit, but the click applies only the
+    // independently planned and validated action range.
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
     const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
     const rebased=rebaseIssuesAfterEdit(s.text,unresolved,range,replacement.length);
     const surviving=survivingIssues(next,rebased);
     const remainingBlocking=blockingIssues(surviving);
     const remainingOptional=optionalIssues(surviving);
+    const remainingActions=rebaseActionsAfterEdit(s.text,actions,range,replacement.length,issue.id);
     const keyword=norm(s.feedback?.keyword||card.word)||card.word;
     const keywordOk=usesTarget(next,keyword)||usesTarget(next,card.word);
     const english=!/[\u3400-\u9fff]/.test(next);
@@ -465,12 +494,13 @@
     s.suggestionApproved=Boolean(!approved&&s.suggestionApproved);
     s.checkError=null;
     s.editing=false;
-    s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
+    s.lastFix={start:range.start,end:range.start+replacement.length,from:action.before,to:replacement,at:Date.now()};
     s.feedback={
       ...(s.feedback||{}),
       approved,
       level:approved?"good":"warn",
       issues:[...remainingBlocking,...remainingOptional],
+      actions:remainingActions,
       changes:remainingChanges,
       tips:[],
       suggestion:approved?"":norm(s.feedback?.suggestion),
@@ -481,7 +511,7 @@
   function adopt(){
     const card=currentCard();if(!card)return;const s=session(card);const suggestion=norm(s.feedback?.suggestion);if(!suggestion||!s.suggestionApproved)return;
     if(s.text&&!s.originalText)s.originalText=s.text;
-    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];render();
+    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],actions:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];render();
   }
 
   function restore(){
