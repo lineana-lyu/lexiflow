@@ -26,6 +26,11 @@ assert(!quality.includes("window.fetch=")&&!quality.includes("window.fetch ="),"
 assert(!quality.includes("/api/learning-data"),"Apply Quality must use the Learning Data Gateway snapshot instead of observing learning-data transport");
 assert(quality.includes("registerAfterPersist?.(()=>schedule())"),"Apply Quality must redraw from Gateway-confirmed persistence events");
 assert(applyStage.includes('fetch("/api/ai/text"')&&applyStage.includes("LexiFlowApplyQualityV3?.processFeedback?."),"Apply Stage must own the AI request and explicitly pass its response through Apply Quality before interpretation");
+assert(applyStage.includes("async function requestApplyCheck(body)")&&applyStage.includes("payload?.userError")&&applyStage.includes("err.userMessage"),"Apply transport must preserve structured server error reasons instead of collapsing failures into a generic error");
+assert(applyStage.includes("checkError:null")&&applyStage.includes("s.checkError=normalizeCheckError(err)")&&applyStage.includes("s.feedback=null"),"Apply check failures must be a first-class session state separate from language feedback");
+assert(applyStage.includes('data-apply-stage-v3="retry"')&&applyStage.includes('if(action==="submit"||action==="retry")void submit();'),"failed Apply checks must offer a direct retry using the preserved sentence");
+assert(applyStage.includes('s.checkError?"检查未完成"')&&applyStage.includes("<b>原因：</b>")&&applyStage.includes("错误代码："),"failure UI must identify that checking did not complete and show the concrete reason/code");
+assert(!applyStage.includes('throw new Error("APPLY_AI_FAILED")'),"Apply must not discard the server userError contract behind a generic transport error");
 assert(applyStage.includes("function currentState()")&&applyStage.includes("approved:Boolean(s.approved)")&&applyStage.includes("text:String(s.text||\"\")"),"Apply Stage must expose the authoritative checked sentence state");
 assert(quality.includes("LexiFlowApplyStageV3?.currentState?.()")&&guard.includes("LexiFlowApplyStageV3?.currentState?.()"),"Apply validators must consume Apply Stage state instead of requiring textarea DOM");
 assert(quality.includes("function immediateFeedback(payload,body)")&&quality.includes("recordAudit(body,feedback);"),"Apply feedback must be available immediately for interactive diagnostics");
@@ -80,7 +85,7 @@ assert(applyStage.includes("pendingIssues:[]")&&applyStage.includes("s.pendingIs
 assert(applyStage.includes("const originalApproved=Boolean(")&&applyStage.includes("mergedBlocking.length===0")&&applyStage.includes("s.pendingIssues=mergedBlocking"),"automatic recheck must block only on unresolved blocking issues");
 assert(applyStage.includes("s.approved=originalApproved")&&applyStage.includes('optional.length?"保留原句 · 明天首次复习"'),"a sentence with only optional suggestions must remain approved and allow the learner to keep the original");
 assert(applyStage.includes("const showFallback=Boolean(!issues.length&&suggestion&&!s.approved);")&&applyStage.includes("showFallback&&changes.length"),"full corrected sentence must remain a fallback only when the original is not already approved and no localized diagnostic exists");
-assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.lastFix||s.approved))"),"accepted fixes must remain as a stable resolved state after automatic recheck");
+assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.checkError||s.lastFix||s.approved))"),"accepted fixes and failed checks must remain explicit stable review states");
 assert(!applyStage.includes("state.lastFix=null;render();"),"automatic recheck must not erase the green resolved marker on a timer");
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
