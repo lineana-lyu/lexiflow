@@ -68,6 +68,13 @@ for (const [name, label] of routes) {
   const button = page.getByRole('button', { name: label }).first();
   await button.click();
   await capture(name);
+
+  if (name === 'select') {
+    await page.locator('#word-input').fill('grow');
+    await page.getByRole('button', { name: /^查询$/ }).click();
+    await page.waitForTimeout(3500);
+    await capture('lookup-grow');
+  }
 }
 
 await fs.writeFile(path.join(outDir, 'browser-console.txt'), consoleLines.join('\n'), 'utf8');
