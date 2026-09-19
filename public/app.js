@@ -23,6 +23,7 @@
     providerChecks: { dictionary:null, ai:null },
     loadingMoreSenses: false,
     pronunciationHydration: {},
+    wordFormsHydration: {},
     notice: null,
     searchResolution: null,
     lookupAlternativesOpen: false,
@@ -598,6 +599,7 @@
     const senses=Array.isArray(r.senses)?r.senses:[];
     const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
     const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r.word));
+    const wordForms=normalizeWordForms(r.wordForms);
     const normalizedDiff=Boolean(r.normalizedQuery && String(r.normalizedQuery).toLowerCase()!==String(r.sourceQuery||"").toLowerCase());
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || normalizedDiff)
       ? `<div class="auto-resolved-note"><span>已自动识别</span><strong>${escapeHtml(r.sourceQuery)} → ${escapeHtml(r.word)}</strong>${normalizedDiff?`<small>识别为“${escapeHtml(r.normalizedQuery)}”</small>`:""}</div>`
@@ -635,6 +637,7 @@
         <div><div class="word-line"><h2>${escapeHtml(r.word)}</h2><button class="speaker" data-action="speak" data-word="${escapeHtml(r.word)}" data-audio="${escapeHtml(r.audioUrl||"")}" data-audios="${escapeHtml(JSON.stringify(r.audioUrls||[]))}" title="播放美式发音">🔊</button></div><div class="phonetic">${escapeHtml(formatPhonetic(r.phonetic||""))}</div></div>
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
+      ${wordFormsMarkup(wordForms)}
       ${primarySense&&!String(primarySense.meaningZh||"").trim()?`<div class="feedback warn"><h4>中文释义暂缺</h4><ul><li>当前词条没有可用中文释义，可以重新查询或手动补充。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
       ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
@@ -941,6 +944,57 @@
     ) return raw;
     return `/${raw}/`;
   }
+  function normalizeWordForms(forms){
+    if(!Array.isArray(forms))return [];
+    const seen=new Set();
+    return forms.map(item=>({
+      type:String(item?.type||"").trim(),
+      label:String(item?.label||"").trim(),
+      form:String(item?.form||"").trim(),
+    })).filter(item=>{
+      if(!item.label||!item.form)return false;
+      const key=`${item.type}:${item.form.toLowerCase()}`;
+      if(seen.has(key))return false;
+      seen.add(key);
+      return true;
+    }).slice(0,8);
+  }
+
+  function wordFormsMarkup(forms,{compact=false}={}){
+    const items=normalizeWordForms(forms);
+    if(!items.length)return "";
+    return `<div class="lexi-word-forms ${compact?"compact":""}" aria-label="词形变化">
+      <div class="lexi-word-forms-title">词形变化</div>
+      <div class="lexi-word-forms-list">${items.map(item=>`<span class="lexi-word-form"><small>${escapeHtml(item.label)}</small><strong>${escapeHtml(item.form)}</strong></span>`).join("")}</div>
+    </div>`;
+  }
+
+  async function ensureCardWordForms(card){
+    if(!card||isMultiWordExpression(card.word)||normalizeWordForms(card.wordForms).length)return;
+    const id=String(card.id||"");if(!id||state.wordFormsHydration[id])return;
+    state.wordFormsHydration[id]="loading";
+    try{
+      const payload=await api("/api/dictionary/lookup",{method:"POST",body:{word:card.word,mode:"primary"}});
+      const result=payload?.result||{};
+      const forms=normalizeWordForms(result.wordForms);
+      if(forms.length){
+        card.wordForms=forms;
+        card.exchange=String(result.exchange||card.exchange||"");
+        card.updatedAt=new Date().toISOString();
+        if(state.libraryEditor&&String(state.libraryEditor.cardId)===id){
+          state.libraryEditor.draft={...(state.libraryEditor.draft||libraryEditorBaseDraft(card)),wordForms:forms,exchange:card.exchange};
+        }
+        saveData();
+        state.wordFormsHydration[id]="done";
+        render();
+        return;
+      }
+      state.wordFormsHydration[id]="empty";
+    }catch{
+      state.wordFormsHydration[id]="failed";
+    }
+  }
+
 
   function wordIdentity(card,{size="large",showPos=true,center=false}={}){
     return `<div class="target-word-identity ${center?"center":""} ${size}">
@@ -998,6 +1052,8 @@
       meaningZh:card.meaningZh||"",
       exampleEn:card.exampleEn||"",
       exampleZh:card.exampleZh||"",
+      exchange:card.exchange||"",
+      wordForms:normalizeWordForms(card.wordForms),
       visualNote:card.visualNote||card.visualSceneSuggestion?.scene||"",
       imageData:card.imageData||"",
       imageUrl:card.imageUrl||"",
@@ -1020,6 +1076,7 @@
     };
     state.route="library-edit";
     render();
+    void ensureCardWordForms(card);
   }
 
   function captureLibraryEditorDraft(){
@@ -1068,6 +1125,7 @@
             <span>中文释义</span>
             <strong>${escapeHtml(d.meaningZh)}</strong>
           </div>
+          ${wordFormsMarkup(d.wordForms,{compact:true})}
         </section>
 
         <section class="card pad library-editor-copy-card">
@@ -1752,7 +1810,7 @@
       const requestedToday=state.addToTodayIntent===todayKey(nowDate);
       const currentPlan=state.data.dailyPlan;
       const addToToday=requestedToday&&Number(currentPlan?.remainingSelectSlots||0)>0;
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],exchange:String(r.exchange||""),wordForms:normalizeWordForms(r.wordForms),sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       if(addToToday){
         card.inboxPending=false;
         card.todaySelectedOn=todayKey(nowDate);

@@ -56,5 +56,9 @@ assert(!transport.includes("softenNearIdenticalSentenceFeedback"),"transport lay
 assert(!transport.includes("optionalSuggestion"),"transport layer must not manufacture optional Apply suggestions");
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
+assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}]'),"server feedback contract must return concise explanations for actual corrections");
+assert(server.includes("不确定具体语法规则时，只说明更自然的实际用法，不要编造规则"),"correction explanations must prefer accurate usage guidance over invented grammar rules");
+assert(quality.includes("changes:[]"),"early feedback rounds must not leak the held-back correction through explanation metadata");
+assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must show concise reasons beside an actual correction");
 
 console.log("Apply Quality V3 contract checks passed.");

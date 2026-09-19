@@ -61,7 +61,16 @@ function localLookupResult(word, mode = "primary", sourceQuery = "") {
     sourceQuery: sourceQuery || word,
     autoResolved: Boolean(sourceQuery && sourceQuery.toLowerCase() !== String(word || "").toLowerCase()),
   };
-  return coreLexicon.lookupExact(word, mode, options) || ecdict.lookupExact(word, mode, options);
+  const core = coreLexicon.lookupExact(word, mode, options);
+  const morphology = ecdict.lookupExact(word, mode, options);
+  if (!core) return morphology;
+  return {
+    ...core,
+    exchange: String(morphology?.exchange || core.exchange || ""),
+    wordForms: Array.isArray(morphology?.wordForms)
+      ? morphology.wordForms
+      : (Array.isArray(core.wordForms) ? core.wordForms : []),
+  };
 }
 
 function localPhraseResult(phrase, mode = "primary") {
@@ -100,7 +109,17 @@ async function ensureWholePhrasePhonetic(result, phrase) {
 }
 
 function localChineseResult(query) {
-  return coreLexicon.lookupChinese(query);
+  const result = coreLexicon.lookupChinese(query);
+  const word = clean(result?.word).toLowerCase();
+  if (!result || !word || /\s/.test(word)) return result;
+  const morphology = ecdict.lookupExact(word, "primary", { sourceQuery:query, autoResolved:true });
+  return {
+    ...result,
+    exchange: String(morphology?.exchange || result.exchange || ""),
+    wordForms: Array.isArray(morphology?.wordForms)
+      ? morphology.wordForms
+      : (Array.isArray(result.wordForms) ? result.wordForms : []),
+  };
 }
 
 async function handleLocalDictionary(req, res, pathname, body) {
