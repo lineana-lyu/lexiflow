@@ -20,6 +20,8 @@
     return parts.filter((value,index)=>parts.indexOf(value)===index).join("；");
   };
   const copyNorm=value=>norm(value).toLowerCase().replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[.,!?;:()[\]{}"']/g," ").replace(/\s+/g," ").trim();
+  const surfaceNorm=value=>String(value??"").replace(/\r\n?/g,"\n");
+  const hasSurfaceEdit=(from,to)=>Boolean(norm(to))&&surfaceNorm(from)!==surfaceNorm(to);
   const phonetic=value=>{const s=norm(value);return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
   const escapeRe=value=>String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
 
@@ -290,7 +292,7 @@
     const panelTone=blockers.length?"warn":(optional.length?"suggest":"good");
     return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
       <div class="lexi-apply-v3-feedback-head"><div><small>${blockers.length?"需要修改":optional.length?"可选优化":"检查结果"}</small><strong>${esc(title)}</strong></div></div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="polish"?"可选润色":"表达建议");const actionText=issue.blocking?"一键改为":"一键优化为";return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${replacement&&copyNorm(replacement)!==copyNorm(issue.span)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="polish"?"可选润色":"表达建议");const actionText=issue.blocking?"一键改为":"一键优化为";return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${hasSurfaceEdit(issue.span,replacement)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${showFallback?`<div class="lexi-apply-v3-complete-label">AI 无法安全拆成局部修改，给出完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${showFallback&&changes.length?`<div class="lexi-apply-v3-changes"><strong>修改原因</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${!issues.length&&tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
@@ -415,20 +417,40 @@
     const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
     if(!issue)return;
     const replacement=issueReplacement(issue,changes),range=issueRange(s.text,issue.span);
-    if(!replacement||!range)return;
+    if(!replacement||!range||!hasSurfaceEdit(issue.span,replacement))return;
     if(s.text&&!s.originalText)s.originalText=s.text;
+
+    // One AI check creates one correction transaction. Applying an AI-proposed
+    // local fix consumes that issue from the same transaction; it must not
+    // silently start a fresh generative review and move the goalposts.
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
     const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
-    s.pendingIssues=survivingIssues(next,blockingIssues(unresolved));
-    s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;
+    const surviving=survivingIssues(next,unresolved);
+    const remainingBlocking=blockingIssues(surviving);
+    const remainingOptional=optionalIssues(surviving);
+    const keyword=norm(s.feedback?.keyword||card.word)||card.word;
+    const keywordOk=usesTarget(next,keyword)||usesTarget(next,card.word);
+    const english=!/[\u3400-\u9fff]/.test(next);
+    const approved=Boolean(english&&keywordOk&&remainingBlocking.length===0);
+    const remainingChanges=changes.filter(change=>issueRange(next,change.from));
+
+    s.pendingIssues=remainingBlocking;
+    s.text=next;
+    s.approved=approved;
+    s.suggestionApproved=Boolean(!approved&&s.suggestionApproved);
+    s.checkError=null;
+    s.editing=false;
     s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
-    const caret=s.lastFix.end;
+    s.feedback={
+      ...(s.feedback||{}),
+      approved,
+      level:approved?"good":"warn",
+      issues:[...remainingBlocking,...remainingOptional],
+      changes:remainingChanges,
+      tips:[],
+      suggestion:approved?"":norm(s.feedback?.suggestion),
+    };
     render();
-    setTimeout(()=>{
-      const live=currentCard();if(!live||String(live.id)!==String(card.id))return;
-      const state=session(live);if(state.submitting||state.text!==next)return;
-      void submit();
-    },650);
   }
 
   function adopt(){
