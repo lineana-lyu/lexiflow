@@ -18,6 +18,8 @@
   function remember(input){
     const cardId=activeCardId(input);if(!cardId)return;
     setDraft(cardId,input.value,input.selectionStart,input.selectionEnd);
+    // Only a real input event carries "the learner edited the sentence" semantics.
+    // Apply V3 may therefore clear stale AI feedback here.
     window.LexiFlowApplyStageV3?.handleInput?.(input);
   }
 
@@ -34,8 +36,9 @@
     const input=document.getElementById("apply-text");if(!input)return;
     const cardId=activeCardId(input);if(!cardId)return;
     const draft=drafts.get(cardId);if(!draft)return;
+    // A DOM remount is not a learner edit. Restore only text/caret state here.
+    // Calling ApplyStageV3.handleInput() would clear freshly rendered AI feedback.
     if(input.value!==draft.value)input.value=draft.value;
-    window.LexiFlowApplyStageV3?.handleInput?.(input);
     if(document.activeElement!==input)return;
     const length=input.value.length;
     const start=Math.max(0,Math.min(length,Number(draft.selectionStart)||0));
