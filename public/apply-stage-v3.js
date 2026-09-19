@@ -196,12 +196,12 @@
     return coalesceIssues(text,[
       ...blockingIssues(fresh),
       ...survivingIssues(text,blockingIssues(carryover)),
-    ]).filter(issue=>issue.blocking).slice(0,2);
+    ]).filter(issue=>issue.blocking).slice(0,3);
   }
   function mergeDisplayIssues(text,blocking,optional){
     const merged=coalesceIssues(text,[...(Array.isArray(blocking)?blocking:[]),...(Array.isArray(optional)?optional:[])]);
-    const required=blockingIssues(merged).slice(0,2);
-    const suggestions=optionalIssues(merged).slice(0,1);
+    const required=blockingIssues(merged).slice(0,3);
+    const suggestions=optionalIssues(merged).slice(0,Math.max(0,3-required.length));
     return [...required,...suggestions];
   }
   function diagnosticSentenceHtml(text,issues,lastFix=null){
