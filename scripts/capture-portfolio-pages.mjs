@@ -170,25 +170,54 @@ await capture('stage-apply-grow');
 await setStage('review', {
   reviewCount: 0,
   reviewStep: 0,
-  initialReviewPending: true,
-  nextReviewAt: new Date().toISOString(),
+  initialReviewPending: false,
+  nextReviewAt: new Date(Date.now() - 86400000).toISOString(),
+  stageEligibleOn: new Date(Date.now() - 86400000).toISOString(),
   memoryState: 'reinforcing',
 });
+await page.evaluate(async () => {
+  const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
+  payload.data.dailyPlan = window.LexiFlowLearningCore.buildDailyPlan(payload.data, new Date());
+  await fetch('/api/learning-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: payload.data, appShellAuthority: 'portfolio-review-capture' }),
+  });
+  localStorage.removeItem('lexiflow-review-session-v3');
+});
+await page.reload({ waitUntil: 'domcontentloaded' });
+await page.waitForTimeout(2200);
 await page.evaluate(() => window.LexiFlowReviewSessionV3.restart());
-await page.waitForSelector('.lexi-r3-card', { timeout: 15000 });
-const reviewReveal = page.locator('[data-r3="reveal"]').first();
-if (await reviewReveal.count()) {
-  await reviewReveal.click();
-  await page.waitForTimeout(350);
-} else {
-  const reviewInput = page.locator('#lexi-r3-answer');
-  if (await reviewInput.count()) {
-    await reviewInput.fill('grow');
-    await page.locator('[data-r3="check"]').click();
+await page.waitForTimeout(2200);
+
+if (await page.locator('.lexi-r3-card').count()) {
+  const reviewReveal = page.locator('[data-r3="reveal"]').first();
+  if (await reviewReveal.count()) {
+    await reviewReveal.click();
     await page.waitForTimeout(350);
+  } else {
+    const reviewInput = page.locator('#lexi-r3-answer');
+    if (await reviewInput.count()) {
+      await reviewInput.fill('grow');
+      const check = page.locator('[data-r3="check"]').first();
+      if (await check.count()) await check.click();
+      await page.waitForTimeout(350);
+    }
   }
+  await capture('stage-review-grow');
+} else {
+  await capture('stage-review-debug');
+  const debug = await page.evaluate(async () => {
+    const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
+    return {
+      bodyText: document.body.innerText,
+      dailyPlan: payload.data?.dailyPlan || null,
+      card: payload.data?.cards?.[0] || null,
+      reviewSession: localStorage.getItem('lexiflow-review-session-v3'),
+    };
+  });
+  await fs.writeFile(path.join(outDir, 'stage-review-debug.json'), JSON.stringify(debug, null, 2), 'utf8');
 }
-await capture('stage-review-grow');
 
 await fs.writeFile(path.join(outDir, 'browser-console.txt'), consoleLines.join('\n'), 'utf8');
 await browser.close();
