@@ -10,6 +10,10 @@ const {
   normalizeSentenceDiagnostics,
 } = require("./lib/sentence-feedback-contract");
 const { buildSentenceFeedbackPrompt } = require("./lib/sentence-feedback-prompt");
+const {
+  stableFeedbackKey,
+  PersistentSentenceFeedbackStore,
+} = require("./lib/sentence-feedback-store");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -26,13 +30,17 @@ const CODEX_CONFIG = path.join(os.homedir(), ".codex", "config.toml");
 const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 
 const LOOKUP_CACHE_FILE = path.join(DATA_DIR, "dictionary-cache.json");
+const SENTENCE_FEEDBACK_CACHE_FILE = path.join(DATA_DIR, "sentence-feedback-cache.json");
 const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v10-positional-diagnostics";
+const SENTENCE_FEEDBACK_SCHEMA = "v11-stable-review";
 let lookupCache = null;
-const sentenceFeedbackCache = new Map();
+const sentenceFeedbackStore = new PersistentSentenceFeedbackStore({
+  filePath: SENTENCE_FEEDBACK_CACHE_FILE,
+  maxEntries: 300,
+});
 const visualSceneCache = new Map();
 const practicePromptCache = new Map();
 
@@ -180,7 +188,7 @@ async function migrateLegacyRuntimeData() {
   await fsp.mkdir(DATA_DIR, { recursive: true });
   await fsp.mkdir(GENERATED_DIR, { recursive: true });
 
-  for (const name of ["settings.json", "dictionary-cache.json", "learning-data.json"]) {
+  for (const name of ["settings.json", "dictionary-cache.json", "sentence-feedback-cache.json", "learning-data.json"]) {
     const from = path.join(LEGACY_DATA_DIR, name);
     const to = path.join(DATA_DIR, name);
     try {
@@ -2111,15 +2119,15 @@ async function sentenceFeedback(body) {
 
   const inputLanguage = /[\u3400-\u9fff]/.test(sentence) ? "zh" : "en";
   const settings = await loadSettings();
-  const cacheKey = [
-    SENTENCE_FEEDBACK_SCHEMA,
-    settings.codexModel || DEFAULT_CODEX_MODEL,
-    word.toLowerCase(),
+  const cacheKey = stableFeedbackKey({
+    schema: SENTENCE_FEEDBACK_SCHEMA,
+    model: settings.codexModel || DEFAULT_CODEX_MODEL,
+    word,
     meaningZh,
     sentence,
-  ].join("|");
-  const cached = sentenceFeedbackCache.get(cacheKey);
-  if (cached) return { ...cached, cacheHit: true };
+  });
+  const cached = await sentenceFeedbackStore.get(cacheKey);
+  if (cached) return { ...cached, cacheHit: true, cacheScope: "persistent" };
 
   const prompt = buildSentenceFeedbackPrompt({ word, meaningZh, sentence });
 
@@ -2188,11 +2196,7 @@ async function sentenceFeedback(body) {
     feedback.level = "warn";
   }
 
-  sentenceFeedbackCache.set(cacheKey, feedback);
-  if (sentenceFeedbackCache.size > 100) {
-    const first = sentenceFeedbackCache.keys().next().value;
-    sentenceFeedbackCache.delete(first);
-  }
+  await sentenceFeedbackStore.set(cacheKey, feedback);
   return feedback;
 }
 
