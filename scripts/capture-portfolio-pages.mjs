@@ -74,6 +74,16 @@ for (const [name, label] of routes) {
     await page.getByRole('button', { name: /^查询$/ }).click();
     await page.waitForTimeout(3500);
     await capture('lookup-grow');
+
+    const saveButton = page.locator('[data-action="save-card"]').first();
+    await saveButton.click();
+    await page.waitForTimeout(1800);
+    await capture('today-with-grow');
+
+    await page.getByRole('button', { name: /单词库/ }).first().click();
+    await capture('library-with-grow');
+
+    await page.getByRole('button', { name: /选词制卡/ }).first().click();
   }
 }
 
