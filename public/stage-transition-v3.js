@@ -129,7 +129,9 @@
       const data=await loadData(); const card=currentStudyCard(data); if(!card)return false;
       if(commandCommitted(data,commandId)){busy(button,"已完成 · 明天首次复习");setTimeout(()=>location.reload(),80);return true;}
       if(core.canonicalStage(card)!=="apply")return false;
-      const sentence=String(document.getElementById("apply-text")?.value||card.applyDraft||card.userSentence||"").trim();
+      const live=window.LexiFlowApplyStageV3?.currentState?.();
+      if(!live||String(live.cardId||"")!==String(card.id)||!live.approved)return false;
+      const sentence=String(live.text||"").trim();
       if(!sentence||containsChinese(sentence)||!usesTarget(sentence,card.word))return false;
       if(copyNorm(sentence)&&copyNorm(sentence)===copyNorm(card.exampleEn||"")){applyWarning("这句话和词典参考例句相同。请换一个与你自己有关的场景，再用目标词写一句。");return "blocked";}
       const prev={...card,learningStage:"apply"};

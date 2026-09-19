@@ -75,6 +75,22 @@
     if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null,editing:true};sessions.set(card.id,value);}
     return value;
   }
+  function currentState(){
+    syncFromGateway();
+    const card=currentCard();if(!card)return null;
+    const s=session(card);
+    return Object.freeze({
+      cardId:String(card.id||""),
+      word:String(card.word||""),
+      meaningZh:String(card.meaningZh||""),
+      text:String(s.text||""),
+      approved:Boolean(s.approved),
+      suggestionApproved:Boolean(s.suggestionApproved),
+      submitting:Boolean(s.submitting),
+      editing:Boolean(s.editing),
+      feedback:s.feedback||null,
+    });
+  }
 
   function injectStyle(){
     if(document.getElementById("lexi-apply-stage-v3-style"))return;
@@ -263,7 +279,7 @@
     s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;
     s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
     const caret=s.lastFix.end;
-    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,next,caret,caret);
+    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,next);
     render();
     setTimeout(()=>{
       const live=currentCard();if(!live||String(live.id)!==String(card.id))return;
@@ -334,6 +350,10 @@
     new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
     window.addEventListener("lexiflow:today-plan-data",schedule);
   }
-  window.LexiFlowApplyStageV3=Object.freeze({isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},handleInput(input){handleComposerInput(input);}});
+  window.LexiFlowApplyStageV3=Object.freeze({
+    isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},
+    currentState,
+    handleInput(input){handleComposerInput(input);},
+  });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

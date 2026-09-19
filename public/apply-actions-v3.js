@@ -56,6 +56,8 @@
     return String(card?.applyDraftSavedAt||"").trim()?String(card?.applyDraft||""):"";
   }
   function currentDraft(card){
+    const live=window.LexiFlowApplyStageV3?.currentState?.();
+    if(live&&String(live.cardId||"")===String(card?.id||""))return String(live.text||"").trim();
     const input=document.getElementById("apply-text");
     return String(input?input.value:explicitSavedDraft(card)).trim();
   }
