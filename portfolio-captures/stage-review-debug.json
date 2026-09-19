@@ -27,11 +27,11 @@
     "selectMaxGoal": 3,
     "selectGoal": 3,
     "selectedToday": [
-      "f20c9c4e-7756-4713-904c-4f0a8d199dc5"
+      "05b5a17e-56c4-4052-a394-ff1e08882ef3"
     ],
     "remainingSelectSlots": 2,
     "initialTaskIds": [
-      "f20c9c4e-7756-4713-904c-4f0a8d199dc5"
+      "05b5a17e-56c4-4052-a394-ff1e08882ef3"
     ],
     "taskTotal": 1,
     "taskRemaining": 0,
@@ -39,7 +39,7 @@
     "taskProgressPercent": 100
   },
   "card": {
-    "id": "f20c9c4e-7756-4713-904c-4f0a8d199dc5",
+    "id": "05b5a17e-56c4-4052-a394-ff1e08882ef3",
     "word": "grow",
     "lexeme": {
       "schema": "lexeme-v1",
@@ -85,8 +85,8 @@
     "stage": "review",
     "learningStage": "review",
     "inboxPending": false,
-    "createdAt": "2026-09-19T08:35:02.121Z",
-    "updatedAt": "2026-09-19T08:35:13.028Z",
+    "createdAt": "2026-09-19T08:37:42.355Z",
+    "updatedAt": "2026-09-19T08:37:53.206Z",
     "reviewCount": 0,
     "nextReviewAt": "2026-09-20T12:00:00.000Z",
     "memoryHistory": [],
