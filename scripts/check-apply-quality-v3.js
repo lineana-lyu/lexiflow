@@ -12,6 +12,7 @@ const guard=read("public/apply-guard-v3.js");
 const transport=read("public/transport-fixes.js");
 const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
+const feedbackContract=require("../lib/sentence-feedback-contract");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
 assert(index.includes("apply-guard-v3.js"),"Apply Guard V3 must load in index.html");
@@ -69,7 +70,8 @@ assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","r
 assert(server.includes("不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论")&&server.includes("拼写问题要明确正确拼写或词形规则")&&server.includes("语法问题要指出具体结构关系"),"correction explanations must identify a concrete spelling, grammar, collocation, or meaning reason");
 assert(server.includes("不要把个人风格偏好伪装成 error")&&server.includes("可以作为 improve/polish issue 返回"),"optional stylistic polish must be represented as non-blocking feedback");
 assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"severity\":\"error|improve|polish\"")&&server.includes("\"blocking\":true"),"server feedback must locate problem spans and classify whether they block completion");
-assert(server.includes("function normalizeSentenceDiagnostics(")&&server.includes("function feedbackRangesOverlap(")&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must normalize AI diagnostics against the original sentence instead of trusting overlapping model spans");
+assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
+assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic English mechanics with AI diagnostics before approval");
 assert(server.includes("issues 之间的 span 不得重叠")&&server.includes("必须合并成一条 issue")&&server.includes("最多额外返回 1 条 improve/polish"),"AI contract must merge overlapping corrections while still preserving one independent optional naturalness suggestion");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
@@ -84,11 +86,24 @@ assert(applyStage.includes("setTimeout(()=>{")&&applyStage.includes("void submit
 assert(applyStage.includes("pendingIssues:[]")&&applyStage.includes("s.pendingIssues=survivingIssues(next,blockingIssues(unresolved))")&&applyStage.includes("const mergedBlocking=mergeBlockingIssues(text,freshIssues,s.pendingIssues)"),"one-click fixes must carry only untouched blocking issues into automatic recheck");
 assert(applyStage.includes("const originalApproved=Boolean(")&&applyStage.includes("mergedBlocking.length===0")&&applyStage.includes("s.pendingIssues=mergedBlocking"),"automatic recheck must block only on unresolved blocking issues");
 assert(applyStage.includes("s.approved=originalApproved")&&applyStage.includes('optional.length?"保留原句 · 明天首次复习"'),"a sentence with only optional suggestions must remain approved and allow the learner to keep the original");
-assert(applyStage.includes("const showFallback=Boolean(!issues.length&&suggestion&&!s.approved);")&&applyStage.includes("showFallback&&changes.length"),"full corrected sentence must remain a fallback only when the original is not already approved and no localized diagnostic exists");
+assert(applyStage.includes("hasUnactionableBlocking")&&applyStage.includes("showFallback=Boolean(suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking))"),"full corrected sentence must remain available when a blocking diagnostic cannot provide a local replacement");
 assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.checkError||s.lastFix||s.approved))"),"accepted fixes and failed checks must remain explicit stable review states");
 assert(!applyStage.includes("state.lastFix=null;render();"),"automatic recheck must not erase the green resolved marker on a timer");
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
 assert(applyStage.includes("修改原因")&&applyStage.includes("lexi-apply-v3-changes"),"Apply fallback full correction must retain concise reasons when local diagnostics are unavailable");
+
+const mechanics=feedbackContract.detectEnglishMechanics("My boss is very dependable,because he never makes any mistakes");
+assert(mechanics.length===1&&mechanics[0].span==="dependable,because"&&mechanics[0].replacement==="dependable, because","deterministic mechanics must catch missing punctuation spacing on the first check");
+assert(feedbackContract.joinReasonFragments(["第一条原因。","第二条原因；"])==="第一条原因；第二条原因","merged Chinese explanations must not produce duplicated mixed punctuation such as 。；");
+const actionable=feedbackContract.normalizeSentenceDiagnostics(
+  "My boss is very dependable,because he never makes any mistakes",
+  [{span:"dependable,because",reason:"逗号后需要空格。",hint:"加空格",replacement:"",severity:"error",blocking:true}],
+  [{from:"dependable,because",to:"dependable, because",reason:"补上英文逗号后的空格",severity:"error",blocking:true}],
+  false,
+  "warn"
+);
+assert(actionable.length===1&&actionable[0].replacement==="dependable, because","diagnostic merge must prefer an actionable replacement when issue and change cover the same span");
+assert(!actionable[0].reason.includes("。；"),"diagnostic merge must keep reason punctuation canonical");
 
 console.log("Apply Quality V3 contract checks passed.");
