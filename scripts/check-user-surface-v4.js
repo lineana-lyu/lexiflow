@@ -46,7 +46,7 @@ assert(reviewSession.includes('data-r3="speak-example"')&&reviewSession.includes
 assert(app.includes('if(!String(sense.exampleEn||"").trim()){')&&!app.includes('if(!String(sense.exampleEn||"").trim()||!String(sense.exampleZh||"").trim()){'),"missing Chinese example translation must remain background work instead of blocking card save");
 assert(app.includes("本机 LexiFlow 中的全部单词卡"),"destructive-data copy must describe the desktop storage location accurately");
 assert(runtime.includes('pronunciationPolicy:"whole-expression-tts-v3"')&&runtime.includes("dictionaryAudio:false")&&runtime.includes("wholeExpressionAudio:false")&&runtime.includes("composePhrasePhonetic"),"runtime phrase pronunciation must expose full IPA metadata but never component dictionary audio");
-assert(app.includes("normalizedDiff")&&app.includes("targetWordForms(head)"),"phrase result UX must hide identical auto-resolution and accept inflected phrase examples");
+assert(app.includes("normalizedDiff")&&app.includes("lookupLexemeForms")&&app.includes("acceptedForms"),"phrase and word result UX must consume server-provided lexeme forms instead of inventing morphology in the browser");
 assert(app.includes("prepareLookupForSave")&&app.includes("mergeActiveLookupHydration"),"lookup save must await hydrated examples/pronunciation and merge them into active state");
 assert(runtime.includes("ensureWholePhrasePhonetic")&&runtime.includes("await ensureWholePhrasePhonetic(localPhraseResult"),"phrase responses must carry a complete phonetic before they reach the UI");
 assert(hydration.includes("shouldAdoptPhonetic")&&hydration.includes("phoneticSourceRank"),"low-quality phonetic hydration must not overwrite an existing authoritative transcription");
