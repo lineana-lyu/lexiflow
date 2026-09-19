@@ -12,9 +12,9 @@
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const norm=value=>String(value||"").trim();
   const feedbackCopy=value=>norm(value)
-    .replace(/\\s+([，。！？；：])/g,"$1")
-    .replace(/([，。！？；：])\\s+/g,"$1")
-    .replace(/([。！？；])\\s*[。；]+/g,"$1");
+    .replace(/\s+([，。！？；：])/g,"$1")
+    .replace(/([，。！？；：])\s+/g,"$1")
+    .replace(/([。！？；])\s*[。；]+/g,"$1");
   const joinFeedbackReasons=values=>{
     const parts=(Array.isArray(values)?values:[values]).map(value=>feedbackCopy(value).replace(/[，。！？；：,.;!?]+$/g,"").trim()).filter(Boolean);
     return parts.filter((value,index)=>parts.indexOf(value)===index).join("；");
