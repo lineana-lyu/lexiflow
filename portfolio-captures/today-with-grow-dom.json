@@ -1,0 +1,102 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n今日学习\n＋ 添加新词\nTODAY\n今日学习\n\n今天最多选择 3 个新词；先从第 1 个开始，不会补昨天的数量。\n\n今日新词 0 / 3\n选择新词 0 / 3\n还需选择 3 个\n选择明天要学的新词\n\n这些词已经完成制卡。这里只决定明天学哪些词，不再重复确认词义。\n\n已选 0 / 本次最多 3\ngrow\n/ɡrəʊ/ · verb\n种植, 使长满\n确认选择 · 明天开始记忆\n去选词制卡\n不补昨天任务 · 当天计划生成后保持稳定\n最近单词\n\n最近添加或学习的内容。\n\ngrow\n/ɡrəʊ/\n待确认\n\n种植, 使长满",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn active",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "＋ 添加新词",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    },
+    {
+      "index": 6,
+      "text": "",
+      "id": "",
+      "className": "speaker lexi-speaker-button",
+      "action": "speak"
+    },
+    {
+      "index": 7,
+      "text": "确认选择  · 明天开始记忆",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    },
+    {
+      "index": 8,
+      "text": "去选词制卡",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    },
+    {
+      "index": 9,
+      "text": "从单词库选择待学习词",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    },
+    {
+      "index": 10,
+      "text": "继续收集单词",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    },
+    {
+      "index": 11,
+      "text": "查看单词库",
+      "id": "",
+      "className": "btn",
+      "action": ""
+    }
+  ],
+  "links": [],
+  "inputs": [
+    {
+      "index": 0,
+      "tag": "INPUT",
+      "id": "",
+      "placeholder": "",
+      "name": "",
+      "type": "checkbox",
+      "value": "on"
+    }
+  ]
+}
