@@ -511,7 +511,7 @@
   function adopt(){
     const card=currentCard();if(!card)return;const s=session(card);const suggestion=norm(s.feedback?.suggestion);if(!suggestion||!s.suggestionApproved)return;
     if(s.text&&!s.originalText)s.originalText=s.text;
-    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];render();
+    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],actions:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];render();
   }
 
   function restore(){
