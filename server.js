@@ -30,7 +30,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v7-authority-separated-diagnostics";
+const SENTENCE_FEEDBACK_SCHEMA = "v8-policy-severity-gate";
 let lookupCache = null;
 const sentenceFeedbackCache = new Map();
 const visualSceneCache = new Map();
@@ -2141,12 +2141,9 @@ async function sentenceFeedback(body) {
           reason: normalizeFeedbackCopy(item?.reason).slice(0, 160),
           hint: normalizeFeedbackCopy(item?.hint).slice(0, 160),
           replacement: String(item?.replacement || "").trim().slice(0, 120),
-          severity: ["error","improve","polish"].includes(String(item?.severity || "").trim().toLowerCase())
-            ? String(item.severity).trim().toLowerCase()
-            : (item?.blocking === false ? "improve" : "error"),
-          blocking: ["improve","polish"].includes(String(item?.severity || "").trim().toLowerCase())
-            ? false
-            : (item?.blocking !== false),
+          category: String(item?.category || "").trim().toLowerCase(),
+          severity: String(item?.severity || "").trim().toLowerCase(),
+          source: "issue",
         })).filter(item => item.span || item.reason || item.hint || item.replacement)
       : [],
     suggestion: String(parsed.suggestion || "").trim(),
@@ -2155,10 +2152,9 @@ async function sentenceFeedback(body) {
           from: String(item?.from || "").trim().slice(0, 80),
           to: String(item?.to || "").trim().slice(0, 80),
           reason: normalizeFeedbackCopy(item?.reason).slice(0, 120),
-          severity: ["error","improve","polish"].includes(String(item?.severity || "").trim().toLowerCase())
-            ? String(item.severity).trim().toLowerCase()
-            : "",
-          blocking: typeof item?.blocking === "boolean" ? item.blocking : null,
+          category: String(item?.category || "").trim().toLowerCase(),
+          severity: String(item?.severity || "").trim().toLowerCase(),
+          source: "change",
         })).filter(item => item.from || item.to || item.reason)
       : [],
     keyword: String(parsed.keyword || word).trim() || word,
@@ -2169,28 +2165,26 @@ async function sentenceFeedback(body) {
   const mechanicsIssues = feedback.inputLanguage === "en"
     ? detectEnglishMechanics(sentence)
     : [];
-  feedback.issues = normalizeSentenceDiagnostics(
+  feedback.issues = normalizeSentenceDiagnostics({
     sentence,
-    [...mechanicsIssues, ...feedback.issues],
-    feedback.changes,
-    feedback.approved,
-    feedback.level
-  );
+    issues: [...mechanicsIssues, ...feedback.issues],
+    changes: feedback.changes,
+  });
 
-  if (feedback.inputLanguage === "en" && feedback.issues.length) {
-    const hasBlockingIssue = feedback.issues.some(item => item.blocking === true || item.severity === "error");
-    if (hasBlockingIssue) {
-      feedback.approved = false;
-      feedback.level = "warn";
-    } else {
-      feedback.approved = true;
-      feedback.level = "good";
-    }
+  // Progression is a product policy, not a model opinion. The model proposes
+  // diagnostics; the normalized severity policy decides whether learning is
+  // blocked.
+  if (feedback.inputLanguage === "en") {
+    const hasBlockingIssue = feedback.issues.some(item => item.blocking === true);
+    feedback.approved = !hasBlockingIssue;
+    feedback.level = hasBlockingIssue ? "warn" : "good";
   }
 
   if (!feedback.suggestion) feedback.changes = [];
-  if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
-  if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
+  if (feedback.inputLanguage === "zh" && !feedback.suggestion) {
+    feedback.approved = false;
+    feedback.level = "warn";
+  }
 
   sentenceFeedbackCache.set(cacheKey, feedback);
   if (sentenceFeedbackCache.size > 100) {
