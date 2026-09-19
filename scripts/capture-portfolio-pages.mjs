@@ -15,11 +15,58 @@ const consoleLines = [];
 page.on('console', msg => consoleLines.push(`[${msg.type()}] ${msg.text()}`));
 page.on('pageerror', err => consoleLines.push(`[pageerror] ${err.message}`));
 
-async function capture(name, fullPage = true) {
+await page.route('**/api/ai/visual-scene', async route => {
+  await route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      assist: {
+        scene: '我站在阳台给一株刚冒出新叶的薄荷浇水。镜头拉近时能看到新叶一层层长出来，提醒我 grow 是“持续成长”，不是一瞬间变好。',
+        cue: '把 grow 和“每天照料、慢慢长高”的过程绑定。',
+        practiceQuestion: '说一句你希望自己未来在哪方面持续成长。',
+      },
+    }),
+  });
+});
+
+await page.route('**/api/ai/text', async route => {
+  await route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      ok: true,
+      feedback: {
+        level: 'good',
+        approved: true,
+        inputLanguage: 'en',
+        keyword: 'grow',
+        title: '表达可以使用',
+        suggestion: '',
+        tips: [],
+        changes: [],
+        actions: [],
+        issues: [
+          {
+            id: 'detail-1',
+            span: 'better product manager',
+            reason: '句子本身正确；如果想更具体，可以说明你希望成长成哪一类产品经理。',
+            hint: '可以保留原句，也可以补充更具体的能力方向。',
+            category: 'expression',
+            severity: 'suggestion',
+            blocking: false
+          }
+        ]
+      }
+    }),
+  });
+});
+
+async function capture(name) {
   await page.waitForTimeout(900);
   await page.screenshot({
     path: path.join(outDir, `${name}.png`),
-    fullPage,
+    fullPage: true,
   });
   const snapshot = await page.evaluate(() => ({
     title: document.title,
@@ -29,35 +76,15 @@ async function capture(name, fullPage = true) {
       text: (el.textContent || '').trim(),
       className: el.className || '',
       action: el.getAttribute('data-action') || '',
-      r3: el.getAttribute('data-r3') || '',
     })),
     inputs: [...document.querySelectorAll('input, textarea, select')].map((el, index) => ({
       index,
       tag: el.tagName,
       id: el.id || '',
-      placeholder: el.getAttribute('placeholder') || '',
       value: 'value' in el ? String(el.value || '') : '',
     })),
   }));
   await fs.writeFile(path.join(outDir, `${name}-dom.json`), JSON.stringify(snapshot, null, 2), 'utf8');
-}
-
-async function boot() {
-  await page.goto('http://127.0.0.1:4177', { waitUntil: 'domcontentloaded', timeout: 120000 });
-  await page.waitForTimeout(2200);
-}
-
-async function resetData(data) {
-  await page.evaluate(async payload => {
-    const response = await fetch('/api/learning-data', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({data: payload, appShellAuthority:'portfolio-capture'}),
-    });
-    if (!response.ok) throw new Error('seed failed');
-  }, data);
-  await page.reload({ waitUntil:'domcontentloaded' });
-  await page.waitForTimeout(1800);
 }
 
 function isoToday(hour=9) {
@@ -65,14 +92,12 @@ function isoToday(hour=9) {
   d.setHours(hour, 0, 0, 0);
   return d.toISOString();
 }
-
 function isoYesterday() {
   const d = new Date();
   d.setDate(d.getDate()-1);
   d.setHours(9,0,0,0);
   return d.toISOString();
 }
-
 function baseCard(stage, overrides={}) {
   return {
     id: `portfolio-${stage}`,
@@ -90,17 +115,16 @@ function baseCard(stage, overrides={}) {
     stageEligibleOn: isoToday(),
     reviewCount: 0,
     memoryHistory: [],
-    visualNote: '想到自己第一次独立完成一个完整项目，能力是一点点长出来的。',
+    visualNote: '',
     imageData: null,
     imageUrl: '',
-    userSentence: 'I want to grow into a product manager who can turn ideas into real products.',
+    userSentence: '',
     sourceType: 'work',
     sourceTitle: '个人项目复盘',
     sourceContext: '能力不是一下子获得的，而是在一次次真实项目里慢慢长出来。',
     ...overrides,
   };
 }
-
 function dataFor(card) {
   return {
     version: 1,
@@ -110,60 +134,45 @@ function dataFor(card) {
     createdAt: isoYesterday(),
   };
 }
+async function boot() {
+  await page.goto('http://127.0.0.1:4177', { waitUntil: 'domcontentloaded', timeout: 120000 });
+  await page.waitForTimeout(2200);
+}
+async function resetData(data) {
+  await page.evaluate(async payload => {
+    const response = await fetch('/api/learning-data', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({data: payload, appShellAuthority:'portfolio-capture'}),
+    });
+    if (!response.ok) throw new Error('seed failed');
+  }, data);
+  await page.reload({ waitUntil:'domcontentloaded' });
+  await page.waitForTimeout(1600);
+}
 
 await boot();
 
-// 1. Real lookup result: the entry point into Select.
-await page.getByRole('button', { name: /选词制卡/ }).first().click();
-await page.locator('#word-input').fill('grow');
-await page.getByRole('button', { name: /^查询$/ }).click();
-await page.waitForTimeout(2600);
-await capture('core-select-lookup');
-
-// 2. Memorize: active recall / memory-stage surface.
-await resetData(dataFor(baseCard('memorize')));
-const continueBtn = page.locator('[data-action="continue-learning"]').first();
-await continueBtn.click();
-await page.waitForTimeout(1500);
-await capture('core-memorize');
-
-// 3. Visualize: learner association first, AI is optional assistance.
+// Visualize: learner writes first, then explicitly asks AI to make the scene more concrete.
 await resetData(dataFor(baseCard('visualize', {
-  visualNote: '想到一株植物从幼苗慢慢长高，也想到自己第一次独立完成产品闭环。',
+  visualNote: '想到阳台上的薄荷从一小株慢慢长高，我每天给它浇水。',
 })));
 await page.locator('[data-action="continue-learning"]').first().click();
-await page.waitForTimeout(1500);
-await capture('core-visualize');
+await page.waitForTimeout(1200);
+await page.locator('[data-visual-v3="assist"]').first().click();
+await page.waitForFunction(() => document.body.innerText.includes('AI 建议 · 仅供参考'), null, { timeout: 10000 });
+await capture('visualize-ai-assisted');
 
-// 4. Apply: learner writes first, then AI checking.
+// Apply: learner writes first, then AI checks it; optional advice does not overwrite the sentence.
 await resetData(dataFor(baseCard('apply', {
-  userSentence: '',
-  practicePromptZh: '说一句你希望自己未来在哪方面成长。',
+  practicePrompt: { question: '说一句你希望自己未来在哪方面持续成长。' },
 })));
 await page.locator('[data-action="continue-learning"]').first().click();
-await page.waitForTimeout(1500);
-const applyEditor = page.locator('textarea, input').filter({has: page.locator('')});
-const visibleTextarea = page.locator('textarea:visible').first();
-if (await visibleTextarea.count()) {
-  await visibleTextarea.fill('I want to grow into a product manager who can turn ideas into real products.');
-}
-await capture('core-apply');
-
-// 5. Review: scheduled active recall.
-const now = new Date();
-const reviewCard = baseCard('review', {
-  memoryState: 'reinforcing',
-  reviewStep: 1,
-  stableStep: 0,
-  nextReviewAt: isoToday(8),
-  stageEligibleOn: isoYesterday(),
-  applyCompletedOn: isoYesterday(),
-});
-await resetData(dataFor(reviewCard));
-const reviewBtn = page.locator('[data-action="start-review"]').first();
-await reviewBtn.click();
-await page.waitForTimeout(1500);
-await capture('core-review');
+await page.waitForTimeout(1200);
+await page.locator('#apply-text').fill('I want to grow into a better product manager by building real products.');
+await page.locator('[data-action="submit-apply"]').first().click();
+await page.waitForFunction(() => document.body.innerText.includes('表达可以使用'), null, { timeout: 10000 });
+await capture('apply-ai-checked');
 
 await fs.writeFile(path.join(outDir, 'browser-console.txt'), consoleLines.join('\n'), 'utf8');
 await browser.close();
