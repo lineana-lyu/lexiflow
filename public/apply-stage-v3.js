@@ -193,25 +193,32 @@
   function feedbackHtml(card,s){
     if(s.submitting){
       const checkingCopy=s.lastFix?"AI 正在重新检查你的表达":"AI 正在检查你的表达";
-      return `<div class="lexi-apply-v3-feedback"><div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>${checkingCopy}</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">检查完成后只保留仍需处理的问题，不重复展示相同修改。</div></div>`;
+      return `<div class="lexi-apply-v3-feedback"><div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>${checkingCopy}</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">检查完成后，红色错误必须处理；黄色建议可以保留原句。</div></div>`;
     }
     const fb=s.feedback;if(!fb)return"";
     const suggestion=norm(fb.suggestion);
     const tips=Array.isArray(fb.tips)?fb.tips.map(String).filter(Boolean):[];
     const changes=feedbackChanges(fb);
     const issues=feedbackIssues(fb);
-    const good=Boolean(fb.level==="good"&&!suggestion&&!issues.length);
-    const showFallback=Boolean(!issues.length&&suggestion);
-    const title=good?"表达可以使用":(issues.length?`发现 ${issues.length} 处需要修改`:String(fb.title||"这句话还需要调整"));
-    return `<div class="lexi-apply-v3-feedback ${good?"good":"warn"} ai-feedback-panel ${good?"good":"warn"}">
-      <div class="lexi-apply-v3-feedback-head"><div><small>${good?"检查结果":"修改建议"}</small><strong>${esc(title)}</strong></div></div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);return `<div class="lexi-apply-v3-issue" data-issue-card="${index}">${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>怎么改：</b>${esc(issue.hint)}</small>`:""}${replacement&&copyNorm(replacement)!==copyNorm(issue.span)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">一键改为 ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+    const blockers=blockingIssues(issues);
+    const optional=optionalIssues(issues);
+    const good=Boolean(s.approved&&blockers.length===0);
+    const showFallback=Boolean(!issues.length&&suggestion&&!s.approved);
+    const title=blockers.length
+      ?`发现 ${blockers.length} 处必须修改`
+      :optional.length
+        ?`表达可以使用 · 有 ${optional.length} 条优化建议`
+        :(good?"表达可以使用":String(fb.title||"这句话还需要调整"));
+    const panelTone=blockers.length?"warn":(optional.length?"suggest":"good");
+    return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
+      <div class="lexi-apply-v3-feedback-head"><div><small>${blockers.length?"需要修改":optional.length?"可选优化":"检查结果"}</small><strong>${esc(title)}</strong></div></div>
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="polish"?"可选润色":"表达建议");const actionText=issue.blocking?"一键改为":"一键优化为";return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${replacement&&copyNorm(replacement)!==copyNorm(issue.span)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${showFallback?`<div class="lexi-apply-v3-complete-label">AI 无法安全拆成局部修改，给出完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${showFallback&&changes.length?`<div class="lexi-apply-v3-changes"><strong>修改原因</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${!issues.length&&tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
       <div class="lexi-apply-v3-actions">
         ${showFallback?`<button class="btn" type="button" data-apply-stage-v3="adopt" ${s.suggestionApproved||s.promptLoading?"":"disabled"}>采用完整修正版</button>`:""}
-        ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply" ${s.promptLoading?"disabled title=\"正在保存新的练习话题\"":""}>${s.promptLoading?"正在保存当前阶段…":"确认这句话 · 明天首次复习"}</button>`:""}
+        ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply" ${s.promptLoading?"disabled title=\"正在保存新的练习话题\"":""}>${s.promptLoading?"正在保存当前阶段…":optional.length?"保留原句 · 明天首次复习":"确认这句话 · 明天首次复习"}</button>`:""}
         ${issues.length?`<button class="text-action" type="button" data-apply-stage-v3="edit">自己继续修改</button>`:""}
       </div>
     </div>`;
@@ -222,10 +229,16 @@
     const chinese=/[\u3400-\u9fff]/.test(text);
     const missing=Boolean(text.trim()&&!chinese&&!usesTarget(text,card.word));
     const issues=feedbackIssues(s.feedback);
+    const blockers=blockingIssues(issues);
+    const optional=optionalIssues(issues);
     const reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.lastFix||s.approved));
     const reviewSentence=diagnosticSentenceHtml(text,issues,s.lastFix);
-    const reviewLabel=s.submitting?(s.lastFix?"已修改 · 正在自动复检":"正在检查"):(s.approved&&!issues.length?"检查通过":(issues.length?"AI 已标出需要修改的位置":"检查完成"));
-    const reviewHint=s.submitting?"请稍候…":(s.approved&&!issues.length?"这句话已经通过检查。":(issues.length?"点击浅红色片段查看对应原因":"如需调整，可以继续修改。"));
+    const reviewLabel=s.submitting
+      ?(s.lastFix?"已修改 · 正在自动复检":"正在检查")
+      :(blockers.length?"AI 已标出必须修改的位置":optional.length?"检查通过 · 有可选表达建议":s.approved?"检查通过":"检查完成");
+    const reviewHint=s.submitting
+      ?"请稍候…"
+      :(blockers.length?"浅红色位置必须处理后才能继续。":optional.length?"浅黄色建议可选，不影响继续学习。":s.approved?"这句话已经通过检查。":"如需调整，可以继续修改。");
     const composer=reviewMode
       ?`<div class="lexi-apply-v3-composer lexi-apply-v3-review-composer apply-composer"><div><div class="lexi-apply-v3-review-label">${reviewLabel}</div><div class="lexi-apply-v3-review-sentence">${reviewSentence}</div></div><div class="lexi-apply-v3-composer-bottom"><span>${reviewHint}</span><button class="btn" type="button" data-apply-stage-v3="edit">继续修改</button></div></div>`
       :`<div class="lexi-apply-v3-composer apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" spellcheck="false" placeholder="中文或英文都可以，先写你真正想表达的话…">${esc(text)}</textarea><div class="lexi-apply-v3-composer-bottom"><span>Enter 检查 · Shift + Enter 换行</span><button class="btn primary" type="button" data-action="submit-apply" data-apply-stage-v3="submit" ${s.submitting||!text.trim()?"disabled":""}>${s.submitting?"AI 正在检查…":"检查表达"}</button></div></div>`;
@@ -279,15 +292,18 @@
       const rawPayload=await response.json();
       const payload=window.LexiFlowApplyQualityV3?.processFeedback?.(rawPayload,{cardId:card.id,word:card.word,meaningZh:card.meaningZh,sentence:text})||rawPayload;
       const fb=payload.feedback||{};const suggestion=norm(fb.suggestion);const inputLanguage=fb.inputLanguage==="zh"||/[\u3400-\u9fff]/.test(text)?"zh":"en";
-      const keyword=norm(fb.keyword||card.word)||card.word;const candidate=suggestion||text;const keywordOk=usesTarget(candidate,keyword)||usesTarget(candidate,card.word);
+      const keyword=norm(fb.keyword||card.word)||card.word;
+      const originalKeywordOk=usesTarget(text,keyword)||usesTarget(text,card.word);
+      const suggestionKeywordOk=Boolean(suggestion&&(usesTarget(suggestion,keyword)||usesTarget(suggestion,card.word)));
       const freshIssues=feedbackIssues(fb);
-      const mergedIssues=mergeIssues(text,freshIssues,s.pendingIssues);
-      const candidateApproved=fb.approved!==false&&fb.level==="good"&&keywordOk&&!(inputLanguage==="zh"&&!suggestion);
-      const fullyApproved=Boolean(candidateApproved&&mergedIssues.length===0);
-      s.pendingIssues=mergedIssues;
-      s.approved=Boolean(inputLanguage==="en"&&!suggestion&&fullyApproved);
-      s.suggestionApproved=Boolean(suggestion&&candidateApproved);
-      s.feedback={...fb,inputLanguage,keyword,issues:mergedIssues,level:fullyApproved?"good":"warn",suggestion};
+      const mergedBlocking=mergeBlockingIssues(text,freshIssues,s.pendingIssues);
+      const freshOptional=optionalIssues(freshIssues);
+      const displayIssues=mergeDisplayIssues(mergedBlocking,freshOptional);
+      const originalApproved=Boolean(inputLanguage==="en"&&fb.approved!==false&&fb.level==="good"&&originalKeywordOk&&mergedBlocking.length===0);
+      s.pendingIssues=mergedBlocking;
+      s.approved=originalApproved;
+      s.suggestionApproved=Boolean(suggestion&&suggestionKeywordOk);
+      s.feedback={...fb,approved:originalApproved,inputLanguage,keyword,issues:displayIssues,level:originalApproved?"good":"warn",suggestion};
     }catch(err){
       console.error("Apply Stage V3 check failed",err);
       s.feedback={level:"warn",title:"AI 暂时没有完成检查",tips:["你的句子还在，可以直接再试一次。"],suggestion:""};s.approved=false;s.suggestionApproved=false;
@@ -317,7 +333,7 @@
     if(s.text&&!s.originalText)s.originalText=s.text;
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
     const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
-    s.pendingIssues=survivingIssues(next,unresolved);
+    s.pendingIssues=survivingIssues(next,blockingIssues(unresolved));
     s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;
     s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
     const caret=s.lastFix.end;
