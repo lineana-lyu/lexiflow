@@ -197,8 +197,9 @@ async function jsonRequest(base,pathname,{method="GET",body=null}={}){
     assert(chinese.status===200&&chinese.payload?.ok===true,"Chinese smart search must resolve through the local Core lexicon");
     const zhResult=chinese.payload?.result||{};
     assert(zhResult.word==="address","Chinese intent lookup must prefer the matching verb over a misleading exact noun alias");
-    assert(zhResult.dictionarySource==="LexiFlow Core"&&zhResult.lookupPath==="core-zh"&&zhResult.localLookup===true,"Chinese lookup must stay on the offline Core path");
+    assert(zhResult.dictionarySource==="LexiFlow Core"&&zhResult.lookupPath==="lexeme-zh-v5"&&zhResult.localLookup===true,"Chinese lookup must stay offline while passing through canonical lexeme ranking");
     assert(zhResult.sourceQuery==="应对"&&zhResult.normalizedQuery==="应对"&&zhResult.autoResolved===true,"Chinese lookup must retain the learner's original query identity");
+    assert(zhResult.lexeme?.schema==="lexeme-v1"&&zhResult.lexeme?.lemma===zhResult.word,"Chinese local lookup must expose one canonical lexeme identity to every downstream consumer");
     assert(zhResult.chineseSenseMatched===true,"Chinese lookup must confirm a semantic sense match rather than only a word-level alias hit");
     assert(zhResult.senses?.[0]?.pos==="verb","Chinese semantic reranking must select the verb sense even when the noun has a higher raw sense rank");
     assert(zhResult.senses?.[0]?.meaningZh==="应对","the selected learning meaning must be the learner's queried Chinese sense");
