@@ -189,8 +189,24 @@
     }
     return spanRange(source,target);
   }
+  function actionRange(text,action){
+    const source=String(text||"");if(!action||!Number.isInteger(action.start)||!Number.isInteger(action.end))return null;
+    if(action.start<0||action.end<action.start||action.end>source.length)return null;
+    const before=source.slice(action.start,action.end);
+    return before===String(action.before??"")?{start:action.start,end:action.end}:null;
+  }
   function survivingIssues(text,issues=[]){
     return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue));
+  }
+  function rebaseActionsAfterEdit(oldText,actions,editRange,replacementLength,removedIssueId){
+    const delta=Number(replacementLength||0)-(editRange.end-editRange.start);
+    return (Array.isArray(actions)?actions:[]).map(action=>{
+      if(action.issueId===removedIssueId)return null;
+      const range=actionRange(oldText,action);if(!range)return null;
+      if(range.end<=editRange.start)return{...action,start:range.start,end:range.end};
+      if(range.start>=editRange.end)return{...action,start:range.start+delta,end:range.end+delta};
+      return null;
+    }).filter(Boolean);
   }
   function rebaseIssuesAfterEdit(oldText,issues,editRange,replacementLength){
     const delta=Number(replacementLength||0)-(editRange.end-editRange.start);
