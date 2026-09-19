@@ -1,0 +1,163 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n设置\n⌁\n连接信息只保存在当前设备\nLexiFlow 启动后会自动确认词典和 AI 的连接状态。\n词典\n\n本地词典负责快速查词；配置在线词典后，会自动补充真人发音和例句。\n\n本地词典可用\n未启用在线增强\n保存密钥\nAI 辅助\n\n用于短语理解、例句翻译、造句反馈、联想场景和图片生成；启动后自动连接。\n\n需要登录 AI\n每日学习目标\n\n这是每天最多新加入学习流程的数量；复习较多时系统会自动减少新词。\n\n−\n个 / 天\n＋\n自然发音\n\n优先播放真人词典发音；没有真人音频时，使用你选择的自然合成音。\n\n合成音色\n● 未准备\n美式女声 · Bella\n美式女声 · Heart\n美式女声 · Nicole\n美式男声 · Michael\n英式女声 · Emma\n英式男声 · George\n试听音色\n准备语音\n高级设置\n一般无需调整\n展开\n导出学习数据\n\n备份单词卡、学习进度和复习记录。\n\n导出 JSON\n导入学习数据\n\n从此前导出的备份恢复学习数据。\n\n选择 JSON\n清除所有学习数据 · 高风险\n\n永久删除全部单词卡、学习进度、复习记录、造句、统计数据和学习过程中生成/上传的图片。应用设置会保留。\n\n清除所有学习数据",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn active",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "保存密钥",
+      "id": "",
+      "className": "btn primary",
+      "action": "save-dictionary-key"
+    },
+    {
+      "index": 6,
+      "text": "−",
+      "id": "",
+      "className": "goal-step",
+      "action": ""
+    },
+    {
+      "index": 7,
+      "text": "＋",
+      "id": "",
+      "className": "goal-step",
+      "action": ""
+    },
+    {
+      "index": 8,
+      "text": "试听音色",
+      "id": "",
+      "className": "btn",
+      "action": "preview-kokoro-voice"
+    },
+    {
+      "index": 9,
+      "text": "准备语音",
+      "id": "",
+      "className": "btn",
+      "action": "prepare-kokoro-tts"
+    },
+    {
+      "index": 10,
+      "text": "保存设置",
+      "id": "",
+      "className": "btn primary",
+      "action": "save-codex-runtime"
+    },
+    {
+      "index": 11,
+      "text": "导出 JSON",
+      "id": "",
+      "className": "btn",
+      "action": "export-data"
+    },
+    {
+      "index": 12,
+      "text": "清除所有学习数据",
+      "id": "",
+      "className": "btn danger",
+      "action": "confirm-reset"
+    }
+  ],
+  "links": [],
+  "inputs": [
+    {
+      "index": 0,
+      "tag": "INPUT",
+      "id": "mw-api-key",
+      "placeholder": "输入在线词典密钥",
+      "name": "",
+      "type": "password",
+      "value": ""
+    },
+    {
+      "index": 1,
+      "tag": "INPUT",
+      "id": "daily-goal",
+      "placeholder": "",
+      "name": "",
+      "type": "number",
+      "value": "3"
+    },
+    {
+      "index": 2,
+      "tag": "SELECT",
+      "id": "tts-voice",
+      "placeholder": "",
+      "name": "",
+      "type": "",
+      "value": "af_bella"
+    },
+    {
+      "index": 3,
+      "tag": "SELECT",
+      "id": "codex-model-select",
+      "placeholder": "",
+      "name": "",
+      "type": "",
+      "value": "gpt-5.6-luna"
+    },
+    {
+      "index": 4,
+      "tag": "INPUT",
+      "id": "codex-model-custom",
+      "placeholder": "输入模型名称",
+      "name": "",
+      "type": "",
+      "value": ""
+    },
+    {
+      "index": 5,
+      "tag": "SELECT",
+      "id": "codex-effort",
+      "placeholder": "",
+      "name": "",
+      "type": "",
+      "value": "medium"
+    },
+    {
+      "index": 6,
+      "tag": "INPUT",
+      "id": "import-file",
+      "placeholder": "",
+      "name": "",
+      "type": "file",
+      "value": ""
+    }
+  ]
+}

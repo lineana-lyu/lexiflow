@@ -1,0 +1,60 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n查词并添加\n● 词典已连接\n⌕\n查询\n支持中文\n支持英文\n支持拼写纠错\n默认只生成一个核心学习词义",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn active",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "查询",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    }
+  ],
+  "links": [],
+  "inputs": [
+    {
+      "index": 0,
+      "tag": "INPUT",
+      "id": "word-input",
+      "placeholder": "输入英文或中文，例如 keyboard、键盘、wrok",
+      "name": "",
+      "type": "",
+      "value": ""
+    }
+  ]
+}

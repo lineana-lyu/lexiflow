@@ -1,0 +1,88 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n单词库\n\n点击任意单词卡可以查看并修改内容。\n\n＋ 添加单词\n0 张卡片\n全部0\n待学习0\n学习中0\n长期稳定0\n“待学习”就是已保存、尚未加入 Today 的单词\n联想图\t单词\t词性\t中文释义\t阶段\t下次复习\t\n\n没有匹配的单词",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn active",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "＋ 添加单词",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    },
+    {
+      "index": 6,
+      "text": "全部0",
+      "id": "",
+      "className": "is-active",
+      "action": ""
+    },
+    {
+      "index": 7,
+      "text": "待学习0",
+      "id": "",
+      "className": "",
+      "action": ""
+    },
+    {
+      "index": 8,
+      "text": "学习中0",
+      "id": "",
+      "className": "",
+      "action": ""
+    },
+    {
+      "index": 9,
+      "text": "长期稳定0",
+      "id": "",
+      "className": "",
+      "action": ""
+    }
+  ],
+  "links": [],
+  "inputs": [
+    {
+      "index": 0,
+      "tag": "INPUT",
+      "id": "library-search",
+      "placeholder": "搜索单词或中文释义",
+      "name": "",
+      "type": "",
+      "value": ""
+    }
+  ]
+}
