@@ -16,6 +16,7 @@ const feedbackContract=require("../lib/sentence-feedback-contract");
 const feedbackPolicy=require("../lib/sentence-feedback-policy");
 const feedbackEvidence=require("../lib/sentence-feedback-evidence");
 const {buildSentenceFeedbackPrompt}=require("../lib/sentence-feedback-prompt");
+const {stableFeedbackKey}=require("../lib/sentence-feedback-store");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
 assert(index.includes("apply-guard-v3.js"),"Apply Guard V3 must load in index.html");
@@ -71,6 +72,8 @@ assert(server.includes('require("./lib/sentence-feedback-prompt")')&&server.incl
 assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
 assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic mechanics into the diagnostic normalization pipeline");
 assert(server.includes("Progression is a product policy, not a model opinion")&&server.includes("feedback.approved = !hasBlockingIssue"),"Apply progression must be derived from normalized blocking diagnostics rather than raw model approval");
+assert(server.includes('require("./lib/sentence-feedback-store")')&&server.includes("PersistentSentenceFeedbackStore")&&server.includes('cacheScope: "persistent"'),"same Apply input must reuse a persistent content-addressed review instead of re-running a generative checker after restart");
+assert(!server.includes("const sentenceFeedbackCache = new Map()"),"Apply review stability must not depend on process-local memory only");
 assert(server.includes("targetWord: word")&&!server.includes("changes: feedback.changes"),"suggestion change summaries must not participate in diagnostic authority");
 const genericPrompt=buildSentenceFeedbackPrompt({word:"reliable",meaningZh:"可靠的",sentence:"I rely on her."});
 assert(genericPrompt.includes("这不是作文润色器，也不是排版检查器")&&genericPrompt.includes("明确拼错的英文单词使用 category=spelling、severity=error"),"production prompt must be usage-focused while treating definite spelling mistakes as correctness errors");
@@ -125,14 +128,15 @@ const hiddenMechanics=feedbackContract.normalizeSentenceDiagnostics({
 });
 assert(hiddenMechanics.length===0,"Apply must not surface punctuation/spacing mechanics in the learner-facing review");
 
-const hiddenCapitalization=feedbackContract.normalizeSentenceDiagnostics({
+const pronounReminder=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"My friend and i hike.",
   issues:[
     ...feedbackContract.detectEnglishMechanics("My friend and i hike."),
     {span:"i",reason:"这里的人称代词要大写",hint:"改成 I",replacement:"I",category:"capitalization",severity:"error",source:"issue"}
   ],
 });
-assert(hiddenCapitalization.length===0,"capitalization mechanics must stay silent in the speaking/usage stage even if the model escalates them");
+assert(pronounReminder.length===1&&pronounReminder[0].category==="pronoun_case","standalone first-person i must remain a deterministic learner-facing reminder");
+assert(pronounReminder[0].severity==="warning"&&!pronounReminder[0].blocking,"pronoun capitalization should be visible but non-blocking");
 
 const verifiedSpelling=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"I often climb montain with her",
@@ -172,6 +176,18 @@ const blockerSuppressesStyle=feedbackContract.normalizeSentenceDiagnostics({
 });
 assert(blockerSuppressesStyle.length===1&&blockerSuppressesStyle[0].blocking,"when correctness blockers exist, Apply must not add style noise to the same review");
 
+const blockerKeepsPronoun=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"i go montain",
+  issues:[
+    ...feedbackContract.detectEnglishMechanics("i go montain"),
+    {span:"go",reason:"这里需要第三人称形式",hint:"改为 goes",replacement:"goes",category:"grammar",severity:"error",source:"issue"},
+    {span:"montain",reason:"拼写错误",hint:"改为 mountain",replacement:"mountain",category:"spelling",severity:"error",source:"issue"}
+  ],
+  spellingVerifier:()=>({verified:true,reason:"test-lexicon"}),
+});
+assert(blockerKeepsPronoun.length===3,"two blockers plus the deterministic pronoun reminder must stay visible in one stable review");
+assert(blockerKeepsPronoun.some(issue=>issue.category==="pronoun_case"&&!issue.blocking),"a visible pronoun reminder must not be dropped just because blockers also exist");
+
 const onlyStyle=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"I finished quickly.",
   issues:[
@@ -182,11 +198,16 @@ const onlyStyle=feedbackContract.normalizeSentenceDiagnostics({
 assert(onlyStyle.length===1&&!onlyStyle[0].blocking,"with no correctness error, Apply must surface at most one optional language suggestion");
 
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"capitalization",severity:"error"}).report===false,"capitalization must be silent in Apply");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"pronoun_case",severity:"error"}).report===true&&feedbackPolicy.applyDiagnosticPolicy({category:"pronoun_case",severity:"error"}).blocking===false,"standalone pronoun case must be a visible non-blocking deterministic reminder");
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"spacing",severity:"error"}).report===false,"spacing must be silent in Apply");
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"spelling",severity:"error",evidence:{spellingVerified:true}}).blocking===true,"verified spelling must block");
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"spelling",severity:"error",evidence:{spellingVerified:false}}).report===false,"unverified spelling must not surface");
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"grammar",severity:"error"}).blocking===true,"grammar errors must block");
 assert(feedbackPolicy.applyDiagnosticPolicy({category:"unknown",severity:"error"}).report===false,"unknown model categories must not surface");
+
+const stableKeyA=stableFeedbackKey({schema:"v",model:"m",word:"Ride-or-die",meaningZh:"死党",sentence:"My friend and i hike."});
+const stableKeyB=stableFeedbackKey({schema:"v",model:"m",word:"ride-or-die",meaningZh:"死党",sentence:"My friend and i hike."});
+assert(stableKeyA===stableKeyB,"exact same Apply content must resolve to the same persistent review key across runs");
 
 const evidence=feedbackEvidence.verifySpellingCorrection({
   span:"montain",
