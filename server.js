@@ -23,6 +23,9 @@ const {
   stableFeedbackKey,
   PersistentSentenceFeedbackStore,
 } = require("./lib/sentence-feedback-store");
+const ecdict = require("./lib/ecdict");
+const lexemeIdentity = require("./lib/lexeme-identity");
+const { rankChineseCandidates } = require("./lib/lookup-candidate-ranker");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -41,7 +44,7 @@ const CODEX_AUTH = path.join(os.homedir(), ".codex", "auth.json");
 const LOOKUP_CACHE_FILE = path.join(DATA_DIR, "dictionary-cache.json");
 const SENTENCE_FEEDBACK_CACHE_FILE = path.join(DATA_DIR, "sentence-feedback-cache.json");
 const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
-const LOOKUP_CACHE_SCHEMA = "v4.4-verified-resolution";
+const LOOKUP_CACHE_SCHEMA = "v5-lexeme-identity";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
 const SENTENCE_FEEDBACK_SCHEMA = "v12-diagnostic-code-actions";
@@ -87,7 +90,9 @@ async function getCachedLookup(key) {
   const cache = await loadLookupCache();
   const hit = cache[key];
   if (!hit) return null;
-  if (Date.now() - Number(hit.savedAt || 0) > LOOKUP_CACHE_TTL_MS) {
+  const stale = Date.now() - Number(hit.savedAt || 0) > LOOKUP_CACHE_TTL_MS;
+  const trusted = lexemeIdentity.validateLexemeContract(hit.result, { requireExampleMembership:true });
+  if (stale || !trusted) {
     delete cache[key];
     void saveLookupCache();
     return null;
@@ -1625,31 +1630,33 @@ function levenshteinDistance(a, b) {
   return prev[t.length];
 }
 
+function canonicalCandidateFromEcdict(word, sourceQuery = "") {
+  const surface = String(word || "").trim().toLowerCase();
+  if (!surface) return { word:"", canonicalWord:"", morphology:null };
+  const morphology = /\s/.test(surface)
+    ? null
+    : ecdict.lookupExact(surface, "primary", { sourceQuery, autoResolved:Boolean(sourceQuery) });
+  return {
+    word:surface,
+    canonicalWord:lexemeIdentity.exchangeBaseForm(morphology) || surface,
+    morphology,
+  };
+}
+
 async function localChineseCandidates(query) {
   const q = String(query || "").trim();
   if (!q) return [];
-  const cache = await loadLookupCache();
-  const hits = [];
-  const seen = new Set();
-
-  for (const entry of Object.values(cache || {})) {
-    const result = entry?.result;
-    if (!result?.word || !Array.isArray(result?.senses)) continue;
-    for (const sense of result.senses) {
-      const meaning = String(sense?.meaningZh || "").trim();
-      if (!meaning) continue;
-      const direct = meaning.includes(q) || q.includes(meaning);
-      const distance = levenshteinDistance(meaning.replace(/[；;、，,\s]/g, ""), q.replace(/[；;、，,\s]/g, ""));
-      if (direct || distance <= (q.length <= 3 ? 1 : 2)) {
-        const word = String(result.word).toLowerCase();
-        if (!seen.has(word)) {
-          seen.add(word);
-          hits.push({ word, reason: meaning, source: "local-cache" });
-        }
-      }
-    }
-  }
-  return hits.slice(0, 5);
+  return ecdict.searchChinese(q, 8).map(item => {
+    const identity = canonicalCandidateFromEcdict(item?.result?.word, q);
+    return {
+      ...identity,
+      reason:String(item?.result?.senses?.[0]?.meaningZh || q).trim(),
+      source:"ecdict-reverse",
+      localSearchScore:Number(item?.score || 0),
+      fallbackResult:item?.result || null,
+      intentEn:String(item?.result?.senses?.[0]?.senseIntentEn || "").trim(),
+    };
+  });
 }
 
 async function findCachedChineseLookup(query) {
@@ -1665,6 +1672,7 @@ async function findCachedChineseLookup(query) {
     if (!cacheKey.startsWith(LOOKUP_CACHE_SCHEMA + "|")) continue;
     const result = entry?.result;
     if (!result?.word || !Array.isArray(result?.senses)) continue;
+    if (!lexemeIdentity.validateLexemeContract(result, { requireExampleMembership:true })) continue;
 
     for (const sense of result.senses) {
       const meaning = String(sense?.meaningZh || "").trim();
@@ -1703,6 +1711,7 @@ async function resolveChineseSearch(query) {
 用户可能输入正确中文、少量错别字，或一个日常概念。
 
 用户输入：${q}
+本地可信词典候选：${JSON.stringify(local.map(item => ({ word:item.canonicalWord || item.word, meaningZh:item.reason, score:item.localSearchScore })))}
 
 任务：
 1. 纠正明显中文错别字。
@@ -1905,8 +1914,23 @@ async function merriamWebsterLookup(word, mode = "primary", options = {}) {
     result.autoResolved = Boolean(options.sourceQuery && options.sourceQuery.toLowerCase() !== word.toLowerCase());
   }
 
+  const morphology = /\s/.test(String(result.word || ""))
+    ? null
+    : ecdict.lookupExact(result.word, safeMode, {
+        sourceQuery:String(options.sourceQuery || word),
+        normalizedQuery:String(options.normalizedQuery || ""),
+        autoResolved:Boolean(options.sourceQuery),
+      });
+  result = lexemeIdentity.attachLexemeIdentity(result, {
+    candidateSurface:String(options.candidateSurface || word),
+    morphology,
+    source:result.dictionarySource || result.pronunciationSource || "merriam-webster",
+  });
+  result = lexemeIdentity.sanitizeLexemeExamples(result);
   result.cacheHit = false;
-  await setCachedLookup(cacheKey, result);
+  if (lexemeIdentity.validateLexemeContract(result, { requireExampleMembership:true })) {
+    await setCachedLookup(cacheKey, result);
+  }
   return result;
 }
 
@@ -1923,7 +1947,7 @@ async function buildResolvedPhraseCard(candidate, resolved, sourceQuery) {
   const alternatives = [resolved.primary, ...(resolved.alternatives || [])]
     .filter(item => item?.word && item.word.toLowerCase() !== exactPhrase.toLowerCase())
     .map(item => ({ word:item.word, meaningZh:item.meaningZh || resolved.normalizedChinese || sourceQuery }));
-  return {
+  const result = {
     word: exactPhrase,
     phonetic: pronunciation.phonetic || "",
     audioUrl: pronunciation.audioUrl || "",
@@ -1951,10 +1975,14 @@ async function buildResolvedPhraseCard(candidate, resolved, sourceQuery) {
       avoidVisualEn:Array.isArray(candidate.avoidVisualEn || resolved.primary.avoidVisualEn) ? (candidate.avoidVisualEn || resolved.primary.avoidVisualEn) : [],
     }],
   };
+  return lexemeIdentity.sanitizeLexemeExamples(
+    lexemeIdentity.attachLexemeIdentity(result, { candidateSurface:exactPhrase, source:"resolved-phrase" })
+  );
 }
 
 async function lookupResolvedChineseCandidate(candidate, resolved, sourceQuery) {
-  const word = String(candidate?.word || "").trim().toLowerCase();
+  const surface = String(candidate?.word || "").trim().toLowerCase();
+  const word = String(candidate?.canonicalWord || surface).trim().toLowerCase();
   if (!word) return null;
   const learningContent = {
     ...resolved.primary,
@@ -1974,6 +2002,7 @@ async function lookupResolvedChineseCandidate(candidate, resolved, sourceQuery) 
     alternatives: [resolved.primary, ...(resolved.alternatives || [])]
       .filter(item => item?.word && item.word.toLowerCase() !== word)
       .map(item => ({ word:item.word, meaningZh:item.meaningZh || resolved.normalizedChinese || sourceQuery })),
+    candidateSurface: surface || word,
   });
   if (result?.semanticMismatch) return { kind:"semantic-mismatch", result };
   if (result?.senses?.length) {
@@ -1981,7 +2010,7 @@ async function lookupResolvedChineseCandidate(candidate, resolved, sourceQuery) 
     // Never display a target word/phrase next to an example that does not
     // actually contain that target. This is the exact inconsistency that made
     // 笔筒 show as "behold" beside a "pen holder" sentence.
-    if (!example || !example.toLowerCase().includes(word.toLowerCase())) {
+    if (!example || !lexemeIdentity.textContainsLexeme(example, result.lexeme || result)) {
       return { kind:"content-mismatch", result };
     }
     return { kind:"verified", result };
@@ -2005,28 +2034,40 @@ async function smartLookup(query, options = {}) {
     }
 
     const resolved = await resolveChineseSearch(q);
-    const allCandidates = [resolved.primary, ...(resolved.alternatives || [])]
+    const trustedLocal = await localChineseCandidates(q);
+    const generated = [resolved.primary, ...(resolved.alternatives || [])]
       .filter(item => item?.word)
-      .filter((item, index, list) => list.findIndex(other => other.word.toLowerCase() === item.word.toLowerCase()) === index);
+      .map(item => ({
+        ...item,
+        ...canonicalCandidateFromEcdict(item.word, q),
+        aiConfidence:Number(item.confidence || 0),
+        source:"ai-resolver",
+      }));
     const preferredWord = String(options.preferredWord || "").trim().toLowerCase();
-    if (preferredWord) allCandidates.sort((a, b) => (a.word.toLowerCase() === preferredWord ? -1 : b.word.toLowerCase() === preferredWord ? 1 : 0));
+    if (preferredWord && !generated.some(item => item.word === preferredWord || item.canonicalWord === preferredWord)) {
+      generated.push({ ...canonicalCandidateFromEcdict(preferredWord, q), source:"explicit-user-choice" });
+    }
+    const allCandidates = rankChineseCandidates([...trustedLocal, ...generated], {
+      preferredWord,
+      limit:12,
+    });
 
     for (const candidate of allCandidates) {
-      if (preferredWord && candidate.word.toLowerCase() !== preferredWord) continue;
+      if (preferredWord && candidate.word !== preferredWord && candidate.canonicalWord !== preferredWord) continue;
       const checked = await lookupResolvedChineseCandidate(candidate, resolved, q);
       if (checked?.kind === "verified") return checked.result;
       // Only use the phrase fallback when Merriam-Webster has no exact phrase
       // entry. A real dictionary entry with the wrong sense must be rejected.
-      if (checked?.kind === "not-exact" && candidate.word.includes(" ")) {
-        return buildResolvedPhraseCard(candidate, resolved, q);
+      if (checked?.kind === "not-exact" && (candidate.canonicalWord || candidate.word).includes(" ")) {
+        return buildResolvedPhraseCard({ ...candidate, word:candidate.canonicalWord || candidate.word }, resolved, q);
       }
     }
 
     for (const candidate of allCandidates) {
       const checked = await lookupResolvedChineseCandidate(candidate, resolved, q);
       if (checked?.kind === "verified") return checked.result;
-      if (checked?.kind === "not-exact" && candidate.word.includes(" ")) {
-        return buildResolvedPhraseCard(candidate, resolved, q);
+      if (checked?.kind === "not-exact" && (candidate.canonicalWord || candidate.word).includes(" ")) {
+        return buildResolvedPhraseCard({ ...candidate, word:candidate.canonicalWord || candidate.word }, resolved, q);
       }
     }
 
@@ -2035,7 +2076,7 @@ async function smartLookup(query, options = {}) {
       sourceQuery:q,
       normalizedQuery:resolved.normalizedChinese,
       autoResolved:true,
-      suggestions:allCandidates.map(item => ({ word:item.word, reason:item.meaningZh || resolved.normalizedChinese || q })),
+      suggestions:allCandidates.map(item => ({ word:item.canonicalWord || item.word, reason:item.meaningZh || item.reason || resolved.normalizedChinese || q })),
       suggestionTitle:"没有找到可靠的完全匹配",
       suggestionHint:"下面是可能的英文表达。选择一个后再由词典确认，不会自动替换成无关的拼写建议。",
     };
