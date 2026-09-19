@@ -171,22 +171,35 @@ await setStage('review', {
   reviewCount: 0,
   reviewStep: 0,
   initialReviewPending: false,
-  nextReviewAt: new Date(Date.now() - 86400000).toISOString(),
-  stageEligibleOn: new Date(Date.now() - 86400000).toISOString(),
   memoryState: 'reinforcing',
 });
-await page.evaluate(async () => {
-  const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
-  payload.data.dailyPlan = window.LexiFlowLearningCore.buildDailyPlan(payload.data, new Date());
-  await fetch('/api/learning-data', {
+
+{
+  const payload = await fetch('http://127.0.0.1:4177/api/learning-data', { cache: 'no-store' }).then(r => r.json());
+  const card = payload.data?.cards?.[0];
+  if (!card) throw new Error('NO_CARD_FOR_REVIEW_CAPTURE');
+  const yesterday = new Date(Date.now() - 86400000).toISOString();
+
+  card.stage = 'review';
+  card.learningStage = 'review';
+  card.memoryState = 'reinforcing';
+  card.initialReviewPending = false;
+  card.nextReviewAt = yesterday;
+  card.stageEligibleOn = yesterday;
+  card.applyCompletedOn = yesterday;
+  payload.data.dailyPlan = null;
+
+  const persisted = await fetch('http://127.0.0.1:4177/api/learning-data', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ data: payload.data, appShellAuthority: 'portfolio-review-capture' }),
+    body: JSON.stringify({ data: payload.data, captureAuthority: 'portfolio-review-direct' }),
   });
-  localStorage.removeItem('lexiflow-review-session-v3');
-});
+  if (!persisted.ok) throw new Error('REVIEW_CAPTURE_PERSIST_FAILED');
+}
+
 await page.reload({ waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(2200);
+await page.evaluate(() => localStorage.removeItem('lexiflow-review-session-v3'));
 await page.evaluate(() => window.LexiFlowReviewSessionV3.restart());
 await page.waitForTimeout(2200);
 
