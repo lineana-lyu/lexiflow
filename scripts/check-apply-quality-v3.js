@@ -57,7 +57,7 @@ assert(!transport.includes("optionalSuggestion"),"transport layer must not manuf
 assert(server.includes("完全正确时 suggestion 为空"),"server contract must explicitly reserve empty suggestion for a fully correct original sentence");
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
 assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}]'),"server feedback contract must return concise explanations for actual corrections");
-assert(server.includes("不确定具体语法规则时，只说明更自然的实际用法，不要编造规则"),"correction explanations must prefer accurate usage guidance over invented grammar rules");
+assert(server.includes("不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论")&&server.includes("拼写问题要明确正确拼写或词形规则")&&server.includes("语法问题要指出具体结构关系"),"correction explanations must identify a concrete spelling, grammar, collocation, or meaning reason");
 assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"replacement\":\"可直接替换 span 的局部修正\""),"server feedback must locate exact problem spans and return a local one-click replacement");
 assert(server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)")&&server.includes('if (feedback.level === "good" && !feedback.suggestion) feedback.issues = [];'),"corrected suggestions must preserve or synthesize issue diagnostics instead of clearing them");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must highlight diagnosed sentence spans as interactive red issues");
@@ -67,9 +67,11 @@ assert(applyStage.includes("if(direct.length)return direct;")&&applyStage.includ
 assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为"),"each issue must show a clear reason and a local one-click replacement");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("setTimeout(()=>{")&&applyStage.includes("void submit();"),"one-click fixes must automatically recheck the corrected sentence");
-assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("void submit();"),"accepted fixes must show a short resolved-state animation and automatically recheck");
+assert(applyStage.includes("const showFallback=Boolean(!issues.length&&suggestion);")&&applyStage.includes("showFallback&&changes.length"),"localized issues must not duplicate the same correction as a full suggestion and change explanation");
+assert(applyStage.includes("lexi-apply-v3-inline-fixed")&&applyStage.includes("lastFix")&&applyStage.includes("reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.lastFix||s.approved))"),"accepted fixes must remain as a stable resolved state after automatic recheck");
+assert(!applyStage.includes("state.lastFix=null;render();"),"automatic recheck must not erase the green resolved marker on a timer");
 assert(applyStage.includes("cardId:card.id"),"Apply feedback must stay bound to the exact card ID");
 assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次检查")&&!applyStage.includes("/ 3 轮"),"Apply UI must not expose correction-round rituals");
-assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must retain concise reasons for full corrections");
+assert(applyStage.includes("修改原因")&&applyStage.includes("lexi-apply-v3-changes"),"Apply fallback full correction must retain concise reasons when local diagnostics are unavailable");
 
 console.log("Apply Quality V3 contract checks passed.");
