@@ -228,13 +228,9 @@
       const current=result[overlapIndex];
       const currentLength=current._range.end-current._range.start;
       const candidateLength=candidate._range.end-candidate._range.start;
-      const currentActionable=Boolean(norm(current.replacement));
-      const candidateActionable=Boolean(norm(candidate.replacement));
       const primary=(current.blocking!==candidate.blocking)
         ?(current.blocking?current:candidate)
-        :(currentActionable!==candidateActionable)
-          ?(candidateActionable?candidate:current)
-          :(candidateLength>currentLength?candidate:current);
+        :(candidateLength<currentLength?candidate:current);
       const secondary=primary===current?candidate:current;
       result[overlapIndex]={
         ...primary,
