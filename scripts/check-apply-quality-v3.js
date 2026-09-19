@@ -13,6 +13,7 @@ const transport=read("public/transport-fixes.js");
 const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 const feedbackContract=require("../lib/sentence-feedback-contract");
+const feedbackPolicy=require("../lib/sentence-feedback-policy");
 const {buildSentenceFeedbackPrompt}=require("../lib/sentence-feedback-prompt");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
@@ -68,9 +69,10 @@ assert(!transport.includes("optionalSuggestion"),"transport layer must not manuf
 assert(server.includes('require("./lib/sentence-feedback-prompt")')&&server.includes("buildSentenceFeedbackPrompt({ word, meaningZh, sentence })"),"server must consume the isolated generic Apply prompt policy rather than embed regression-specific prompt text");
 assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
 assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic English mechanics with AI diagnostics before approval");
+assert(server.includes("Progression is a product policy, not a model opinion")&&server.includes("feedback.approved = !hasBlockingIssue"),"Apply progression must be derived from normalized blocking severity rather than raw model approval");
 const genericPrompt=buildSentenceFeedbackPrompt({word:"reliable",meaningZh:"可靠的",sentence:"I rely on her."});
-assert(genericPrompt.includes("必须修正")&&genericPrompt.includes("可选优化")&&genericPrompt.includes("独立、可执行的局部修改"),"production prompt must define generic correctness and atomic-action invariants");
-assert(genericPrompt.includes("不得加入原句和当前修改无法直接证明的")&&genericPrompt.includes("同一 span")&&genericPrompt.includes("replacement 必须一致"),"production prompt must require evidence-bound reasons and consistent replacements");
+assert(genericPrompt.includes("error：必须修正")&&genericPrompt.includes("warning：书写层面的明确问题")&&genericPrompt.includes("suggestion：只是更自然"),"production prompt must define a three-level diagnostic model");
+assert(genericPrompt.includes("非目标词的普通拼写错误、大小写、标点、空格和排版问题必须是 warning")&&genericPrompt.includes("approved 只取决于是否仍存在 error"),"production prompt must keep surface-writing issues advisory while preserving correctness gates");
 assert(!genericPrompt.includes("第一人称单数代词")&&!genericPrompt.includes("ride-or-die")&&!genericPrompt.includes("montain"),"regression fixtures and grammar-specific examples must stay out of the production prompt");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
@@ -80,7 +82,7 @@ assert(applyStage.includes("background:rgba(201,73,73,.12)")&&applyStage.include
 assert(applyStage.includes("function normalizeIssue(")&&applyStage.includes("function blockingIssues(")&&applyStage.includes("function optionalIssues("),"Apply must normalize issue severity and separate blocking from optional diagnostics");
 assert(applyStage.includes("function coalesceIssues(text,issues=[])")&&applyStage.includes("candidate._range.start<item._range.end")&&applyStage.includes("mergeDisplayIssues(text,mergedBlocking,freshOptional)"),"Apply UI must coalesce any residual overlapping diagnostics before rendering");
 assert(applyStage.includes("filter(issue=>issue.blocking).slice(0,3)")&&applyStage.includes("blockingIssues(merged).slice(0,3)")&&applyStage.includes("3-required.length"),"all three review slots must be available to blocking errors so the checker does not reveal hidden required fixes in later rounds");
-assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键优化为"),"blocking errors and optional suggestions must both explain the reason while using different action language");
+assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键修正")&&applyStage.includes("一键优化为"),"error, warning, and suggestion diagnostics must use distinct learner-facing action language");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("const surfaceNorm=")&&applyStage.includes("const hasSurfaceEdit="),"Apply must distinguish visible edits from semantic-copy normalization");
 assert(applyStage.includes("hasSurfaceEdit(issue.span,replacement)")&&!applyStage.includes("copyNorm(replacement)!==copyNorm(issue.span)"),"punctuation and spacing fixes must remain actionable instead of being hidden as semantically equivalent");
@@ -98,53 +100,53 @@ assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次�
 assert(applyStage.includes("修改原因")&&applyStage.includes("lexi-apply-v3-changes"),"Apply fallback full correction must retain concise reasons when local diagnostics are unavailable");
 
 const mechanics=feedbackContract.detectEnglishMechanics("My boss is very dependable,because he never makes any mistakes");
-assert(mechanics.length===1&&mechanics[0].span==="dependable,because"&&mechanics[0].replacement==="dependable, because","deterministic mechanics must catch missing punctuation spacing on the first check");
-assert(feedbackContract.joinReasonFragments(["第一条原因。","第二条原因；"])==="第一条原因；第二条原因","merged Chinese explanations must not produce duplicated mixed punctuation such as 。；");
-const actionable=feedbackContract.normalizeSentenceDiagnostics(
-  "My boss is very dependable,because he never makes any mistakes",
-  [{span:"dependable,because",reason:"逗号后需要空格。",hint:"加空格",replacement:"",severity:"error",blocking:true}],
-  [{from:"dependable,because",to:"dependable, because",reason:"补上英文逗号后的空格",severity:"error",blocking:true}],
-  false,
-  "warn"
-);
-assert(actionable.length===1&&actionable[0].replacement==="dependable, because","diagnostic merge must prefer an actionable replacement when issue and change cover the same span");
-assert(!actionable[0].reason.includes("。；"),"diagnostic merge must keep reason punctuation canonical");
+assert(mechanics.length===1&&mechanics[0].span==="dependable,because"&&mechanics[0].replacement==="dependable, because","deterministic mechanics must catch missing punctuation spacing");
+assert(mechanics[0].severity==="warning"&&mechanics[0].blocking===false&&mechanics[0].category==="spacing","mechanical punctuation/spacing issues must be advisory, not learning gates");
+assert(feedbackContract.joinReasonFragments(["第一条原因。","第二条原因；"])==="第一条原因；第二条原因","merged Chinese explanations must keep canonical punctuation");
 
-const pronounMechanics=feedbackContract.detectEnglishMechanics("My ride-or-die is exuberant, and i often climb montain with her in sunday");
-const pronounI=pronounMechanics.find(issue=>issue.span==="i");
-assert(pronounI&&pronounI.replacement==="I","deterministic mechanics must catch lowercase first-person pronoun I anywhere in the sentence");
-assert(!pronounI.reason.includes("句首")&&pronounI.reason.includes("无论位于句中何处"),"pronoun-I explanation must state the actual rule instead of inventing a sentence-initial condition");
+const punctuation=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"My boss is very dependable,because he never makes any mistakes",
+  issues:[...mechanics],
+  changes:[],
+});
+assert(punctuation.length===1&&punctuation[0].severity==="warning"&&!punctuation[0].blocking,"surface mechanics must remain warning-level after normalization");
 
-const duplicatedI=feedbackContract.normalizeSentenceDiagnostics(
-  "My friend and i hike.",
-  [
+const pronoun=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"My friend and i hike.",
+  issues:[
     ...feedbackContract.detectEnglishMechanics("My friend and i hike."),
-    {span:"i",reason:"这里的人称代词要大写",hint:"改成 I",replacement:"I",severity:"error",blocking:true}
+    {span:"i",reason:"这里的人称代词要大写",hint:"改成 I",replacement:"I",category:"capitalization",severity:"error",source:"issue"}
   ],
-  [{from:"i",to:"I",reason:"把 i 改成 I",severity:"error",blocking:true}],
-  false,
-  "warn"
-);
-assert(duplicatedI.length===1&&duplicatedI[0].replacement==="I","same-span mechanics/model/change records must collapse to one issue");
-assert(duplicatedI[0].reason.includes("无论位于句中何处")&&!duplicatedI[0].reason.includes("；"),"deterministic mechanics must own the reason instead of concatenating duplicate model prose");
+  changes:[],
+});
+assert(pronoun.length===1&&pronoun[0].replacement==="I","same-span mechanics/model records must collapse to one issue");
+assert(pronoun[0].severity==="warning"&&!pronoun[0].blocking,"capitalization must remain advisory even when the model tries to escalate it");
 
-const conflictingMountain=feedbackContract.normalizeSentenceDiagnostics(
-  "I often climb montain with her",
-  [{span:"montain",reason:"montain 拼写错误，应为 mountain",hint:"改正拼写",replacement:"mountain",severity:"error",blocking:true}],
-  [{from:"montain",to:"mountains",reason:"这里表示经常爬山，最终修正版采用复数 mountains",severity:"error",blocking:true}],
-  false,
-  "warn"
-);
-assert(conflictingMountain.length===1&&conflictingMountain[0].replacement==="mountains","same-span issue/change replacement conflicts must choose the final-suggestion change authority");
-assert(conflictingMountain[0].reason.includes("mountains")&&!conflictingMountain[0].reason.includes("应为 mountain；"),"conflicting replacement explanations must not be concatenated into contradictory guidance");
+const spelling=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"I often climb montain with her",
+  issues:[{span:"montain",reason:"拼写错误",hint:"改正拼写",replacement:"mountain",category:"spelling",severity:"error",source:"issue"}],
+  changes:[{from:"montain",to:"mountains",reason:"完整修正版使用复数",category:"spelling",severity:"error",source:"change"}],
+});
+assert(spelling.length===1&&spelling[0].replacement==="mountains","same-span issue/change conflicts must keep one final replacement authority");
+assert(spelling[0].severity==="warning"&&!spelling[0].blocking,"non-target spelling must never be promoted into a blocking error by model severity");
 
-const broadOnly=feedbackContract.normalizeSentenceDiagnostics(
-  "i climb montain",
-  [{span:"i climb montain",reason:"这部分包含多处错误",hint:"整体修正",replacement:"I climb mountains",severity:"error",blocking:true}],
-  [],
-  false,
-  "warn"
-);
-assert(broadOnly.length===1&&broadOnly[0].span==="i climb montain","normalizer must not explode a broad model rewrite into extra blocking issues without independent evidence");
+const grammar=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"He go to school.",
+  issues:[{span:"He go",reason:"第三人称单数主谓不一致",hint:"改为 He goes",replacement:"He goes",category:"grammar",severity:"error",source:"issue"}],
+  changes:[],
+});
+assert(grammar.length===1&&grammar[0].severity==="error"&&grammar[0].blocking,"real grammar correctness errors must remain blocking");
+
+const targetUsage=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"I dependabled on him.",
+  issues:[{span:"dependabled",reason:"目标词词形错误",hint:"改为 depended",replacement:"depended",category:"target_usage",severity:"error",source:"issue"}],
+  changes:[],
+});
+assert(targetUsage.length===1&&targetUsage[0].blocking,"target-word correctness must remain a learning gate");
+
+assert(feedbackPolicy.applySeverityPolicy({category:"capitalization",severity:"error"}).severity==="warning","server policy must cap capitalization at warning");
+assert(feedbackPolicy.applySeverityPolicy({category:"spelling",severity:"error"}).severity==="warning","server policy must cap ordinary spelling at warning");
+assert(feedbackPolicy.applySeverityPolicy({category:"grammar",severity:"error"}).blocking===true,"server policy must allow grammar errors to block");
+assert(feedbackPolicy.applySeverityPolicy({category:"unknown",severity:"error"}).blocking===false,"unknown model categories must fail open as advisory instead of blocking learning");
 
 console.log("Apply Quality V3 contract checks passed.");
