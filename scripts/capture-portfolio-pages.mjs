@@ -15,200 +15,155 @@ const consoleLines = [];
 page.on('console', msg => consoleLines.push(`[${msg.type()}] ${msg.text()}`));
 page.on('pageerror', err => consoleLines.push(`[pageerror] ${err.message}`));
 
-async function capture(name) {
-  await page.waitForTimeout(1000);
+async function capture(name, fullPage = true) {
+  await page.waitForTimeout(900);
   await page.screenshot({
     path: path.join(outDir, `${name}.png`),
-    fullPage: true,
+    fullPage,
   });
-
   const snapshot = await page.evaluate(() => ({
     title: document.title,
     bodyText: document.body.innerText,
     buttons: [...document.querySelectorAll('button')].map((el, index) => ({
       index,
       text: (el.textContent || '').trim(),
-      id: el.id || '',
       className: el.className || '',
       action: el.getAttribute('data-action') || '',
-    })),
-    links: [...document.querySelectorAll('a')].map((el, index) => ({
-      index,
-      text: (el.textContent || '').trim(),
-      href: el.getAttribute('href') || '',
-      className: el.className || '',
+      r3: el.getAttribute('data-r3') || '',
     })),
     inputs: [...document.querySelectorAll('input, textarea, select')].map((el, index) => ({
       index,
       tag: el.tagName,
       id: el.id || '',
       placeholder: el.getAttribute('placeholder') || '',
-      name: el.getAttribute('name') || '',
-      type: el.getAttribute('type') || '',
       value: 'value' in el ? String(el.value || '') : '',
     })),
   }));
-
   await fs.writeFile(path.join(outDir, `${name}-dom.json`), JSON.stringify(snapshot, null, 2), 'utf8');
 }
 
-await page.goto('http://127.0.0.1:4177', { waitUntil: 'domcontentloaded', timeout: 120000 });
-await page.waitForTimeout(4000);
-
-await capture('today-empty');
-
-const routes = [
-  ['select', /选词制卡/],
-  ['library', /单词库/],
-  ['stats', /学习统计/],
-  ['settings', /设置/],
-];
-
-for (const [name, label] of routes) {
-  const button = page.getByRole('button', { name: label }).first();
-  await button.click();
-  await capture(name);
-
-  if (name === 'select') {
-    await page.locator('#word-input').fill('grow');
-    await page.getByRole('button', { name: /^查询$/ }).click();
-    await page.waitForTimeout(3500);
-    await capture('lookup-grow');
-
-    const saveButton = page.locator('[data-action="save-card"]').first();
-    await saveButton.click();
-    await page.waitForTimeout(1800);
-    await capture('today-with-grow');
-
-    await page.getByRole('button', { name: /单词库/ }).first().click();
-    await capture('library-with-grow');
-
-    await page.getByRole('button', { name: /选词制卡/ }).first().click();
-  }
-}
-
-
-async function setStage(stage, patch = {}) {
-  const cardId = await page.evaluate(async ({ stage, patch }) => {
-    const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
-    const data = payload.data;
-    const card = data.cards[0];
-    if (!card) throw new Error('NO_CARD_FOR_STAGE_CAPTURE');
-
-    card.stage = stage;
-    card.learningStage = stage;
-    card.inboxPending = false;
-    card.memoryState = patch.memoryState ?? (stage === 'review' ? 'reinforcing' : '');
-    Object.assign(card, patch);
-
-    if (stage === 'review') {
-      const d = new Date();
-      const day = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
-      data.dailyPlan = {
-        version: 3,
-        date: day,
-        frozen: true,
-        review: [card.id],
-        memorize: [],
-        visualize: [],
-        apply: [],
-        select: [],
-        remainingSelectSlots: 0,
-      };
-    }
-
-    await fetch('/api/learning-data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data, appShellAuthority: 'portfolio-capture' }),
-    });
-
-    for (const key of Object.keys(localStorage)) {
-      if (key.startsWith('lexiflow-')) localStorage.removeItem(key);
-    }
-    return card.id;
-  }, { stage, patch });
-
-  await page.reload({ waitUntil: 'domcontentloaded' });
+async function boot() {
+  await page.goto('http://127.0.0.1:4177', { waitUntil: 'domcontentloaded', timeout: 120000 });
   await page.waitForTimeout(2200);
-  return cardId;
 }
 
-const stageCardId = await setStage('memorize', { memorizeRound: 1 });
-await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
-await page.waitForSelector('.lexi-m2', { timeout: 15000 });
-const revealButton = page.locator('[data-m2="reveal"]').first();
-if (await revealButton.count()) {
-  await revealButton.click();
-  await page.waitForTimeout(450);
+async function resetData(data) {
+  await page.evaluate(async payload => {
+    const response = await fetch('/api/learning-data', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({data: payload, appShellAuthority:'portfolio-capture'}),
+    });
+    if (!response.ok) throw new Error('seed failed');
+  }, data);
+  await page.reload({ waitUntil:'domcontentloaded' });
+  await page.waitForTimeout(1800);
 }
-await capture('stage-memorize-grow');
 
-await setStage('visualize', {
-  visualNote: '',
-  imageData: null,
-  imageUrl: '',
-  visualSceneSuggestion: null,
-  visualImageConfirmed: false,
-});
-await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
-await page.waitForSelector('[data-visualize-stage-v3]', { timeout: 15000 });
-await page.locator('#visual-note').fill('想到阳台上的薄荷从一小株慢慢长高，我每天给它浇水。');
-await page.waitForTimeout(350);
-await capture('stage-visualize-grow');
+function isoToday(hour=9) {
+  const d = new Date();
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+}
 
-await setStage('apply', {
+function isoYesterday() {
+  const d = new Date();
+  d.setDate(d.getDate()-1);
+  d.setHours(9,0,0,0);
+  return d.toISOString();
+}
+
+function baseCard(stage, overrides={}) {
+  return {
+    id: `portfolio-${stage}`,
+    word: 'grow',
+    phonetic: 'ɡrəʊ',
+    pos: 'verb',
+    meaningZh: '成长；发展；逐渐变得',
+    exampleEn: 'You grow by what you practice.',
+    exampleZh: '你会因反复练习的事情而成长。',
+    stage,
+    learningStage: stage,
+    inboxPending: false,
+    createdAt: isoYesterday(),
+    updatedAt: isoToday(),
+    stageEligibleOn: isoToday(),
+    reviewCount: 0,
+    memoryHistory: [],
+    visualNote: '想到自己第一次独立完成一个完整项目，能力是一点点长出来的。',
+    imageData: null,
+    imageUrl: '',
+    userSentence: 'I want to grow into a product manager who can turn ideas into real products.',
+    sourceType: 'work',
+    sourceTitle: '个人项目复盘',
+    sourceContext: '能力不是一下子获得的，而是在一次次真实项目里慢慢长出来。',
+    ...overrides,
+  };
+}
+
+function dataFor(card) {
+  return {
+    version: 1,
+    settings: { dailyGoal: 3, ttsVoice:'af_bella' },
+    cards: [card],
+    activities: [],
+    createdAt: isoYesterday(),
+  };
+}
+
+await boot();
+
+// 1. Real lookup result: the entry point into Select.
+await page.getByRole('button', { name: /选词制卡/ }).first().click();
+await page.locator('#word-input').fill('grow');
+await page.getByRole('button', { name: /^查询$/ }).click();
+await page.waitForTimeout(2600);
+await capture('core-select-lookup');
+
+// 2. Memorize: active recall / memory-stage surface.
+await resetData(dataFor(baseCard('memorize')));
+const continueBtn = page.locator('[data-action="continue-learning"]').first();
+await continueBtn.click();
+await page.waitForTimeout(1500);
+await capture('core-memorize');
+
+// 3. Visualize: learner association first, AI is optional assistance.
+await resetData(dataFor(baseCard('visualize', {
+  visualNote: '想到一株植物从幼苗慢慢长高，也想到自己第一次独立完成产品闭环。',
+})));
+await page.locator('[data-action="continue-learning"]').first().click();
+await page.waitForTimeout(1500);
+await capture('core-visualize');
+
+// 4. Apply: learner writes first, then AI checking.
+await resetData(dataFor(baseCard('apply', {
   userSentence: '',
-  practicePrompt: { question: '说说一个你想持续成长的真实目标。' },
-});
-await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
-await page.waitForSelector('[data-apply-stage-v3-root]', { timeout: 15000 });
-await page.locator('#apply-text').fill('I want to grow into a better product manager by building real products.');
-await page.waitForTimeout(350);
-await capture('stage-apply-grow');
-
-await setStage('review', {
-  reviewCount: 0,
-  reviewStep: 0,
-  initialReviewPending: false,
-  memoryState: 'reinforcing',
-});
-
-await page.clock.install({ time: new Date(Date.now() + 36 * 60 * 60 * 1000) });
-await page.reload({ waitUntil: 'domcontentloaded' });
-await page.waitForTimeout(2200);
-await page.evaluate(() => localStorage.removeItem('lexiflow-review-session-v3'));
-await page.evaluate(() => window.LexiFlowReviewSessionV3.restart());
-await page.waitForTimeout(2200);
-
-if (await page.locator('.lexi-r3-card').count()) {
-  const reviewReveal = page.locator('[data-r3="reveal"]').first();
-  if (await reviewReveal.count()) {
-    await reviewReveal.click();
-    await page.waitForTimeout(350);
-  } else {
-    const reviewInput = page.locator('#lexi-r3-answer');
-    if (await reviewInput.count()) {
-      await reviewInput.fill('grow');
-      const check = page.locator('[data-r3="check"]').first();
-      if (await check.count()) await check.click();
-      await page.waitForTimeout(350);
-    }
-  }
-  await capture('stage-review-grow');
-} else {
-  await capture('stage-review-debug');
-  const debug = await page.evaluate(async () => {
-    const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
-    return {
-      bodyText: document.body.innerText,
-      dailyPlan: payload.data?.dailyPlan || null,
-      card: payload.data?.cards?.[0] || null,
-      reviewSession: localStorage.getItem('lexiflow-review-session-v3'),
-    };
-  });
-  await fs.writeFile(path.join(outDir, 'stage-review-debug.json'), JSON.stringify(debug, null, 2), 'utf8');
+  practicePromptZh: '说一句你希望自己未来在哪方面成长。',
+})));
+await page.locator('[data-action="continue-learning"]').first().click();
+await page.waitForTimeout(1500);
+const applyEditor = page.locator('textarea, input').filter({has: page.locator('')});
+const visibleTextarea = page.locator('textarea:visible').first();
+if (await visibleTextarea.count()) {
+  await visibleTextarea.fill('I want to grow into a product manager who can turn ideas into real products.');
 }
+await capture('core-apply');
+
+// 5. Review: scheduled active recall.
+const now = new Date();
+const reviewCard = baseCard('review', {
+  memoryState: 'reinforcing',
+  reviewStep: 1,
+  stableStep: 0,
+  nextReviewAt: isoToday(8),
+  stageEligibleOn: isoYesterday(),
+  applyCompletedOn: isoYesterday(),
+});
+await resetData(dataFor(reviewCard));
+const reviewBtn = page.locator('[data-action="start-review"]').first();
+await reviewBtn.click();
+await page.waitForTimeout(1500);
+await capture('core-review');
 
 await fs.writeFile(path.join(outDir, 'browser-console.txt'), consoleLines.join('\n'), 'utf8');
 await browser.close();
