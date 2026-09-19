@@ -169,7 +169,8 @@
     const start=issue?.start,end=issue?.end;
     if(Number.isInteger(start)&&Number.isInteger(end)&&start>=0&&end>start&&end<=source.length){
       const slice=source.slice(start,end);
-      if(slice===target||slice.toLowerCase()===target.toLowerCase())return{start,end};
+      const matches=slice===target||slice.toLowerCase()===target.toLowerCase();
+      if(matches&&(!wordLikeSpan(target)||(!wordChar(source[start-1])&&!wordChar(source[end]))))return{start,end};
     }
     return spanRange(source,target);
   }
