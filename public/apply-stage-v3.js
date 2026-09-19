@@ -72,7 +72,7 @@
   }
   function session(card){
     let value=sessions.get(card.id);
-    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false};sessions.set(card.id,value);}
+    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null};sessions.set(card.id,value);}
     return value;
   }
 
@@ -80,42 +80,83 @@
     if(document.getElementById("lexi-apply-stage-v3-style"))return;
     const style=document.createElement("style");style.id="lexi-apply-stage-v3-style";
     style.textContent=`
-      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(139,109,72,.055);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
+      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:0 1px;margin:0;background:rgba(194,74,74,.09);color:#a23f3f;font:inherit;line-height:inherit;border-bottom:2px solid rgba(194,74,74,.72);border-radius:3px;cursor:pointer;animation:lexi-apply-issue-in .34s ease both}.lexi-apply-v3-inline-issue:hover{background:rgba(194,74,74,.15)}.lexi-apply-v3-inline-fixed{padding:0 1px;border-radius:3px;background:rgba(70,139,94,.12);color:#39734d;animation:lexi-apply-fix-in .7s ease both}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(139,109,72,.055);border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.active{border-color:rgba(194,74,74,.28);box-shadow:0 0 0 3px rgba(194,74,74,.06)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(194,74,74,0);border-bottom-color:transparent}100%{background:rgba(194,74,74,.09);border-bottom-color:rgba(194,74,74,.72)}}@keyframes lexi-apply-fix-in{0%{background:rgba(70,139,94,.28);transform:translateY(-1px)}100%{background:rgba(70,139,94,.08);transform:none}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
     `;document.head.appendChild(style);
   }
 
-  function feedbackHtml(card,s){
-    if(s.submitting)return `<div class="lexi-apply-v3-feedback"><div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>AI 正在检查你的表达</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">先保留你的原句，检查完成前不会替你改写。</div></div>`;
-    const fb=s.feedback;if(!fb)return"";
-    const suggestion=norm(fb.suggestion);
-    const tips=Array.isArray(fb.tips)?fb.tips.map(String).filter(Boolean):[];
-    const changes=Array.isArray(fb.changes)?fb.changes.slice(0,2).map(item=>({
-      from:norm(item?.from),
-      to:norm(item?.to),
-      reason:norm(item?.reason),
-    })).filter(item=>item.from||item.to||item.reason):[];
-    const issues=Array.isArray(fb.issues)?fb.issues.slice(0,2).map(item=>({
+  function feedbackIssues(fb){
+    return Array.isArray(fb?.issues)?fb.issues.slice(0,2).map(item=>({
       span:norm(item?.span),
       reason:norm(item?.reason),
       hint:norm(item?.hint),
-    })).filter(item=>item.span||item.reason||item.hint):[];
+      replacement:norm(item?.replacement),
+    })).filter(item=>item.span||item.reason||item.hint||item.replacement):[];
+  }
+  function feedbackChanges(fb){
+    return Array.isArray(fb?.changes)?fb.changes.slice(0,2).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:norm(item?.reason)})).filter(item=>item.from||item.to||item.reason):[];
+  }
+  function issueReplacement(issue,changes){
+    const direct=norm(issue?.replacement);if(direct)return direct;
+    const span=norm(issue?.span).toLowerCase();
+    const match=(changes||[]).find(change=>norm(change.from).toLowerCase()===span&&norm(change.to));
+    return norm(match?.to);
+  }
+  function issueRange(text,span){
+    const source=String(text||""),target=norm(span);if(!source||!target)return null;
+    let start=source.indexOf(target);
+    if(start<0)start=source.toLowerCase().indexOf(target.toLowerCase());
+    return start<0?null:{start,end:start+target.length};
+  }
+  function diagnosticSentenceHtml(text,issues,lastFix=null){
+    const source=String(text||""),ranges=[];
+    for(let index=0;index<(issues||[]).length;index+=1){
+      const range=issueRange(source,issues[index]?.span);
+      if(range&&!ranges.some(item=>range.start<item.end&&range.end>item.start))ranges.push({...range,type:"issue",index});
+    }
+    if(lastFix&&Number.isInteger(lastFix.start)&&Number.isInteger(lastFix.end)&&lastFix.start>=0&&lastFix.end>lastFix.start&&lastFix.end<=source.length){
+      ranges.push({start:lastFix.start,end:lastFix.end,type:"fixed",index:-1});
+    }
+    if(!ranges.length)return esc(source);
+    ranges.sort((a,b)=>a.start-b.start||a.end-b.end);
+    let out="",cursor=0;
+    for(const range of ranges){
+      if(range.start<cursor)continue;
+      out+=esc(source.slice(cursor,range.start));
+      const piece=esc(source.slice(range.start,range.end));
+      if(range.type==="issue")out+=`<button type="button" class="lexi-apply-v3-inline-issue" data-apply-stage-v3="focus-issue" data-issue-index="${range.index}" aria-label="查看问题：${piece}">${piece}</button>`;
+      else out+=`<span class="lexi-apply-v3-inline-fixed">${piece}</span>`;
+      cursor=range.end;
+    }
+    return out+esc(source.slice(cursor));
+  }
+
+  function feedbackHtml(card,s){
+    if(s.submitting){
+      const flash=s.lastFix?`<div class="lexi-apply-v3-diagnostic"><small>已替换 · 正在自动复检</small><div class="lexi-apply-v3-diagnostic-line">${diagnosticSentenceHtml(s.text,[],s.lastFix)}</div></div>`:"";
+      return `<div class="lexi-apply-v3-feedback">${flash}<div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>AI 正在重新检查你的表达</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">已保留当前句子，检查完成后会继续标出仍需修改的位置。</div></div>`;
+    }
+    const fb=s.feedback;if(!fb)return"";
+    const suggestion=norm(fb.suggestion);
+    const tips=Array.isArray(fb.tips)?fb.tips.map(String).filter(Boolean):[];
+    const changes=feedbackChanges(fb);
+    const issues=feedbackIssues(fb);
     const title=String(fb.title||((fb.level==="good")?"表达可以使用":"这句话还需要调整"));
     const good=Boolean(fb.level==="good");
-    const round=Number(fb.feedbackRound||0);
+    const diagnostic=issues.length?`<div class="lexi-apply-v3-diagnostic"><small>句子诊断 · 点击红色片段查看原因</small><div class="lexi-apply-v3-diagnostic-line">${diagnosticSentenceHtml(s.text,issues)}</div></div>`:"";
     return `<div class="lexi-apply-v3-feedback ${good?"good":"warn"} ai-feedback-panel ${good?"good":"warn"}">
-      <div class="lexi-apply-v3-feedback-head"><div><small>${suggestion?"修改建议":"检查结果"}</small><strong>${esc(title)}</strong></div>${round===1?`<span style="font-size:11px;color:var(--muted)">第 1 次自改</span>`:round===2?`<span style="font-size:11px;color:var(--muted)">第 2 次检查</span>`:""}</div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map(issue=>`<div class="lexi-apply-v3-issue">${issue.span?`<strong>问题位置：${esc(issue.span)}</strong>`:""}${issue.reason?`<p>${esc(issue.reason)}</p>`:""}${issue.hint?`<small>修改方向：${esc(issue.hint)}</small>`:""}</div>`).join("")}</div>`:""}
-      ${suggestion?`<div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
+      <div class="lexi-apply-v3-feedback-head"><div><small>${good?"检查结果":"发现可改进位置"}</small><strong>${esc(title)}</strong></div></div>
+      ${diagnostic}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);return `<div class="lexi-apply-v3-issue" data-issue-card="${index}">${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p>${esc(issue.reason)}</p>`:""}${issue.hint?`<small>${esc(issue.hint)}</small>`:""}${replacement?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">改为 ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${suggestion?`<div class="lexi-apply-v3-complete-label">完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${suggestion&&changes.length?`<div class="lexi-apply-v3-changes"><strong>为什么这样改</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
       <div class="lexi-apply-v3-actions">
-        ${suggestion?`<button class="btn primary" type="button" data-apply-stage-v3="adopt" ${s.suggestionApproved||s.promptLoading?"":"disabled"}>采用建议</button>`:""}
+        ${suggestion?`<button class="btn" type="button" data-apply-stage-v3="adopt" ${s.suggestionApproved||s.promptLoading?"":"disabled"}>一键采用完整修正版</button>`:""}
         ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply" ${s.promptLoading?"disabled title=\"正在保存新的练习话题\"":""}>${s.promptLoading?"正在保存当前阶段…":"确认这句话 · 明天首次复习"}</button>`:""}
-        <button class="text-action" type="button" data-apply-stage-v3="edit">继续修改</button>
+        <button class="text-action" type="button" data-apply-stage-v3="edit">自己继续修改</button>
       </div>
     </div>`;
   }
-
   function html(card){
     const s=session(card);const text=String(s.text||"");
     const prompt=String(card.practicePrompt?.question||`想一个和你自己有关的场景，用“${card.word}”表达一句你真正会说的话。`);
@@ -183,6 +224,38 @@
     }finally{s.submitting=false;render();}
   }
 
+  function focusIssue(index){
+    const card=document.querySelector(`[data-issue-card="${index}"]`);if(!card)return;
+    document.querySelectorAll("[data-issue-card].active").forEach(item=>item.classList.remove("active"));
+    card.classList.add("active");
+    card.scrollIntoView({behavior:"smooth",block:"nearest"});
+    setTimeout(()=>card.classList.remove("active"),1200);
+  }
+
+  function applyIssueFix(index){
+    const card=currentCard();if(!card)return;const s=session(card);
+    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
+    if(!issue)return;
+    const replacement=issueReplacement(issue,changes),range=issueRange(s.text,issue.span);
+    if(!replacement||!range)return;
+    if(s.text&&!s.originalText)s.originalText=s.text;
+    const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
+    s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;
+    s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
+    const caret=s.lastFix.end;
+    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,next,caret,caret);
+    render();
+    setTimeout(()=>{
+      const live=currentCard();if(!live||String(live.id)!==String(card.id))return;
+      const state=session(live);if(state.submitting||state.text!==next)return;
+      void submit();
+    },650);
+    setTimeout(()=>{
+      const live=currentCard();if(!live||String(live.id)!==String(card.id))return;
+      const state=session(live);if(state.lastFix?.at===s.lastFix?.at){state.lastFix=null;render();}
+    },950);
+  }
+
   function adopt(){
     const card=currentCard();if(!card)return;const s=session(card);const suggestion=norm(s.feedback?.suggestion);if(!suggestion||!s.suggestionApproved)return;
     if(s.text&&!s.originalText)s.originalText=s.text;
@@ -210,7 +283,7 @@
 
   function handleComposerInput(input){
     if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;
+    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
     const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
   }
@@ -231,6 +304,8 @@
     if(action==="speak-word"&&card)void speak(card);
     if(action==="submit")void submit();
     if(action==="adopt")adopt();
+    if(action==="fix-issue")applyIssueFix(button.dataset.issueIndex);
+    if(action==="focus-issue")focusIssue(button.dataset.issueIndex);
     if(action==="edit")document.getElementById("apply-text")?.focus();
     if(action==="restore")restore();
     if(action==="refresh-prompt")void refreshPrompt();
