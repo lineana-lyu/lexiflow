@@ -114,3 +114,20 @@ multiword entries needed by LexiFlow. Redistributors of that data file or a
 modified version must preserve attribution and comply with CC BY-SA 4.0,
 including the ShareAlike requirement. This data license does not replace the
 licenses of LexiFlow's separately distributed source code or runtime components.
+
+
+## Princeton WordNet
+
+LexiFlow can use Princeton WordNet locally to identify derivationally related
+word-family members across nouns, verbs, and adjectives. The runtime wrapper is
+the npm package `wordnet`.
+
+- WordNet: https://wordnet.princeton.edu/
+- Node.js wrapper: https://github.com/words/wordnet
+- Wrapper license: MIT
+- WordNet data license: Princeton WordNet License
+
+WordNet permits use, copying, modification, and redistribution without fee,
+provided its copyright notice, license terms, and disclaimer are preserved.
+LexiFlow uses WordNet only as lexical relationship data; learner-facing Chinese
+definitions and the core dictionary remain sourced separately.

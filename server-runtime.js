@@ -4,6 +4,7 @@ const http = require("http");
 const path = require("path");
 const ecdict = require("./lib/ecdict");
 const coreLexicon = require("./lib/core-lexicon");
+const wordFamily = require("./lib/word-family");
 const phraseDictionary = require("./lib/phrase-dictionary");
 const exampleEnrichment = require("./lib/example-enrichment");
 const expressionQuery = require("./lib/expression-query");
@@ -73,6 +74,18 @@ function localLookupResult(word, mode = "primary", sourceQuery = "") {
   };
 }
 
+async function enrichWordFamily(result, word) {
+  const target = clean(word || result?.word).toLowerCase();
+  if (!result || !/^[a-z][a-z'-]*$/i.test(target)) return result;
+  try {
+    const family = await wordFamily.lookup(target);
+    return { ...result, wordFamily: Array.isArray(family) ? family : [] };
+  } catch (err) {
+    console.warn("word family lookup skipped:", err?.message || err);
+    return { ...result, wordFamily: [] };
+  }
+}
+
 function localPhraseResult(phrase, mode = "primary") {
   const curated = phraseDictionary.lookupExact(phrase, mode, { sourceQuery:phrase });
   if (curated) return curated;
@@ -137,8 +150,9 @@ async function handleLocalDictionary(req, res, pathname, body) {
     if (!query) return false;
     const hasChinese = /[\u3400-\u9fff]/.test(query);
     if (hasChinese) {
-      const result = localChineseResult(query);
+      let result = localChineseResult(query);
       if (!result) return false;
+      result = await enrichWordFamily(result, result.word);
       writeJson(res, 200, { ok: true, result: { ...result, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
       console.log(`LexiFlow lookup [${result.lookupPath || "core-zh"}] ${result.lookupMs ?? "?"}ms: ${query} -> ${result.word}`);
       return true;
@@ -147,6 +161,7 @@ async function handleLocalDictionary(req, res, pathname, body) {
     let result = null;
     if (queryKind === "word" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
       result = localLookupResult(query.toLowerCase(), "primary", query);
+      if (result) result = await enrichWordFamily(result, result.word || query);
     } else if (queryKind === "phrase" && /^[A-Za-z][A-Za-z\s'-]*$/.test(query)) {
       result = await ensureWholePhrasePhonetic(localPhraseResult(query.toLowerCase(), "primary"), query.toLowerCase());
     }
@@ -187,8 +202,9 @@ async function handleLocalDictionary(req, res, pathname, body) {
       }
       return true;
     }
-    const result = localLookupResult(word, mode, word);
+    let result = localLookupResult(word, mode, word);
     if (!result) return false;
+    result = await enrichWordFamily(result, result.word || word);
     writeJson(res, 200, { ok: true, result: { ...result, localLookup: true, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
     console.log("LexiFlow lookup [" + (result.lookupPath || result.dictionarySource || "local") + "] " + (result.lookupMs ?? "?") + "ms: " + word);
     return true;

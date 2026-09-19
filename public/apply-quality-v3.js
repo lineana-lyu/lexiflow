@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const STORAGE_KEY="lexiflow-apply-quality-v3";
+  const STORAGE_KEY="lexiflow-apply-quality-v4";
   let latestAudit=null;
   let latestData=null;
   let queued=false;
@@ -24,7 +24,7 @@
     }catch{return{};}
   }
   function saveStore(store){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(store));}catch{}}
-  function keyOf(word,meaning){return `${lower(word)}|${normalize(meaning)}`;}
+  function keyOf(cardId,word,meaning){const id=normalize(cardId);return id?`card:${id}`:`word:${lower(word)}|${normalize(meaning)}`;}
 
   function syncFromGateway(){
     try{
@@ -50,12 +50,12 @@
   }
 
   function recordAudit(body,feedback){
-    const word=normalize(body?.word),meaning=normalize(body?.meaningZh),sentence=normalize(body?.sentence);
+    const cardId=normalize(body?.cardId),word=normalize(body?.word),meaning=normalize(body?.meaningZh),sentence=normalize(body?.sentence);
     if(!word||!sentence||!feedback)return null;
     const suggestion=normalize(feedback.suggestion);
     const approved=feedback.approved!==false&&feedback.level==="good";
     const inputLanguage=feedback.inputLanguage==="zh"||hasChinese(sentence)?"zh":"en";
-    const key=keyOf(word,meaning);
+    const key=keyOf(cardId,word,meaning);
     const store=loadStore();
     const previous=store[key]||{};
     const originalPass=Boolean(approved&&inputLanguage==="en"&&!suggestion);
@@ -65,12 +65,12 @@
     if(originalPass){
       round=0;
     }else if(inputLanguage==="en"){
-      if(normalize(previous.lastFailedInput)!==sentence)round=Math.min(3,Math.max(0,round)+1);
+      if(normalize(previous.lastFailedInput)!==sentence)round=Math.min(2,Math.max(0,round)+1);
       else round=Math.max(1,round);
     }
 
     const audit={
-      key,word,meaning,inputSentence:sentence,inputLanguage,
+      key,cardId,word,meaning,inputSentence:sentence,inputLanguage,
       originalPass,suggestionPass,suggestion,
       approved:Boolean(approved),level:String(feedback.level||"warn"),
       round,
@@ -89,15 +89,12 @@
     if(!feedback||!body?.sentence)return payload;
     const audit=recordAudit(body,feedback);
     if(!audit||audit.originalPass||audit.inputLanguage!=="en")return payload;
-    if(audit.round>=3)return {...payload,feedback:{...feedback,feedbackRound:3}};
+    if(audit.round>=2)return {...payload,feedback:{...feedback,feedbackRound:2,correctionHeldBack:false}};
 
+    const issues=Array.isArray(feedback.issues)?feedback.issues.slice(0,2):[];
     const tips=Array.isArray(feedback.tips)?feedback.tips.map(String).filter(Boolean):[];
-    const round=audit.round;
-    const fallback=round===1
-      ? "先检查目标词是否真的表达了当前词义，以及句子主干是否完整。"
-      : "再检查动词形式、搭配和语序；先自己改完，再让 AI 复查。";
-    const selected=round===1?tips.slice(0,1):tips.slice(0,2);
-    if(!selected.length)selected.push(fallback);
+    const selected=tips.slice(0,1);
+    if(!issues.length&&!selected.length)selected.push("这句话还有问题，但 AI 没有定位到具体片段。请再检查拼写、句子主干和目标词搭配。");
     return {
       ...payload,
       feedback:{
@@ -106,10 +103,11 @@
         level:"warn",
         suggestion:"",
         changes:[],
-        feedbackRound:round,
+        feedbackRound:1,
         correctionHeldBack:true,
-        title:round===1?"先自己改一次":"再自己改一次",
+        title:"先根据问题位置改一次",
         tips:selected,
+        issues,
       },
     };
   }
@@ -122,7 +120,7 @@
     const card=currentCard();
     if(!card)return latestAudit;
     const store=loadStore();
-    return store[keyOf(card.word,card.meaningZh)]||latestAudit;
+    return store[keyOf(card.id,card.word,card.meaningZh)]||latestAudit;
   }
 
   function qualityState(){
@@ -135,8 +133,8 @@
     if(sentence===normalize(audit.suggestion)&&audit.suggestionPass)return{allowed:true,message:""};
     if(sentence!==normalize(audit.inputSentence)&&sentence!==normalize(audit.suggestion))return{allowed:false,message:"你修改了句子，需要重新检查后再继续。"};
     if(audit.inputLanguage==="zh")return{allowed:false,message:"最终需要采用或写出通过检查的英文句子。"};
-    if(audit.round<3)return{allowed:false,message:`第 ${audit.round} 轮反馈先不给完整答案。请根据提示自己修改，再重新检查。`};
-    return{allowed:false,message:"原句还没有通过。请采用已通过的修改建议，或继续自己修改并重新检查。"};
+    if(audit.round<2)return{allowed:false,message:"已指出具体问题位置。请先自己修改一次，再重新检查。"};
+    return{allowed:false,message:"修改后仍未通过。可以采用完整修改建议，或继续自己修改并重新检查。"};
   }
 
   function warning(message){
@@ -164,10 +162,10 @@
     });
     const audit=auditForCurrent();
     const panel=document.querySelector(".ai-feedback-panel.warn");
-    if(panel&&audit?.inputLanguage==="en"&&audit.round>0&&audit.round<3){
+    if(panel&&audit?.inputLanguage==="en"&&audit.round===1){
       let note=panel.querySelector(".lexi-apply-round-note");
       if(!note){note=document.createElement("div");note.className="lexi-apply-round-note";note.style.cssText="font-size:12px;color:var(--muted);line-height:1.6;margin-top:8px";panel.appendChild(note);}
-      note.textContent=`提示第 ${audit.round} / 3 轮：先自己修改；第 3 次仍未通过时才显示完整修改建议。`;
+      note.textContent="先根据上面的具体问题自己改一次；修改后若仍未通过，下一次检查会直接给完整修改建议。";
     }
     if(state.allowed)warning("");
   }

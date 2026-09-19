@@ -2018,10 +2018,11 @@ async function sentenceFeedback(body) {
 4. 如果英文完全没包含目标词，优先在不改变原意的前提下自然补入目标词；如果确实无法合理补入，再 approved=false 并解释原因。
 5. keyword 必须是最终英文里实际出现的目标词或词形，用于界面高亮。
 6. suggestion 如果非空，应当是可直接保存的最终英文；修正版本身正确且含目标词时，level=good、approved=true。不要出现“判定有问题但不给修正句”的情况。
-7. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~2 个“实际发生的改动”，每条包含 from、to、reason。reason 必须是简洁、准确的一句中文，只解释为什么这样改（拼写、语法、搭配或自然度），不要泛泛讲语法课，不要解释没有改动的内容；不确定具体语法规则时，只说明更自然的实际用法，不要编造规则。suggestion 为空时 changes 必须为空数组。
+7. 英文输入只要没有完全通过，就必须返回 issues，最多 2 条。每条 issue 必须包含 span、reason、hint：span 是用户原句中实际有问题的片段；reason 用一句简洁中文说明问题属于拼写、语法、搭配或表达关系中的哪一种以及为什么；hint 只给修改方向，不直接给完整正确句。不要只说“检查语法/搭配/目标词”，必须指出具体位置。
+8. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~2 个“实际发生的改动”，每条包含 from、to、reason。reason 必须是简洁、准确的一句中文，只解释为什么这样改（拼写、语法、搭配或自然度），不要泛泛讲语法课，不要解释没有改动的内容；不确定具体语法规则时，只说明更自然的实际用法，不要编造规则。suggestion 为空时 changes 必须为空数组。
 
 只输出 JSON：
-{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}],"keyword":"最终英文中实际目标词/词形"}`;
+{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"不给完整答案的修改方向"}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}],"keyword":"最终英文中实际目标词/词形"}`;
 
   const result = await runCodexFastText(prompt, {
     timeoutMs: 15000,
@@ -2034,6 +2035,13 @@ async function sentenceFeedback(body) {
     level: parsed.level === "good" ? "good" : "warn",
     title: String(parsed.title || "审核完成"),
     tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(String) : [],
+    issues: Array.isArray(parsed.issues)
+      ? parsed.issues.slice(0, 2).map(item => ({
+          span: String(item?.span || "").trim().slice(0, 100),
+          reason: String(item?.reason || "").trim().slice(0, 160),
+          hint: String(item?.hint || "").trim().slice(0, 160),
+        })).filter(item => item.span || item.reason || item.hint)
+      : [],
     suggestion: String(parsed.suggestion || "").trim(),
     changes: Array.isArray(parsed.changes)
       ? parsed.changes.slice(0, 2).map(item => ({
@@ -2048,6 +2056,7 @@ async function sentenceFeedback(body) {
   };
 
   if (!feedback.suggestion) feedback.changes = [];
+  if (feedback.level === "good") feedback.issues = [];
   if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
   if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
 
