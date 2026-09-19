@@ -273,9 +273,23 @@
       ${feedbackHtml(card,s)}
     </div>`;
   }
+  function activeEditor(card,s){
+    const input=document.getElementById("apply-text");
+    if(!input||document.activeElement!==input||!s?.editing||s.submitting||s.promptLoading)return null;
+    const root=input.closest("[data-apply-stage-v3-root]");
+    return String(root?.dataset?.applyStageV3Root||"")===String(card?.id||"")?input:null;
+  }
   function render(){
     injectStyle();const host=document.querySelector(".study-card-focus"),card=currentCard();if(!host||!card)return;
-    const s=session(card);const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading,editing:s.editing,lastFix:s.lastFix});
+    const s=session(card);
+    // The textarea is a native editing island. While the learner is typing,
+    // no observer/decorator may replace it or refocus it; doing so reverses
+    // subsequent input by resetting the browser caret.
+    if(activeEditor(card,s)){
+      window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);
+      return;
+    }
+    const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading,editing:s.editing,lastFix:s.lastFix});
     if(host.dataset.applyStageV3===signature)return;
     host.dataset.applyStageV3=signature;host.innerHTML=html(card);
     window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);
@@ -396,8 +410,10 @@
   function handleComposerInput(input){
     if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
     s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;s.editing=true;s.pendingIssues=[];
+    const root=input.closest("[data-apply-stage-v3-root]");
+    root?.querySelector?.(".lexi-apply-v3-feedback")?.remove();
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
-    const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
+    const submitButton=root?.querySelector?.('[data-apply-stage-v3="submit"]')||document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
   }
 
   document.addEventListener("input",event=>{
@@ -423,7 +439,12 @@
     if(action==="refresh-prompt")void refreshPrompt();
   },true);
 
-  function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});}
+  function schedule(){
+    if(queued)return;
+    const card=currentCard();
+    if(card&&activeEditor(card,session(card)))return;
+    queued=true;requestAnimationFrame(()=>{queued=false;syncFromGateway();render();});
+  }
   function start(){
     const app=document.getElementById("app");if(!app)return;
     injectStyle();syncFromGateway();if(data)render();else void refresh(true).then(render);
