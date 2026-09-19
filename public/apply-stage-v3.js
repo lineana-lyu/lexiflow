@@ -139,25 +139,14 @@
     };
   }
   function feedbackIssues(fb){
-    const direct=Array.isArray(fb?.issues)?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.span||item.reason||item.hint||item.replacement):[];
-    if(direct.length)return direct;
-    return feedbackChanges(fb).map(change=>normalizeIssue({
-      span:change.from,
-      reason:change.reason||"这部分表达可以调整。",
-      hint:change.to?`建议改为 “${change.to}”`:"",
-      replacement:change.to,
-      category:change.category,
-      severity:change.severity,
-      blocking:change.blocking,
-    })).filter(item=>item.span&&item.replacement);
+    return Array.isArray(fb?.issues)
+      ?fb.issues.slice(0,3).map(normalizeIssue).filter(item=>item.span||item.reason||item.hint||item.replacement)
+      :[];
   }
   function blockingIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking===true);}
   function optionalIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking!==true);}
-  function issueReplacement(issue,changes){
-    const direct=norm(issue?.replacement);if(direct)return direct;
-    const span=norm(issue?.span).toLowerCase();
-    const match=(changes||[]).find(change=>norm(change.from).toLowerCase()===span&&norm(change.to));
-    return norm(match?.to);
+  function issueReplacement(issue){
+    return norm(issue?.replacement);
   }
   function issueRange(text,span){
     const source=String(text||""),target=norm(span);if(!source||!target)return null;
@@ -288,7 +277,7 @@
     const blockers=blockingIssues(issues);
     const optional=optionalIssues(issues);
     const good=Boolean(s.approved&&blockers.length===0);
-    const hasUnactionableBlocking=blockers.some(issue=>!issueReplacement(issue,changes));
+    const hasUnactionableBlocking=blockers.some(issue=>!issueReplacement(issue));
     const showFallback=Boolean(suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
     const title=blockers.length
       ?`发现 ${blockers.length} 处必须修改`
@@ -298,7 +287,7 @@
     const panelTone=blockers.length?"warn":(optional.length?"suggest":"good");
     return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
       <div class="lexi-apply-v3-feedback-head"><div><small>${blockers.length?"需要修改":optional.length?"可选优化":"检查结果"}</small><strong>${esc(title)}</strong></div></div>
-      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue,changes);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${hasSurfaceEdit(issue.span,replacement)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
+      ${issues.length?`<div class="lexi-apply-v3-issues">${issues.map((issue,index)=>{const replacement=issueReplacement(issue);const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"必须修改":(issue.severity==="warning"?"书写提醒":"表达建议");const actionText=issue.blocking?"一键改为":(issue.severity==="warning"?"一键修正":"一键优化为");return `<div class="lexi-apply-v3-issue ${tone}" data-issue-card="${index}"><span class="lexi-apply-v3-severity">${label}</span>${issue.span?`<strong>${esc(issue.span)}</strong>`:""}${issue.reason?`<p><b>原因：</b>${esc(issue.reason)}</p>`:""}${issue.hint?`<small><b>${issue.blocking?"怎么改":"可选方案"}：</b>${esc(issue.hint)}</small>`:""}${hasSurfaceEdit(issue.span,replacement)?`<button class="btn lexi-apply-v3-issue-fix" type="button" data-apply-stage-v3="fix-issue" data-issue-index="${index}">${actionText} ${esc(replacement)}</button>`:""}</div>`;}).join("")}</div>`:""}
       ${showFallback?`<div class="lexi-apply-v3-complete-label">AI 无法安全拆成局部修改，给出完整修正版</div><div class="lexi-apply-v3-suggestion">${esc(suggestion)}</div>`:""}
       ${showFallback&&changes.length?`<div class="lexi-apply-v3-changes"><strong>修改原因</strong>${changes.map(change=>{const line=change.from&&change.to?`${change.from} → ${change.to}`:(change.to||change.from);return `<div class="lexi-apply-v3-change">${line?`<div class="lexi-apply-v3-change-line">${esc(line)}</div>`:""}${change.reason?`<p>${esc(change.reason)}</p>`:""}</div>`;}).join("")}</div>`:""}
       ${!issues.length&&tips.length?`<div class="lexi-apply-v3-tips">${tips.map(tip=>`<span>• ${esc(tip)}</span>`).join("")}</div>`:""}
@@ -422,7 +411,7 @@
     const card=currentCard();if(!card)return;const s=session(card);
     const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
     if(!issue)return;
-    const replacement=issueReplacement(issue,changes),range=issueRange(s.text,issue.span);
+    const replacement=issueReplacement(issue),range=issueRange(s.text,issue.span);
     if(!replacement||!range||!hasSurfaceEdit(issue.span,replacement))return;
     if(s.text&&!s.originalText)s.originalText=s.text;
 
