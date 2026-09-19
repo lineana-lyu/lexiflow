@@ -37,7 +37,7 @@ async function shot(page, name) {
   page.on("console", msg => console.log("[browser]", msg.type(), msg.text()));
   page.on("pageerror", err => console.error("[pageerror]", err.message));
 
-  await page.goto(BASE, { waitUntil: "networkidle", timeout: 60000 });
+  await page.goto(BASE, { waitUntil: "domcontentloaded", timeout: 60000 });
   await waitForText(page, "今日学习");
   await shot(page, "01-today-empty.png");
 
