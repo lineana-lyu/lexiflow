@@ -72,7 +72,7 @@ assert(server.includes("不要把个人风格偏好伪装成 error")&&server.inc
 assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\"")&&server.includes("\"severity\":\"error|improve|polish\"")&&server.includes("\"blocking\":true"),"server feedback must locate problem spans and classify whether they block completion");
 assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
 assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic English mechanics with AI diagnostics before approval");
-assert(server.includes("issues 之间的 span 不得重叠")&&server.includes("必须合并成一条 issue")&&server.includes("最多额外返回 1 条 improve/polish"),"AI contract must merge overlapping corrections while still preserving one independent optional naturalness suggestion");
+assert(server.includes("issues 必须按“独立可执行修改”拆分")&&server.includes("不同的词或不同的连续片段")&&server.includes("不得臆测“句首、句中、从句、时态”等位置或语法条件"),"AI contract must require atomic corrections and evidence-bound explanations instead of broad inferred grammar stories");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
 assert(applyStage.includes("lexi-apply-v3-inline-issue.blocking")&&applyStage.includes("lexi-apply-v3-inline-issue.optional"),"Apply must visually distinguish blocking red errors from optional yellow suggestions");
@@ -80,6 +80,7 @@ assert(applyStage.includes("lexi-apply-v3-review-composer")&&applyStage.includes
 assert(applyStage.includes("background:rgba(201,73,73,.12)")&&applyStage.includes("background:rgba(210,159,54,.14)")&&!applyStage.includes("border-bottom:2px solid rgba(194,74,74,.72)"),"blocking errors must use soft red and optional suggestions soft yellow without underline UI");
 assert(applyStage.includes("function normalizeIssue(")&&applyStage.includes("function blockingIssues(")&&applyStage.includes("function optionalIssues("),"Apply must normalize issue severity and separate blocking from optional diagnostics");
 assert(applyStage.includes("function coalesceIssues(text,issues=[])")&&applyStage.includes("candidate._range.start<item._range.end")&&applyStage.includes("mergeDisplayIssues(text,mergedBlocking,freshOptional)"),"Apply UI must coalesce any residual overlapping diagnostics before rendering");
+assert(applyStage.includes("filter(issue=>issue.blocking).slice(0,3)")&&applyStage.includes("blockingIssues(merged).slice(0,3)")&&applyStage.includes("3-required.length"),"all three review slots must be available to blocking errors so the checker does not reveal hidden required fixes in later rounds");
 assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键优化为"),"blocking errors and optional suggestions must both explain the reason while using different action language");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("const surfaceNorm=")&&applyStage.includes("const hasSurfaceEdit="),"Apply must distinguish visible edits from semantic-copy normalization");
@@ -109,5 +110,30 @@ const actionable=feedbackContract.normalizeSentenceDiagnostics(
 );
 assert(actionable.length===1&&actionable[0].replacement==="dependable, because","diagnostic merge must prefer an actionable replacement when issue and change cover the same span");
 assert(!actionable[0].reason.includes("。；"),"diagnostic merge must keep reason punctuation canonical");
+
+const pronounMechanics=feedbackContract.detectEnglishMechanics("My ride-or-die is exuberant, and i often climb montain with her in sunday");
+const pronounI=pronounMechanics.find(issue=>issue.span==="i");
+assert(pronounI&&pronounI.replacement==="I","deterministic mechanics must catch lowercase first-person pronoun I anywhere in the sentence");
+assert(!pronounI.reason.includes("句首")&&pronounI.reason.includes("无论位于句中何处"),"pronoun-I explanation must state the actual rule instead of inventing a sentence-initial condition");
+
+const broadSentence="My ride-or-die is exuberant, and i often climb montain with her in sunday";
+const broadIssue={
+  span:"i often climb montain with her in sunday",
+  reason:"句首人称代词 I 必须大写；montain 拼写错误，应为 mountains；表示每周日应使用 on Sundays；修正大小写、拼写、名词单复数和时间介词",
+  hint:"统一修正大小写、拼写和介词",
+  replacement:"I often climb mountains with her on Sundays",
+  severity:"error",blocking:true,
+};
+const atomic=feedbackContract.normalizeSentenceDiagnostics(
+  broadSentence,
+  [...pronounMechanics,broadIssue],
+  [],
+  false,
+  "warn"
+);
+assert(atomic.length===3&&atomic.every(issue=>issue.blocking),"one broad model correction with three independent edits must normalize into three blocking actions in the same review");
+assert(atomic[0].span==="i"&&atomic[0].replacement==="I"&&!atomic[0].reason.includes("句首"),"atomic normalization must replace unsupported positional explanations with the evidence-backed pronoun rule");
+assert(atomic.some(issue=>issue.span==="montain"&&issue.replacement==="mountains"),"atomic normalization must preserve the spelling/number edit as its own action");
+assert(atomic.some(issue=>issue.span==="in sunday"&&issue.replacement==="on Sundays"),"atomic normalization must preserve the time-preposition/day expression edit as its own action");
 
 console.log("Apply Quality V3 contract checks passed.");
