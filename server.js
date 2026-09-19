@@ -2138,8 +2138,8 @@ async function sentenceFeedback(body) {
     issues: Array.isArray(parsed.issues)
       ? parsed.issues.slice(0, 3).map(item => ({
           span: String(item?.span || "").trim().slice(0, 100),
-          start: Number.isInteger(Number(item?.start)) ? Number(item.start) : null,
-          end: Number.isInteger(Number(item?.end)) ? Number(item.end) : null,
+          start: Number.isInteger(item?.start) ? item.start : null,
+          end: Number.isInteger(item?.end) ? item.end : null,
           reason: normalizeFeedbackCopy(item?.reason).slice(0, 160),
           hint: normalizeFeedbackCopy(item?.hint).slice(0, 160),
           replacement: String(item?.replacement || "").trim().slice(0, 120),
