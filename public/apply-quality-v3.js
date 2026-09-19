@@ -57,8 +57,8 @@
     const approved=feedback.approved!==false&&feedback.level==="good";
     const inputLanguage=feedback.inputLanguage==="zh"||hasChinese(sentence)?"zh":"en";
     const key=keyOf(cardId,word,meaning);
-    const originalPass=Boolean(approved&&inputLanguage==="en"&&!suggestion);
-    const suggestionPass=Boolean(approved&&suggestion);
+    const originalPass=Boolean(approved&&inputLanguage==="en");
+    const suggestionPass=Boolean(suggestion);
     const audit={
       key,cardId,word,meaning,inputSentence:sentence,inputLanguage,
       originalPass,suggestionPass,suggestion,
