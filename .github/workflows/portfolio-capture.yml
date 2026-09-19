@@ -1,0 +1,69 @@
+name: Capture portfolio pages
+
+on:
+  push:
+    branches:
+      - portfolio-capture
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: portfolio-capture
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Prepare local dictionaries
+        run: npm run prepare:dictionary
+
+      - name: Start LexiFlow web runtime
+        run: |
+          LEXIFLOW_NO_OPEN=1 npm run web > /tmp/lexiflow.log 2>&1 &
+          echo $! > /tmp/lexiflow.pid
+          for i in {1..90}; do
+            if curl -fsS http://127.0.0.1:4177/api/health >/dev/null; then
+              echo "LexiFlow is ready"
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://127.0.0.1:4177/api/health
+
+      - name: Capture real UI
+        run: node scripts/capture-portfolio-pages.mjs
+
+      - name: Show runtime log
+        if: always()
+        run: tail -n 120 /tmp/lexiflow.log || true
+
+      - name: Commit captures
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add portfolio-captures/
+          if git diff --cached --quiet; then
+            echo "No capture changes"
+          else
+            git commit -m "Capture real LexiFlow UI for portfolio"
+            git push origin HEAD:portfolio-capture
+          fi
