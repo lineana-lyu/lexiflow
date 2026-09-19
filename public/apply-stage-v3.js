@@ -263,7 +263,7 @@
       :(blockers.length?"浅红色位置必须处理后才能继续。":optional.length?"浅黄色建议可选，不影响继续学习。":s.approved?"这句话已经通过检查。":"如需调整，可以继续修改。");
     const composer=reviewMode
       ?`<div class="lexi-apply-v3-composer lexi-apply-v3-review-composer apply-composer"><div><div class="lexi-apply-v3-review-label">${reviewLabel}</div><div class="lexi-apply-v3-review-sentence">${reviewSentence}</div></div><div class="lexi-apply-v3-composer-bottom"><span>${reviewHint}</span><button class="btn" type="button" data-apply-stage-v3="edit">继续修改</button></div></div>`
-      :`<div class="lexi-apply-v3-composer apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" spellcheck="false" placeholder="中文或英文都可以，先写你真正想表达的话…">${esc(text)}</textarea><div class="lexi-apply-v3-composer-bottom"><span>Enter 检查 · Shift + Enter 换行</span><button class="btn primary" type="button" data-action="submit-apply" data-apply-stage-v3="submit" ${s.submitting||!text.trim()?"disabled":""}>${s.submitting?"AI 正在检查…":"检查表达"}</button></div></div>`;
+      :`<div class="lexi-apply-v3-composer apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" spellcheck="false" data-lexiflow-render-lock="study-editor" data-lexiflow-render-route="study" data-lexiflow-render-card="${esc(card.id)}" data-lexiflow-render-stage="apply" placeholder="中文或英文都可以，先写你真正想表达的话…">${esc(text)}</textarea><div class="lexi-apply-v3-composer-bottom"><span>Enter 检查 · Shift + Enter 换行</span><button class="btn primary" type="button" data-action="submit-apply" data-apply-stage-v3="submit" ${s.submitting||!text.trim()?"disabled":""}>${s.submitting?"AI 正在检查…":"检查表达"}</button></div></div>`;
     return `<div class="apply-learning-stage lexi-apply-stage-v3" data-apply-stage-v3-root="${esc(card.id)}">
       <div class="lexi-apply-v3-head apply-word-hero"><div class="lexi-apply-v3-word"><strong class="target-word-text">${esc(card.word)}</strong><button type="button" class="speaker" data-apply-stage-v3="speak-word" aria-label="播放发音">🔊</button></div><div class="lexi-apply-v3-meta">${esc(phonetic(card.phonetic))}${card.pos?` · ${esc(card.pos)}`:""}</div><span class="lexi-apply-v3-meaning">${esc(card.meaningZh||"")}</span></div>
       <div class="lexi-apply-v3-prompt ai-practice-prompt"><div><small>先自己表达，再让 AI 检查</small><strong>${esc(prompt)}</strong></div><button class="text-action" type="button" data-apply-stage-v3="refresh-prompt" ${s.promptLoading||s.submitting?"disabled":""}>${s.promptLoading?"正在换一个…":"换一个话题"}</button></div>
@@ -282,17 +282,13 @@
   function render(){
     injectStyle();const host=document.querySelector(".study-card-focus"),card=currentCard();if(!host||!card)return;
     const s=session(card);
-    // The textarea is a native editing island. While the learner is typing,
-    // no observer/decorator may replace it or refocus it; doing so reverses
-    // subsequent input by resetting the browser caret.
-    if(activeEditor(card,s)){
-      window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);
-      return;
-    }
+    // Keep the native textarea node mounted while it owns focus. app.js also
+    // honors the render-lock marker, so background shell updates cannot replace
+    // this editor from above.
+    if(activeEditor(card,s))return;
     const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading,editing:s.editing,lastFix:s.lastFix});
     if(host.dataset.applyStageV3===signature)return;
     host.dataset.applyStageV3=signature;host.innerHTML=html(card);
-    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text);
     if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
   }
 
@@ -373,7 +369,6 @@
     s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;
     s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
     const caret=s.lastFix.end;
-    window.LexiFlowApplyInputGuardV3?.setDraft?.(card.id,next);
     render();
     setTimeout(()=>{
       const live=currentCard();if(!live||String(live.id)!==String(card.id))return;
@@ -454,7 +449,6 @@
   window.LexiFlowApplyStageV3=Object.freeze({
     isBusy(){const card=currentCard();return Boolean(card&&session(card).promptLoading);},
     currentState,
-    handleInput(input){handleComposerInput(input);},
   });
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();
 })();

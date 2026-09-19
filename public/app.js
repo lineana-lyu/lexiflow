@@ -29,6 +29,47 @@
     lookupAlternativesOpen: false,
   };
 
+  // Destructive app-shell renders must not replace a focused study editor.
+  // This follows the same DOM-identity principle used by keyed/permanent DOM
+  // renderers: background state may update immediately, while the focused
+  // native editor node remains mounted until the learner leaves it.
+  let deferredRenderPending=false;
+  let deferredRenderFlushQueued=false;
+
+  function activeRenderLock(){
+    const active=document.activeElement;
+    if(!active?.matches?.("[data-lexiflow-render-lock]"))return null;
+    const route=String(active.dataset.lexiflowRenderRoute||"");
+    if(route&&route!==String(state.route||""))return null;
+    if(route==="study"){
+      const cardId=String(active.dataset.lexiflowRenderCard||"");
+      if(cardId&&cardId!==String(state.study?.cardId||""))return null;
+      const expectedStage=String(active.dataset.lexiflowRenderStage||"");
+      if(expectedStage){
+        const card=getCard(cardId||state.study?.cardId);
+        const actualStage=window.LexiFlowLearningCore?.canonicalStage?.(card)||String(card?.learningStage||card?.stage||"");
+        if(actualStage&&actualStage!==expectedStage)return null;
+      }
+    }
+    return active;
+  }
+
+  function flushDeferredRender(){
+    if(!deferredRenderPending||deferredRenderFlushQueued)return;
+    deferredRenderFlushQueued=true;
+    queueMicrotask(()=>{
+      deferredRenderFlushQueued=false;
+      if(!deferredRenderPending||activeRenderLock())return;
+      deferredRenderPending=false;
+      render();
+    });
+  }
+
+  document.addEventListener("focusout",event=>{
+    if(!event.target?.matches?.("[data-lexiflow-render-lock]"))return;
+    flushDeferredRender();
+  },true);
+
   function defaultData(){
     return {
       version: APP_VERSION,
@@ -1434,6 +1475,12 @@
 
   function render(){
     const app=document.getElementById("app");
+    if(!app)return;
+    if(activeRenderLock()){
+      deferredRenderPending=true;
+      return;
+    }
+    deferredRenderPending=false;
     let html;
     if(state.route==="home") html=homePage();
     else if(state.route==="add") html=addPage();

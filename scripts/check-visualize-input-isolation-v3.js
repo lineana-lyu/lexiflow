@@ -6,7 +6,8 @@ const root=path.join(__dirname,"..");
 const index=fs.readFileSync(path.join(root,"public","index.html"),"utf8").replace(/\r\n/g,"\n");
 const guard=fs.readFileSync(path.join(root,"public","visualize-input-guard-v3.js"),"utf8").replace(/\r\n/g,"\n");
 
-assert(index.includes('<script src="./visualize-input-guard-v3.js"></script>\n  <script src="./apply-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'),"Visualize and Apply input guards must both load before the legacy app shell");
+assert(index.includes('<script src="./visualize-input-guard-v3.js"></script>\n  <script src="./app.js"></script>'),"Visualize input guard must load before the legacy app shell");
+assert(!index.includes("apply-input-guard-v3.js"),"Apply must rely on app-shell render ownership rather than a remount recovery guard");
 assert(guard.includes('if(input?.id!=="visual-note")return;'),"Visualize input guard must scope itself to visual-note only");
 assert(guard.includes("event.stopImmediatePropagation();"),"Visualize note input must stop legacy/global input handlers from remounting the stage");
 assert(guard.includes("setDraft(cardId,input.value);")&&guard.includes("function clearDraft(cardId)"),"Visualize input guard must retain the current draft through the shared draft authority and be able to clear stale residue");
