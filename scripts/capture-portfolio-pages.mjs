@@ -87,5 +87,108 @@ for (const [name, label] of routes) {
   }
 }
 
+
+async function setStage(stage, patch = {}) {
+  const cardId = await page.evaluate(async ({ stage, patch }) => {
+    const payload = await fetch('/api/learning-data', { cache: 'no-store' }).then(r => r.json());
+    const data = payload.data;
+    const card = data.cards[0];
+    if (!card) throw new Error('NO_CARD_FOR_STAGE_CAPTURE');
+
+    card.stage = stage;
+    card.learningStage = stage;
+    card.inboxPending = false;
+    card.memoryState = patch.memoryState ?? (stage === 'review' ? 'reinforcing' : '');
+    Object.assign(card, patch);
+
+    if (stage === 'review') {
+      const d = new Date();
+      const day = [d.getFullYear(), String(d.getMonth() + 1).padStart(2, '0'), String(d.getDate()).padStart(2, '0')].join('-');
+      data.dailyPlan = {
+        version: 3,
+        date: day,
+        frozen: true,
+        review: [card.id],
+        memorize: [],
+        visualize: [],
+        apply: [],
+        select: [],
+        remainingSelectSlots: 0,
+      };
+    }
+
+    await fetch('/api/learning-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data, appShellAuthority: 'portfolio-capture' }),
+    });
+
+    for (const key of Object.keys(localStorage)) {
+      if (key.startsWith('lexiflow-')) localStorage.removeItem(key);
+    }
+    return card.id;
+  }, { stage, patch });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2200);
+  return cardId;
+}
+
+const stageCardId = await setStage('memorize', { memorizeRound: 1 });
+await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
+await page.waitForSelector('.lexi-m2', { timeout: 15000 });
+const revealButton = page.locator('[data-m2="reveal"]').first();
+if (await revealButton.count()) {
+  await revealButton.click();
+  await page.waitForTimeout(450);
+}
+await capture('stage-memorize-grow');
+
+await setStage('visualize', {
+  visualNote: '',
+  imageData: null,
+  imageUrl: '',
+  visualSceneSuggestion: null,
+  visualImageConfirmed: false,
+});
+await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
+await page.waitForSelector('[data-visualize-stage-v3]', { timeout: 15000 });
+await page.locator('#visual-note').fill('想到阳台上的薄荷从一小株慢慢长高，我每天给它浇水。');
+await page.waitForTimeout(350);
+await capture('stage-visualize-grow');
+
+await setStage('apply', {
+  userSentence: '',
+  practicePrompt: { question: '说说一个你想持续成长的真实目标。' },
+});
+await page.evaluate(id => window.LexiFlowStudyRenderer.openCard(id), stageCardId);
+await page.waitForSelector('[data-apply-stage-v3-root]', { timeout: 15000 });
+await page.locator('#apply-text').fill('I want to grow into a better product manager by building real products.');
+await page.waitForTimeout(350);
+await capture('stage-apply-grow');
+
+await setStage('review', {
+  reviewCount: 0,
+  reviewStep: 0,
+  initialReviewPending: true,
+  nextReviewAt: new Date().toISOString(),
+  memoryState: 'reinforcing',
+});
+await page.evaluate(() => window.LexiFlowReviewSessionV3.restart());
+await page.waitForSelector('.lexi-r3-card', { timeout: 15000 });
+const reviewReveal = page.locator('[data-r3="reveal"]').first();
+if (await reviewReveal.count()) {
+  await reviewReveal.click();
+  await page.waitForTimeout(350);
+} else {
+  const reviewInput = page.locator('#lexi-r3-answer');
+  if (await reviewInput.count()) {
+    await reviewInput.fill('grow');
+    await page.locator('[data-r3="check"]').click();
+    await page.waitForTimeout(350);
+  }
+}
+await capture('stage-review-grow');
+
 await fs.writeFile(path.join(outDir, 'browser-console.txt'), consoleLines.join('\n'), 'utf8');
 await browser.close();
