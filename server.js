@@ -2021,7 +2021,7 @@ async function sentenceFeedback(body) {
 7. 英文输入只要没有完全通过，就必须返回 issues，最多 3 条。每条 issue 必须包含 span、reason、hint、replacement：span 必须是用户原句中真实存在的一段连续文本，尽量选能唯一定位的最小片段；replacement 是可以直接替换 span 的最小修正文本。只有无法可靠做局部替换时 replacement 才允许为空。
 8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
 9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
-10. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~3 个“实际发生的改动”，每条包含 from、to、reason。reason 同样必须具体，不得只写“表达更自然”。suggestion 为空时 changes 必须为空数组。
+10. 只有 suggestion 非空时才返回 changes。changes 只列最重要的 1~3 个“实际发生的改动”，每条包含 from、to、reason。reason 同样必须具体，不得只写“表达更自然”。suggestion 为空时 changes 必须为空数组。\n11. issues 只用于“必须修改才能通过”的问题。若原句语法成立、词义正确，只是存在另一种更地道或更偏好的表达，不要把它列为 issue，也不要阻止通过；这类可选润色最多放到 tips。不要把个人风格偏好伪装成错误。
 
 只输出 JSON：
 {"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正"}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}],"keyword":"最终英文中实际目标词/词形"}`;

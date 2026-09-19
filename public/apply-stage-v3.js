@@ -72,7 +72,7 @@
   }
   function session(card){
     let value=sessions.get(card.id);
-    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null,editing:true};sessions.set(card.id,value);}
+    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null,editing:true,pendingIssues:[]};sessions.set(card.id,value);}
     return value;
   }
   function currentState(){
@@ -89,6 +89,7 @@
       submitting:Boolean(s.submitting),
       editing:Boolean(s.editing),
       feedback:s.feedback||null,
+      pendingIssueCount:Array.isArray(s.pendingIssues)?s.pendingIssues.length:0,
     });
   }
 
@@ -129,6 +130,19 @@
     let start=source.indexOf(target);
     if(start<0)start=source.toLowerCase().indexOf(target.toLowerCase());
     return start<0?null:{start,end:start+target.length};
+  }
+  function survivingIssues(text,issues=[]){
+    return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue?.span));
+  }
+  function mergeIssues(text,fresh=[],carryover=[]){
+    const result=[];
+    for(const issue of [...(Array.isArray(fresh)?fresh:[]),...survivingIssues(text,carryover)]){
+      const span=norm(issue?.span);if(!span)continue;
+      const key=copyNorm(span);
+      if(result.some(item=>copyNorm(item.span)===key))continue;
+      result.push(issue);
+    }
+    return result.slice(0,3);
   }
   function diagnosticSentenceHtml(text,issues,lastFix=null){
     const source=String(text||""),ranges=[];
@@ -244,10 +258,14 @@
       const payload=window.LexiFlowApplyQualityV3?.processFeedback?.(rawPayload,{cardId:card.id,word:card.word,meaningZh:card.meaningZh,sentence:text})||rawPayload;
       const fb=payload.feedback||{};const suggestion=norm(fb.suggestion);const inputLanguage=fb.inputLanguage==="zh"||/[\u3400-\u9fff]/.test(text)?"zh":"en";
       const keyword=norm(fb.keyword||card.word)||card.word;const candidate=suggestion||text;const keywordOk=usesTarget(candidate,keyword)||usesTarget(candidate,card.word);
+      const freshIssues=feedbackIssues(fb);
+      const mergedIssues=mergeIssues(text,freshIssues,s.pendingIssues);
       const candidateApproved=fb.approved!==false&&fb.level==="good"&&keywordOk&&!(inputLanguage==="zh"&&!suggestion);
-      s.approved=Boolean(inputLanguage==="en"&&!suggestion&&candidateApproved);
+      const fullyApproved=Boolean(candidateApproved&&mergedIssues.length===0);
+      s.pendingIssues=mergedIssues;
+      s.approved=Boolean(inputLanguage==="en"&&!suggestion&&fullyApproved);
       s.suggestionApproved=Boolean(suggestion&&candidateApproved);
-      s.feedback={...fb,inputLanguage,keyword,level:candidateApproved?"good":"warn",suggestion};
+      s.feedback={...fb,inputLanguage,keyword,issues:mergedIssues,level:fullyApproved?"good":"warn",suggestion};
     }catch(err){
       console.error("Apply Stage V3 check failed",err);
       s.feedback={level:"warn",title:"AI 暂时没有完成检查",tips:["你的句子还在，可以直接再试一次。"],suggestion:""};s.approved=false;s.suggestionApproved=false;
@@ -276,6 +294,8 @@
     if(!replacement||!range)return;
     if(s.text&&!s.originalText)s.originalText=s.text;
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
+    const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
+    s.pendingIssues=survivingIssues(next,unresolved);
     s.text=next;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;
     s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
     const caret=s.lastFix.end;
@@ -291,12 +311,12 @@
   function adopt(){
     const card=currentCard();if(!card)return;const s=session(card);const suggestion=norm(s.feedback?.suggestion);if(!suggestion||!s.suggestionApproved)return;
     if(s.text&&!s.originalText)s.originalText=s.text;
-    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;render();
+    s.text=suggestion;s.approved=true;s.feedback={...s.feedback,title:"已采用通过检查的修改建议",suggestion:"",issues:[],changes:[],tips:[]};s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];render();
   }
 
   function restore(){
     const card=currentCard();if(!card)return;const s=session(card);if(!s.originalText)return;
-    s.text=s.originalText;s.originalText="";s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=true;s.lastFix=null;render();
+    s.text=s.originalText;s.originalText="";s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=true;s.lastFix=null;s.pendingIssues=[];render();
   }
 
   async function refreshPrompt(){
@@ -315,7 +335,7 @@
 
   function handleComposerInput(input){
     if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;s.editing=true;
+    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;s.editing=true;s.pendingIssues=[];
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
     const submitButton=document.querySelector('[data-apply-stage-v3="submit"]');if(submitButton)submitButton.disabled=!text.trim()||s.submitting;
   }
