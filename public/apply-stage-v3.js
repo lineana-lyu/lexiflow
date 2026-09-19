@@ -470,21 +470,22 @@
 
   function applyIssueFix(index){
     const card=currentCard();if(!card)return;const s=session(card);
-    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
+    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),actions=feedbackActions(s.feedback),issue=issues[Number(index)];
     if(!issue)return;
-    const replacement=issueReplacement(issue),range=issueRange(s.text,issue);
-    if(!replacement||!range||!hasSurfaceEdit(issue.span,replacement))return;
+    const action=actionForIssue(issue,actions),range=actionRange(s.text,action),replacement=String(action?.replacement??"");
+    if(!action||!replacement||!range||!hasSurfaceEdit(action.before,replacement))return;
     if(s.text&&!s.originalText)s.originalText=s.text;
 
-    // One AI check creates one correction transaction. Applying an AI-proposed
-    // local fix consumes that issue from the same transaction; it must not
-    // silently start a fresh generative review and move the goalposts.
+    // Diagnostics and code actions are separate. The highlighted diagnostic can
+    // be broader than the verified edit, but the click applies only the
+    // independently planned and validated action range.
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
     const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
     const rebased=rebaseIssuesAfterEdit(s.text,unresolved,range,replacement.length);
     const surviving=survivingIssues(next,rebased);
     const remainingBlocking=blockingIssues(surviving);
     const remainingOptional=optionalIssues(surviving);
+    const remainingActions=rebaseActionsAfterEdit(s.text,actions,range,replacement.length,issue.id);
     const keyword=norm(s.feedback?.keyword||card.word)||card.word;
     const keywordOk=usesTarget(next,keyword)||usesTarget(next,card.word);
     const english=!/[\u3400-\u9fff]/.test(next);
@@ -497,12 +498,13 @@
     s.suggestionApproved=Boolean(!approved&&s.suggestionApproved);
     s.checkError=null;
     s.editing=false;
-    s.lastFix={start:range.start,end:range.start+replacement.length,from:issue.span,to:replacement,at:Date.now()};
+    s.lastFix={start:range.start,end:range.start+replacement.length,from:action.before,to:replacement,at:Date.now()};
     s.feedback={
       ...(s.feedback||{}),
       approved,
       level:approved?"good":"warn",
       issues:[...remainingBlocking,...remainingOptional],
+      actions:remainingActions,
       changes:remainingChanges,
       tips:[],
       suggestion:approved?"":norm(s.feedback?.suggestion),
