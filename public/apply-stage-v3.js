@@ -72,7 +72,7 @@
   }
   function session(card){
     let value=sessions.get(card.id);
-    if(!value){value={text:restorableDraft(card),feedback:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null,editing:true,pendingIssues:[]};sessions.set(card.id,value);}
+    if(!value){value={text:restorableDraft(card),feedback:null,checkError:null,submitting:false,originalText:"",approved:false,suggestionApproved:false,promptLoading:false,lastFix:null,editing:true,pendingIssues:[]};sessions.set(card.id,value);}
     return value;
   }
   function currentState(){
@@ -89,6 +89,7 @@
       submitting:Boolean(s.submitting),
       editing:Boolean(s.editing),
       feedback:s.feedback||null,
+      checkError:s.checkError||null,
       pendingIssueCount:Array.isArray(s.pendingIssues)?s.pendingIssues.length:0,
     });
   }
@@ -97,7 +98,7 @@
     if(document.getElementById("lexi-apply-stage-v3-style"))return;
     const style=document.createElement("style");style.id="lexi-apply-stage-v3-style";
     style.textContent=`
-      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-review-composer{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#fff;min-height:125px;display:grid;align-content:space-between;gap:18px}.lexi-apply-v3-review-label{font-size:11px;color:var(--muted)}.lexi-apply-v3-review-sentence{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:1px 3px;margin:0;color:var(--text);font:inherit;line-height:inherit;border-radius:5px;cursor:pointer}.lexi-apply-v3-inline-issue.blocking{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13);animation:lexi-apply-issue-in .28s ease both}.lexi-apply-v3-inline-issue.blocking:hover{background:rgba(201,73,73,.18);box-shadow:inset 0 0 0 1px rgba(201,73,73,.22)}.lexi-apply-v3-inline-issue.optional{background:rgba(210,159,54,.14);box-shadow:inset 0 0 0 1px rgba(210,159,54,.16)}.lexi-apply-v3-inline-issue.optional:hover{background:rgba(210,159,54,.20)}.lexi-apply-v3-inline-fixed{padding:1px 3px;border-radius:5px;background:rgba(70,139,94,.12);color:#39734d;box-shadow:inset 0 0 0 1px rgba(70,139,94,.10)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.blocking{background:rgba(201,73,73,.045);border-color:rgba(201,73,73,.13)}.lexi-apply-v3-issue.optional{background:rgba(210,159,54,.055);border-color:rgba(210,159,54,.16)}.lexi-apply-v3-issue.active{box-shadow:0 0 0 3px rgba(110,122,114,.07)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-severity{font-size:10.5px;font-weight:750;letter-spacing:.03em}.lexi-apply-v3-issue.blocking .lexi-apply-v3-severity{color:#a84f4f}.lexi-apply-v3-issue.optional .lexi-apply-v3-severity{color:#9a7527}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(201,73,73,0);box-shadow:inset 0 0 0 1px rgba(201,73,73,0)}100%{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13)}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
+      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback.error{background:rgba(174,86,67,.045);border-color:rgba(174,86,67,.16)}.lexi-apply-v3-error-message{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.lexi-apply-v3-error-code{font-size:11px;color:var(--muted)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-review-composer{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#fff;min-height:125px;display:grid;align-content:space-between;gap:18px}.lexi-apply-v3-review-label{font-size:11px;color:var(--muted)}.lexi-apply-v3-review-sentence{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:1px 3px;margin:0;color:var(--text);font:inherit;line-height:inherit;border-radius:5px;cursor:pointer}.lexi-apply-v3-inline-issue.blocking{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13);animation:lexi-apply-issue-in .28s ease both}.lexi-apply-v3-inline-issue.blocking:hover{background:rgba(201,73,73,.18);box-shadow:inset 0 0 0 1px rgba(201,73,73,.22)}.lexi-apply-v3-inline-issue.optional{background:rgba(210,159,54,.14);box-shadow:inset 0 0 0 1px rgba(210,159,54,.16)}.lexi-apply-v3-inline-issue.optional:hover{background:rgba(210,159,54,.20)}.lexi-apply-v3-inline-fixed{padding:1px 3px;border-radius:5px;background:rgba(70,139,94,.12);color:#39734d;box-shadow:inset 0 0 0 1px rgba(70,139,94,.10)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.blocking{background:rgba(201,73,73,.045);border-color:rgba(201,73,73,.13)}.lexi-apply-v3-issue.optional{background:rgba(210,159,54,.055);border-color:rgba(210,159,54,.16)}.lexi-apply-v3-issue.active{box-shadow:0 0 0 3px rgba(110,122,114,.07)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-severity{font-size:10.5px;font-weight:750;letter-spacing:.03em}.lexi-apply-v3-issue.blocking .lexi-apply-v3-severity{color:#a84f4f}.lexi-apply-v3-issue.optional .lexi-apply-v3-severity{color:#9a7527}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(201,73,73,0);box-shadow:inset 0 0 0 1px rgba(201,73,73,0)}100%{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13)}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
     `;document.head.appendChild(style);
   }
 
@@ -212,10 +213,51 @@
     return out+esc(source.slice(cursor));
   }
 
+  function normalizeCheckError(err){
+    const code=norm(err?.code)||"APPLY_CHECK_FAILED";
+    const title=norm(err?.title)||"AI 检查没有完成";
+    const message=norm(err?.userMessage||err?.message)||"这次检查没有返回可用结果。你的句子已经保留，可以直接重试。";
+    return {code,title,message};
+  }
+
+  async function requestApplyCheck(body){
+    let response;
+    try{
+      response=await fetch("/api/ai/text",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+    }catch(cause){
+      const err=new Error("LexiFlow 没有连接到本地 AI 服务。请确认应用仍在运行，然后再试一次。");
+      err.code="APPLY_CHECK_NETWORK";err.title="无法连接本地 AI";err.cause=cause;throw err;
+    }
+    let payload=null;
+    try{payload=await response.json();}catch{}
+    if(!response.ok||payload?.ok===false){
+      const user=payload?.userError||{};
+      const err=new Error(norm(user.message||payload?.error)||`AI 检查请求失败（HTTP ${response.status}）。`);
+      err.code=norm(user.code||payload?.code)||`HTTP_${response.status}`;
+      err.title=norm(user.title)||"AI 检查没有完成";
+      err.userMessage=norm(user.message||payload?.error)||err.message;
+      throw err;
+    }
+    if(!payload?.feedback){
+      const err=new Error("AI 已响应，但没有返回可用于检查的反馈数据。请直接再检查一次。");
+      err.code="APPLY_CHECK_INVALID_RESPONSE";err.title="AI 返回结果不完整";throw err;
+    }
+    return payload;
+  }
+
   function feedbackHtml(card,s){
     if(s.submitting){
       const checkingCopy=s.lastFix?"AI 正在重新检查你的表达":"AI 正在检查你的表达";
       return `<div class="lexi-apply-v3-feedback"><div class="lexi-apply-v3-feedback-head"><div><small>正在检查</small><strong>${checkingCopy}</strong></div><span class="mini-spinner"></span></div><div style="color:var(--muted);font-size:13px">检查完成后，红色错误必须处理；黄色建议可以保留原句。</div></div>`;
+    }
+    if(s.checkError){
+      const error=s.checkError;
+      return `<div class="lexi-apply-v3-feedback error ai-feedback-panel warn">
+        <div class="lexi-apply-v3-feedback-head"><div><small>检查未完成</small><strong>${esc(error.title)}</strong></div></div>
+        <p class="lexi-apply-v3-error-message"><b>原因：</b>${esc(error.message)}</p>
+        ${error.code?`<span class="lexi-apply-v3-error-code">错误代码：${esc(error.code)}</span>`:""}
+        <div class="lexi-apply-v3-actions"><button class="btn primary" type="button" data-apply-stage-v3="retry">再检查一次</button><button class="text-action" type="button" data-apply-stage-v3="edit">继续修改</button></div>
+      </div>`;
     }
     const fb=s.feedback;if(!fb)return"";
     const suggestion=norm(fb.suggestion);
@@ -253,14 +295,14 @@
     const issues=feedbackIssues(s.feedback);
     const blockers=blockingIssues(issues);
     const optional=optionalIssues(issues);
-    const reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.lastFix||s.approved));
+    const reviewMode=Boolean(!s.editing&&(s.submitting||s.feedback||s.checkError||s.lastFix||s.approved));
     const reviewSentence=diagnosticSentenceHtml(text,issues,s.lastFix);
     const reviewLabel=s.submitting
       ?(s.lastFix?"已修改 · 正在自动复检":"正在检查")
-      :(blockers.length?"AI 已标出必须修改的位置":optional.length?"检查通过 · 有可选表达建议":s.approved?"检查通过":"检查完成");
+      :(s.checkError?"检查未完成":blockers.length?"AI 已标出必须修改的位置":optional.length?"检查通过 · 有可选表达建议":s.approved?"检查通过":"检查完成");
     const reviewHint=s.submitting
       ?"请稍候…"
-      :(blockers.length?"浅红色位置必须处理后才能继续。":optional.length?"浅黄色建议可选，不影响继续学习。":s.approved?"这句话已经通过检查。":"如需调整，可以继续修改。");
+      :(s.checkError?"句子已保留，可以直接重新检查或继续修改。":blockers.length?"浅红色位置必须处理后才能继续。":optional.length?"浅黄色建议可选，不影响继续学习。":s.approved?"这句话已经通过检查。":"如需调整，可以继续修改。");
     const composer=reviewMode
       ?`<div class="lexi-apply-v3-composer lexi-apply-v3-review-composer apply-composer"><div><div class="lexi-apply-v3-review-label">${reviewLabel}</div><div class="lexi-apply-v3-review-sentence">${reviewSentence}</div></div><div class="lexi-apply-v3-composer-bottom"><span>${reviewHint}</span><button class="btn" type="button" data-apply-stage-v3="edit">继续修改</button></div></div>`
       :`<div class="lexi-apply-v3-composer apply-composer"><textarea class="textarea apply-composer-input" id="apply-text" spellcheck="false" data-lexiflow-render-lock="study-editor" data-lexiflow-render-route="study" data-lexiflow-render-card="${esc(card.id)}" data-lexiflow-render-stage="apply" placeholder="中文或英文都可以，先写你真正想表达的话…">${esc(text)}</textarea><div class="lexi-apply-v3-composer-bottom"><span>Enter 检查 · Shift + Enter 换行</span><button class="btn primary" type="button" data-action="submit-apply" data-apply-stage-v3="submit" ${s.submitting||!text.trim()?"disabled":""}>${s.submitting?"AI 正在检查…":"检查表达"}</button></div></div>`;
@@ -286,7 +328,7 @@
     // honors the render-lock marker, so background shell updates cannot replace
     // this editor from above.
     if(activeEditor(card,s))return;
-    const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading,editing:s.editing,lastFix:s.lastFix});
+    const signature=JSON.stringify({id:card.id,text:s.text,feedback:s.feedback,checkError:s.checkError,submitting:s.submitting,originalText:s.originalText,approved:s.approved,suggestionApproved:s.suggestionApproved,prompt:card.practicePrompt?.question||"",promptLoading:s.promptLoading,editing:s.editing,lastFix:s.lastFix});
     if(host.dataset.applyStageV3===signature)return;
     host.dataset.applyStageV3=signature;host.innerHTML=html(card);
     if(!s.submitting&&!s.promptLoading)requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
@@ -315,13 +357,11 @@
     const card=currentCard();if(!card)return;const s=session(card);
     const text=norm(document.getElementById("apply-text")?.value??s.text);if(!text||s.submitting)return;
     if(copyNorm(text)&&copyNorm(text)===copyNorm(card.exampleEn||"")){
-      s.text=text;s.approved=false;s.suggestionApproved=false;s.feedback={level:"warn",title:"不要直接照抄参考例句",tips:["换成一个与你自己有关的真实场景，再用这个词表达一次。"],suggestion:""};render();return;
+      s.text=text;s.approved=false;s.suggestionApproved=false;s.checkError=null;s.feedback={level:"warn",title:"不要直接照抄参考例句",tips:["换成一个与你自己有关的真实场景，再用这个词表达一次。"],suggestion:""};render();return;
     }
-    s.text=text;s.submitting=true;s.feedback=null;s.approved=false;s.suggestionApproved=false;s.editing=false;render();
+    s.text=text;s.submitting=true;s.feedback=null;s.checkError=null;s.approved=false;s.suggestionApproved=false;s.editing=false;render();
     try{
-      const response=await fetch("/api/ai/text",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({cardId:card.id,word:card.word,meaningZh:card.meaningZh,sentence:text})});
-      if(!response.ok)throw new Error("APPLY_AI_FAILED");
-      const rawPayload=await response.json();
+      const rawPayload=await requestApplyCheck({cardId:card.id,word:card.word,meaningZh:card.meaningZh,sentence:text});
       const payload=window.LexiFlowApplyQualityV3?.processFeedback?.(rawPayload,{cardId:card.id,word:card.word,meaningZh:card.meaningZh,sentence:text})||rawPayload;
       const fb=payload.feedback||{};const suggestion=norm(fb.suggestion);const inputLanguage=fb.inputLanguage==="zh"||/[\u3400-\u9fff]/.test(text)?"zh":"en";
       const keyword=norm(fb.keyword||card.word)||card.word;
@@ -335,16 +375,16 @@
       s.pendingIssues=mergedBlocking;
       s.approved=originalApproved;
       s.suggestionApproved=Boolean(suggestion&&suggestionKeywordOk);
-      s.feedback={...fb,approved:originalApproved,inputLanguage,keyword,issues:displayIssues,level:originalApproved?"good":"warn",suggestion};
+      s.feedback={...fb,approved:originalApproved,inputLanguage,keyword,issues:displayIssues,level:originalApproved?"good":"warn",suggestion};s.checkError=null;
     }catch(err){
       console.error("Apply Stage V3 check failed",err);
-      s.feedback={level:"warn",title:"AI 暂时没有完成检查",tips:["你的句子还在，可以直接再试一次。"],suggestion:""};s.approved=false;s.suggestionApproved=false;
+      s.feedback=null;s.checkError=normalizeCheckError(err);s.approved=false;s.suggestionApproved=false;
     }finally{s.submitting=false;render();}
   }
 
   function editSentence(){
     const card=currentCard();if(!card)return;const s=session(card);
-    s.editing=true;s.lastFix=null;render();
+    s.editing=true;s.lastFix=null;s.checkError=null;render();
     requestAnimationFrame(()=>document.getElementById("apply-text")?.focus());
   }
 
@@ -404,7 +444,7 @@
 
   function handleComposerInput(input){
     if(input?.id!=="apply-text")return;const card=currentCard();if(!card)return;const s=session(card);
-    s.text=String(input.value||"");s.feedback=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;s.editing=true;s.pendingIssues=[];
+    s.text=String(input.value||"");s.feedback=null;s.checkError=null;s.approved=false;s.suggestionApproved=false;s.lastFix=null;s.editing=true;s.pendingIssues=[];
     const root=input.closest("[data-apply-stage-v3-root]");
     root?.querySelector?.(".lexi-apply-v3-feedback")?.remove();
     const warning=document.getElementById("apply-keyword-warning");const text=s.text;const missing=Boolean(text.trim()&&!/[\u3400-\u9fff]/.test(text)&&!usesTarget(text,card.word));if(warning)warning.hidden=!missing;
@@ -425,7 +465,7 @@
     event.preventDefault();event.stopImmediatePropagation();const action=button.dataset.applyStageV3;
     const card=currentCard();
     if(action==="speak-word"&&card)void speak(card);
-    if(action==="submit")void submit();
+    if(action==="submit"||action==="retry")void submit();
     if(action==="adopt")adopt();
     if(action==="fix-issue")applyIssueFix(button.dataset.issueIndex);
     if(action==="focus-issue")focusIssue(button.dataset.issueIndex);
