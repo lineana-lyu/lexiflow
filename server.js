@@ -478,6 +478,9 @@ function spawnCodex(args, options = {}) {
 const CODEX_APP_SERVER_START_TIMEOUT_MS = 7000;
 const CODEX_APP_SERVER_REQUEST_TIMEOUT_MS = 8000;
 const CODEX_APP_SERVER_COOLDOWN_MS = 5 * 60 * 1000;
+const CODEX_MODEL_CATALOG_TIMEOUT_MS = 12000;
+const CODEX_FAST_TEXT_TURN_TIMEOUT_MS = 30000;
+const CODEX_FAST_TEXT_FALLBACK_TIMEOUT_MS = 30000;
 const CODEX_FAST_THREAD_MAX_TURNS = 18;
 const CODEX_FAST_THREAD_IDLE_MS = 10 * 60 * 1000;
 
@@ -495,6 +498,10 @@ const codexAppServerState = {
   threadKey: "",
   threadTurns: 0,
   lastUsedAt: 0,
+  modelCatalog: [],
+  modelCatalogAt: 0,
+  modelCatalogRefreshing: null,
+  lastFastTextRun: null,
 };
 
 let codexFastTextQueue = Promise.resolve();
@@ -517,6 +524,11 @@ function appServerPublicStatus() {
     fallbackUntil: codexAppServerState.disabledUntil > now
       ? new Date(codexAppServerState.disabledUntil).toISOString()
       : "",
+    modelCatalogReady: codexAppServerState.modelCatalog.length > 0,
+    modelCatalogAt: codexAppServerState.modelCatalogAt
+      ? new Date(codexAppServerState.modelCatalogAt).toISOString()
+      : "",
+    lastRun: codexAppServerState.lastFastTextRun,
   };
 }
 
@@ -723,6 +735,46 @@ async function ensureCodexAppServer() {
   }
 }
 
+async function refreshCodexModelCatalog() {
+  if (codexAppServerState.modelCatalogRefreshing) return codexAppServerState.modelCatalogRefreshing;
+  codexAppServerState.modelCatalogRefreshing = (async () => {
+    await ensureCodexAppServer();
+    const response = await codexAppServerRequest("model/list", { limit: 100, includeHidden: true }, CODEX_MODEL_CATALOG_TIMEOUT_MS);
+    const models = Array.isArray(response?.data) ? response.data : [];
+    codexAppServerState.modelCatalog = models;
+    codexAppServerState.modelCatalogAt = Date.now();
+    return models;
+  })();
+  try {
+    return await codexAppServerState.modelCatalogRefreshing;
+  } finally {
+    codexAppServerState.modelCatalogRefreshing = null;
+  }
+}
+
+function resolveSupportedFastTextEffort(model, requestedEffort) {
+  const requested = String(requestedEffort || "").trim().toLowerCase() || "low";
+  const selected = String(model || "").trim();
+  const entry = codexAppServerState.modelCatalog.find(item =>
+    String(item?.model || item?.id || "").trim() === selected || String(item?.id || "").trim() === selected
+  );
+  if (!entry) return { effort: requested, adjusted: false, catalogKnown: false };
+  const supported = (Array.isArray(entry.supportedReasoningEfforts) ? entry.supportedReasoningEfforts : [])
+    .map(item => String(item?.reasoningEffort || "").trim().toLowerCase())
+    .filter(Boolean);
+  if (!supported.length || supported.includes(requested)) return { effort: requested, adjusted: false, catalogKnown: true };
+  const fallback = String(entry.defaultReasoningEffort || "").trim().toLowerCase();
+  const effort = supported.includes(fallback) ? fallback : supported[0];
+  return { effort, adjusted: effort !== requested, catalogKnown: true };
+}
+
+function recordFastTextRun(value) {
+  codexAppServerState.lastFastTextRun = {
+    at: new Date().toISOString(),
+    ...value,
+  };
+}
+
 async function ensureCodexFastThread(runtime, effort) {
   await ensureCodexAppServer();
   const model = String(runtime.codexModel || "").trim();
@@ -763,7 +815,7 @@ function waitForCodexTurn(turnId, timeoutMs) {
     turn.timer = setTimeout(() => {
       codexAppServerState.turns.delete(turnId);
       reject(Object.assign(new Error("Codex 调用超时"), { code: "CODEX_TIMEOUT" }));
-      clearCodexAppServerState({ kill: true, cooldown: false });
+      clearCodexAppServerState({ kill: true, cooldown: true });
     }, timeoutMs);
     settleCodexTurn(turnId);
   });
@@ -777,33 +829,53 @@ function shouldFallbackFromCodexAppServer(err) {
     "CODEX_APP_SERVER_WRITE_FAILED",
     "CODEX_APP_SERVER_REQUEST_TIMEOUT",
     "CODEX_APP_SERVER_PROTOCOL",
+    "CODEX_TIMEOUT",
   ]).has(String(err?.code || ""));
 }
 
-async function runCodexFastTextNow(prompt, { timeoutMs = 15000, reasoningEffortOverride = "low" } = {}) {
+async function runCodexFastTextNow(prompt, options = {}) {
   const runtime = await loadSettings();
-  const effort = String(reasoningEffortOverride || "low").trim().toLowerCase() || "low";
+  const requestedEffort = String(options.reasoningEffortOverride || "low").trim().toLowerCase() || "low";
+  const turnTimeoutMs = Math.max(5000, Number(options.turnTimeoutMs ?? options.timeoutMs ?? CODEX_FAST_TEXT_TURN_TIMEOUT_MS) || CODEX_FAST_TEXT_TURN_TIMEOUT_MS);
+  const fallbackTimeoutMs = Math.max(5000, Number(options.fallbackTimeoutMs ?? CODEX_FAST_TEXT_FALLBACK_TIMEOUT_MS) || CODEX_FAST_TEXT_FALLBACK_TIMEOUT_MS);
   const startedAt = Date.now();
+  let effortInfo = resolveSupportedFastTextEffort(runtime.codexModel, requestedEffort);
 
   try {
+    await ensureCodexAppServer();
+    effortInfo = resolveSupportedFastTextEffort(runtime.codexModel, requestedEffort);
+    const effort = effortInfo.effort;
+    const bootstrapStartedAt = Date.now();
     const threadId = await ensureCodexFastThread(runtime, effort);
-    const elapsed = Date.now() - startedAt;
-    const remaining = Math.max(1000, timeoutMs - elapsed);
+    const bootstrapMs = Date.now() - bootstrapStartedAt;
+    const turnStartedAt = Date.now();
     const started = await codexAppServerRequest("turn/start", {
       threadId,
       input: [{ type: "text", text: String(prompt || ""), text_elements: [] }],
       ...(runtime.codexModel ? { model: runtime.codexModel } : {}),
       effort,
-    }, Math.min(6000, remaining));
+    }, Math.min(CODEX_APP_SERVER_REQUEST_TIMEOUT_MS, turnTimeoutMs));
     const turnId = String(started?.turn?.id || "");
     if (!turnId) throw appServerError("Codex app-server did not return a turn id", "CODEX_APP_SERVER_PROTOCOL");
 
-    const turn = await waitForCodexTurn(turnId, Math.max(1000, timeoutMs - (Date.now() - startedAt)));
+    // Generation receives its own budget. Bootstrap/thread setup no longer eats
+    // into the model-turn timeout.
+    const turn = await waitForCodexTurn(turnId, turnTimeoutMs);
     const stdout = String(turn.finalText || turn.delta || "").trim();
     if (!stdout) throw appServerError("Codex app-server returned empty text", "CODEX_APP_SERVER_PROTOCOL");
 
     codexAppServerState.threadTurns += 1;
     codexAppServerState.lastUsedAt = Date.now();
+    recordFastTextRun({
+      status: "success",
+      transport: "app-server",
+      model: runtime.codexModel || "",
+      reasoningEffort: effort,
+      effortAdjusted: effortInfo.adjusted,
+      bootstrapMs,
+      turnMs: Date.now() - turnStartedAt,
+      totalMs: Date.now() - startedAt,
+    });
     return {
       stdout,
       stderr: "",
@@ -811,14 +883,46 @@ async function runCodexFastTextNow(prompt, { timeoutMs = 15000, reasoningEffortO
       transport: "app-server",
     };
   } catch (err) {
-    if (!shouldFallbackFromCodexAppServer(err)) throw err;
+    const appServerCode = String(err?.code || "");
+    if (!shouldFallbackFromCodexAppServer(err)) {
+      recordFastTextRun({ status: "failed", transport: "app-server", code: appServerCode, totalMs: Date.now() - startedAt });
+      throw err;
+    }
+
+    // A stuck/failed app-server should not make the learner repeat the same
+    // request against a fresh cold app-server. Put it on cooldown and use the
+    // independent one-shot CLI transport once.
     codexAppServerState.disabledUntil = Math.max(codexAppServerState.disabledUntil, Date.now() + CODEX_APP_SERVER_COOLDOWN_MS);
-    const fallback = await runCodex(prompt, {
-      timeoutMs,
-      workspaceWrite: false,
-      reasoningEffortOverride: effort,
-    });
-    return { ...fallback, transport: "exec-fallback" };
+    const fallbackStartedAt = Date.now();
+    try {
+      const fallback = await runCodex(prompt, {
+        timeoutMs: fallbackTimeoutMs,
+        workspaceWrite: false,
+        reasoningEffortOverride: effortInfo.effort,
+      });
+      recordFastTextRun({
+        status: "success",
+        transport: "exec-fallback",
+        fallbackReason: appServerCode || "APP_SERVER_FAILED",
+        model: fallback.runtime?.model || runtime.codexModel || "",
+        reasoningEffort: fallback.runtime?.reasoningEffort || effortInfo.effort,
+        effortAdjusted: effortInfo.adjusted,
+        fallbackMs: Date.now() - fallbackStartedAt,
+        totalMs: Date.now() - startedAt,
+      });
+      return { ...fallback, transport: "exec-fallback" };
+    } catch (fallbackErr) {
+      fallbackErr.appServerCode = appServerCode;
+      recordFastTextRun({
+        status: "failed",
+        transport: "exec-fallback",
+        fallbackReason: appServerCode || "APP_SERVER_FAILED",
+        code: String(fallbackErr?.code || "CODEX_FAILED"),
+        fallbackMs: Date.now() - fallbackStartedAt,
+        totalMs: Date.now() - startedAt,
+      });
+      throw fallbackErr;
+    }
   }
 }
 
@@ -832,7 +936,10 @@ function runCodexFastText(prompt, options = {}) {
 }
 
 async function warmCodexAppServer() {
-  try { await ensureCodexAppServer(); } catch {}
+  try {
+    await ensureCodexAppServer();
+    await refreshCodexModelCatalog();
+  } catch {}
 }
 
 function shutdownCodexAppServer() {
@@ -2041,7 +2148,8 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
 {"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正","severity":"error|improve|polish","blocking":true}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释","severity":"error|improve|polish","blocking":true}],"keyword":"最终英文中实际目标词/词形"}`;
 
   const result = await runCodexFastText(prompt, {
-    timeoutMs: 15000,
+    turnTimeoutMs: 30000,
+    fallbackTimeoutMs: 30000,
     reasoningEffortOverride: "low",
   });
   const parsed = extractJson(result.stdout);
