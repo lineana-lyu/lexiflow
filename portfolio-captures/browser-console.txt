@@ -1,3 +1,0 @@
-[error] Failed to load resource: the server responded with a status of 400 (Bad Request)
-[error] daily plan persistence failed Error: DAILY_PLAN_PERSIST_FAILED
-    at persistFrozenPlan (http://127.0.0.1:4177/daily-plan-persistence-v3.js:49:26)

@@ -1,0 +1,136 @@
+{
+  "title": "LexiFlow · 英语词汇学习",
+  "bodyText": "LexiFlow\n词义 · 语境 · 主动回忆\n⌂\n今日学习\n＋\n选词制卡\n▤\n单词库\n▥\n学习统计\n⚙\n设置\n本地学习空间\n\n学习进度保存在当前设备，词典与 AI 服务按需连接。\n\n查词并添加\n● 词典已连接\n⌕\n查询\n清空\n支持中文\n支持英文\n支持拼写纠错\n默认只生成一个核心学习词义\ngrow\n/ɡrəʊ/\n词性家族\n同一词族的名词 · 动词 · 形容词\n名词\ngrowth\n动词\ngrow\nverb\n核心学习词义\n种植, 使长满\n例句\nIn time, the boy grew into a man.\n中文翻译正在后台补充，可先保存\n你在哪里遇到这个词？\n可选。保留真实语境后，Visualize 和 Apply 会优先提醒这个场景。\n来源\n视频 / 影视\n文章 / 书\n对话\n同义词 / 关联词\n工作 / 学习材料\n其他\n来源名称\n当时的原句 / 场景\n查看其它常用词义\n手动编辑\n重新查询\n保存到单词库",
+  "buttons": [
+    {
+      "index": 0,
+      "text": "⌂今日学习",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 1,
+      "text": "＋选词制卡",
+      "id": "",
+      "className": "nav-btn active",
+      "action": ""
+    },
+    {
+      "index": 2,
+      "text": "▤单词库",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 3,
+      "text": "▥学习统计",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 4,
+      "text": "⚙设置",
+      "id": "",
+      "className": "nav-btn ",
+      "action": ""
+    },
+    {
+      "index": 5,
+      "text": "查询",
+      "id": "",
+      "className": "btn primary",
+      "action": ""
+    },
+    {
+      "index": 6,
+      "text": "清空",
+      "id": "",
+      "className": "btn ghost",
+      "action": "clear-lookup"
+    },
+    {
+      "index": 7,
+      "text": "",
+      "id": "",
+      "className": "speaker lexi-speaker-button",
+      "action": "speak"
+    },
+    {
+      "index": 8,
+      "text": "",
+      "id": "",
+      "className": "sentence-speaker lexi-speaker-button",
+      "action": "speak-sentence"
+    },
+    {
+      "index": 9,
+      "text": "查看其它常用词义",
+      "id": "",
+      "className": "btn",
+      "action": "load-more-senses"
+    },
+    {
+      "index": 10,
+      "text": "手动编辑",
+      "id": "",
+      "className": "btn ghost",
+      "action": "edit-sense"
+    },
+    {
+      "index": 11,
+      "text": "重新查询",
+      "id": "",
+      "className": "btn ghost",
+      "action": "lookup-again"
+    },
+    {
+      "index": 12,
+      "text": "保存到单词库",
+      "id": "",
+      "className": "btn primary save-learning-card",
+      "action": "save-card"
+    }
+  ],
+  "links": [],
+  "inputs": [
+    {
+      "index": 0,
+      "tag": "INPUT",
+      "id": "word-input",
+      "placeholder": "输入英文或中文，例如 keyboard、键盘、wrok",
+      "name": "",
+      "type": "",
+      "value": "grow"
+    },
+    {
+      "index": 1,
+      "tag": "SELECT",
+      "id": "lexi-source-type",
+      "placeholder": "",
+      "name": "",
+      "type": "",
+      "value": "other"
+    },
+    {
+      "index": 2,
+      "tag": "INPUT",
+      "id": "lexi-source-title",
+      "placeholder": "例如：某个 B 站视频、一本书、一场会议",
+      "name": "",
+      "type": "",
+      "value": ""
+    },
+    {
+      "index": 3,
+      "tag": "TEXTAREA",
+      "id": "lexi-source-context",
+      "placeholder": "例如：老师说 The room was enormous，我当时想到学校最大的报告厅。",
+      "name": "",
+      "type": "",
+      "value": ""
+    }
+  ]
+}
