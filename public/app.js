@@ -639,7 +639,7 @@
     const r=state.lookup.result;
     const senses=Array.isArray(r.senses)?r.senses:[];
     const primarySense=senses.find(s=>s.id===state.selectedSenseId)||senses[0]||null;
-    const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r.word));
+    const targetExampleMismatch=Boolean(primarySense?.exampleEn && !learningExampleUsesTarget(primarySense.exampleEn,r));
     const wordFamily=normalizeWordFamily(r.wordFamily);
     const normalizedDiff=Boolean(r.normalizedQuery && String(r.normalizedQuery).toLowerCase()!==String(r.sourceQuery||"").toLowerCase());
     const resolvedNote = r.sourceQuery && (r.autoResolved || r.autoCorrectedFrom || normalizedDiff)
@@ -816,46 +816,30 @@
     return String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
   }
 
-  function targetWordForms(word){
-    const w=String(word||"").trim().toLowerCase();
-    if(!w)return [];
-    const forms=new Set([w]);
-    if(w.endsWith("y")&&w.length>2){forms.add(w.slice(0,-1)+"ies");forms.add(w.slice(0,-1)+"ied");}
-    if(w.endsWith("e")){forms.add(w+"s");forms.add(w+"d");forms.add(w.slice(0,-1)+"ing");}
-    else{forms.add(w+"s");forms.add(w+"es");forms.add(w+"ed");forms.add(w+"ing");}
-    const irregular={
-      keep:["kept"],run:["ran","running"],write:["wrote","written","writing"],go:["went","gone"],
-      have:["has","had"],do:["does","did","done"],make:["made"],take:["took","taken"],
-      see:["saw","seen"],come:["came"],get:["got","gotten"],give:["gave","given"],
-      eat:["ate","eaten"],buy:["bought"],bring:["brought"],think:["thought"],say:["said"]
-    };
-    (irregular[w]||[]).forEach(x=>forms.add(x));
-    return Array.from(forms);
+  function lookupLexemeForms(resultOrWord){
+    if(resultOrWord&&typeof resultOrWord==="object"){
+      const lemma=String(resultOrWord.lexeme?.lemma||resultOrWord.word||"").trim().toLowerCase();
+      const provided=Array.isArray(resultOrWord.lexeme?.acceptedForms)?resultOrWord.lexeme.acceptedForms:[];
+      return Array.from(new Set([lemma,...provided].map(value=>String(value||"").trim().toLowerCase().replace(/\s+/g," ")).filter(Boolean)));
+    }
+    const word=String(resultOrWord||"").trim().toLowerCase().replace(/\s+/g," ");
+    return word?[word]:[];
   }
 
   function textContainsKeyword(text,keyword){
-    const key=String(keyword||"").trim();
-    if(!key)return false;
-    return new RegExp(`\\b${escapeRegExp(key)}\\b`,"i").test(String(text||""));
+    const source=String(text||"");
+    const key=String(keyword||"").trim().toLowerCase().replace(/\s+/g," ");
+    if(!source||!key)return false;
+    const pattern=escapeRegExp(key).replace(/\s+/g,"\\s+");
+    return new RegExp(`(^|[^A-Za-z])${pattern}(?=$|[^A-Za-z])`,"i").test(source);
   }
 
-  function sentenceUsesTargetWord(text,word){
-    return targetWordForms(word).some(form=>textContainsKeyword(text,form));
+  function sentenceUsesTargetWord(text,resultOrWord){
+    return lookupLexemeForms(resultOrWord).some(form=>textContainsKeyword(text,form));
   }
 
-  function learningExampleUsesTarget(text,word){
-    const example=String(text||"").trim().toLowerCase().replace(/\s+/g," ");
-    const target=String(word||"").trim().toLowerCase().replace(/\s+/g," ");
-    if(!example||!target)return false;
-    if(target.includes(" ")){
-      if(example.includes(target))return true;
-      const parts=target.split(" ").filter(Boolean);
-      const head=parts.shift()||"";
-      const tail=parts.join(" ");
-      if(!head||!tail)return false;
-      return targetWordForms(head).some(form=>new RegExp(`\\b${escapeRegExp(`${form} ${tail}`)}\\b`,"i").test(example));
-    }
-    return sentenceUsesTargetWord(example,target);
+  function learningExampleUsesTarget(text,resultOrWord){
+    return sentenceUsesTargetWord(text,resultOrWord);
   }
 
 
@@ -1846,7 +1830,7 @@
       const r=state.lookup?.result;let s=r?.senses.find(x=>x.id===state.selectedSenseId);if(!r||!s)return;
       s=await prepareLookupForSave(r,s);
       if(!s.meaningZh?.trim()||!s.exampleEn?.trim()){state.addDraft=JSON.parse(JSON.stringify(s));toast("保存前请补全中文释义和英文例句");render();return;}
-      if(!learningExampleUsesTarget(s.exampleEn,r.word)){
+      if(!learningExampleUsesTarget(s.exampleEn,r)){
         showNotice("这张卡片还不能保存",`例句没有使用当前目标词“${r.word}”。请重新识别结果，或修改例句后再保存。`,"warn");
         return;
       }
@@ -1857,7 +1841,7 @@
       const requestedToday=state.addToTodayIntent===todayKey(nowDate);
       const currentPlan=state.data.dailyPlan;
       const addToToday=requestedToday&&Number(currentPlan?.remainingSelectSlots||0)>0;
-      const card={id:uid(),word:r.word,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],wordFamily:normalizeWordFamily(r.wordFamily),sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,lexeme:r.lexeme&&typeof r.lexeme==="object"?JSON.parse(JSON.stringify(r.lexeme)):null,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],wordFamily:normalizeWordFamily(r.wordFamily),sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       if(addToToday){
         card.inboxPending=false;
         card.todaySelectedOn=todayKey(nowDate);

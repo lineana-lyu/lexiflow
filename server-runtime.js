@@ -8,6 +8,8 @@ const wordFamily = require("./lib/word-family");
 const phraseDictionary = require("./lib/phrase-dictionary");
 const exampleEnrichment = require("./lib/example-enrichment");
 const expressionQuery = require("./lib/expression-query");
+const lexemeIdentity = require("./lib/lexeme-identity");
+const { rankChineseCandidates } = require("./lib/lookup-candidate-ranker");
 const kokoroTts = require("./lib/kokoro-tts");
 
 const HOST = "127.0.0.1";
@@ -58,20 +60,36 @@ function isAllowedOrigin(req) {
 }
 
 function localLookupResult(word, mode = "primary", sourceQuery = "") {
+  const surface = clean(word).toLowerCase();
   const options = {
-    sourceQuery: sourceQuery || word,
-    autoResolved: Boolean(sourceQuery && sourceQuery.toLowerCase() !== String(word || "").toLowerCase()),
+    sourceQuery: sourceQuery || surface,
+    autoResolved: Boolean(sourceQuery && sourceQuery.toLowerCase() !== surface),
   };
-  const core = coreLexicon.lookupExact(word, mode, options);
-  const morphology = ecdict.lookupExact(word, mode, options);
-  if (!core) return morphology;
-  return {
-    ...core,
-    exchange: String(morphology?.exchange || core.exchange || ""),
+  const surfaceMorphology = ecdict.lookupExact(surface, mode, options);
+  const lemma = lexemeIdentity.exchangeBaseForm(surfaceMorphology) || surface;
+  const lemmaOptions = {
+    ...options,
+    autoResolved: Boolean(options.autoResolved || lemma !== surface),
+  };
+  const core = coreLexicon.lookupExact(lemma, mode, lemmaOptions);
+  const lemmaMorphology = ecdict.lookupExact(lemma, mode, lemmaOptions);
+  const base = core || lemmaMorphology || surfaceMorphology;
+  if (!base) return null;
+  const morphology = lemmaMorphology || surfaceMorphology;
+  const merged = {
+    ...base,
+    exchange: String(morphology?.exchange || base.exchange || ""),
     wordForms: Array.isArray(morphology?.wordForms)
       ? morphology.wordForms
-      : (Array.isArray(core.wordForms) ? core.wordForms : []),
+      : (Array.isArray(base.wordForms) ? base.wordForms : []),
   };
+  return lexemeIdentity.sanitizeLexemeExamples(
+    lexemeIdentity.attachLexemeIdentity(merged, {
+      candidateSurface: surface,
+      morphology,
+      source: merged.dictionarySource || merged.lookupPath || "local-dictionary",
+    })
+  );
 }
 
 async function enrichWordFamily(result, word) {
@@ -87,14 +105,19 @@ async function enrichWordFamily(result, word) {
 }
 
 function localPhraseResult(phrase, mode = "primary") {
-  const curated = phraseDictionary.lookupExact(phrase, mode, { sourceQuery:phrase });
-  if (curated) return curated;
+  const surface = clean(phrase).toLowerCase();
+  const curated = phraseDictionary.lookupExact(surface, mode, { sourceQuery:surface });
+  if (curated) {
+    return lexemeIdentity.sanitizeLexemeExamples(
+      lexemeIdentity.attachLexemeIdentity(curated, { candidateSurface:surface, source:curated.dictionarySource || "phrase-dictionary" })
+    );
+  }
   // ECDICT has broad exact multi-word coverage. Use it only for phrase semantics;
   // its legacy phonetic field is not trusted for a whole expression because some
   // rows contain only the first component pronunciation.
-  const fallback = ecdict.lookupExact(phrase, mode, { sourceQuery:phrase });
+  const fallback = ecdict.lookupExact(surface, mode, { sourceQuery:surface });
   if (!fallback || !/\s/.test(String(fallback.word || ""))) return null;
-  return {
+  const result = {
     ...fallback,
     phonetic:"",
     audioUrl:"",
@@ -105,6 +128,9 @@ function localPhraseResult(phrase, mode = "primary") {
     dictionarySource:`${fallback.dictionarySource || "ECDICT"} · phrase fallback`,
     phraseFallback:true,
   };
+  return lexemeIdentity.sanitizeLexemeExamples(
+    lexemeIdentity.attachLexemeIdentity(result, { candidateSurface:surface, morphology:fallback, source:result.dictionarySource })
+  );
 }
 
 
@@ -121,18 +147,87 @@ async function ensureWholePhrasePhonetic(result, phrase) {
   };
 }
 
-function localChineseResult(query) {
-  const result = coreLexicon.lookupChinese(query);
-  const word = clean(result?.word).toLowerCase();
-  if (!result || !word || /\s/.test(word)) return result;
-  const morphology = ecdict.lookupExact(word, "primary", { sourceQuery:query, autoResolved:true });
+function canonicalCandidate(surface, sourceQuery = "") {
+  const word = clean(surface).toLowerCase();
+  if (!word) return { word:"", canonicalWord:"", morphology:null };
+  const morphology = /\s/.test(word)
+    ? null
+    : ecdict.lookupExact(word, "primary", { sourceQuery, autoResolved:Boolean(sourceQuery) });
   return {
-    ...result,
-    exchange: String(morphology?.exchange || result.exchange || ""),
-    wordForms: Array.isArray(morphology?.wordForms)
-      ? morphology.wordForms
-      : (Array.isArray(result.wordForms) ? result.wordForms : []),
+    word,
+    canonicalWord: lexemeIdentity.exchangeBaseForm(morphology) || word,
+    morphology,
   };
+}
+
+function trustedChineseCandidates(query, preferredWord = "") {
+  const core = coreLexicon.chineseCandidates(query, 12).map(item => {
+    const identity = canonicalCandidate(item.word, query);
+    return {
+      ...item,
+      ...identity,
+      learningScore:Number(item.learning_score || 0),
+      learnerRank:Number(item.learner_rank || 0),
+      aliasRank:Number(item.rank || 0),
+      source:item.source || "core-lexicon",
+    };
+  });
+  const local = ecdict.searchChinese(query, 8).map(item => {
+    const identity = canonicalCandidate(item?.result?.word, query);
+    return {
+      ...identity,
+      localSearchScore:Number(item.score || 0),
+      learnerRank:Number(item?.result?.coreRank || 0),
+      source:"ecdict-reverse",
+      fallbackResult:item.result,
+    };
+  });
+  const preferred = clean(preferredWord).toLowerCase();
+  if (preferred && ![...core, ...local].some(item => item.word === preferred || item.canonicalWord === preferred)) {
+    const identity = canonicalCandidate(preferred, query);
+    core.push({ ...identity, source:"explicit-user-choice" });
+  }
+  return rankChineseCandidates([...core, ...local], { preferredWord:preferred, limit:12 });
+}
+
+function localChineseResult(query, { preferredWord = "" } = {}) {
+  const startedAt = Date.now();
+  const ranked = trustedChineseCandidates(query, preferredWord);
+  for (const candidate of ranked) {
+    const canonical = candidate.canonicalWord || candidate.word;
+    let result = coreLexicon.lookupChineseWord(canonical, query);
+    if (!result && candidate.word !== canonical) result = coreLexicon.lookupChineseWord(candidate.word, query);
+    if (!result && candidate.fallbackResult) result = candidate.fallbackResult;
+    if (!result) continue;
+
+    const morphology = /\s/.test(canonical)
+      ? null
+      : (ecdict.lookupExact(canonical, "primary", { sourceQuery:query, autoResolved:true }) || candidate.morphology);
+    result = {
+      ...result,
+      sourceQuery:query,
+      normalizedQuery:query,
+      autoResolved:true,
+      exchange:String(morphology?.exchange || result.exchange || ""),
+      wordForms:Array.isArray(morphology?.wordForms)
+        ? morphology.wordForms
+        : (Array.isArray(result.wordForms) ? result.wordForms : []),
+      alternatives:ranked
+        .filter(item => item.canonicalWord !== canonical)
+        .slice(0, 3)
+        .map(item => ({ word:item.canonicalWord, meaningZh:query, source:item.source || "" })),
+      lookupMs:Math.max(0, Date.now() - startedAt),
+      lookupPath:"lexeme-zh-v5",
+      lexicalRankScore:Number(candidate.rankScore || 0),
+    };
+    result = lexemeIdentity.attachLexemeIdentity(result, {
+      candidateSurface:candidate.word,
+      morphology,
+      source:result.dictionarySource || result.lookupPath || candidate.source || "local-dictionary",
+    });
+    return lexemeIdentity.sanitizeLexemeExamples(result);
+  }
+  return null;
 }
 
 async function handleLocalDictionary(req, res, pathname, body) {
@@ -150,7 +245,8 @@ async function handleLocalDictionary(req, res, pathname, body) {
     if (!query) return false;
     const hasChinese = /[\u3400-\u9fff]/.test(query);
     if (hasChinese) {
-      let result = localChineseResult(query);
+      if (parsed.forceRefresh === true) return false;
+      let result = localChineseResult(query, { preferredWord:clean(parsed.preferredWord) });
       if (!result) return false;
       result = await enrichWordFamily(result, result.word);
       writeJson(res, 200, { ok: true, result: { ...result, examplesPending: result.senses?.some(s => !s.exampleEn || !s.exampleZh) } });
