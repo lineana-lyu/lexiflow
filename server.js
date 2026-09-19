@@ -2081,7 +2081,6 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
       blocking: fallbackBlocking,
     })).filter(item => item.span && item.replacement);
   }
-  if (feedback.level === "good" && !feedback.suggestion) feedback.issues = [];
   if (feedback.inputLanguage === "zh" && !feedback.suggestion) feedback.approved = false;
   if (feedback.level !== "good" && !feedback.suggestion) feedback.approved = false;
 
