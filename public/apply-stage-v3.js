@@ -97,28 +97,41 @@
     if(document.getElementById("lexi-apply-stage-v3-style"))return;
     const style=document.createElement("style");style.id="lexi-apply-stage-v3-style";
     style.textContent=`
-      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-review-composer{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#fff;min-height:125px;display:grid;align-content:space-between;gap:18px}.lexi-apply-v3-review-label{font-size:11px;color:var(--muted)}.lexi-apply-v3-review-sentence{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:1px 3px;margin:0;background:rgba(201,73,73,.12);color:var(--text);font:inherit;line-height:inherit;box-shadow:inset 0 0 0 1px rgba(201,73,73,.13);border-radius:5px;cursor:pointer;animation:lexi-apply-issue-in .28s ease both}.lexi-apply-v3-inline-issue:hover{background:rgba(201,73,73,.18);box-shadow:inset 0 0 0 1px rgba(201,73,73,.22)}.lexi-apply-v3-inline-fixed{padding:1px 3px;border-radius:5px;background:rgba(70,139,94,.12);color:#39734d;box-shadow:inset 0 0 0 1px rgba(70,139,94,.10)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(139,109,72,.055);border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.active{border-color:rgba(194,74,74,.28);box-shadow:0 0 0 3px rgba(194,74,74,.06)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(201,73,73,0);box-shadow:inset 0 0 0 1px rgba(201,73,73,0)}100%{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13)}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
+      .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-review-composer{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#fff;min-height:125px;display:grid;align-content:space-between;gap:18px}.lexi-apply-v3-review-label{font-size:11px;color:var(--muted)}.lexi-apply-v3-review-sentence{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:1px 3px;margin:0;color:var(--text);font:inherit;line-height:inherit;border-radius:5px;cursor:pointer}.lexi-apply-v3-inline-issue.blocking{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13);animation:lexi-apply-issue-in .28s ease both}.lexi-apply-v3-inline-issue.blocking:hover{background:rgba(201,73,73,.18);box-shadow:inset 0 0 0 1px rgba(201,73,73,.22)}.lexi-apply-v3-inline-issue.optional{background:rgba(210,159,54,.14);box-shadow:inset 0 0 0 1px rgba(210,159,54,.16)}.lexi-apply-v3-inline-issue.optional:hover{background:rgba(210,159,54,.20)}.lexi-apply-v3-inline-fixed{padding:1px 3px;border-radius:5px;background:rgba(70,139,94,.12);color:#39734d;box-shadow:inset 0 0 0 1px rgba(70,139,94,.10)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.blocking{background:rgba(201,73,73,.045);border-color:rgba(201,73,73,.13)}.lexi-apply-v3-issue.optional{background:rgba(210,159,54,.055);border-color:rgba(210,159,54,.16)}.lexi-apply-v3-issue.active{box-shadow:0 0 0 3px rgba(110,122,114,.07)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-severity{font-size:10.5px;font-weight:750;letter-spacing:.03em}.lexi-apply-v3-issue.blocking .lexi-apply-v3-severity{color:#a84f4f}.lexi-apply-v3-issue.optional .lexi-apply-v3-severity{color:#9a7527}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(201,73,73,0);box-shadow:inset 0 0 0 1px rgba(201,73,73,0)}100%{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13)}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
     `;document.head.appendChild(style);
   }
 
   function feedbackChanges(fb){
     return Array.isArray(fb?.changes)?fb.changes.slice(0,3).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:norm(item?.reason)})).filter(item=>item.from||item.to||item.reason):[];
   }
-  function feedbackIssues(fb){
-    const direct=Array.isArray(fb?.issues)?fb.issues.slice(0,3).map(item=>({
+  function normalizeIssue(item,{blockingFallback=true}={}){
+    const rawSeverity=norm(item?.severity).toLowerCase();
+    const severity=["error","improve","polish"].includes(rawSeverity)?rawSeverity:(item?.blocking===false?"improve":(blockingFallback?"error":"improve"));
+    const blocking=severity==="error";
+    return{
       span:norm(item?.span),
       reason:norm(item?.reason),
       hint:norm(item?.hint),
       replacement:norm(item?.replacement),
-    })).filter(item=>item.span||item.reason||item.hint||item.replacement):[];
+      severity,
+      blocking,
+    };
+  }
+  function feedbackIssues(fb){
+    const direct=Array.isArray(fb?.issues)?fb.issues.slice(0,3).map(item=>normalizeIssue(item,{blockingFallback:fb?.approved===false||fb?.level!=="good"})).filter(item=>item.span||item.reason||item.hint||item.replacement):[];
     if(direct.length)return direct;
-    return feedbackChanges(fb).map(change=>({
+    const fallbackBlocking=fb?.approved===false||fb?.level!=="good";
+    return feedbackChanges(fb).map(change=>normalizeIssue({
       span:change.from,
-      reason:change.reason||"这部分表达需要调整。",
+      reason:change.reason||"这部分表达可以调整。",
       hint:change.to?`建议改为 “${change.to}”`:"",
       replacement:change.to,
-    })).filter(item=>item.span&&item.replacement);
+      severity:fallbackBlocking?"error":"improve",
+      blocking:fallbackBlocking,
+    },{blockingFallback:fallbackBlocking})).filter(item=>item.span&&item.replacement);
   }
+  function blockingIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking===true);}
+  function optionalIssues(issues){return (Array.isArray(issues)?issues:[]).filter(issue=>issue?.blocking!==true);}
   function issueReplacement(issue,changes){
     const direct=norm(issue?.replacement);if(direct)return direct;
     const span=norm(issue?.span).toLowerCase();
@@ -134,12 +147,21 @@
   function survivingIssues(text,issues=[]){
     return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue?.span));
   }
-  function mergeIssues(text,fresh=[],carryover=[]){
+  function mergeBlockingIssues(text,fresh=[],carryover=[]){
     const result=[];
-    for(const issue of [...(Array.isArray(fresh)?fresh:[]),...survivingIssues(text,carryover)]){
+    for(const issue of [...blockingIssues(fresh),...survivingIssues(text,blockingIssues(carryover))]){
       const span=norm(issue?.span);if(!span)continue;
       const key=copyNorm(span);
       if(result.some(item=>copyNorm(item.span)===key))continue;
+      result.push({...issue,severity:"error",blocking:true});
+    }
+    return result.slice(0,3);
+  }
+  function mergeDisplayIssues(blocking,optional){
+    const result=[...(Array.isArray(blocking)?blocking:[])];
+    for(const issue of Array.isArray(optional)?optional:[]){
+      const key=copyNorm(issue?.span);
+      if(!key||result.some(item=>copyNorm(item.span)===key))continue;
       result.push(issue);
     }
     return result.slice(0,3);
@@ -161,7 +183,7 @@
       if(range.start<cursor)continue;
       out+=esc(source.slice(cursor,range.start));
       const piece=esc(source.slice(range.start,range.end));
-      if(range.type==="issue")out+=`<button type="button" class="lexi-apply-v3-inline-issue" data-apply-stage-v3="focus-issue" data-issue-index="${range.index}" aria-label="查看问题：${piece}">${piece}</button>`;
+      if(range.type==="issue"){const issue=issues[range.index]||{};const tone=issue.blocking?"blocking":"optional";const label=issue.blocking?"查看必须修改的问题":"查看可选表达建议";out+=`<button type="button" class="lexi-apply-v3-inline-issue ${tone}" data-apply-stage-v3="focus-issue" data-issue-index="${range.index}" aria-label="${label}：${piece}">${piece}</button>`;}
       else out+=`<span class="lexi-apply-v3-inline-fixed">${piece}</span>`;
       cursor=range.end;
     }
