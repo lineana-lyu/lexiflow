@@ -11,6 +11,14 @@
 
   const esc=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
   const norm=value=>String(value||"").trim();
+  const feedbackCopy=value=>norm(value)
+    .replace(/\\s+([，。！？；：])/g,"$1")
+    .replace(/([，。！？；：])\\s+/g,"$1")
+    .replace(/([。！？；])\\s*[。；]+/g,"$1");
+  const joinFeedbackReasons=values=>{
+    const parts=(Array.isArray(values)?values:[values]).map(value=>feedbackCopy(value).replace(/[，。！？；：,.;!?]+$/g,"").trim()).filter(Boolean);
+    return parts.filter((value,index)=>parts.indexOf(value)===index).join("；");
+  };
   const copyNorm=value=>norm(value).toLowerCase().replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[.,!?;:()[\]{}"']/g," ").replace(/\s+/g," ").trim();
   const phonetic=value=>{const s=norm(value);return !s?"暂无音标":((s.startsWith("/")&&s.endsWith("/"))||(s.startsWith("[")&&s.endsWith("]")))?s:`/${s}/`;};
   const escapeRe=value=>String(value||"").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
@@ -103,7 +111,7 @@
   }
 
   function feedbackChanges(fb){
-    return Array.isArray(fb?.changes)?fb.changes.slice(0,3).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:norm(item?.reason),severity:norm(item?.severity).toLowerCase(),blocking:typeof item?.blocking==="boolean"?item.blocking:null})).filter(item=>item.from||item.to||item.reason):[];
+    return Array.isArray(fb?.changes)?fb.changes.slice(0,3).map(item=>({from:norm(item?.from),to:norm(item?.to),reason:feedbackCopy(item?.reason),severity:norm(item?.severity).toLowerCase(),blocking:typeof item?.blocking==="boolean"?item.blocking:null})).filter(item=>item.from||item.to||item.reason):[];
   }
   function normalizeIssue(item,{blockingFallback=true}={}){
     const rawSeverity=norm(item?.severity).toLowerCase();
@@ -111,8 +119,8 @@
     const blocking=severity==="error";
     return{
       span:norm(item?.span),
-      reason:norm(item?.reason),
-      hint:norm(item?.hint),
+      reason:feedbackCopy(item?.reason),
+      hint:feedbackCopy(item?.hint),
       replacement:norm(item?.replacement),
       severity,
       blocking,
@@ -163,14 +171,19 @@
       const current=result[overlapIndex];
       const currentLength=current._range.end-current._range.start;
       const candidateLength=candidate._range.end-candidate._range.start;
+      const currentActionable=Boolean(norm(current.replacement));
+      const candidateActionable=Boolean(norm(candidate.replacement));
       const primary=(current.blocking!==candidate.blocking)
         ?(current.blocking?current:candidate)
-        :(candidateLength>currentLength&&candidate.replacement?candidate:current);
+        :(currentActionable!==candidateActionable)
+          ?(candidateActionable?candidate:current)
+          :(candidateLength>currentLength?candidate:current);
       const secondary=primary===current?candidate:current;
-      const reasons=[primary.reason,secondary.reason].filter(Boolean);
       result[overlapIndex]={
         ...primary,
-        reason:reasons.filter((value,index)=>reasons.indexOf(value)===index).join("；"),
+        reason:joinFeedbackReasons([primary.reason,secondary.reason]),
+        hint:feedbackCopy(primary.hint||secondary.hint),
+        replacement:norm(primary.replacement||secondary.replacement),
         blocking:Boolean(current.blocking||candidate.blocking),
         severity:(current.blocking||candidate.blocking)?"error":(primary.severity==="polish"&&secondary.severity==="polish"?"polish":"improve"),
       };
@@ -267,7 +280,8 @@
     const blockers=blockingIssues(issues);
     const optional=optionalIssues(issues);
     const good=Boolean(s.approved&&blockers.length===0);
-    const showFallback=Boolean(!issues.length&&suggestion&&!s.approved);
+    const hasUnactionableBlocking=blockers.some(issue=>!issueReplacement(issue,changes));
+    const showFallback=Boolean(suggestion&&!s.approved&&(!issues.length||hasUnactionableBlocking));
     const title=blockers.length
       ?`发现 ${blockers.length} 处必须修改`
       :optional.length
