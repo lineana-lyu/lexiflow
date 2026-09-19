@@ -22,6 +22,10 @@ const restoreBody=guard.slice(guard.indexOf('function restore(){'),guard.indexOf
 assert(!restoreBody.includes('LexiFlowApplyStageV3?.handleInput?.(input)'),"Apply remount restore must not re-fire learner input semantics or erase AI feedback");
 assert(apply.includes('currentState,')&&apply.includes('text:String(s.text||"")')&&apply.includes('approved:Boolean(s.approved)'),"Apply stage must expose one authoritative in-memory state for text and approval");
 assert(apply.includes('handleInput(input){handleComposerInput(input);}')&&apply.includes('LexiFlowApplyInputGuardV3?.setDraft?.(card.id,s.text)'),"Apply stage must share text authority with the pre-app guard");
+assert(apply.includes("function activeEditor(card,s)")&&apply.includes("document.activeElement!==input"),"Apply must detect the native textarea that currently owns keyboard focus");
+assert(apply.includes("if(activeEditor(card,s)){")&&apply.includes("return;\n    }\n    const signature="),"Apply renderer must never replace the focused textarea while the learner is typing");
+assert(apply.includes("if(card&&activeEditor(card,session(card)))return;"),"Apply MutationObserver scheduling must stay dormant while the focused editor is active");
+assert(apply.includes('root?.querySelector?.(".lexi-apply-v3-feedback")?.remove();'),"manual typing must clear stale diagnostic feedback surgically without remounting the editor");
 assert(apply.includes('function restorableDraft(card)')&&apply.includes('card?.applyDraftSavedAt')&&!apply.includes('card.applyDraft||card.userSentence'),"Apply must start blank unless the learner explicitly saved an unfinished draft");
 assert(applyActions.includes('function explicitSavedDraft(card)')&&applyActions.includes('card?.applyDraftSavedAt')&&!applyActions.includes('card?.userSentence'),"Apply draft restore must ignore historical userSentence and legacy unsaved residue");
 assert(!visual.includes('placeholder="例如：我第一次去东京时'),"Visualize scene editor must not contain a default example sentence");
