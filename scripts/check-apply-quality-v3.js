@@ -26,7 +26,7 @@ assert(!quality.includes("window.fetch=")&&!quality.includes("window.fetch ="),"
 assert(!quality.includes("/api/learning-data"),"Apply Quality must use the Learning Data Gateway snapshot instead of observing learning-data transport");
 assert(quality.includes("registerAfterPersist?.(()=>schedule())"),"Apply Quality must redraw from Gateway-confirmed persistence events");
 assert(applyStage.includes('fetch("/api/ai/text"')&&applyStage.includes("LexiFlowApplyQualityV3?.processFeedback?."),"Apply Stage must own the AI request and explicitly pass its response through Apply Quality before interpretation");
-assert(quality.includes("round>=3"),"full correction may appear only from the third failed revision round");
+assert(quality.includes("round>=2"),"full correction may appear after one concrete self-correction attempt");
 assert(quality.includes("lastFailedInput"),"re-submitting the exact same sentence must not consume another feedback round");
 assert(quality.includes("originalPass"),"gate must distinguish an approved original sentence from an approved correction");
 assert(quality.includes("suggestionPass"),"an adopted AI correction may pass only when that correction was approved");
@@ -37,7 +37,7 @@ assert(quality.includes('[data-action="submit-apply"]'),"copied examples must be
 assert(quality.includes("这句话和词典参考例句相同"),"copied reference examples must explain why they cannot complete Apply");
 assert(quality.includes("LexiFlowStudyRenderer?.currentCardId"),"reference-copy checks must bind to the exact current learning card");
 assert(quality.includes("function syncFromGateway()"),"Apply Quality must resolve current-card audit identity from the learning-data gateway snapshot");
-assert(quality.includes("keyOf(card.word,card.meaningZh)"),"Apply audit lookup must use the exact current card rather than visible DOM copy");
+assert(quality.includes("keyOf(card.id,card.word,card.meaningZh)"),"Apply audit lookup must bind feedback progress to the exact card ID");
 assert(!quality.includes("function currentWord(")&&!quality.includes("function currentMeaning("),"Apply Quality must not infer audit identity from rendered word or meaning text");
 assert(quality.includes("requestAnimationFrame(()=>{queued=false;syncFromGateway();decorate();});"),"Apply Quality mutation decoration must stay on the in-memory snapshot");
 
@@ -58,7 +58,11 @@ assert(server.includes("完全正确时 suggestion 为空"),"server contract mus
 assert(server.includes("只要句子不完整、语法错误、搭配不自然或明显表达不完整，suggestion 必须给出"),"server contract must return a correction for materially flawed English input");
 assert(server.includes('"changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}]'),"server feedback contract must return concise explanations for actual corrections");
 assert(server.includes("不确定具体语法规则时，只说明更自然的实际用法，不要编造规则"),"correction explanations must prefer accurate usage guidance over invented grammar rules");
-assert(quality.includes("changes:[]"),"early feedback rounds must not leak the held-back correction through explanation metadata");
+assert(quality.includes("changes:[]"),"the first self-correction step must not leak the held-back full correction");
+assert(server.includes("\"issues\":[{\"span\":\"原句中的问题片段\""),"server feedback must locate concrete problem spans before asking the learner to self-correct");
+assert(applyStage.includes("问题位置：")&&applyStage.includes("修改方向："),"Apply UI must say exactly where the problem is and how to think about fixing it");
+assert(applyStage.includes("cardId:card.id"),"Apply feedback progress must send the exact card ID");
+assert(!applyStage.includes("/ 3 轮"),"Apply UI must not force a three-round correction ritual");
 assert(applyStage.includes("为什么这样改")&&applyStage.includes("lexi-apply-v3-changes"),"Apply UI must show concise reasons beside an actual correction");
 
 console.log("Apply Quality V3 contract checks passed.");
