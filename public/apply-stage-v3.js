@@ -130,6 +130,8 @@
     const severity=normalizedSeverity(item?.severity);
     return{
       span:norm(item?.span),
+      start:Number.isInteger(item?.start)?item.start:null,
+      end:Number.isInteger(item?.end)?item.end:null,
       reason:feedbackCopy(item?.reason),
       hint:feedbackCopy(item?.hint),
       replacement:norm(item?.replacement),
@@ -148,18 +150,44 @@
   function issueReplacement(issue){
     return norm(issue?.replacement);
   }
-  function issueRange(text,span){
+  function wordLikeSpan(value){return /^[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*$/.test(norm(value));}
+  function wordChar(value){return Boolean(value&&/[A-Za-z0-9'’-]/.test(value));}
+  function spanRange(text,span){
     const source=String(text||""),target=norm(span);if(!source||!target)return null;
-    let start=source.indexOf(target);
-    if(start<0)start=source.toLowerCase().indexOf(target.toLowerCase());
-    return start<0?null:{start,end:start+target.length};
+    const lowerSource=source.toLowerCase(),lowerTarget=target.toLowerCase(),token=wordLikeSpan(target);
+    let cursor=0;
+    while(cursor<=source.length-target.length){
+      const start=lowerSource.indexOf(lowerTarget,cursor);if(start<0)break;
+      const end=start+target.length;
+      if(!token||(!wordChar(source[start-1])&&!wordChar(source[end])))return{start,end};
+      cursor=start+1;
+    }
+    return null;
+  }
+  function issueRange(text,issue){
+    const source=String(text||""),target=norm(issue?.span);if(!source||!target)return null;
+    const start=issue?.start,end=issue?.end;
+    if(Number.isInteger(start)&&Number.isInteger(end)&&start>=0&&end>start&&end<=source.length){
+      const slice=source.slice(start,end);
+      if(slice===target||slice.toLowerCase()===target.toLowerCase())return{start,end};
+    }
+    return spanRange(source,target);
   }
   function survivingIssues(text,issues=[]){
-    return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue?.span));
+    return (Array.isArray(issues)?issues:[]).filter(issue=>issueRange(text,issue));
+  }
+  function rebaseIssuesAfterEdit(oldText,issues,editRange,replacementLength){
+    const delta=Number(replacementLength||0)-(editRange.end-editRange.start);
+    return (Array.isArray(issues)?issues:[]).map(issue=>{
+      const range=issueRange(oldText,issue);if(!range)return null;
+      if(range.end<=editRange.start)return{...issue,start:range.start,end:range.end};
+      if(range.start>=editRange.end)return{...issue,start:range.start+delta,end:range.end+delta};
+      return null;
+    }).filter(Boolean);
   }
   function coalesceIssues(text,issues=[]){
     const prepared=(Array.isArray(issues)?issues:[]).map(issue=>{
-      const range=issueRange(text,issue?.span);return range?{...issue,_range:range}:null;
+      const range=issueRange(text,issue);return range?{...issue,start:range.start,end:range.end,_range:range}:null;
     }).filter(Boolean).sort((a,b)=>a._range.start-b._range.start||((b._range.end-b._range.start)-(a._range.end-a._range.start)));
     const result=[];
     for(const candidate of prepared){
@@ -202,7 +230,7 @@
   function diagnosticSentenceHtml(text,issues,lastFix=null){
     const source=String(text||""),ranges=[];
     for(let index=0;index<(issues||[]).length;index+=1){
-      const range=issueRange(source,issues[index]?.span);
+      const range=issueRange(source,issues[index]);
       if(range&&!ranges.some(item=>range.start<item.end&&range.end>item.start))ranges.push({...range,type:"issue",index});
     }
     if(lastFix&&Number.isInteger(lastFix.start)&&Number.isInteger(lastFix.end)&&lastFix.start>=0&&lastFix.end>lastFix.start&&lastFix.end<=source.length){
@@ -411,7 +439,7 @@
     const card=currentCard();if(!card)return;const s=session(card);
     const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),issue=issues[Number(index)];
     if(!issue)return;
-    const replacement=issueReplacement(issue),range=issueRange(s.text,issue.span);
+    const replacement=issueReplacement(issue),range=issueRange(s.text,issue);
     if(!replacement||!range||!hasSurfaceEdit(issue.span,replacement))return;
     if(s.text&&!s.originalText)s.originalText=s.text;
 
@@ -420,14 +448,15 @@
     // silently start a fresh generative review and move the goalposts.
     const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
     const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
-    const surviving=survivingIssues(next,unresolved);
+    const rebased=rebaseIssuesAfterEdit(s.text,unresolved,range,replacement.length);
+    const surviving=survivingIssues(next,rebased);
     const remainingBlocking=blockingIssues(surviving);
     const remainingOptional=optionalIssues(surviving);
     const keyword=norm(s.feedback?.keyword||card.word)||card.word;
     const keywordOk=usesTarget(next,keyword)||usesTarget(next,card.word);
     const english=!/[\u3400-\u9fff]/.test(next);
     const approved=Boolean(english&&keywordOk&&remainingBlocking.length===0);
-    const remainingChanges=changes.filter(change=>issueRange(next,change.from));
+    const remainingChanges=changes.filter(change=>spanRange(next,change.from));
 
     s.pendingIssues=remainingBlocking;
     s.text=next;
