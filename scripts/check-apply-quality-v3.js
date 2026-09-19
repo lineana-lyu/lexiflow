@@ -14,6 +14,7 @@ const transition=read("public/stage-transition-v3.js");
 const server=read("server.js");
 const feedbackContract=require("../lib/sentence-feedback-contract");
 const feedbackPolicy=require("../lib/sentence-feedback-policy");
+const feedbackEvidence=require("../lib/sentence-feedback-evidence");
 const {buildSentenceFeedbackPrompt}=require("../lib/sentence-feedback-prompt");
 
 assert(index.includes("apply-quality-v3.js"),"Apply Quality V3 must load in index.html");
@@ -68,11 +69,12 @@ assert(!transport.includes("softenNearIdenticalSentenceFeedback"),"transport lay
 assert(!transport.includes("optionalSuggestion"),"transport layer must not manufacture optional Apply suggestions");
 assert(server.includes('require("./lib/sentence-feedback-prompt")')&&server.includes("buildSentenceFeedbackPrompt({ word, meaningZh, sentence })"),"server must consume the isolated generic Apply prompt policy rather than embed regression-specific prompt text");
 assert(server.includes('require("./lib/sentence-feedback-contract")')&&server.includes("feedback.issues = normalizeSentenceDiagnostics("),"server must use the centralized sentence feedback contract instead of maintaining ad-hoc diagnostic normalization");
-assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic English mechanics with AI diagnostics before approval");
-assert(server.includes("Progression is a product policy, not a model opinion")&&server.includes("feedback.approved = !hasBlockingIssue"),"Apply progression must be derived from normalized blocking severity rather than raw model approval");
+assert(server.includes("detectEnglishMechanics(sentence)")&&server.includes("[...mechanicsIssues, ...feedback.issues]"),"server must merge deterministic mechanics into the diagnostic normalization pipeline");
+assert(server.includes("Progression is a product policy, not a model opinion")&&server.includes("feedback.approved = !hasBlockingIssue"),"Apply progression must be derived from normalized blocking diagnostics rather than raw model approval");
+assert(server.includes("targetWord: word")&&!server.includes("changes: feedback.changes"),"suggestion change summaries must not participate in diagnostic authority");
 const genericPrompt=buildSentenceFeedbackPrompt({word:"reliable",meaningZh:"可靠的",sentence:"I rely on her."});
-assert(genericPrompt.includes("error：必须修正")&&genericPrompt.includes("warning：书写层面的明确问题")&&genericPrompt.includes("suggestion：只是更自然"),"production prompt must define a three-level diagnostic model");
-assert(genericPrompt.includes("非目标词的普通拼写错误、大小写、标点、空格和排版问题必须是 warning")&&genericPrompt.includes("approved 只取决于是否仍存在 error"),"production prompt must keep surface-writing issues advisory while preserving correctness gates");
+assert(genericPrompt.includes("这不是作文润色器，也不是排版检查器")&&genericPrompt.includes("明确拼错的英文单词使用 category=spelling、severity=error"),"production prompt must be usage-focused while treating definite spelling mistakes as correctness errors");
+assert(genericPrompt.includes("不要把大小写、标点、空格、排版等表层书写问题输出为 issue")&&genericPrompt.includes("changes 只是完整 suggestion 的变更摘要，不是诊断来源"),"production prompt must suppress low-value mechanics and separate diagnostics from suggestion edits");
 assert(!genericPrompt.includes("第一人称单数代词")&&!genericPrompt.includes("ride-or-die")&&!genericPrompt.includes("montain"),"regression fixtures and grammar-specific examples must stay out of the production prompt");
 assert(!server.includes("if (!feedback.issues.length && feedback.suggestion && feedback.changes.length)"),"legacy fallback issue synthesis must not bypass the normalized diagnostic authority");
 assert(applyStage.includes("lexi-apply-v3-inline-issue")&&applyStage.includes('data-apply-stage-v3="focus-issue"'),"Apply must render diagnosed sentence spans as interactive diagnostics");
@@ -82,7 +84,9 @@ assert(applyStage.includes("background:rgba(201,73,73,.12)")&&applyStage.include
 assert(applyStage.includes("function normalizeIssue(")&&applyStage.includes("function blockingIssues(")&&applyStage.includes("function optionalIssues("),"Apply must normalize issue severity and separate blocking from optional diagnostics");
 assert(applyStage.includes("function coalesceIssues(text,issues=[])")&&applyStage.includes("candidate._range.start<item._range.end")&&applyStage.includes("mergeDisplayIssues(text,mergedBlocking,freshOptional)"),"Apply UI must coalesce any residual overlapping diagnostics before rendering");
 assert(applyStage.includes("filter(issue=>issue.blocking).slice(0,3)")&&applyStage.includes("blockingIssues(merged).slice(0,3)")&&applyStage.includes("3-required.length"),"all three review slots must be available to blocking errors so the checker does not reveal hidden required fixes in later rounds");
-assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键修正")&&applyStage.includes("一键优化为"),"error, warning, and suggestion diagnostics must use distinct learner-facing action language");
+assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("一键改为")&&applyStage.includes("一键优化为"),"blocking errors and optional suggestions must expose actionable fixes");
+assert(applyStage.includes("function issueReplacement(issue)")&&!applyStage.includes("find(change=>norm(change.from).toLowerCase()===span"),"local issue fixes must come only from the diagnostic replacement, never from full-suggestion changes");
+assert(!applyStage.includes("return feedbackChanges(fb).map(change=>normalizeIssue"),"full-suggestion changes must not be synthesized into diagnostics when issues are absent");
 assert(applyStage.includes('data-apply-stage-v3="fix-issue"')&&applyStage.includes("function applyIssueFix(index)"),"Apply must support one-click local replacement for each fixable issue");
 assert(applyStage.includes("const surfaceNorm=")&&applyStage.includes("const hasSurfaceEdit="),"Apply must distinguish visible edits from semantic-copy normalization");
 assert(applyStage.includes("hasSurfaceEdit(issue.span,replacement)")&&!applyStage.includes("copyNorm(replacement)!==copyNorm(issue.span)"),"punctuation and spacing fixes must remain actionable instead of being hidden as semantically equivalent");
@@ -100,53 +104,87 @@ assert(!applyStage.includes("第 1 次自改")&&!applyStage.includes("第 2 次�
 assert(applyStage.includes("修改原因")&&applyStage.includes("lexi-apply-v3-changes"),"Apply fallback full correction must retain concise reasons when local diagnostics are unavailable");
 
 const mechanics=feedbackContract.detectEnglishMechanics("My boss is very dependable,because he never makes any mistakes");
-assert(mechanics.length===1&&mechanics[0].span==="dependable,because"&&mechanics[0].replacement==="dependable, because","deterministic mechanics must catch missing punctuation spacing");
-assert(mechanics[0].severity==="warning"&&mechanics[0].blocking===false&&mechanics[0].category==="spacing","mechanical punctuation/spacing issues must be advisory, not learning gates");
-assert(feedbackContract.joinReasonFragments(["第一条原因。","第二条原因；"])==="第一条原因；第二条原因","merged Chinese explanations must keep canonical punctuation");
-
-const punctuation=feedbackContract.normalizeSentenceDiagnostics({
+assert(mechanics.length===1&&mechanics[0].category==="spacing","deterministic mechanics may detect spacing internally");
+const hiddenMechanics=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"My boss is very dependable,because he never makes any mistakes",
-  issues:[...mechanics],
-  changes:[],
+  issues:mechanics,
 });
-assert(punctuation.length===1&&punctuation[0].severity==="warning"&&!punctuation[0].blocking,"surface mechanics must remain warning-level after normalization");
+assert(hiddenMechanics.length===0,"Apply must not surface punctuation/spacing mechanics in the learner-facing review");
 
-const pronoun=feedbackContract.normalizeSentenceDiagnostics({
+const hiddenCapitalization=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"My friend and i hike.",
   issues:[
     ...feedbackContract.detectEnglishMechanics("My friend and i hike."),
     {span:"i",reason:"这里的人称代词要大写",hint:"改成 I",replacement:"I",category:"capitalization",severity:"error",source:"issue"}
   ],
-  changes:[],
 });
-assert(pronoun.length===1&&pronoun[0].replacement==="I","same-span mechanics/model records must collapse to one issue");
-assert(pronoun[0].severity==="warning"&&!pronoun[0].blocking,"capitalization must remain advisory even when the model tries to escalate it");
+assert(hiddenCapitalization.length===0,"capitalization mechanics must stay silent in the speaking/usage stage even if the model escalates them");
 
-const spelling=feedbackContract.normalizeSentenceDiagnostics({
+const verifiedSpelling=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"I often climb montain with her",
-  issues:[{span:"montain",reason:"拼写错误",hint:"改正拼写",replacement:"mountain",category:"spelling",severity:"error",source:"issue"}],
-  changes:[{from:"montain",to:"mountains",reason:"完整修正版使用复数",category:"spelling",severity:"error",source:"change"}],
+  issues:[{span:"montain",reason:"montain 拼写错误",hint:"改正拼写",replacement:"mountain",category:"spelling",severity:"error",source:"issue"}],
+  spellingVerifier:()=>({verified:true,reason:"test-lexicon"}),
 });
-assert(spelling.length===1&&spelling[0].replacement==="mountains","same-span issue/change conflicts must keep one final replacement authority");
-assert(spelling[0].severity==="warning"&&!spelling[0].blocking,"non-target spelling must never be promoted into a blocking error by model severity");
+assert(verifiedSpelling.length===1&&verifiedSpelling[0].severity==="error"&&verifiedSpelling[0].blocking,"locally verified spelling mistakes must be red blocking errors");
+assert(verifiedSpelling[0].replacement==="mountain","spelling diagnostic must keep its own minimal replacement instead of adopting a full-suggestion inflection");
+
+const unverifiedSpelling=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"I met Zyphora today",
+  issues:[{span:"Zyphora",reason:"可能拼写错误",hint:"检查拼写",replacement:"Zephora",category:"spelling",severity:"error",source:"issue"}],
+  spellingVerifier:()=>({verified:false,reason:"not-in-local-evidence"}),
+});
+assert(unverifiedSpelling.length===0,"unverified spelling claims must not create noisy learner-facing diagnostics");
 
 const grammar=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"He go to school.",
   issues:[{span:"He go",reason:"第三人称单数主谓不一致",hint:"改为 He goes",replacement:"He goes",category:"grammar",severity:"error",source:"issue"}],
-  changes:[],
 });
-assert(grammar.length===1&&grammar[0].severity==="error"&&grammar[0].blocking,"real grammar correctness errors must remain blocking");
+assert(grammar.length===1&&grammar[0].blocking&&grammar[0].severity==="error","clear grammar errors must remain blocking");
 
 const targetUsage=feedbackContract.normalizeSentenceDiagnostics({
   sentence:"I dependabled on him.",
-  issues:[{span:"dependabled",reason:"目标词词形错误",hint:"改为 depended",replacement:"depended",category:"target_usage",severity:"error",source:"issue"}],
-  changes:[],
+  targetWord:"dependable",
+  issues:[{span:"dependabled",reason:"目标词词形错误",hint:"改为 dependable",replacement:"dependable",category:"spelling",severity:"error",source:"issue"}],
+  spellingVerifier:()=>({verified:true,reason:"test-lexicon"}),
 });
-assert(targetUsage.length===1&&targetUsage[0].blocking,"target-word correctness must remain a learning gate");
+assert(targetUsage.length===1&&targetUsage[0].category==="target_usage"&&targetUsage[0].blocking,"corrections resolving directly to the learning word must be treated as target-word correctness");
 
-assert(feedbackPolicy.applySeverityPolicy({category:"capitalization",severity:"error"}).severity==="warning","server policy must cap capitalization at warning");
-assert(feedbackPolicy.applySeverityPolicy({category:"spelling",severity:"error"}).severity==="warning","server policy must cap ordinary spelling at warning");
-assert(feedbackPolicy.applySeverityPolicy({category:"grammar",severity:"error"}).blocking===true,"server policy must allow grammar errors to block");
-assert(feedbackPolicy.applySeverityPolicy({category:"unknown",severity:"error"}).blocking===false,"unknown model categories must fail open as advisory instead of blocking learning");
+const blockerSuppressesStyle=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"He go home quickly.",
+  issues:[
+    {span:"He go",reason:"主谓不一致",hint:"改为 He goes",replacement:"He goes",category:"grammar",severity:"error",source:"issue"},
+    {span:"quickly",reason:"这里也可以用 right away",hint:"可改为 right away",replacement:"right away",category:"style",severity:"suggestion",source:"issue"}
+  ],
+});
+assert(blockerSuppressesStyle.length===1&&blockerSuppressesStyle[0].blocking,"when correctness blockers exist, Apply must not add style noise to the same review");
+
+const onlyStyle=feedbackContract.normalizeSentenceDiagnostics({
+  sentence:"I finished quickly.",
+  issues:[
+    {span:"quickly",reason:"可以更口语化",hint:"可改为 fast",replacement:"fast",category:"style",severity:"suggestion",source:"issue"},
+    {span:"finished",reason:"也可以用 wrapped up",hint:"可改为 wrapped up",replacement:"wrapped up",category:"style",severity:"suggestion",source:"issue"}
+  ],
+});
+assert(onlyStyle.length===1&&!onlyStyle[0].blocking,"with no correctness error, Apply must surface at most one optional language suggestion");
+
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"capitalization",severity:"error"}).report===false,"capitalization must be silent in Apply");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"spacing",severity:"error"}).report===false,"spacing must be silent in Apply");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"spelling",severity:"error",evidence:{spellingVerified:true}}).blocking===true,"verified spelling must block");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"spelling",severity:"error",evidence:{spellingVerified:false}}).report===false,"unverified spelling must not surface");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"grammar",severity:"error"}).blocking===true,"grammar errors must block");
+assert(feedbackPolicy.applyDiagnosticPolicy({category:"unknown",severity:"error"}).report===false,"unknown model categories must not surface");
+
+const evidence=feedbackEvidence.verifySpellingCorrection({
+  span:"montain",
+  replacement:"mountain",
+  lookupWord:word=>word==="mountain",
+});
+assert(evidence.verified===true,"spelling verification must require an unknown source word and known replacement");
+const distant=feedbackEvidence.verifySpellingCorrection({
+  span:"table",
+  replacement:"mountain",
+  lookupWord:word=>word==="table"||word==="mountain",
+});
+assert(distant.verified===false,"known source words must never be treated as misspellings");
 
 console.log("Apply Quality V3 contract checks passed.");
