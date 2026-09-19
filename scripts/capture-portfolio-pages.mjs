@@ -22,7 +22,7 @@ await page.route('**/api/ai/visual-scene', async route => {
     body: JSON.stringify({
       ok: true,
       assist: {
-        scene: '我站在阳台给一株刚冒出新叶的薄荷浇水。镜头拉近时能看到新叶一层层长出来，提醒我 grow 是“持续成长”，不是一瞬间变好。',
+        scene: '我站在阳台给一株刚冒出新叶的薄荷浇水。镜头拉近时能看到新叶一层层长出来，让我把“每天照料、慢慢长高”的过程和这个词绑定起来。',
         cue: '把 grow 和“每天照料、慢慢长高”的过程绑定。',
         practiceQuestion: '说一句你希望自己未来在哪方面持续成长。',
       },
