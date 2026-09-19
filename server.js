@@ -1989,6 +1989,101 @@ async function practicePromptAssist(body){
   return value;
 }
 
+function feedbackSpanRange(sentence, span) {
+  const source = String(sentence || "");
+  const target = String(span || "").trim();
+  if (!source || !target) return null;
+  let start = source.indexOf(target);
+  if (start < 0) start = source.toLowerCase().indexOf(target.toLowerCase());
+  return start < 0 ? null : { start, end: start + target.length };
+}
+
+function feedbackRangesOverlap(a, b) {
+  return Boolean(a && b && a.start < b.end && b.start < a.end);
+}
+
+function feedbackSeverity(value, blocking, fallbackBlocking = true) {
+  const raw = String(value || "").trim().toLowerCase();
+  if (raw === "error" || raw === "improve" || raw === "polish") return raw;
+  if (blocking === false) return "improve";
+  return fallbackBlocking ? "error" : "improve";
+}
+
+function normalizeSentenceDiagnostics(sentence, issues, changes, approved, level) {
+  const source = String(sentence || "");
+  const normalizedIssues = (Array.isArray(issues) ? issues : []).map(item => {
+    const range = feedbackSpanRange(source, item?.span);
+    if (!range) return null;
+    const severity = feedbackSeverity(item?.severity, item?.blocking, approved === false || level !== "good");
+    return {
+      span: String(item?.span || "").trim(),
+      reason: String(item?.reason || "").trim(),
+      hint: String(item?.hint || "").trim(),
+      replacement: String(item?.replacement || "").trim(),
+      severity,
+      blocking: severity === "error",
+      _range: range,
+      _source: "issue",
+    };
+  }).filter(Boolean);
+
+  const hasBlockingIssue = normalizedIssues.some(item => item.blocking);
+  const changeCandidates = (Array.isArray(changes) ? changes : []).map(change => {
+    const from = String(change?.from || "").trim();
+    const to = String(change?.to || "").trim();
+    const range = feedbackSpanRange(source, from);
+    if (!range || !to || from.toLowerCase() === to.toLowerCase()) return null;
+    const related = normalizedIssues.filter(item => feedbackRangesOverlap(range, item._range));
+    const relatedBlocking = related.some(item => item.blocking);
+    const explicitSeverity = String(change?.severity || "").trim().toLowerCase();
+    const severity = ["error","improve","polish"].includes(explicitSeverity)
+      ? explicitSeverity
+      : related.length
+        ? (relatedBlocking ? "error" : related[0].severity)
+        : (hasBlockingIssue ? "improve" : feedbackSeverity("", change?.blocking, approved === false || level !== "good"));
+    return {
+      span: from,
+      reason: String(change?.reason || "").trim(),
+      hint: to ? `建议改为 “${to}”` : "",
+      replacement: to,
+      severity,
+      blocking: severity === "error",
+      _range: range,
+      _source: "change",
+    };
+  }).filter(Boolean);
+
+  const candidates = [...normalizedIssues, ...changeCandidates]
+    .sort((a, b) => a._range.start - b._range.start || (b._range.end - b._range.start) - (a._range.end - a._range.start));
+
+  const merged = [];
+  for (const candidate of candidates) {
+    const existingIndex = merged.findIndex(item => feedbackRangesOverlap(item._range, candidate._range));
+    if (existingIndex < 0) {
+      merged.push(candidate);
+      continue;
+    }
+    const current = merged[existingIndex];
+    const currentLength = current._range.end - current._range.start;
+    const candidateLength = candidate._range.end - candidate._range.start;
+    const primary = candidateLength > currentLength && candidate.replacement ? candidate : current;
+    const secondary = primary === current ? candidate : current;
+    const reasons = [primary.reason, secondary.reason].filter(Boolean);
+    const uniqueReasons = reasons.filter((value, index) => reasons.indexOf(value) === index);
+    const blocking = Boolean(current.blocking || candidate.blocking);
+    merged[existingIndex] = {
+      ...primary,
+      reason: uniqueReasons.join("；"),
+      severity: blocking ? "error" : (primary.severity === "polish" && secondary.severity === "polish" ? "polish" : "improve"),
+      blocking,
+    };
+  }
+
+  const blocking = merged.filter(item => item.blocking).slice(0, 2);
+  const optional = merged.filter(item => !item.blocking).slice(0, 1);
+  return [...blocking, ...optional].map(({ _range, _source, ...item }) => item);
+}
+
 async function sentenceFeedback(body) {
   const word = String(body.word || "").trim();
   const meaningZh = String(body.meaningZh || "").trim();
@@ -2026,10 +2121,10 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
 8. reason 必须具体到“为什么错/为什么要这样改”，不能只写“表达不自然”“更自然”“有拼写或表达问题”这种泛泛结论。拼写问题要明确正确拼写或词形规则；语法问题要指出具体结构关系（如主谓、时态、动名词/不定式、冠词等）；搭配问题要指出常见搭配；词义问题要说明原表达与目标含义的区别。若一个片段同时涉及两个紧密相关的问题，可在同一条 reason 中分别说清；若是两个独立问题，应拆成两条 issue，不要混成一句模糊说明。
 9. hint 只给简短修改方向，不重复 reason。不要输出“检查语法/搭配/目标词”这类没有操作价值的话。
 10. suggestion 可以用于两种情况：存在 error 时给出完整修正版；或者只有 improve/polish 时给出可选优化版。changes 只列 suggestion 相对原句的实际改动，最多 3 条。reason 必须具体，不得只写“表达更自然”。没有 suggestion 时 changes 必须为空数组。
-11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。
+11. 不要把个人风格偏好伪装成 error；但可以作为 improve/polish issue 返回，让界面以非阻断建议展示。\n12. issues 之间的 span 不得重叠，也不得一个包含另一个。如果两个修改落在同一片段，或者一个 replacement 能同时解决另一个问题，必须合并成一条 issue：使用原句中能覆盖这些问题的完整 span，只给一个 replacement，并在 reason 中把两个原因一起说清。禁止把“studing → studying”和“Keeping studing every day → Studying every day”拆成两条；应合并为“Keeping studing every day → Studying every day”。\n13. 即使同时存在 blocking error，也要继续检查其余不重叠片段；若存在真正有学习价值的自然度/地道度优化，最多额外返回 1 条 improve/polish。不要因为有红色错误就丢掉黄色建议。
 
 只输出 JSON：
-{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正","severity":"error|improve|polish","blocking":true}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释"}],"keyword":"最终英文中实际目标词/词形"}`;
+{"inputLanguage":"zh|en","approved":true,"level":"good|warn","title":"简短中文结论","tips":["最多2条"],"issues":[{"span":"原句中的问题片段","reason":"一句具体中文说明","hint":"简短修改方向","replacement":"可直接替换 span 的局部修正","severity":"error|improve|polish","blocking":true}],"suggestion":"最终英文或空字符串","changes":[{"from":"原片段","to":"修改后片段","reason":"一句简洁准确的中文解释","severity":"error|improve|polish","blocking":true}],"keyword":"最终英文中实际目标词/词形"}`;
 
   const result = await runCodexFastText(prompt, {
     timeoutMs: 15000,
@@ -2062,12 +2157,24 @@ span 必须是用户原句中真实存在的一段连续文本，尽量选能唯
           from: String(item?.from || "").trim().slice(0, 80),
           to: String(item?.to || "").trim().slice(0, 80),
           reason: String(item?.reason || "").trim().slice(0, 120),
+          severity: ["error","improve","polish"].includes(String(item?.severity || "").trim().toLowerCase())
+            ? String(item.severity).trim().toLowerCase()
+            : "",
+          blocking: typeof item?.blocking === "boolean" ? item.blocking : null,
         })).filter(item => item.from || item.to || item.reason)
       : [],
     keyword: String(parsed.keyword || word).trim() || word,
     provider: result.transport === "app-server" ? "codex-app-server" : "codex-exec-fallback",
     cacheHit: false,
   };
+
+  feedback.issues = normalizeSentenceDiagnostics(
+    sentence,
+    feedback.issues,
+    feedback.changes,
+    feedback.approved,
+    feedback.level
+  );
 
   if (!feedback.suggestion) feedback.changes = [];
   if (!feedback.issues.length && feedback.suggestion && feedback.changes.length) {
