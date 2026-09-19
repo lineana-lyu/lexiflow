@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - portfolio-runtime-capture
+    paths:
+      - ".github/workflows/portfolio-screenshots.yml"
+      - "scripts/capture-portfolio-screenshots.cjs"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   capture:
@@ -47,7 +50,18 @@ jobs:
           exit 1
 
       - name: Capture actual product pages
-        run: node scripts/capture-portfolio-screenshots.cjs
+        run: timeout 120s node scripts/capture-portfolio-screenshots.cjs
+
+      - name: Commit screenshots to capture branch
+        if: always()
+        run: |
+          if compgen -G "portfolio-screenshots/*.png" > /dev/null; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add portfolio-screenshots/*.png
+            git commit -m "chore: capture actual LexiFlow portfolio screens" || true
+            git push
+          fi
 
       - name: Show runtime log
         if: always()
