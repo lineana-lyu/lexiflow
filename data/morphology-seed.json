@@ -2456,6 +2456,166 @@
       "headword": "voice",
       "url": "https://en.wiktionary.org/wiki/voice",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "ls-pars",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "pars, partis",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n33930/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "lsj-grapho",
+      "kind": "classical_dictionary",
+      "name": "LSJ Greek-English Lexicon",
+      "headword": "γράφω",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n22825/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "lsj-polis",
+      "kind": "classical_dictionary",
+      "name": "LSJ Greek-English Lexicon",
+      "headword": "πόλις",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n84494/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-possum",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "possum / potens",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37193/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-maneo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "maneo",
+      "url": "https://cld.bbaw.de/lemma/lat/maneo",
+      "license": "Public-domain Lewis & Short source text via CLD"
+    },
+    {
+      "id": "ls-valeo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "valeo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=valeo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-cor",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "cor, cordis",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n11124/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-part",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "part",
+      "url": "https://en.wiktionary.org/wiki/part",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-program",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "program",
+      "url": "https://en.wiktionary.org/wiki/program",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-political",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "political",
+      "url": "https://en.wiktionary.org/wiki/political",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-policy",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "policy",
+      "url": "https://en.wiktionary.org/wiki/policy",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-power",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "power",
+      "url": "https://en.wiktionary.org/wiki/power",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-remain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "remain",
+      "url": "https://en.wiktionary.org/wiki/remain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-value",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "value",
+      "url": "https://en.wiktionary.org/wiki/value",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-record",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "record",
+      "url": "https://en.wiktionary.org/wiki/record",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-special",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "special",
+      "url": "https://en.wiktionary.org/wiki/special",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-view",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "view",
+      "url": "https://en.wiktionary.org/wiki/view",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-support",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "support",
+      "url": "https://en.wiktionary.org/wiki/support",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-actually",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "actually",
+      "url": "https://en.wiktionary.org/wiki/actually",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-especially",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "especially",
+      "url": "https://en.wiktionary.org/wiki/especially",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "morphemes": [
@@ -3193,6 +3353,90 @@
       "narrativeZh": "PROB 来自拉丁语 probare“检验、判断是否合格，并由此认可”。probable 是“经判断可成立的”，prove 是“通过证据检验使其成立”，proof 则是证明或证据。核心是“经得起检验”。",
       "sourceIds": [
         "ls-probo"
+      ]
+    },
+    {
+      "id": "part",
+      "display": "PART",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "part; share; portion",
+      "meaningZh": "部分；份额；分开",
+      "narrativeZh": "PART 来自拉丁语 pars, partis“部分、份额”。它的核心是“整体中的一部分”，因此 partial、partition、participate 等词都围绕“部分、分配、参与其中”展开。看到 part- 时，可以先想“整体被分出一份”。",
+      "sourceIds": [
+        "ls-pars"
+      ]
+    },
+    {
+      "id": "graph",
+      "display": "GRAPH / GRAM",
+      "type": "root",
+      "language": "Greek",
+      "meaningEn": "write; draw; written mark",
+      "meaningZh": "写；画；书写记号",
+      "narrativeZh": "GRAPH / GRAM 来自古希腊语 γράφω“刻、画、写”。graph 常保留“写、画、记录”的动作，-gram 则常表示“写下来的东西或记录”。program、graphic、paragraph 都能从“写下或画出”建立联系。",
+      "sourceIds": [
+        "lsj-grapho"
+      ]
+    },
+    {
+      "id": "polis",
+      "display": "POL / POLIT",
+      "type": "root",
+      "language": "Greek",
+      "meaningEn": "city; citizen; state",
+      "meaningZh": "城市；公民；国家治理",
+      "narrativeZh": "POL / POLIT 来自古希腊语 πόλις“城邦、城市”。古希腊的政治生活以城邦为中心，所以 political、policy、politics 等词都与公民、治理和公共事务形成了历史联系。",
+      "sourceIds": [
+        "lsj-polis"
+      ]
+    },
+    {
+      "id": "pot",
+      "display": "POT / POSS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "be able; have power",
+      "meaningZh": "能够；有能力；有力量",
+      "narrativeZh": "POT / POSS 与拉丁语 posse“能够”及 potens“有能力、有力量”相关。它的核心不是单纯的“权力”，而是“有能力做到”。power、potential、possible、potent 都能回到“能力与力量”这一语义中心。",
+      "sourceIds": [
+        "ls-possum"
+      ]
+    },
+    {
+      "id": "mane",
+      "display": "MANE",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "stay; remain",
+      "meaningZh": "停留；保持；留下",
+      "narrativeZh": "MANE 来自拉丁语 manere“停留、留下”。它的核心画面是“待在原处、不离开”。remain、permanent 等词虽然现代拼写变化不同，但都能追溯到“留下、持续存在”这个动作。",
+      "sourceIds": [
+        "ls-maneo"
+      ]
+    },
+    {
+      "id": "val",
+      "display": "VAL",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "be strong; be worth",
+      "meaningZh": "强健；有效；有价值",
+      "narrativeZh": "VAL 来自拉丁语 valere“强健、有力量、有效”，也可以表示“值多少钱”。因此 valid、value、evaluate 等词把“有力量、有效”进一步发展成“有效性”和“价值”。",
+      "sourceIds": [
+        "ls-valeo"
+      ]
+    },
+    {
+      "id": "cord",
+      "display": "COR / CORD",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "heart; mind",
+      "meaningZh": "心；内心；心意",
+      "narrativeZh": "COR / CORD 来自拉丁语 cor, cordis“心”。拉丁语里“心”不仅是身体器官，也常和记忆、心意联系在一起。record 的历史含义可以理解成“把事情重新带回心里”，cordial、accord 等词也保留了这种“心意”关系。",
+      "sourceIds": [
+        "ls-cor"
       ]
     }
   ],
@@ -10678,6 +10922,413 @@
       "sourceIds": [
         "ls-voco",
         "wik-voice"
+      ]
+    },
+    {
+      "word": "part",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a share or portion",
+      "literalZh": "整体中的一部分",
+      "meaningBridgeZh": "part 直接来自 Latin pars / partem“部分、份额”。它本身就是 PART 词族最核心的词，可以把 partial、partition、participate 都串到“整体中的一份”上。",
+      "parts": [
+        {
+          "text": "part",
+          "role": "root",
+          "meaningEn": "part; share",
+          "meaningZh": "部分；份额",
+          "morphemeId": "part"
+        }
+      ],
+      "rootStoryIds": [
+        "part"
+      ],
+      "relatedWords": [
+        "partial",
+        "partition",
+        "participate",
+        "department"
+      ],
+      "sourceIds": [
+        "ls-pars",
+        "wik-part"
+      ]
+    },
+    {
+      "word": "program",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "something written beforehand / publicly",
+      "literalZh": "预先写下或公开写出的安排",
+      "meaningBridgeZh": "program 经由 Greek programma，来自 pro-“在前”与 graphein“写”。原本是公开写出的告示或安排，后来发展成“节目单、计划、程序”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "before; forward",
+          "meaningZh": "在前；预先"
+        },
+        {
+          "text": "gram",
+          "role": "root",
+          "meaningEn": "written mark; writing",
+          "meaningZh": "写下的内容；记录",
+          "morphemeId": "graph"
+        }
+      ],
+      "rootStoryIds": [
+        "graph"
+      ],
+      "relatedWords": [
+        "graphic",
+        "paragraph",
+        "photograph",
+        "grammar"
+      ],
+      "sourceIds": [
+        "lsj-grapho",
+        "wik-program"
+      ]
+    },
+    {
+      "word": "political",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "of the polis / public affairs",
+      "literalZh": "与城邦和公共事务有关",
+      "meaningBridgeZh": "political 经由 Greek politikos / polites 与 polis“城邦”相连，所以它的历史核心是“公民和城邦公共事务的”。",
+      "parts": [
+        {
+          "text": "polit",
+          "role": "root-association",
+          "meaningEn": "city; citizen; public affairs",
+          "meaningZh": "城邦；公民；公共事务",
+          "morphemeId": "polis"
+        }
+      ],
+      "rootStoryIds": [
+        "polis"
+      ],
+      "relatedWords": [
+        "policy",
+        "politics",
+        "polity",
+        "police"
+      ],
+      "sourceIds": [
+        "lsj-polis",
+        "wik-political"
+      ]
+    },
+    {
+      "word": "policy",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "public administration / course of governance",
+      "literalZh": "治理与公共事务的原则",
+      "meaningBridgeZh": "policy 的“方针、政策”这一词义经由 Old French policie 和 Latin politia，最终连接到 Greek politeia“公民生活、政府”和 polis“城邦”。因此这里展示词源关联，不按现代拼写硬拆。",
+      "parts": [
+        {
+          "text": "policy",
+          "role": "root-association",
+          "meaningEn": "governance; public affairs",
+          "meaningZh": "治理；公共事务",
+          "morphemeId": "polis"
+        }
+      ],
+      "rootStoryIds": [
+        "polis"
+      ],
+      "relatedWords": [
+        "political",
+        "politics",
+        "polity",
+        "police"
+      ],
+      "sourceIds": [
+        "lsj-polis",
+        "wik-policy"
+      ]
+    },
+    {
+      "word": "power",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "ability; capacity to act",
+      "literalZh": "做成事情的能力和力量",
+      "meaningBridgeZh": "power 经由 Old French 追溯到 Latin posse“能够”。因此它最底层的语义不是抽象职位，而是“有能力做成某事”，再发展为力量、权力和功率。",
+      "parts": [
+        {
+          "text": "power",
+          "role": "root-association",
+          "meaningEn": "be able; have power",
+          "meaningZh": "能够；有力量",
+          "morphemeId": "pot"
+        }
+      ],
+      "rootStoryIds": [
+        "pot"
+      ],
+      "relatedWords": [
+        "potent",
+        "potential",
+        "possible",
+        "possess"
+      ],
+      "sourceIds": [
+        "ls-possum",
+        "wik-power"
+      ]
+    },
+    {
+      "word": "remain",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "stay behind / continue to stay",
+      "literalZh": "继续留下、不离开",
+      "meaningBridgeZh": "remain 经由 Old French 追溯到 Latin remanere，其中 manere 的核心就是“停留、留下”。现代拼写已经发生变化，因此 LexiFlow 只显示 MANE 同源关系，不强行拆成现代字母块。",
+      "parts": [
+        {
+          "text": "remain",
+          "role": "root-association",
+          "meaningEn": "stay; remain",
+          "meaningZh": "停留；留下",
+          "morphemeId": "mane"
+        }
+      ],
+      "rootStoryIds": [
+        "mane"
+      ],
+      "relatedWords": [
+        "permanent",
+        "remain",
+        "mansion"
+      ],
+      "sourceIds": [
+        "ls-maneo",
+        "wik-remain"
+      ]
+    },
+    {
+      "word": "value",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "worth; strength or worth of something",
+      "literalZh": "某物具有多少分量或价值",
+      "meaningBridgeZh": "value 经由 Old French value 与 Latin valere“强健、有效、值……”相关，所以“价值”可以理解为一个事物有多大分量、效力或值得程度。",
+      "parts": [
+        {
+          "text": "val",
+          "role": "root-association",
+          "meaningEn": "be strong; be worth",
+          "meaningZh": "强健；有效；有价值",
+          "morphemeId": "val"
+        }
+      ],
+      "rootStoryIds": [
+        "val"
+      ],
+      "relatedWords": [
+        "valid",
+        "evaluate",
+        "valor",
+        "valuable"
+      ],
+      "sourceIds": [
+        "ls-valeo",
+        "wik-value"
+      ]
+    },
+    {
+      "word": "record",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "bring back to the heart / mind",
+      "literalZh": "重新带回心里、记在心中",
+      "meaningBridgeZh": "record 经由 Old French recorder 追溯到 Latin recordari，由 re-“再次、回来”与 cor“心”组成。先是“回想、记住”，再发展为“记录下来”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回来；再次"
+        },
+        {
+          "text": "cord",
+          "role": "root",
+          "meaningEn": "heart; mind",
+          "meaningZh": "心；内心",
+          "morphemeId": "cord"
+        }
+      ],
+      "rootStoryIds": [
+        "cord"
+      ],
+      "relatedWords": [
+        "cordial",
+        "accord",
+        "discord",
+        "recall"
+      ],
+      "sourceIds": [
+        "ls-cor",
+        "wik-record"
+      ]
+    },
+    {
+      "word": "special",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "of a particular kind or appearance",
+      "literalZh": "具有特定种类或样貌",
+      "meaningBridgeZh": "special 经由 Latin specialis / species，与 specere“看”这一词族相关。它不是简单的现代字母拆解，所以这里作为 SPEC/SPECT 的历史词源关联展示。",
+      "parts": [
+        {
+          "text": "spec",
+          "role": "root-association",
+          "meaningEn": "look; appearance; kind",
+          "meaningZh": "看；外观；种类",
+          "morphemeId": "spect"
+        }
+      ],
+      "rootStoryIds": [
+        "spect"
+      ],
+      "relatedWords": [
+        "species",
+        "specific",
+        "inspect",
+        "respect"
+      ],
+      "sourceIds": [
+        "ls-spectio",
+        "wik-special"
+      ]
+    },
+    {
+      "word": "view",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "what is seen",
+      "literalZh": "所看到的景象或看法",
+      "meaningBridgeZh": "view 经由 Old French veue / veoir 追溯到 Latin videre“看见”。现代拼写已看不出 VID/VIS，因此只展示可靠的同源关系。",
+      "parts": [
+        {
+          "text": "view",
+          "role": "root-association",
+          "meaningEn": "see; look",
+          "meaningZh": "看；看见",
+          "morphemeId": "vid"
+        }
+      ],
+      "rootStoryIds": [
+        "vid"
+      ],
+      "relatedWords": [
+        "vision",
+        "visible",
+        "revise",
+        "provide"
+      ],
+      "sourceIds": [
+        "ls-video",
+        "wik-view"
+      ]
+    },
+    {
+      "word": "support",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "carry from underneath",
+      "literalZh": "从下面托住、搬住",
+      "meaningBridgeZh": "support 来自 Latin supportare，由 sub-“在下方”与 portare“携带、搬运”组成。最初的动作就是“从下面托住”，因此自然发展为“支撑、支持”。",
+      "parts": [
+        {
+          "text": "sup- (sub-)",
+          "role": "prefix",
+          "meaningEn": "under",
+          "meaningZh": "在下方"
+        },
+        {
+          "text": "port",
+          "role": "root",
+          "meaningEn": "carry; convey",
+          "meaningZh": "携带；托运",
+          "morphemeId": "port"
+        }
+      ],
+      "rootStoryIds": [
+        "port"
+      ],
+      "relatedWords": [
+        "transport",
+        "portable",
+        "import",
+        "export"
+      ],
+      "sourceIds": [
+        "ls-porto",
+        "wik-support"
+      ]
+    },
+    {
+      "word": "actually",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "in an actual or real manner",
+      "literalZh": "按照实际发生的情况",
+      "meaningBridgeZh": "actually 是 actual 的副词形式，而 actual 经由 actus“行动、已经发生的事”与 ACT 词族相连。因此它继承“真实发生、实际存在”的语义。",
+      "parts": [
+        {
+          "text": "act",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动；发生",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "actual",
+        "action",
+        "active",
+        "agent"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-actually"
+      ]
+    },
+    {
+      "word": "especially",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "in a special manner",
+      "literalZh": "以特别、特殊的方式",
+      "meaningBridgeZh": "especially 经由 especial / special，与 Latin species 和 specere“看”这一词族相连。这里继承 SPECIAL 的词源关系，不把副词后缀当成新的词根。",
+      "parts": [
+        {
+          "text": "spec",
+          "role": "root-association",
+          "meaningEn": "appearance; kind; look",
+          "meaningZh": "外观；种类；看",
+          "morphemeId": "spect"
+        }
+      ],
+      "rootStoryIds": [
+        "spect"
+      ],
+      "relatedWords": [
+        "special",
+        "specific",
+        "species",
+        "inspect"
+      ],
+      "sourceIds": [
+        "ls-spectio",
+        "wik-especially"
       ]
     }
   ]
