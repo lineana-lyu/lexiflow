@@ -1,0 +1,128 @@
+name: Publish LexiFlow v0.8.7
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-v0.8.7.yml
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: v0.8.7
+      RELEASE_SHA: da57b4b4776d3b7ef58299f4fafb864f053b4695
+      BUILD_RUN_ID: "35483200162"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact release commit
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+
+      - name: Verify release source and build gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./package.json').version")"
+          test "$VERSION" = "0.8.7"
+
+          RUN_SHA="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" --jq '.head_sha')"
+          RUN_STATUS="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" --jq '.status')"
+          RUN_CONCLUSION="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN_ID" --jq '.conclusion')"
+
+          test "$RUN_SHA" = "$RELEASE_SHA"
+          test "$RUN_STATUS" = "completed"
+          test "$RUN_CONCLUSION" = "success"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$TAG already exists; nothing to publish."
+            exit 78
+          fi
+
+      - name: Download validated Windows artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p release-assets
+          gh run download "$BUILD_RUN_ID" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "LexiFlow-Windows" \
+            --dir release-assets
+
+          mapfile -t EXES < <(find release-assets -type f -name '*.exe' | sort)
+          test "${#EXES[@]}" -eq 2
+          printf 'Release assets:\n'
+          printf '  %s\n' "${EXES[@]}"
+
+          (
+            cd release-assets
+            find . -type f -name '*.exe' -print0 | sort -z | xargs -0 sha256sum | sed 's# \./# #'
+          ) > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Write release notes
+        shell: bash
+        run: |
+          cat > release-notes.md <<'EOF'
+          ## LexiFlow v0.8.7
+
+          This release focuses on making LexiFlow's lookup and active-use learning flows more reliable, consistent, and easier to trust.
+
+          ### Highlights
+
+          - **Lexeme Identity V5** — inflected forms now resolve to a canonical lemma while retaining valid word forms, so pronunciation, examples, saving, and learning identity stay aligned.
+          - **Better Chinese → English lookup** — local Core/ECDICT evidence, learner frequency, canonical form, and semantic evidence are combined so common learner-friendly words rank ahead of obscure alternatives while explicit user choices still win.
+          - **Chinese semantic evidence in Core V4** — reverse lookup aliases and semantic provenance are now separate data layers, preventing valid mappings from being rejected just because a stored dictionary gloss uses a synonym.
+          - **More stable Apply checking** — deterministic diagnostics, canonical source ranges, persistent reviews, and stricter severity policy reduce repeated-check drift and incorrect highlighting.
+          - **Safer one-click corrections** — diagnostics and executable fixes are now separate. AI-proposed code actions are independently validated against the full sentence before a one-click edit is shown.
+          - **Improved spelling and capitalization handling** — verified spelling mistakes can block as real errors, while the standalone first-person pronoun `i` remains a visible non-blocking reminder without matching letters inside words such as `ride`.
+          - **Expanded automated regression coverage** — canonical morphology, Chinese lookup ranking, real HTTP runtime behavior, Apply/Review flows, production lexicon acceptance, and Windows packaging are all covered by release gates.
+
+          ### Validation
+
+          The Windows binaries attached to this release were built from commit:
+
+          `da57b4b4776d3b7ef58299f4fafb864f053b4695`
+
+          The release build passed:
+          - Learning Engine Check #783
+          - Build LexiFlow for Windows #59
+          - Production dictionary preparation and Production Lexicon V5 acceptance
+          - Windows NSIS installer and portable packaging
+
+          A `SHA256SUMS.txt` file is included for artifact verification.
+
+          ### Windows downloads
+
+          - Use **LexiFlow Setup 0.8.7** for a normal Windows installation.
+          - Use **LexiFlow 0.8.7** for the portable version.
+
+          ### Code signing policy
+
+          **Free code signing provided by SignPath.io, certificate by SignPath Foundation.**
+
+          These v0.8.7 binaries are intentionally **unsigned** while the SignPath Foundation application is still under review. No LexiFlow binary should be considered SignPath-signed until the project has been approved and the automated signing workflow is enabled.
+
+          Windows may therefore show an Unknown Publisher or Microsoft Defender SmartScreen warning.
+
+          The full code-signing policy is available in `CODE_SIGNING_POLICY.md`.
+          EOF
+
+      - name: Publish GitHub Release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t EXES < <(find release-assets -type f -name '*.exe' | sort)
+          gh release create "$TAG" \
+            "${EXES[@]}" \
+            SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$RELEASE_SHA" \
+            --title "LexiFlow v0.8.7" \
+            --notes-file release-notes.md
