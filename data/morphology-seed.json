@@ -344,6 +344,14 @@
       "headword": "structure",
       "url": "https://en.wiktionary.org/wiki/structure",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "ls-formo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "formo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18596/",
+      "license": "Public-domain source text via Perseus"
     }
   ],
   "morphemes": [
@@ -429,7 +437,8 @@
       "meaningZh": "形状；形式；塑造",
       "narrativeZh": "FORM 来自拉丁语 forma“形状、外形”和 formare“塑造、成形”。它的核心不是抽象的“形式”两个字，而是“给某物一个形状”。所以遇到 form 时，可以先想：这个词是在改变形状、形成形状，还是让某物符合某种形状。",
       "sourceIds": [
-        "ls-forma"
+        "ls-forma",
+        "ls-formo"
       ]
     },
     {
@@ -1187,7 +1196,7 @@
         "elevation"
       ],
       "sourceIds": [
-        "ls-levis",
+        "ls-levo",
         "wik-elevate"
       ]
     },
@@ -1251,7 +1260,7 @@
         "reform"
       ],
       "sourceIds": [
-        "ls-forma",
+        "ls-formo",
         "wik-transform"
       ]
     },
@@ -1286,7 +1295,7 @@
         "reform"
       ],
       "sourceIds": [
-        "ls-forma",
+        "ls-formo",
         "wik-conform"
       ]
     },
