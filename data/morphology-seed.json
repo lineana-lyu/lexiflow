@@ -114,12 +114,12 @@
       "license": "CC BY-SA 4.0 / GFDL"
     },
     {
-      "id": "wik-alleviare",
+      "id": "etym-alleviate",
       "kind": "english_etymology",
-      "name": "Wiktionary",
-      "headword": "alleviare",
-      "url": "https://en.wiktionary.org/wiki/alleviare",
-      "license": "CC BY-SA 4.0 / GFDL"
+      "name": "Online Etymology Dictionary",
+      "headword": "alleviate",
+      "url": "https://www.etymonline.com/word/alleviate",
+      "license": "Reference-only factual verification; no source text copied"
     }
   ],
   "morphemes": [
@@ -421,7 +421,7 @@
       "sourceIds": [
         "ls-levis",
         "ls-levo",
-        "wik-alleviare"
+        "etym-alleviate"
       ]
     }
   ]
