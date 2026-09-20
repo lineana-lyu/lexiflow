@@ -1,0 +1,428 @@
+{
+  "schema": "lexiflow-morphology-seed-v1",
+  "policy": {
+    "verifiedWordRequires": [
+      "classical_dictionary",
+      "english_etymology"
+    ],
+    "uncertainBehavior": "hide",
+    "narrativeRule": "Narratives may paraphrase verified facts but must not add unsupported historical claims."
+  },
+  "sources": [
+    {
+      "id": "ls-bene",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "bene",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5168/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-dictio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "dictio",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n13820/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-traho",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "traho",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=traho",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-duco",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "duco",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n14847/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-gravis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "gravis",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19937/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-levis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "levis",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26417/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-levo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "levo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26428/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-benefit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "benefit",
+      "url": "https://en.wiktionary.org/wiki/benefit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-benevolent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "benevolent",
+      "url": "https://en.wiktionary.org/wiki/benevolent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-contradict",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "contradict",
+      "url": "https://en.wiktionary.org/wiki/contradict",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-retract",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "retract",
+      "url": "https://en.wiktionary.org/wiki/retract",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-induce",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "induce",
+      "url": "https://en.wiktionary.org/wiki/induce",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-gravitate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "gravitate",
+      "url": "https://en.wiktionary.org/wiki/gravitate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-alleviare",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "alleviare",
+      "url": "https://en.wiktionary.org/wiki/alleviare",
+      "license": "CC BY-SA 4.0 / GFDL"
+    }
+  ],
+  "morphemes": [
+    {
+      "id": "bene",
+      "display": "BENE",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "well; in a good way",
+      "meaningZh": "好；良好；向好",
+      "narrativeZh": "BENE 来自拉丁语 bene，核心是“好地、顺利地”。它常出现在与好的结果、善意或益处有关的词源关系中。看到 bene- 时，可以先抓住“好、向好”这个方向，再结合单词的其他部分理解完整词义。",
+      "sourceIds": [
+        "ls-bene"
+      ]
+    },
+    {
+      "id": "dict",
+      "display": "DICT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "say; speak; utter",
+      "meaningZh": "说；表达",
+      "narrativeZh": "DICT 与拉丁语中“说、表达”这一组词义有关。它进入不同单词后，常保留“说出、陈述、表达”的语义线索。遇到 dict 时，可以先问自己：这个词是不是在说“怎么说、向谁说、把什么说出来”。",
+      "sourceIds": [
+        "ls-dictio"
+      ]
+    },
+    {
+      "id": "tract",
+      "display": "TRACT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "draw; drag; pull",
+      "meaningZh": "拉；拖；牵引",
+      "narrativeZh": "TRACT 与拉丁语 trahere 的“拉、拖、牵引”有关。很多同根词虽然已经变成抽象含义，但仍能找到“把某物拉向、拉开、拉回”的动作感。记住这个动作，比单独背一个中文释义更容易迁移到新词。",
+      "sourceIds": [
+        "ls-traho"
+      ]
+    },
+    {
+      "id": "duc",
+      "display": "DUC / DUCT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "lead; conduct; bring",
+      "meaningZh": "带领；引导；带来",
+      "narrativeZh": "DUC / DUCT 来自拉丁语 ducere，核心动作是“带领、引导”。在不同前缀的作用下，它可以表示带进来、带出去、向前带或向回带。看到 duc/duct 时，可以先寻找“引导方向”的感觉。",
+      "sourceIds": [
+        "ls-duco"
+      ]
+    },
+    {
+      "id": "grav",
+      "display": "GRAV",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "heavy; weighty; serious",
+      "meaningZh": "重；有分量；严重",
+      "narrativeZh": "GRAV 与拉丁语 gravis 的“重、沉重”有关。这个“重”后来既可以是物理重量，也可以延伸到“严肃、严重、有分量”。所以看到 grav-，可以先从“重量感”出发理解它的抽象义。",
+      "sourceIds": [
+        "ls-gravis"
+      ]
+    },
+    {
+      "id": "lev",
+      "display": "LEV",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "light; raise; lighten",
+      "meaningZh": "轻；举起；减轻",
+      "narrativeZh": "LEV 与拉丁语 levis“轻”以及 levo“举起、使变轻”有关。它的核心联想不是某个固定中文词，而是“让重量变轻、把东西抬起来”。这个动作感能帮助理解表示减轻、升高的一组词。",
+      "sourceIds": [
+        "ls-levis",
+        "ls-levo"
+      ]
+    }
+  ],
+  "words": [
+    {
+      "word": "benefit",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "good deed / good result",
+      "literalZh": "好的行为、好的结果",
+      "meaningBridgeZh": "这个词的历史来源与“做得好、带来好处”有关，因此现代英语中的 benefit 很自然地发展为“益处、好处”。",
+      "parts": [
+        {
+          "text": "bene-",
+          "role": "root-association",
+          "meaningEn": "well; good",
+          "meaningZh": "好；良好",
+          "morphemeId": "bene"
+        }
+      ],
+      "rootStoryIds": [
+        "bene"
+      ],
+      "relatedWords": [
+        "beneficial",
+        "benefactor",
+        "benevolent"
+      ],
+      "sourceIds": [
+        "ls-bene",
+        "wik-benefit"
+      ]
+    },
+    {
+      "word": "benevolent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "well-wishing",
+      "literalZh": "希望别人好",
+      "meaningBridgeZh": "它来自表示“善意、希望别人好”的拉丁语来源，因此现代词义落在“仁慈、善意、乐于助人”这一方向。",
+      "parts": [
+        {
+          "text": "bene-",
+          "role": "root-association",
+          "meaningEn": "well; good",
+          "meaningZh": "好；善意",
+          "morphemeId": "bene"
+        }
+      ],
+      "rootStoryIds": [
+        "bene"
+      ],
+      "relatedWords": [
+        "benefit",
+        "beneficial",
+        "benefactor"
+      ],
+      "sourceIds": [
+        "ls-bene",
+        "wik-benevolent"
+      ]
+    },
+    {
+      "word": "contradict",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "speak against",
+      "literalZh": "反着说；说相反的话",
+      "meaningBridgeZh": "contra- 给出“相反、对着”的方向，dict 保留“说”的核心动作，所以整体很容易理解为“说相反的话”，进一步就是“反驳；与……矛盾”。",
+      "parts": [
+        {
+          "text": "contra-",
+          "role": "prefix",
+          "meaningEn": "against",
+          "meaningZh": "相反；对着"
+        },
+        {
+          "text": "dict",
+          "role": "root",
+          "meaningEn": "say; speak",
+          "meaningZh": "说；表达",
+          "morphemeId": "dict"
+        }
+      ],
+      "rootStoryIds": [
+        "dict"
+      ],
+      "relatedWords": [
+        "dictate",
+        "dictionary",
+        "contradiction"
+      ],
+      "sourceIds": [
+        "ls-dictio",
+        "wik-contradict"
+      ]
+    },
+    {
+      "word": "retract",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "draw back",
+      "literalZh": "往回拉",
+      "meaningBridgeZh": "re- 提供“回、向后”的方向，tract 表示“拉”。从“把东西拉回来”很自然就能过渡到“缩回”，也能进一步理解成“撤回先前说过的话”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "tract",
+          "role": "root",
+          "meaningEn": "draw; pull",
+          "meaningZh": "拉；牵引",
+          "morphemeId": "tract"
+        }
+      ],
+      "rootStoryIds": [
+        "tract"
+      ],
+      "relatedWords": [
+        "attract",
+        "distract",
+        "extract",
+        "protract"
+      ],
+      "sourceIds": [
+        "ls-traho",
+        "wik-retract"
+      ]
+    },
+    {
+      "word": "induce",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "lead in",
+      "literalZh": "引进去；带进去",
+      "meaningBridgeZh": "in- 给出“进入”的方向，duc 表示“带领”。从“把某人或某事引进去”可以理解到现代的“引导、促使、导致”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "in; into",
+          "meaningZh": "进入；向内"
+        },
+        {
+          "text": "duc",
+          "role": "root",
+          "meaningEn": "lead; bring",
+          "meaningZh": "带领；引导",
+          "morphemeId": "duc"
+        }
+      ],
+      "rootStoryIds": [
+        "duc"
+      ],
+      "relatedWords": [
+        "deduce",
+        "produce",
+        "reduce",
+        "conduct"
+      ],
+      "sourceIds": [
+        "ls-duco",
+        "wik-induce"
+      ]
+    },
+    {
+      "word": "gravitate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "move as if by weight or gravity",
+      "literalZh": "像受到重量或引力牵引一样移动",
+      "meaningBridgeZh": "grav- 保留“重、重量”的核心感觉。现代 gravitate 除了表示受引力移动，也常引申为“自然地被吸引到某人或某物附近”。",
+      "parts": [
+        {
+          "text": "grav",
+          "role": "root",
+          "meaningEn": "heavy; weighty",
+          "meaningZh": "重；有分量",
+          "morphemeId": "grav"
+        }
+      ],
+      "rootStoryIds": [
+        "grav"
+      ],
+      "relatedWords": [
+        "gravity",
+        "grave",
+        "gravitas",
+        "aggravate"
+      ],
+      "sourceIds": [
+        "ls-gravis",
+        "wik-gravitate"
+      ]
+    },
+    {
+      "word": "alleviate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "make lighter",
+      "literalZh": "使变轻",
+      "meaningBridgeZh": "lev 的核心联想是“轻、使变轻”。因此 alleviate 可以把痛苦、负担或问题“变轻”，也就是“缓解、减轻”。",
+      "parts": [
+        {
+          "text": "lev",
+          "role": "root",
+          "meaningEn": "light; lighten",
+          "meaningZh": "轻；减轻",
+          "morphemeId": "lev"
+        }
+      ],
+      "rootStoryIds": [
+        "lev"
+      ],
+      "relatedWords": [
+        "elevate",
+        "elevation",
+        "levity",
+        "lever"
+      ],
+      "sourceIds": [
+        "ls-levis",
+        "ls-levo",
+        "wik-alleviare"
+      ]
+    }
+  ]
+}
