@@ -116,6 +116,34 @@ including the ShareAlike requirement. This data license does not replace the
 licenses of LexiFlow's separately distributed source code or runtime components.
 
 
+
+## Morphology and etymology evidence
+
+LexiFlow's optional morphology layer stores compact, learner-facing summaries
+of verified word-building relationships. The root stories are written by
+LexiFlow from cited lexical facts; they are not copied from commercial
+vocabulary books.
+
+Classical Latin meanings are checked against Lewis & Short's *A Latin
+Dictionary* as made available by the Perseus Digital Library / Scaife ATLAS.
+
+- Dictionary: Lewis & Short, *A Latin Dictionary*
+- Perseus / Scaife dictionaries: https://atlas.perseus.tufts.edu/dictionaries/
+- Original dictionary text: public domain
+
+English word-etymology relationships used by the morphology seed are
+cross-checked against English Wiktionary entries.
+
+- Project: English Wiktionary
+- Source: https://en.wiktionary.org/
+- Licenses: Creative Commons Attribution-ShareAlike and GNU Free Documentation
+  License, as described by Wiktionary.
+
+The generated `morphology.sqlite` keeps source names and source URLs alongside
+each verified relationship so learner-facing explanations remain traceable.
+Redistributors should preserve this attribution and comply with the applicable
+Wiktionary share-alike/license requirements for any adapted Wiktionary content.
+
 ## Princeton WordNet
 
 LexiFlow can use Princeton WordNet locally to identify derivationally related
