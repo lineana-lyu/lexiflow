@@ -70,6 +70,22 @@ function validateAuthority(data) {
     assert(Array.isArray(item.coreMeaningZh) && item.coreMeaningZh.length > 0, `Chinese teaching gloss is required: ${id}`);
     assert(clean(item.formRelation), `Form relation is required: ${id}`);
 
+    if (item.sourceLanguage === "Ancient Greek" && item.kind === "root_family") {
+      const derivation = item.stemDerivation || {};
+      assert(clean(item.sourceStem), `Ancient Greek root family requires sourceStem: ${id}`);
+      assert(clean(derivation.sourceStem) === clean(item.sourceStem), `Greek sourceStem mismatch: ${id}`);
+      assert(clean(derivation.method), `Greek stem derivation method is required: ${id}`);
+      assert(Array.isArray(derivation.sources) && derivation.sources.length > 0, `Greek stem derivation evidence is required: ${id}`);
+      for (const sourceId of derivation.sources) {
+        assert(sourceMap.has(sourceId), `Unknown Greek stem derivation source "${sourceId}" for ${id}`);
+      }
+      const derivationSources = derivation.sources.map(sourceId => sourceMap.get(sourceId)).filter(Boolean);
+      assert(
+        derivationSources.some(source => ["historical_grammar","historical_lexicon"].includes(source.sourceType)),
+        `Greek stem derivation must cite a lexicon or grammar source: ${id}`
+      );
+    }
+
     const claims = item.claimSources || {};
     for (const claim of ["lemma", "meaning", "forms"]) {
       assert(Array.isArray(claims[claim]) && claims[claim].length > 0, `Missing ${claim} evidence: ${id}`);
