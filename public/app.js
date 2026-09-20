@@ -679,6 +679,7 @@
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
       ${wordFamilyMarkup(wordFamily)}
+      ${window.LexiFlowMorphologyViewV1?.markup?.(r.morphology)||""}
       ${primarySense&&!String(primarySense.meaningZh||"").trim()?`<div class="feedback warn"><h4>中文释义暂缺</h4><ul><li>当前词条没有可用中文释义，可以重新查询或手动补充。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
       ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
@@ -1544,6 +1545,7 @@
               cacheHit:true,
               sourceQuery:q,
               autoResolved:normalizeSearchText(q)!==normalizeSearchText(saved.word),
+              morphology:saved.morphology&&typeof saved.morphology==="object"?JSON.parse(JSON.stringify(saved.morphology)):null,
               senses:[{
                 id:`local-${saved.id}`,
                 pos:saved.pos,
@@ -1841,7 +1843,7 @@
       const requestedToday=state.addToTodayIntent===todayKey(nowDate);
       const currentPlan=state.data.dailyPlan;
       const addToToday=requestedToday&&Number(currentPlan?.remainingSelectSlots||0)>0;
-      const card={id:uid(),word:r.word,lexeme:r.lexeme&&typeof r.lexeme==="object"?JSON.parse(JSON.stringify(r.lexeme)):null,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],wordFamily:normalizeWordFamily(r.wordFamily),sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
+      const card={id:uid(),word:r.word,lexeme:r.lexeme&&typeof r.lexeme==="object"?JSON.parse(JSON.stringify(r.lexeme)):null,phonetic:r.phonetic,audioUrl:r.audioUrl||"",audioUrls:Array.isArray(r.audioUrls)?r.audioUrls:[],pronunciationSource:r.pronunciationSource||"",pos:s.pos,meaningZh:s.meaningZh,exampleEn:s.exampleEn,exampleZh:s.exampleZh||"",exampleTranslationPending:!s.exampleZh?.trim(),senseIntentEn:s.senseIntentEn||"",avoidVisualEn:Array.isArray(s.avoidVisualEn)?s.avoidVisualEn:[],wordFamily:normalizeWordFamily(r.wordFamily),morphology:r.morphology&&typeof r.morphology==="object"?JSON.parse(JSON.stringify(r.morphology)):null,sourceQuery:r.sourceQuery||state.lookup?.query||r.word,stage:"select",learningStage:"select",inboxPending:!addToToday,createdAt:now,updatedAt:now,reviewCount:0,nextReviewAt:null,memoryHistory:[],visualNote:"",imageData:null,userSentence:""};
       if(addToToday){
         card.inboxPending=false;
         card.todaySelectedOn=todayKey(nowDate);
