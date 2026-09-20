@@ -300,6 +300,90 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n18610/",
       "locator": "ἄφωνος (from φωνή)",
       "publicDomain": true
+    },
+    {
+      "id": "lsj-dia",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n24517/",
+      "locator": "διά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-meta",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n66572/",
+      "locator": "μετά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-para",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n77763/",
+      "locator": "παρά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-peri",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n81017/",
+      "locator": "περί",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-pro",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n86405/",
+      "locator": "πρό",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hyper",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n107183/",
+      "locator": "ὑπέρ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hypo",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n108092/",
+      "locator": "ὑπό",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -1534,6 +1618,400 @@
         "forms": [
           "lsj-phone",
           "lsj-aphonos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ab",
+      "kind": "prefix",
+      "teachingForms": [
+        "A-",
+        "AB-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "a / ab",
+      "sourceForms": [
+        "a-",
+        "ab-"
+      ],
+      "coreMeaningEn": [
+        "away"
+      ],
+      "coreMeaningZh": [
+        "离开",
+        "向外离去"
+      ],
+      "formRelation": "Allen & Greenough §267 lists a/ab as verbal prefixes retaining the adverbial sense AWAY.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-amb",
+      "kind": "prefix",
+      "teachingForms": [
+        "AMB-",
+        "AM-",
+        "AN-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "amb-",
+      "sourceForms": [
+        "amb-",
+        "am-",
+        "an-"
+      ],
+      "coreMeaningEn": [
+        "around"
+      ],
+      "coreMeaningZh": [
+        "环绕",
+        "周围"
+      ],
+      "formRelation": "Allen & Greenough §267 lists amb- with am-/an- variants and the sense AROUND.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-por",
+      "kind": "prefix",
+      "teachingForms": [
+        "POR-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "por-",
+      "sourceForms": [
+        "por-"
+      ],
+      "coreMeaningEn": [
+        "forward"
+      ],
+      "coreMeaningZh": [
+        "向前"
+      ],
+      "formRelation": "Allen & Greenough §267 lists por- as an inseparable particle with the sense FORWARD.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-per-intensive",
+      "kind": "prefix",
+      "teachingForms": [
+        "PER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "per-",
+      "sourceForms": [
+        "per-"
+      ],
+      "coreMeaningEn": [
+        "very",
+        "intensively"
+      ],
+      "coreMeaningZh": [
+        "非常",
+        "加强程度"
+      ],
+      "formRelation": "Allen & Greenough §267d explicitly treats per- as an adverbial intensive prefix meaning VERY. This record does not cover prepositional per 'through'.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-dia",
+      "kind": "prefix",
+      "teachingForms": [
+        "DIA-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "διά",
+      "sourceForms": [
+        "διά",
+        "δια-"
+      ],
+      "coreMeaningEn": [
+        "through",
+        "because of"
+      ],
+      "coreMeaningZh": [
+        "穿过",
+        "通过",
+        "由于"
+      ],
+      "formRelation": "LSJ gives the radical sense THROUGH and attests διά as a productive prepositional element; DIA- is its Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-dia"
+        ],
+        "meaning": [
+          "lsj-dia"
+        ],
+        "forms": [
+          "lsj-dia"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-meta",
+      "kind": "prefix",
+      "teachingForms": [
+        "META-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μετά",
+      "sourceForms": [
+        "μετά",
+        "μετα-"
+      ],
+      "coreMeaningEn": [
+        "with",
+        "among",
+        "after"
+      ],
+      "coreMeaningZh": [
+        "与……一起",
+        "在……之中",
+        "在……之后"
+      ],
+      "formRelation": "LSJ attests μετά with genitive/dative senses around WITH/AMONG and accusative AFTER. Downstream English senses such as 'meta-' = self-referential are not owned by this authority record.",
+      "claimSources": {
+        "lemma": [
+          "lsj-meta"
+        ],
+        "meaning": [
+          "lsj-meta"
+        ],
+        "forms": [
+          "lsj-meta"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-para",
+      "kind": "prefix",
+      "teachingForms": [
+        "PARA-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "παρά",
+      "sourceForms": [
+        "παρά",
+        "παρα-"
+      ],
+      "coreMeaningEn": [
+        "beside",
+        "alongside",
+        "past",
+        "beyond"
+      ],
+      "coreMeaningZh": [
+        "在旁",
+        "沿着",
+        "越过",
+        "偏离"
+      ],
+      "formRelation": "LSJ explicitly describes παρά in compounds with beside/alongside, past, and beyond/amiss relations.",
+      "claimSources": {
+        "lemma": [
+          "lsj-para"
+        ],
+        "meaning": [
+          "lsj-para"
+        ],
+        "forms": [
+          "lsj-para"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-peri",
+      "kind": "prefix",
+      "teachingForms": [
+        "PERI-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "περί",
+      "sourceForms": [
+        "περί",
+        "περι-"
+      ],
+      "coreMeaningEn": [
+        "around",
+        "round about"
+      ],
+      "coreMeaningZh": [
+        "围绕",
+        "在……周围"
+      ],
+      "formRelation": "LSJ gives περί the core spatial sense AROUND / ROUND ABOUT; PERI- is the Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-peri"
+        ],
+        "meaning": [
+          "lsj-peri"
+        ],
+        "forms": [
+          "lsj-peri"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-pro",
+      "kind": "prefix",
+      "teachingForms": [
+        "PRO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "πρό",
+      "sourceForms": [
+        "πρό",
+        "προ-"
+      ],
+      "coreMeaningEn": [
+        "before",
+        "in front of",
+        "forward"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前",
+        "向前"
+      ],
+      "formRelation": "LSJ explicitly treats πρό in compounds with BEFORE/FORWARDS and related senses. This Greek PRO- record is distinct from Latin pro-.",
+      "claimSources": {
+        "lemma": [
+          "lsj-pro"
+        ],
+        "meaning": [
+          "lsj-pro"
+        ],
+        "forms": [
+          "lsj-pro"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hyper",
+      "kind": "prefix",
+      "teachingForms": [
+        "HYPER-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὑπέρ",
+      "sourceForms": [
+        "ὑπέρ",
+        "ὑπερ-"
+      ],
+      "coreMeaningEn": [
+        "over",
+        "above",
+        "beyond"
+      ],
+      "coreMeaningZh": [
+        "在上",
+        "超过",
+        "越过"
+      ],
+      "formRelation": "LSJ explicitly states that ὑπέρ signifies OVER/ABOVE and documents compound uses including excess beyond measure.",
+      "claimSources": {
+        "lemma": [
+          "lsj-hyper"
+        ],
+        "meaning": [
+          "lsj-hyper"
+        ],
+        "forms": [
+          "lsj-hyper"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hypo",
+      "kind": "prefix",
+      "teachingForms": [
+        "HYPO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὑπό",
+      "sourceForms": [
+        "ὑπό",
+        "ὑπο-"
+      ],
+      "coreMeaningEn": [
+        "under",
+        "from under"
+      ],
+      "coreMeaningZh": [
+        "在下",
+        "从下方"
+      ],
+      "formRelation": "LSJ gives ὑπό the core spatial senses UNDER / FROM UNDER; HYPO- is the Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-hypo"
+        ],
+        "meaning": [
+          "lsj-hypo"
+        ],
+        "forms": [
+          "lsj-hypo"
         ],
         "variants": []
       },
