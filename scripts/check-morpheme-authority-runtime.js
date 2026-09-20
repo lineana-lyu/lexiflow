@@ -52,6 +52,34 @@ const synPrefix = authority.getById("grc-syn");
 assert(synPrefix?.sourceLemma === "σύν", "SYN- must resolve to σύν");
 assert(synPrefix?.coreMeaningEn?.includes("together"), "SYN- must retain TOGETHER");
 
+const graph = authority.getById("grc-graph");
+assert(graph?.sourceLemma === "γράφω", "GRAPH must resolve to γράφω");
+assert(graph?.sourceStem === "γραφ-", "GRAPH must preserve Greek source stem γραφ-");
+assert(graph?.stemDerivation?.sources?.includes("smyth-word-formation"), "GRAPH stem mapping must cite Smyth");
+
+const log = authority.getById("grc-log");
+assert(log?.sourceLemma === "λόγος", "LOG must resolve to λόγος");
+assert(log?.sourceStem === "λογο-", "LOG must preserve Greek source stem λογο-");
+assert(log?.teachingForms?.includes("LOGO"), "LOG family must preserve LOGO teaching form");
+
+const bio = authority.getById("grc-bio");
+assert(bio?.sourceLemma === "βίος", "BIO must resolve to βίος");
+assert(bio?.sourceStem === "βιο-", "BIO must preserve second-declension stem βιο-");
+assert(bio?.stemDerivation?.sources?.includes("smyth-declension"), "BIO stem mapping must cite the O-stem rule");
+
+const geo = authority.getById("grc-geo");
+assert(geo?.sourceLemma === "γῆ", "GEO must resolve to γῆ");
+assert(geo?.sourceStem === "γεω-", "GEO must preserve attested compound stem γεω-");
+assert(geo?.stemDerivation?.sources?.includes("lsj-geographo"), "GEO stem mapping must cite an attested Greek compound");
+
+const phon = authority.getById("grc-phon");
+assert(phon?.sourceLemma === "φωνή", "PHON must resolve to φωνή");
+assert(phon?.sourceStem === "φων-", "PHON must preserve attested compound stem φων-");
+assert(phon?.stemDerivation?.sources?.includes("lsj-aphonos"), "PHON stem mapping must cite ἄφωνος");
+
+assert(authority.findByTeachingForm("GRAPH")[0]?.id === "grc-graph", "GRAPH teaching lookup mismatch");
+assert(authority.findByTeachingForm("BIO")[0]?.id === "grc-bio", "BIO teaching lookup mismatch");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
