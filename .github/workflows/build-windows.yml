@@ -40,6 +40,12 @@ jobs:
       - name: Validate JavaScript
         run: npm run check
 
+      - name: Prepare production dictionaries
+        run: npm run prepare:dictionary
+
+      - name: Validate production lexicon
+        run: node --experimental-sqlite scripts/check-production-lexicon-v5.js
+
       - name: Build Windows application
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
