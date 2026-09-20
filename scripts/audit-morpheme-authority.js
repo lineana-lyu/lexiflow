@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const { URL } = require("url");
 
 const ROOT = path.resolve(__dirname, "..");
 const FILE = path.join(ROOT, "data", "morpheme-authority.json");
@@ -87,9 +88,11 @@ function audit(data){
 
     if(item.sourceLanguage==="Latin" && item.kind==="prefix"){
       const sourceForms=(item.sourceForms||[]).map(normForm);
+      const variantForms=(item.variants||[]).map(v=>normForm(v.form));
+      const supportedForms=new Set([...sourceForms,...variantForms]);
       for(const teaching of item.teachingForms||[]){
         const t=normForm(teaching);
-        if(!sourceForms.includes(t)){
+        if(!supportedForms.has(t)){
           findings.push({
             severity:"review",
             type:"latin_prefix_teaching_form_not_source_form",
