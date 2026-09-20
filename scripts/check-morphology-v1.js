@@ -42,6 +42,20 @@ function assert(condition, message) {
   assert(benefit.rootStories?.[0]?.id === "bene", "benefit must attach BENE story");
 
   assert(morphology.lookup("ride") === null, "Unknown words must not receive guessed morphology");
+
+  const serverRuntime=fs.readFileSync(path.join(__dirname,"..","server-runtime.js"),"utf8");
+  const server=fs.readFileSync(path.join(__dirname,"..","server.js"),"utf8");
+  const app=fs.readFileSync(path.join(__dirname,"..","public","app.js"),"utf8");
+  const memorize=fs.readFileSync(path.join(__dirname,"..","public","memorize-stage-v3.js"),"utf8");
+  const review=fs.readFileSync(path.join(__dirname,"..","public","review-session-v3.js"),"utf8");
+  const index=fs.readFileSync(path.join(__dirname,"..","public","index.html"),"utf8");
+  assert(serverRuntime.includes('require("./lib/morphology")') && serverRuntime.includes("morphologyStore.lookup"), "Dictionary runtime must attach morphology");
+  assert(server.includes("hydrateLearningMorphology") && server.includes("morphologyStore.lookup"), "Existing learning cards must be hydrated locally");
+  assert(app.includes("morphology:r.morphology") && app.includes("LexiFlowMorphologyViewV1"), "App shell must persist and preview morphology");
+  assert(memorize.includes("morphologyBlock(card)"), "Memorize stage must reveal morphology with the answer");
+  assert(review.includes("morphologyBlock(card)"), "Review stage must reveal morphology only after recall");
+  assert(index.includes("./morphology-view-v1.js"), "Morphology renderer must be loaded");
+
   const status = morphology.status();
   assert(status.available && status.words >= 7, "Morphology database status must be healthy");
 
