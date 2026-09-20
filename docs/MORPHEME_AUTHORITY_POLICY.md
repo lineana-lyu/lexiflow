@@ -44,3 +44,25 @@ A morpheme may be published only when:
 5. the record passes `scripts/check-morpheme-authority.js`.
 
 Unsupported items remain absent rather than being inferred.
+
+## Greek teaching-form rule
+
+For Ancient Greek roots, the English teaching form (for example `GRAPH`,
+`LOG/LOGO`, `BIO`, `GEO`, `PHON`) is not accepted merely because it
+resembles a Greek lemma in Latin letters.
+
+The registry must keep three layers distinct:
+
+1. the attested Greek lemma, such as `γράφω` or `λόγος`;
+2. the attested root/stem/compound form, such as `γραφ-` or `λογο-`;
+3. the Latin-letter teaching form used by LexiFlow.
+
+The transition from (1) to (2) must be supported by LSJ, Smyth, or an attested
+Greek compound. The teaching form is then a transliteration label for that
+verified Greek form. If this chain cannot be sourced, the teaching root is not
+published.
+
+This is why a candidate such as `TELE` is intentionally withheld until its
+Ancient Greek source form and compound behavior are documented to the same
+standard.
+
