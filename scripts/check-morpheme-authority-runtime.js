@@ -28,6 +28,30 @@ const ad = authority.getById("lat-ad");
 assert(ad?.variants?.some(item => item.form === "at-"), "AD- assimilation must include attested at-");
 assert(ad?.claimSources?.variants?.includes("ag-phonetic"), "AD- variants must cite the grammar source");
 
+
+const fin = authority.getById("lat-fin");
+assert(fin?.sourceLemma === "finis", "FIN must resolve to Latin finis");
+assert(fin?.coreMeaningEn?.includes("boundary"), "FIN must retain the boundary/limit sense");
+
+const pend = authority.getById("lat-pend");
+assert(pend?.sourceLemma === "pendeo", "PEND must resolve to Latin pendeo");
+assert(pend?.coreMeaningEn?.includes("hang"), "PEND must retain the hanging sense");
+
+const rePrefix = authority.getById("lat-re");
+assert(rePrefix?.coreMeaningEn?.includes("back") && rePrefix?.coreMeaningEn?.includes("again"), "RE- must retain BACK/AGAIN");
+assert(rePrefix?.teachingForms?.includes("RED-"), "RE- authority must preserve RED- historical form");
+
+const disPrefix = authority.getById("lat-dis");
+assert(disPrefix?.coreMeaningEn?.includes("apart"), "DIS- must retain APART");
+
+const autoPrefix = authority.getById("grc-auto");
+assert(autoPrefix?.sourceLanguage === "Ancient Greek", "AUTO- must be Greek");
+assert(autoPrefix?.sourceLemma === "αὐτός", "AUTO- must resolve to αὐτός");
+
+const synPrefix = authority.getById("grc-syn");
+assert(synPrefix?.sourceLemma === "σύν", "SYN- must resolve to σύν");
+assert(synPrefix?.coreMeaningEn?.includes("together"), "SYN- must retain TOGETHER");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
