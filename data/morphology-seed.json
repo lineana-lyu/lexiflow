@@ -2032,6 +2032,430 @@
       "headword": "effort",
       "url": "https://en.wiktionary.org/wiki/effort",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "ls-guberno",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "guberno",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n20000/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-publico",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "publico / publicus",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n39397/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-popularis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "popularis / populus",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37054/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-eductor",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "eductor / educo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n15177/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-humanus",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "humanus",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n21043/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-locus",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "locus",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26903/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-caedo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "caedo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6011/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-planus",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "planus",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n36576/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-actio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "actio / ago",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n613/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-rego",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "rego",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n40913/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-probo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "probo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n38414/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-government",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "government",
+      "url": "https://en.wiktionary.org/wiki/government",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-govern",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "govern",
+      "url": "https://en.wiktionary.org/wiki/govern",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-governor",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "governor",
+      "url": "https://en.wiktionary.org/wiki/governor",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-public",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "public",
+      "url": "https://en.wiktionary.org/wiki/public",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-publish",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "publish",
+      "url": "https://en.wiktionary.org/wiki/publish",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-publication",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "publication",
+      "url": "https://en.wiktionary.org/wiki/publication",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-popular",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "popular",
+      "url": "https://en.wiktionary.org/wiki/popular",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-population",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "population",
+      "url": "https://en.wiktionary.org/wiki/population",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-education",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "education",
+      "url": "https://en.wiktionary.org/wiki/education",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-educate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "educate",
+      "url": "https://en.wiktionary.org/wiki/educate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-educator",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "educator",
+      "url": "https://en.wiktionary.org/wiki/educator",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-human",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "human",
+      "url": "https://en.wiktionary.org/wiki/human",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-humane",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "humane",
+      "url": "https://en.wiktionary.org/wiki/humane",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-humanity",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "humanity",
+      "url": "https://en.wiktionary.org/wiki/humanity",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-local",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "local",
+      "url": "https://en.wiktionary.org/wiki/local",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-locate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "locate",
+      "url": "https://en.wiktionary.org/wiki/locate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-location",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "location",
+      "url": "https://en.wiktionary.org/wiki/location",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-decision",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "decision",
+      "url": "https://en.wiktionary.org/wiki/decision",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-decide",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "decide",
+      "url": "https://en.wiktionary.org/wiki/decide",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-incision",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "incision",
+      "url": "https://en.wiktionary.org/wiki/incision",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-concise",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "concise",
+      "url": "https://en.wiktionary.org/wiki/concise",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-explain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "explain",
+      "url": "https://en.wiktionary.org/wiki/explain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-explanation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "explanation",
+      "url": "https://en.wiktionary.org/wiki/explanation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-plain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "plain",
+      "url": "https://en.wiktionary.org/wiki/plain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-plane",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "plane",
+      "url": "https://en.wiktionary.org/wiki/plane",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-action",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "action",
+      "url": "https://en.wiktionary.org/wiki/action",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-actual",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "actual",
+      "url": "https://en.wiktionary.org/wiki/actual",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-active",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "active",
+      "url": "https://en.wiktionary.org/wiki/active",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-activity",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "activity",
+      "url": "https://en.wiktionary.org/wiki/activity",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-agent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "agent",
+      "url": "https://en.wiktionary.org/wiki/agent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-react",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "react",
+      "url": "https://en.wiktionary.org/wiki/react",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-direct",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "direct",
+      "url": "https://en.wiktionary.org/wiki/direct",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-director",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "director",
+      "url": "https://en.wiktionary.org/wiki/director",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-direction",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "direction",
+      "url": "https://en.wiktionary.org/wiki/direction",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-correct",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "correct",
+      "url": "https://en.wiktionary.org/wiki/correct",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-probable",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "probable",
+      "url": "https://en.wiktionary.org/wiki/probable",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-probably",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "probably",
+      "url": "https://en.wiktionary.org/wiki/probably",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-probability",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "probability",
+      "url": "https://en.wiktionary.org/wiki/probability",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-prove",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "prove",
+      "url": "https://en.wiktionary.org/wiki/prove",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-proof",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "proof",
+      "url": "https://en.wiktionary.org/wiki/proof",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-international",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "international",
+      "url": "https://en.wiktionary.org/wiki/international",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-voice",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "voice",
+      "url": "https://en.wiktionary.org/wiki/voice",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "morphemes": [
@@ -2648,6 +3072,127 @@
       "narrativeZh": "FORT 来自拉丁语 fortis“强壮、有力量”。它进入法语和英语后形成 force、fortify、reinforce 等词。虽然现代拼写和词性会变化，但核心始终围绕“增加力量、让某物更强”。",
       "sourceIds": [
         "ls-fortis"
+      ]
+    },
+    {
+      "id": "gubern",
+      "display": "GUBERN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "steer; direct; govern",
+      "meaningZh": "掌舵；引导；治理",
+      "narrativeZh": "GUBERN 来自拉丁语 gubernare“掌舵、驾驶船只”，随后扩展为“引导、管理、治理”。把国家或组织想成需要掌舵的船，就能理解 govern、government、governor 为什么都围绕“管理方向”展开。",
+      "sourceIds": [
+        "ls-guberno"
+      ]
+    },
+    {
+      "id": "publ",
+      "display": "PUBL / POPUL",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "people; public",
+      "meaningZh": "人民；公众；公共",
+      "narrativeZh": "PUBL / POPUL 与拉丁语 publicus、populus 的“人民、公众”词族有关。public 强调属于公众，publish 是“使内容公开”，popular 则与“人民、广受大众欢迎”相关。看到这组词形时，可以先抓住“面向大家、属于公众”。",
+      "sourceIds": [
+        "ls-publico",
+        "ls-popularis"
+      ]
+    },
+    {
+      "id": "educ",
+      "display": "EDUC",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "bring up; train; educate",
+      "meaningZh": "培养；训练；教育",
+      "narrativeZh": "EDUC 与拉丁语中“养育、培养、训练”这一词族有关。这里不采用常见但过度简化的“education 就是 lead out”说法，而是把重点放在更可靠的“把人培养起来、训练成长”上。",
+      "sourceIds": [
+        "ls-eductor"
+      ]
+    },
+    {
+      "id": "human",
+      "display": "HUM / HOM",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "human; person",
+      "meaningZh": "人；人类",
+      "narrativeZh": "HUM / HOM 与拉丁语 homo“人”和 humanus“人的”相关。它进入英语后形成 human、humane、humanity 等词，核心都围绕“人、人性以及对人的关怀”展开。",
+      "sourceIds": [
+        "ls-humanus"
+      ]
+    },
+    {
+      "id": "loc",
+      "display": "LOC",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "place",
+      "meaningZh": "地方；位置",
+      "narrativeZh": "LOC 来自拉丁语 locus“地方、位置”。local 是“某个地方的”，locate 是“确定位置”，location 就是“位置本身”。这组词几乎都能直接用“在哪里”这个问题来理解。",
+      "sourceIds": [
+        "ls-locus"
+      ]
+    },
+    {
+      "id": "cid",
+      "display": "CID / CIS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "cut",
+      "meaningZh": "切；割",
+      "narrativeZh": "CID / CIS 来自拉丁语 caedere“切、砍”。许多抽象词仍保留“切开、切断”的动作感：decide 可以理解为把其他选项切掉，decision 是作出切断选择后的决定，incision 则更直接表示切口。",
+      "sourceIds": [
+        "ls-caedo"
+      ]
+    },
+    {
+      "id": "plan",
+      "display": "PLAN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "flat; level; plain",
+      "meaningZh": "平的；平坦；清楚",
+      "narrativeZh": "PLAN 与拉丁语 planus“平、平坦”有关。物体被铺平后更容易看清，于是“平坦”的感觉进一步发展出“清楚明白”。plain、plane 保留空间上的“平”，explain 则可联想到“把事情摊平讲清楚”。",
+      "sourceIds": [
+        "ls-planus"
+      ]
+    },
+    {
+      "id": "act",
+      "display": "ACT / AG",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "do; act; drive",
+      "meaningZh": "做；行动；推动",
+      "narrativeZh": "ACT / AG 与拉丁语 agere“做、行动、推动”相关，act- 是它在英语中非常常见的派生词形。action 是做出的行为，active 是在行动，agent 则是执行或推动事情的人。",
+      "sourceIds": [
+        "ls-actio"
+      ]
+    },
+    {
+      "id": "reg",
+      "display": "REG / RECT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "guide; rule; keep straight",
+      "meaningZh": "引导；管理；使直",
+      "narrativeZh": "REG / RECT 来自拉丁语 regere“引导、管理、使保持正确方向”。direct 与“引到正确方向”有关，director 是负责引导的人，correct 则保留了“把方向或状态调正”的感觉。",
+      "sourceIds": [
+        "ls-rego"
+      ]
+    },
+    {
+      "id": "prob",
+      "display": "PROB",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "test; approve; prove",
+      "meaningZh": "检验；认可；证明",
+      "narrativeZh": "PROB 来自拉丁语 probare“检验、判断是否合格，并由此认可”。probable 是“经判断可成立的”，prove 是“通过证据检验使其成立”，proof 则是证明或证据。核心是“经得起检验”。",
+      "sourceIds": [
+        "ls-probo"
       ]
     }
   ],
@@ -8890,6 +9435,1249 @@
       "sourceIds": [
         "ls-fortis",
         "wik-effort"
+      ]
+    },
+    {
+      "word": "government",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "掌舵、治理形成的管理体系",
+      "meaningBridgeZh": "government 与 govern 同属 gubernare“掌舵、引导、治理”词族。把国家管理理解为给一艘大船确定方向，可以更自然地记住“政府、治理体系”。",
+      "parts": [
+        {
+          "text": "govern",
+          "role": "root-association",
+          "meaningEn": "steer; govern",
+          "meaningZh": "掌舵；治理",
+          "morphemeId": "gubern"
+        }
+      ],
+      "rootStoryIds": [
+        "gubern"
+      ],
+      "relatedWords": [
+        "govern",
+        "governor"
+      ],
+      "sourceIds": [
+        "ls-guberno",
+        "wik-government"
+      ]
+    },
+    {
+      "word": "govern",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "掌舵并引导方向",
+      "meaningBridgeZh": "govern 经由法语追溯到 Latin gubernare“掌舵、管理”。现代义从控制船的方向扩展为管理国家、组织或行为。",
+      "parts": [
+        {
+          "text": "govern",
+          "role": "root-association",
+          "meaningEn": "steer; govern",
+          "meaningZh": "掌舵；治理",
+          "morphemeId": "gubern"
+        }
+      ],
+      "rootStoryIds": [
+        "gubern"
+      ],
+      "relatedWords": [
+        "government",
+        "governor"
+      ],
+      "sourceIds": [
+        "ls-guberno",
+        "wik-govern"
+      ]
+    },
+    {
+      "word": "governor",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "负责掌舵和治理的人",
+      "meaningBridgeZh": "governor 与 govern 同源，本质上是负责引导、管理的人。",
+      "parts": [
+        {
+          "text": "govern",
+          "role": "root-association",
+          "meaningEn": "steer; govern",
+          "meaningZh": "掌舵；治理",
+          "morphemeId": "gubern"
+        }
+      ],
+      "rootStoryIds": [
+        "gubern"
+      ],
+      "relatedWords": [
+        "government",
+        "govern"
+      ],
+      "sourceIds": [
+        "ls-guberno",
+        "wik-governor"
+      ]
+    },
+    {
+      "word": "public",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "属于公众的",
+      "meaningBridgeZh": "public 直接来自与 publicus“公众的、国家的”相关的词形，因此核心就是“面向所有人、属于公众”。",
+      "parts": [
+        {
+          "text": "publ",
+          "role": "root-association",
+          "meaningEn": "people; public",
+          "meaningZh": "人民；公众",
+          "morphemeId": "publ"
+        }
+      ],
+      "rootStoryIds": [
+        "publ"
+      ],
+      "relatedWords": [
+        "publish",
+        "popular",
+        "population"
+      ],
+      "sourceIds": [
+        "ls-publico",
+        "wik-public"
+      ]
+    },
+    {
+      "word": "publish",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "使内容进入公众视野",
+      "meaningBridgeZh": "publish 经由 publicare“使公开”进入英语，所以它可以理解为“把内容交给公众看到”。",
+      "parts": [
+        {
+          "text": "publ",
+          "role": "root-association",
+          "meaningEn": "people; public",
+          "meaningZh": "人民；公众",
+          "morphemeId": "publ"
+        }
+      ],
+      "rootStoryIds": [
+        "publ"
+      ],
+      "relatedWords": [
+        "public",
+        "popular",
+        "population"
+      ],
+      "sourceIds": [
+        "ls-publico",
+        "wik-publish"
+      ]
+    },
+    {
+      "word": "publication",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "使内容公开后的出版物或发布行为",
+      "meaningBridgeZh": "publication 与 publicare“公开”同源，核心就是把内容从私人范围推向公众。",
+      "parts": [
+        {
+          "text": "publ",
+          "role": "root-association",
+          "meaningEn": "people; public",
+          "meaningZh": "人民；公众",
+          "morphemeId": "publ"
+        }
+      ],
+      "rootStoryIds": [
+        "publ"
+      ],
+      "relatedWords": [
+        "public",
+        "publish",
+        "popular",
+        "population"
+      ],
+      "sourceIds": [
+        "ls-publico",
+        "wik-publication"
+      ]
+    },
+    {
+      "word": "popular",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "属于人民、受大众欢迎的",
+      "meaningBridgeZh": "popular 来自 populus“人民”词族，因此从“人民的、大众的”进一步发展为“受欢迎的”。",
+      "parts": [
+        {
+          "text": "popul",
+          "role": "root-association",
+          "meaningEn": "people; public",
+          "meaningZh": "人民；公众",
+          "morphemeId": "publ"
+        }
+      ],
+      "rootStoryIds": [
+        "publ"
+      ],
+      "relatedWords": [
+        "public",
+        "publish",
+        "population"
+      ],
+      "sourceIds": [
+        "ls-popularis",
+        "wik-popular"
+      ]
+    },
+    {
+      "word": "population",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "一个地区中的人群总体",
+      "meaningBridgeZh": "population 与 populus“人民、人群”相关，因此表示某地聚集的人口总体。",
+      "parts": [
+        {
+          "text": "popul",
+          "role": "root-association",
+          "meaningEn": "people; public",
+          "meaningZh": "人民；公众",
+          "morphemeId": "publ"
+        }
+      ],
+      "rootStoryIds": [
+        "publ"
+      ],
+      "relatedWords": [
+        "public",
+        "publish",
+        "popular"
+      ],
+      "sourceIds": [
+        "ls-popularis",
+        "wik-population"
+      ]
+    },
+    {
+      "word": "education",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "培养和训练人的过程",
+      "meaningBridgeZh": "education 的可靠词源重点是养育、培养和训练，而不是简单套用“向外引导”的流行拆解。",
+      "parts": [
+        {
+          "text": "educ",
+          "role": "root-association",
+          "meaningEn": "bring up; train",
+          "meaningZh": "培养；训练",
+          "morphemeId": "educ"
+        }
+      ],
+      "rootStoryIds": [
+        "educ"
+      ],
+      "relatedWords": [
+        "educate",
+        "educator"
+      ],
+      "sourceIds": [
+        "ls-eductor",
+        "wik-education"
+      ]
+    },
+    {
+      "word": "educate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "培养、训练一个人",
+      "meaningBridgeZh": "educate 与拉丁语培养、养育词族相关，现代义集中在“通过训练和教学使人成长”。",
+      "parts": [
+        {
+          "text": "educ",
+          "role": "root-association",
+          "meaningEn": "bring up; train",
+          "meaningZh": "培养；训练",
+          "morphemeId": "educ"
+        }
+      ],
+      "rootStoryIds": [
+        "educ"
+      ],
+      "relatedWords": [
+        "education",
+        "educator"
+      ],
+      "sourceIds": [
+        "ls-eductor",
+        "wik-educate"
+      ]
+    },
+    {
+      "word": "educator",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "承担培养和教育工作的人",
+      "meaningBridgeZh": "educator 与 educate 同源，因此就是负责培养、教学的人。",
+      "parts": [
+        {
+          "text": "educ",
+          "role": "root-association",
+          "meaningEn": "bring up; train",
+          "meaningZh": "培养；训练",
+          "morphemeId": "educ"
+        }
+      ],
+      "rootStoryIds": [
+        "educ"
+      ],
+      "relatedWords": [
+        "education",
+        "educate"
+      ],
+      "sourceIds": [
+        "ls-eductor",
+        "wik-educator"
+      ]
+    },
+    {
+      "word": "human",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "属于人的、人类的",
+      "meaningBridgeZh": "human 直接来自 Latin humanus“人的”，核心就是“人、人类”。",
+      "parts": [
+        {
+          "text": "hum / hom",
+          "role": "root-association",
+          "meaningEn": "human; person",
+          "meaningZh": "人；人类",
+          "morphemeId": "human"
+        }
+      ],
+      "rootStoryIds": [
+        "human"
+      ],
+      "relatedWords": [
+        "humane",
+        "humanity"
+      ],
+      "sourceIds": [
+        "ls-humanus",
+        "wik-human"
+      ]
+    },
+    {
+      "word": "humane",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "以人的关怀方式对待他人",
+      "meaningBridgeZh": "humane 与 human 同源，但现代语义更强调仁慈、有同情心。",
+      "parts": [
+        {
+          "text": "hum / hom",
+          "role": "root-association",
+          "meaningEn": "human; person",
+          "meaningZh": "人；人类",
+          "morphemeId": "human"
+        }
+      ],
+      "rootStoryIds": [
+        "human"
+      ],
+      "relatedWords": [
+        "human",
+        "humanity"
+      ],
+      "sourceIds": [
+        "ls-humanus",
+        "wik-humane"
+      ]
+    },
+    {
+      "word": "humanity",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "人的本性以及全体人类",
+      "meaningBridgeZh": "humanity 来自 humanitas，既可表示人性，也可表示整个人类。",
+      "parts": [
+        {
+          "text": "hum / hom",
+          "role": "root-association",
+          "meaningEn": "human; person",
+          "meaningZh": "人；人类",
+          "morphemeId": "human"
+        }
+      ],
+      "rootStoryIds": [
+        "human"
+      ],
+      "relatedWords": [
+        "human",
+        "humane"
+      ],
+      "sourceIds": [
+        "ls-humanus",
+        "wik-humanity"
+      ]
+    },
+    {
+      "word": "local",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "属于某个地方的",
+      "meaningBridgeZh": "local 来自 localis，而 localis 明确由 locus“地方”构成，因此 local 最直接的记忆就是“某地的”。",
+      "parts": [
+        {
+          "text": "loc",
+          "role": "root",
+          "meaningEn": "place",
+          "meaningZh": "地方；位置",
+          "morphemeId": "loc"
+        }
+      ],
+      "rootStoryIds": [
+        "loc"
+      ],
+      "relatedWords": [
+        "locate",
+        "location"
+      ],
+      "sourceIds": [
+        "ls-locus",
+        "wik-local"
+      ]
+    },
+    {
+      "word": "locate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "确定某物所在的地方",
+      "meaningBridgeZh": "locate 围绕 locus“地方、位置”展开，核心动作就是找出或安排某物的位置。",
+      "parts": [
+        {
+          "text": "loc",
+          "role": "root",
+          "meaningEn": "place",
+          "meaningZh": "地方；位置",
+          "morphemeId": "loc"
+        }
+      ],
+      "rootStoryIds": [
+        "loc"
+      ],
+      "relatedWords": [
+        "local",
+        "location"
+      ],
+      "sourceIds": [
+        "ls-locus",
+        "wik-locate"
+      ]
+    },
+    {
+      "word": "location",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "某物所在的位置",
+      "meaningBridgeZh": "location 与 locate 同族，本质就是“地点、位置”。",
+      "parts": [
+        {
+          "text": "loc",
+          "role": "root",
+          "meaningEn": "place",
+          "meaningZh": "地方；位置",
+          "morphemeId": "loc"
+        }
+      ],
+      "rootStoryIds": [
+        "loc"
+      ],
+      "relatedWords": [
+        "local",
+        "locate"
+      ],
+      "sourceIds": [
+        "ls-locus",
+        "wik-location"
+      ]
+    },
+    {
+      "word": "decide",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把其他选择切掉",
+      "meaningBridgeZh": "decide 来自 Latin decidere，与 caedere“切”相关。作决定就像把其余选项切掉，只留下一个选择。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "off; away",
+          "meaningZh": "去掉；离开"
+        },
+        {
+          "text": "cide",
+          "role": "root",
+          "meaningEn": "cut",
+          "meaningZh": "切；割",
+          "morphemeId": "cid"
+        }
+      ],
+      "rootStoryIds": [
+        "cid"
+      ],
+      "relatedWords": [
+        "decision",
+        "incision",
+        "concise"
+      ],
+      "sourceIds": [
+        "ls-caedo",
+        "wik-decide"
+      ]
+    },
+    {
+      "word": "decision",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "切掉其他选项后留下的决定",
+      "meaningBridgeZh": "decision 与 decide 同源，历史上与“切开、切断”相关。把其他可能性切掉后留下的结果，就是“决定”。",
+      "parts": [
+        {
+          "text": "cis",
+          "role": "root-association",
+          "meaningEn": "cut",
+          "meaningZh": "切；割",
+          "morphemeId": "cid"
+        }
+      ],
+      "rootStoryIds": [
+        "cid"
+      ],
+      "relatedWords": [
+        "decide",
+        "incision",
+        "concise"
+      ],
+      "sourceIds": [
+        "ls-caedo",
+        "wik-decision"
+      ]
+    },
+    {
+      "word": "incision",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "向里面切开的口子",
+      "meaningBridgeZh": "incision 与 Latin incidere“切入”相关，因此就是“切口”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "into",
+          "meaningZh": "进入；向内"
+        },
+        {
+          "text": "cis",
+          "role": "root",
+          "meaningEn": "cut",
+          "meaningZh": "切；割",
+          "morphemeId": "cid"
+        }
+      ],
+      "rootStoryIds": [
+        "cid"
+      ],
+      "relatedWords": [
+        "decide",
+        "decision",
+        "concise"
+      ],
+      "sourceIds": [
+        "ls-caedo",
+        "wik-incision"
+      ]
+    },
+    {
+      "word": "concise",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "像被剪掉多余部分一样简短",
+      "meaningBridgeZh": "concise 来自与 concidere“切开、切短”相关的历史词形。把多余部分切掉后，表达就变得简洁。",
+      "parts": [
+        {
+          "text": "cis",
+          "role": "root-association",
+          "meaningEn": "cut",
+          "meaningZh": "切；删减",
+          "morphemeId": "cid"
+        }
+      ],
+      "rootStoryIds": [
+        "cid"
+      ],
+      "relatedWords": [
+        "decide",
+        "decision",
+        "incision"
+      ],
+      "sourceIds": [
+        "ls-caedo",
+        "wik-concise"
+      ]
+    },
+    {
+      "word": "explain",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把事情铺平、讲清楚",
+      "meaningBridgeZh": "explain 追溯到 Latin explanare，与 planus“平坦、清楚”相关。把复杂内容“摊平”让人看清，是更贴近词源的学习桥梁。",
+      "parts": [
+        {
+          "text": "plan",
+          "role": "root-association",
+          "meaningEn": "flat; plain",
+          "meaningZh": "平；清楚",
+          "morphemeId": "plan"
+        }
+      ],
+      "rootStoryIds": [
+        "plan"
+      ],
+      "relatedWords": [
+        "explanation",
+        "plain",
+        "plane"
+      ],
+      "sourceIds": [
+        "ls-planus",
+        "wik-explain"
+      ]
+    },
+    {
+      "word": "explanation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把事情讲清楚的说明",
+      "meaningBridgeZh": "explanation 与 explain 同源，本质上是让原本不清楚的内容变得平整、清晰。",
+      "parts": [
+        {
+          "text": "plan",
+          "role": "root-association",
+          "meaningEn": "flat; plain",
+          "meaningZh": "平；清楚",
+          "morphemeId": "plan"
+        }
+      ],
+      "rootStoryIds": [
+        "plan"
+      ],
+      "relatedWords": [
+        "explain",
+        "plain",
+        "plane"
+      ],
+      "sourceIds": [
+        "ls-planus",
+        "wik-explanation"
+      ]
+    },
+    {
+      "word": "plain",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "平坦的；清楚直接的",
+      "meaningBridgeZh": "plain 与 planus“平坦”直接相关，空间上的“平”后来也能表示表达上的“清楚、不复杂”。",
+      "parts": [
+        {
+          "text": "plan",
+          "role": "root-association",
+          "meaningEn": "flat; plain",
+          "meaningZh": "平；清楚",
+          "morphemeId": "plan"
+        }
+      ],
+      "rootStoryIds": [
+        "plan"
+      ],
+      "relatedWords": [
+        "explain",
+        "explanation",
+        "plane"
+      ],
+      "sourceIds": [
+        "ls-planus",
+        "wik-plain"
+      ]
+    },
+    {
+      "word": "plane",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "平面、平坦表面",
+      "meaningBridgeZh": "plane 保留了 planus 最直观的空间义：平的、平面。",
+      "parts": [
+        {
+          "text": "plan",
+          "role": "root-association",
+          "meaningEn": "flat; plain",
+          "meaningZh": "平；清楚",
+          "morphemeId": "plan"
+        }
+      ],
+      "rootStoryIds": [
+        "plan"
+      ],
+      "relatedWords": [
+        "explain",
+        "explanation",
+        "plain"
+      ],
+      "sourceIds": [
+        "ls-planus",
+        "wik-plane"
+      ]
+    },
+    {
+      "word": "action",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "做出来的行为",
+      "meaningBridgeZh": "action 来自 Latin actio，而 actio 明确由 ago“做、行动”构成。",
+      "parts": [
+        {
+          "text": "act",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "actual",
+        "active",
+        "agent",
+        "react"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-action"
+      ]
+    },
+    {
+      "word": "actual",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "已经做成或成为现实的",
+      "meaningBridgeZh": "actual 经由 actus“行动、已发生的事”进入语义发展，因此现代义集中在“实际的、真实发生的”。",
+      "parts": [
+        {
+          "text": "act",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "action",
+        "active",
+        "agent",
+        "react"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-actual"
+      ]
+    },
+    {
+      "word": "active",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "正在行动中的",
+      "meaningBridgeZh": "active 与 actus / agere 同源，所以最直接就是“在行动、活跃的”。",
+      "parts": [
+        {
+          "text": "act",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "action",
+        "actual",
+        "agent",
+        "react"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-active"
+      ]
+    },
+    {
+      "word": "activity",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "正在做、正在发生的活动",
+      "meaningBridgeZh": "activity 与 active 同源，核心仍然是“行动起来、发生中的事”。",
+      "parts": [
+        {
+          "text": "act",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "action",
+        "actual",
+        "active",
+        "agent",
+        "react"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-activity"
+      ]
+    },
+    {
+      "word": "agent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "执行、推动事情的人或事物",
+      "meaningBridgeZh": "agent 来自 agens，是 agere“做、推动”的现在分词来源，因此 agent 本质上是“执行动作的人或事物”。",
+      "parts": [
+        {
+          "text": "ag",
+          "role": "root-association",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "action",
+        "actual",
+        "active",
+        "react"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-agent"
+      ]
+    },
+    {
+      "word": "react",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "针对某事再次采取行动",
+      "meaningBridgeZh": "react 是 re- + act 的透明构词，可以直接理解成“针对刺激做出行动、反应”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回；再次"
+        },
+        {
+          "text": "act",
+          "role": "root",
+          "meaningEn": "do; act",
+          "meaningZh": "做；行动",
+          "morphemeId": "act"
+        }
+      ],
+      "rootStoryIds": [
+        "act"
+      ],
+      "relatedWords": [
+        "action",
+        "active",
+        "agent"
+      ],
+      "sourceIds": [
+        "ls-actio",
+        "wik-react"
+      ]
+    },
+    {
+      "word": "direct",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把方向引直、引向目标",
+      "meaningBridgeZh": "direct 来自 Latin dirigere，与 regere“引导、使保持正确方向”相关。",
+      "parts": [
+        {
+          "text": "rect / reg",
+          "role": "root-association",
+          "meaningEn": "guide; keep straight",
+          "meaningZh": "引导；使直",
+          "morphemeId": "reg"
+        }
+      ],
+      "rootStoryIds": [
+        "reg"
+      ],
+      "relatedWords": [
+        "director",
+        "direction",
+        "correct"
+      ],
+      "sourceIds": [
+        "ls-rego",
+        "wik-direct"
+      ]
+    },
+    {
+      "word": "director",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "负责给方向、引导的人",
+      "meaningBridgeZh": "director 与 direct 同源，所以本质上就是负责确定方向和引导行动的人。",
+      "parts": [
+        {
+          "text": "rect / reg",
+          "role": "root-association",
+          "meaningEn": "guide; keep straight",
+          "meaningZh": "引导；使直",
+          "morphemeId": "reg"
+        }
+      ],
+      "rootStoryIds": [
+        "reg"
+      ],
+      "relatedWords": [
+        "direct",
+        "direction",
+        "correct"
+      ],
+      "sourceIds": [
+        "ls-rego",
+        "wik-director"
+      ]
+    },
+    {
+      "word": "direction",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "被引导出来的方向",
+      "meaningBridgeZh": "direction 与 direct 同源，核心是“指向哪里、如何引导”。",
+      "parts": [
+        {
+          "text": "rect / reg",
+          "role": "root-association",
+          "meaningEn": "guide; keep straight",
+          "meaningZh": "引导；使直",
+          "morphemeId": "reg"
+        }
+      ],
+      "rootStoryIds": [
+        "reg"
+      ],
+      "relatedWords": [
+        "direct",
+        "director",
+        "correct"
+      ],
+      "sourceIds": [
+        "ls-rego",
+        "wik-direction"
+      ]
+    },
+    {
+      "word": "correct",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把错误状态调正",
+      "meaningBridgeZh": "correct 来自 Latin corrigere，与 regere“使直、引导”相关，可以理解为把偏掉的东西重新调正。",
+      "parts": [
+        {
+          "text": "rect / reg",
+          "role": "root-association",
+          "meaningEn": "guide; keep straight",
+          "meaningZh": "引导；使直",
+          "morphemeId": "reg"
+        }
+      ],
+      "rootStoryIds": [
+        "reg"
+      ],
+      "relatedWords": [
+        "direct",
+        "director",
+        "direction"
+      ],
+      "sourceIds": [
+        "ls-rego",
+        "wik-correct"
+      ]
+    },
+    {
+      "word": "probable",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "经过判断后可以成立的",
+      "meaningBridgeZh": "probable 与 probare“检验、认可”相关，因此不是凭空的“也许”，而是“经判断有理由成立的”。",
+      "parts": [
+        {
+          "text": "prob / prov",
+          "role": "root-association",
+          "meaningEn": "test; prove",
+          "meaningZh": "检验；证明",
+          "morphemeId": "prob"
+        }
+      ],
+      "rootStoryIds": [
+        "prob"
+      ],
+      "relatedWords": [
+        "probably",
+        "probability",
+        "prove",
+        "proof"
+      ],
+      "sourceIds": [
+        "ls-probo",
+        "wik-probable"
+      ]
+    },
+    {
+      "word": "probably",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "以较有根据的可能性方式",
+      "meaningBridgeZh": "probably 来自 probable，同样保留“经过判断后认为可成立”的感觉。",
+      "parts": [
+        {
+          "text": "prob / prov",
+          "role": "root-association",
+          "meaningEn": "test; prove",
+          "meaningZh": "检验；证明",
+          "morphemeId": "prob"
+        }
+      ],
+      "rootStoryIds": [
+        "prob"
+      ],
+      "relatedWords": [
+        "probable",
+        "probability",
+        "prove",
+        "proof"
+      ],
+      "sourceIds": [
+        "ls-probo",
+        "wik-probably"
+      ]
+    },
+    {
+      "word": "probability",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "某事经判断成立的可能程度",
+      "meaningBridgeZh": "probability 与 probable 同族，把“可被认可、可成立”进一步抽象成概率。",
+      "parts": [
+        {
+          "text": "prob / prov",
+          "role": "root-association",
+          "meaningEn": "test; prove",
+          "meaningZh": "检验；证明",
+          "morphemeId": "prob"
+        }
+      ],
+      "rootStoryIds": [
+        "prob"
+      ],
+      "relatedWords": [
+        "probable",
+        "probably",
+        "prove",
+        "proof"
+      ],
+      "sourceIds": [
+        "ls-probo",
+        "wik-probability"
+      ]
+    },
+    {
+      "word": "prove",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "通过检验使某事成立",
+      "meaningBridgeZh": "prove 经由法语追溯到 Latin probare“检验、证明”，所以核心是用证据经受检验。",
+      "parts": [
+        {
+          "text": "prob / prov",
+          "role": "root-association",
+          "meaningEn": "test; prove",
+          "meaningZh": "检验；证明",
+          "morphemeId": "prob"
+        }
+      ],
+      "rootStoryIds": [
+        "prob"
+      ],
+      "relatedWords": [
+        "probable",
+        "probably",
+        "probability",
+        "proof"
+      ],
+      "sourceIds": [
+        "ls-probo",
+        "wik-prove"
+      ]
+    },
+    {
+      "word": "proof",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "能够经受检验的证据",
+      "meaningBridgeZh": "proof 与 prove 同源，因此可以理解为让主张通过检验的证据。",
+      "parts": [
+        {
+          "text": "prob / prov",
+          "role": "root-association",
+          "meaningEn": "test; prove",
+          "meaningZh": "检验；证明",
+          "morphemeId": "prob"
+        }
+      ],
+      "rootStoryIds": [
+        "prob"
+      ],
+      "relatedWords": [
+        "probable",
+        "probably",
+        "probability",
+        "prove"
+      ],
+      "sourceIds": [
+        "ls-probo",
+        "wik-proof"
+      ]
+    },
+    {
+      "word": "international",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "国家与国家之间的",
+      "meaningBridgeZh": "inter- 表示“在……之间”，nation 已经属于 LexiFlow 的 NAT 词族。international 因而可以直接理解成“国家之间的”。",
+      "parts": [
+        {
+          "text": "inter-",
+          "role": "prefix",
+          "meaningEn": "between",
+          "meaningZh": "在……之间"
+        },
+        {
+          "text": "nation",
+          "role": "root-association",
+          "meaningEn": "nation",
+          "meaningZh": "国家；民族",
+          "morphemeId": "nat"
+        }
+      ],
+      "rootStoryIds": [
+        "nat"
+      ],
+      "relatedWords": [
+        "nation",
+        "national",
+        "native"
+      ],
+      "sourceIds": [
+        "ls-nascor",
+        "wik-international"
+      ]
+    },
+    {
+      "word": "voice",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "发出的声音",
+      "meaningBridgeZh": "voice 经由法语追溯到 Latin vox“声音”，与 VOC / VOK 词族直接相关，因此可以作为 vocal、vocabulary、invoke 的核心联想词。",
+      "parts": [
+        {
+          "text": "voc / vox",
+          "role": "root-association",
+          "meaningEn": "voice; call",
+          "meaningZh": "声音；呼叫",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocal",
+        "vocabulary",
+        "invoke",
+        "revoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-voice"
       ]
     }
   ]
