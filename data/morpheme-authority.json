@@ -132,6 +132,54 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37331/",
       "locator": "prae",
       "publicDomain": true
+    },
+    {
+      "id": "ls-finis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18202/",
+      "locator": "finis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pendeo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pendeo",
+      "locator": "pendeo",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-autos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n17907/",
+      "locator": "αὐτός",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-syn",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n99002/",
+      "locator": "σύν",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -778,6 +826,362 @@
         ],
         "forms": [
           "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fin",
+      "kind": "root_family",
+      "teachingForms": [
+        "FIN"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "finis",
+      "sourceForms": [
+        "finis"
+      ],
+      "coreMeaningEn": [
+        "boundary",
+        "limit",
+        "end"
+      ],
+      "coreMeaningZh": [
+        "边界",
+        "界限",
+        "终点"
+      ],
+      "formRelation": "FIN is the pedagogical form tied to Latin finis; downstream English-word membership must be verified separately.",
+      "claimSources": {
+        "lemma": [
+          "ls-finis"
+        ],
+        "meaning": [
+          "ls-finis"
+        ],
+        "forms": [
+          "ls-finis"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-pend",
+      "kind": "root_family",
+      "teachingForms": [
+        "PEND"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pendeo",
+      "sourceForms": [
+        "pendeo",
+        "pependi"
+      ],
+      "coreMeaningEn": [
+        "hang",
+        "hang down",
+        "be suspended"
+      ],
+      "coreMeaningZh": [
+        "悬挂",
+        "垂下",
+        "悬着"
+      ],
+      "formRelation": "PEND is tied to the Latin pendeo family; downstream English-word membership is a separate claim.",
+      "claimSources": {
+        "lemma": [
+          "ls-pendeo"
+        ],
+        "meaning": [
+          "ls-pendeo"
+        ],
+        "forms": [
+          "ls-pendeo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ante",
+      "kind": "prefix",
+      "teachingForms": [
+        "ANTE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ante",
+      "sourceForms": [
+        "ante-"
+      ],
+      "coreMeaningEn": [
+        "before"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前"
+      ],
+      "formRelation": "Allen & Greenough lists ante- as a verbal prefix retaining the adverbial sense BEFORE.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-circum",
+      "kind": "prefix",
+      "teachingForms": [
+        "CIRCUM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "circum",
+      "sourceForms": [
+        "circum-"
+      ],
+      "coreMeaningEn": [
+        "around"
+      ],
+      "coreMeaningZh": [
+        "环绕",
+        "在……周围"
+      ],
+      "formRelation": "Allen & Greenough lists circum- with the adverbial sense AROUND.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-super",
+      "kind": "prefix",
+      "teachingForms": [
+        "SUPER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "super",
+      "sourceForms": [
+        "super-"
+      ],
+      "coreMeaningEn": [
+        "upon",
+        "over and above"
+      ],
+      "coreMeaningZh": [
+        "在上",
+        "超过",
+        "在……之上"
+      ],
+      "formRelation": "Allen & Greenough lists super- with the senses UPON / OVER AND ABOVE.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-dis",
+      "kind": "prefix",
+      "teachingForms": [
+        "DIS-",
+        "DI-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "dis-",
+      "sourceForms": [
+        "dis-",
+        "di-"
+      ],
+      "coreMeaningEn": [
+        "asunder",
+        "apart"
+      ],
+      "coreMeaningZh": [
+        "分开",
+        "离散"
+      ],
+      "formRelation": "Allen & Greenough treats dis-/di- as an inseparable particle with the senses ASUNDER / APART.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-re",
+      "kind": "prefix",
+      "teachingForms": [
+        "RE-",
+        "RED-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "re- / red-",
+      "sourceForms": [
+        "re-",
+        "red-"
+      ],
+      "coreMeaningEn": [
+        "back",
+        "again"
+      ],
+      "coreMeaningZh": [
+        "向后",
+        "回来",
+        "再次"
+      ],
+      "formRelation": "Allen & Greenough lists red-/re- as an inseparable particle with the senses BACK / AGAIN.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-se",
+      "kind": "prefix",
+      "teachingForms": [
+        "SE-",
+        "SED-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "se- / sed-",
+      "sourceForms": [
+        "se-",
+        "sed-"
+      ],
+      "coreMeaningEn": [
+        "apart"
+      ],
+      "coreMeaningZh": [
+        "分开",
+        "离开"
+      ],
+      "formRelation": "Allen & Greenough lists sed-/se- as an inseparable particle with the sense APART.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-auto",
+      "kind": "prefix",
+      "teachingForms": [
+        "AUTO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "αὐτός",
+      "sourceForms": [
+        "αὐτός",
+        "αὐτο-"
+      ],
+      "coreMeaningEn": [
+        "self",
+        "the same",
+        "of or by oneself"
+      ],
+      "coreMeaningZh": [
+        "自身",
+        "自己",
+        "同一"
+      ],
+      "formRelation": "LSJ explicitly records αὐτός in compound use with the value self-/of or by oneself.",
+      "claimSources": {
+        "lemma": [
+          "lsj-autos"
+        ],
+        "meaning": [
+          "lsj-autos"
+        ],
+        "forms": [
+          "lsj-autos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-syn",
+      "kind": "prefix",
+      "teachingForms": [
+        "SYN-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "σύν",
+      "sourceForms": [
+        "σύν",
+        "συν-"
+      ],
+      "coreMeaningEn": [
+        "with",
+        "along with",
+        "together"
+      ],
+      "coreMeaningZh": [
+        "与……一起",
+        "共同",
+        "一起"
+      ],
+      "formRelation": "LSJ explicitly describes σύν in composition as with / along with / together and as marking union or connection.",
+      "claimSources": {
+        "lemma": [
+          "lsj-syn"
+        ],
+        "meaning": [
+          "lsj-syn"
+        ],
+        "forms": [
+          "lsj-syn"
         ],
         "variants": []
       },
