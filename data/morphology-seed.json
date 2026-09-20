@@ -1568,6 +1568,14 @@
       "headword": "inanimate",
       "url": "https://en.wiktionary.org/wiki/inanimate",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "lsj-genesis",
+      "kind": "classical_dictionary",
+      "name": "LSJ Greek-English Lexicon",
+      "headword": "γένεσις",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n21872/",
+      "license": "Public-domain source text via Perseus"
     }
   ],
   "morphemes": [
@@ -2033,12 +2041,13 @@
       "id": "gen",
       "display": "GEN",
       "type": "root",
-      "language": "Latin",
+      "language": "Greek / Latin",
       "meaningEn": "beget; produce; kind",
       "meaningZh": "产生；出生；种类",
       "narrativeZh": "GEN 与拉丁语 gignere“产生、生育”和 genus“种类、族类”有关。它常出现在生成、世代、血统和种类相关词中。generate、generation、genetic、progeny 都共享“产生生命或产生某类事物”的核心。",
       "sourceIds": [
-        "ls-gigno"
+        "ls-gigno",
+        "lsj-genesis"
       ]
     },
     {
@@ -6615,7 +6624,7 @@
       "mode": "association",
       "literalEn": "",
       "literalZh": "与出生、种类来源有关的",
-      "meaningBridgeZh": "genetic 经由 Greek/Latin 词源网络与“产生、出生”相关，因此现代表示“遗传的、基因的”。",
+      "meaningBridgeZh": "genetic 的现代英语词源直接经过 Ancient Greek genesis / genetikos 一组“产生、起源”的词形，因此这里把 GEN 作为希腊语—拉丁语共享的“产生、出生”词族来理解，而不是只按拉丁语解释。",
       "parts": [
         {
           "text": "gen",
@@ -6634,6 +6643,7 @@
         "progeny"
       ],
       "sourceIds": [
+        "lsj-genesis",
         "ls-gigno",
         "wik-genetic"
       ]
