@@ -352,6 +352,414 @@
       "headword": "formo",
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18596/",
       "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-porto",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "porto",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=porto",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-scribo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "scribo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=scribo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-credo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "credo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=credo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-video",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "video",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=video",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-audio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "audio",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=audio",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-mitto",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "mitto",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=mitto",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-facio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "facio",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=facio",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-pendeo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "pendeo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pendeo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-iacio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "iacio / jacio",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=iacio",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-moveo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "moveo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=moveo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-transport",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "transport",
+      "url": "https://en.wiktionary.org/wiki/transport",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-import",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "import",
+      "url": "https://en.wiktionary.org/wiki/import",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-export",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "export",
+      "url": "https://en.wiktionary.org/wiki/export",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-portable",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "portable",
+      "url": "https://en.wiktionary.org/wiki/portable",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-describe",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "describe",
+      "url": "https://en.wiktionary.org/wiki/describe",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-prescribe",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "prescribe",
+      "url": "https://en.wiktionary.org/wiki/prescribe",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-subscribe",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "subscribe",
+      "url": "https://en.wiktionary.org/wiki/subscribe",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-script",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "script",
+      "url": "https://en.wiktionary.org/wiki/script",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-credible",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "credible",
+      "url": "https://en.wiktionary.org/wiki/credible",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-credit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "credit",
+      "url": "https://en.wiktionary.org/wiki/credit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-incredible",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "incredible",
+      "url": "https://en.wiktionary.org/wiki/incredible",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-visible",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "visible",
+      "url": "https://en.wiktionary.org/wiki/visible",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-vision",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "vision",
+      "url": "https://en.wiktionary.org/wiki/vision",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-revise",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "revise",
+      "url": "https://en.wiktionary.org/wiki/revise",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-audible",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "audible",
+      "url": "https://en.wiktionary.org/wiki/audible",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-audience",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "audience",
+      "url": "https://en.wiktionary.org/wiki/audience",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-audition",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "audition",
+      "url": "https://en.wiktionary.org/wiki/audition",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-transmit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "transmit",
+      "url": "https://en.wiktionary.org/wiki/transmit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-submit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "submit",
+      "url": "https://en.wiktionary.org/wiki/submit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-dismiss",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "dismiss",
+      "url": "https://en.wiktionary.org/wiki/dismiss",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-permit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "permit",
+      "url": "https://en.wiktionary.org/wiki/permit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-accept",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "accept",
+      "url": "https://en.wiktionary.org/wiki/accept",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-concept",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "concept",
+      "url": "https://en.wiktionary.org/wiki/concept",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-capture",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "capture",
+      "url": "https://en.wiktionary.org/wiki/capture",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-receive",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "receive",
+      "url": "https://en.wiktionary.org/wiki/receive",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-fact",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "fact",
+      "url": "https://en.wiktionary.org/wiki/fact",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-factory",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "factory",
+      "url": "https://en.wiktionary.org/wiki/factory",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-perfect",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "perfect",
+      "url": "https://en.wiktionary.org/wiki/perfect",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-depend",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "depend",
+      "url": "https://en.wiktionary.org/wiki/depend",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-suspend",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "suspend",
+      "url": "https://en.wiktionary.org/wiki/suspend",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pending",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pending",
+      "url": "https://en.wiktionary.org/wiki/pending",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pendant",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pendant",
+      "url": "https://en.wiktionary.org/wiki/pendant",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-inject",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "inject",
+      "url": "https://en.wiktionary.org/wiki/inject",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-reject",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "reject",
+      "url": "https://en.wiktionary.org/wiki/reject",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-project",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "project",
+      "url": "https://en.wiktionary.org/wiki/project",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-eject",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "eject",
+      "url": "https://en.wiktionary.org/wiki/eject",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-motion",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "motion",
+      "url": "https://en.wiktionary.org/wiki/motion",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-remove",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "remove",
+      "url": "https://en.wiktionary.org/wiki/remove",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-promote",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "promote",
+      "url": "https://en.wiktionary.org/wiki/promote",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-motive",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "motive",
+      "url": "https://en.wiktionary.org/wiki/motive",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "ls-capio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "capio",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=capio1",
+      "license": "Public-domain source text via Perseus"
     }
   ],
   "morphemes": [
@@ -475,6 +883,138 @@
       "narrativeZh": "STRUCT 来自拉丁语 struere“堆叠、排列、建造”的词族。它的核心感觉是“把多个部分组织起来，形成一个整体”。因此看到 struct 时，可以优先联想到结构、搭建和组织，而不是把它当成孤立字母组合。",
       "sourceIds": [
         "ls-struo"
+      ]
+    },
+    {
+      "id": "port",
+      "display": "PORT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "carry; convey",
+      "meaningZh": "携带；运送",
+      "narrativeZh": "PORT 来自拉丁语 portare“携带、运送”。它的核心画面是“把某物从一个地方带到另一个地方”。不同前缀只是在改变运输的方向：带进来、带出去、跨过去。先抓住“携带”这个动作，很多同根词就会变得直观。",
+      "sourceIds": [
+        "ls-porto"
+      ]
+    },
+    {
+      "id": "scrib",
+      "display": "SCRIB / SCRIPT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "write",
+      "meaningZh": "写；书写",
+      "narrativeZh": "SCRIB / SCRIPT 来自拉丁语 scribere“写”。scrib- 常出现在动词里，script- 常见于名词或过去分词来源的词形，但核心都和“写下来”有关。看到这组词根时，可以先判断：是在写下、预先写、签在下面，还是已经写成的文字。",
+      "sourceIds": [
+        "ls-scribo"
+      ]
+    },
+    {
+      "id": "cred",
+      "display": "CRED",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "believe; trust",
+      "meaningZh": "相信；信任",
+      "narrativeZh": "CRED 来自拉丁语 credere“相信、信任”。它常出现在与“相信某人、相信某事、值得相信”有关的词里。看到 cred- 时，可以先从“信任”出发，再判断这个词说的是可信度、信用，还是相信这一行为本身。",
+      "sourceIds": [
+        "ls-credo"
+      ]
+    },
+    {
+      "id": "vid",
+      "display": "VID / VIS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "see; look",
+      "meaningZh": "看；看见",
+      "narrativeZh": "VID / VIS 来自拉丁语 videre“看见”。不同词形会在 vid、vis 之间变化，但核心动作始终是“看”。因此 visible 是“能被看见”，vision 是“看见、视觉”，revise 也能追溯到“再看一次”的思路。",
+      "sourceIds": [
+        "ls-video"
+      ]
+    },
+    {
+      "id": "aud",
+      "display": "AUD",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "hear; listen",
+      "meaningZh": "听；倾听",
+      "narrativeZh": "AUD 来自拉丁语 audire“听、听见”。它常出现在和声音、听觉、听众有关的词里。看到 aud- 时，可以先抓住“听”这个动作，再区分是在说“能听见”、正在听的人，还是通过听来进行判断或表演。",
+      "sourceIds": [
+        "ls-audio"
+      ]
+    },
+    {
+      "id": "mit",
+      "display": "MIT / MISS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "send; let go",
+      "meaningZh": "发送；放出",
+      "narrativeZh": "MIT / MISS 来自拉丁语 mittere“发送、放出”。mit- 和 miss- 是同一词源家族中的不同词形。前缀决定发送的方向：向下送、横向送、送走或允许通过。把它理解成“让某物离开原位置”，比死记单词更容易迁移。",
+      "sourceIds": [
+        "ls-mitto"
+      ]
+    },
+    {
+      "id": "cap",
+      "display": "CAP / CEPT / CEIV",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "take; seize; receive",
+      "meaningZh": "拿；取得；接受",
+      "narrativeZh": "CAP / CEPT / CEIV 与拉丁语 capere“拿、抓住、取得”有关。进入英语后词形变化较大，例如 accept、concept、receive 看起来并不完全一样，但都保留“取得、接纳、拿到”这一核心关系。因此这组更适合按词源家族理解，而不是只靠字面切词。",
+      "sourceIds": [
+        "ls-capio"
+      ]
+    },
+    {
+      "id": "fac",
+      "display": "FAC / FIC / FECT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "make; do",
+      "meaningZh": "做；制造；使成为",
+      "narrativeZh": "FAC / FIC / FECT 来自拉丁语 facere“做、制造”。词形在不同派生中会变化，但核心都和“做成某事、使某物成为某种状态”有关。看到 fact、fect、fic 这组形式时，可以先从“做、造成”去理解词义。",
+      "sourceIds": [
+        "ls-facio"
+      ]
+    },
+    {
+      "id": "pend",
+      "display": "PEND",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "hang; be suspended",
+      "meaningZh": "悬挂；悬着",
+      "narrativeZh": "PEND 来自拉丁语 pendere“悬挂、悬着”。这个画面后来发展出很多抽象义：depend 像是“挂在某物上”所以表示依赖；suspend 是“让它悬着”，所以表示暂停。抓住“悬而未落”的状态，会比直接背中文更容易。",
+      "sourceIds": [
+        "ls-pendeo"
+      ]
+    },
+    {
+      "id": "ject",
+      "display": "JECT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "throw; cast",
+      "meaningZh": "投；掷；抛",
+      "narrativeZh": "JECT 来自拉丁语 iacere“投、掷”。不同前缀决定“往哪里扔”：向里投、向外投、往回投、向前投。很多抽象词义都能从这个方向动作延伸出来，因此它非常适合用“投掷方向”来形成稳定记忆。",
+      "sourceIds": [
+        "ls-iacio"
+      ]
+    },
+    {
+      "id": "mov",
+      "display": "MOV / MOT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "move; set in motion",
+      "meaningZh": "移动；使运动",
+      "narrativeZh": "MOV / MOT 来自拉丁语 movere“移动、使运动”。mov- 常保留在动词词形里，mot- 常出现在名词或派生词中。它们共同表达“位置或状态发生移动”，再进一步延伸到推动、动机和运动等抽象概念。",
+      "sourceIds": [
+        "ls-moveo"
       ]
     }
   ],
@@ -1495,6 +2035,1292 @@
       "sourceIds": [
         "ls-struo",
         "wik-structure"
+      ]
+    },
+    {
+      "word": "transport",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "carry across",
+      "literalZh": "跨过去运送",
+      "meaningBridgeZh": "trans- 表示“跨越”，port 表示“携带、运送”。把东西跨越一段距离带到另一处，就是 transport“运输”。",
+      "parts": [
+        {
+          "text": "trans-",
+          "role": "prefix",
+          "meaningEn": "across",
+          "meaningZh": "跨越；横跨"
+        },
+        {
+          "text": "port",
+          "role": "root",
+          "meaningEn": "carry; convey",
+          "meaningZh": "携带；运送",
+          "morphemeId": "port"
+        }
+      ],
+      "rootStoryIds": [
+        "port"
+      ],
+      "relatedWords": [
+        "import",
+        "export",
+        "portable"
+      ],
+      "sourceIds": [
+        "ls-porto",
+        "wik-transport"
+      ]
+    },
+    {
+      "word": "import",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "carry in",
+      "literalZh": "带进来",
+      "meaningBridgeZh": "im- 是 in- 的同化形式，表示“进入”；port 表示“携带”。把东西带进一个国家或系统，就是 import“进口；导入”。",
+      "parts": [
+        {
+          "text": "im- (in-)",
+          "role": "prefix",
+          "meaningEn": "in; into",
+          "meaningZh": "进入；向内"
+        },
+        {
+          "text": "port",
+          "role": "root",
+          "meaningEn": "carry; convey",
+          "meaningZh": "携带；运送",
+          "morphemeId": "port"
+        }
+      ],
+      "rootStoryIds": [
+        "port"
+      ],
+      "relatedWords": [
+        "transport",
+        "export",
+        "portable"
+      ],
+      "sourceIds": [
+        "ls-porto",
+        "wik-import"
+      ]
+    },
+    {
+      "word": "export",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "carry out",
+      "literalZh": "带出去",
+      "meaningBridgeZh": "ex- 表示“向外”，port 表示“携带”。把东西带出去，就是 export“出口；导出”。",
+      "parts": [
+        {
+          "text": "ex-",
+          "role": "prefix",
+          "meaningEn": "out",
+          "meaningZh": "向外"
+        },
+        {
+          "text": "port",
+          "role": "root",
+          "meaningEn": "carry; convey",
+          "meaningZh": "携带；运送",
+          "morphemeId": "port"
+        }
+      ],
+      "rootStoryIds": [
+        "port"
+      ],
+      "relatedWords": [
+        "transport",
+        "import",
+        "portable"
+      ],
+      "sourceIds": [
+        "ls-porto",
+        "wik-export"
+      ]
+    },
+    {
+      "word": "portable",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "able to be carried",
+      "literalZh": "能够被携带",
+      "meaningBridgeZh": "portable 与 portare“携带”直接相关，所以它的核心不是“端口”，而是“能够被带走、便于携带”。",
+      "parts": [
+        {
+          "text": "port",
+          "role": "root-association",
+          "meaningEn": "carry",
+          "meaningZh": "携带",
+          "morphemeId": "port"
+        }
+      ],
+      "rootStoryIds": [
+        "port"
+      ],
+      "relatedWords": [
+        "transport",
+        "import",
+        "export"
+      ],
+      "sourceIds": [
+        "ls-porto",
+        "wik-portable"
+      ]
+    },
+    {
+      "word": "describe",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "write down / mark out",
+      "literalZh": "写下来、描画出来",
+      "meaningBridgeZh": "de- 在 Latin describere 中与 scribere“写”结合，原本包含“写下、描画”的意思，后来发展成“用语言描写、描述”。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "down; fully",
+          "meaningZh": "向下；完整展开"
+        },
+        {
+          "text": "scrib",
+          "role": "root",
+          "meaningEn": "write",
+          "meaningZh": "写；书写",
+          "morphemeId": "scrib"
+        }
+      ],
+      "rootStoryIds": [
+        "scrib"
+      ],
+      "relatedWords": [
+        "prescribe",
+        "subscribe",
+        "script"
+      ],
+      "sourceIds": [
+        "ls-scribo",
+        "wik-describe"
+      ]
+    },
+    {
+      "word": "prescribe",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "write beforehand",
+      "literalZh": "预先写下",
+      "meaningBridgeZh": "pre- 表示“在前”，scrib 表示“写”。预先把规则、药物或要求写下来，就发展成 prescribe“规定；开处方”。",
+      "parts": [
+        {
+          "text": "pre-",
+          "role": "prefix",
+          "meaningEn": "before",
+          "meaningZh": "在前；预先"
+        },
+        {
+          "text": "scrib",
+          "role": "root",
+          "meaningEn": "write",
+          "meaningZh": "写；书写",
+          "morphemeId": "scrib"
+        }
+      ],
+      "rootStoryIds": [
+        "scrib"
+      ],
+      "relatedWords": [
+        "describe",
+        "subscribe",
+        "script"
+      ],
+      "sourceIds": [
+        "ls-scribo",
+        "wik-prescribe"
+      ]
+    },
+    {
+      "word": "subscribe",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "write underneath",
+      "literalZh": "在下面签写",
+      "meaningBridgeZh": "sub- 表示“在下方”，scrib 表示“写”。早期的“在文件下面签名”逐渐发展出“签署、订阅”等现代含义。",
+      "parts": [
+        {
+          "text": "sub-",
+          "role": "prefix",
+          "meaningEn": "under",
+          "meaningZh": "在下；下面"
+        },
+        {
+          "text": "scrib",
+          "role": "root",
+          "meaningEn": "write",
+          "meaningZh": "写；书写",
+          "morphemeId": "scrib"
+        }
+      ],
+      "rootStoryIds": [
+        "scrib"
+      ],
+      "relatedWords": [
+        "describe",
+        "prescribe",
+        "script"
+      ],
+      "sourceIds": [
+        "ls-scribo",
+        "wik-subscribe"
+      ]
+    },
+    {
+      "word": "script",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "something written",
+      "literalZh": "写成的文字",
+      "meaningBridgeZh": "script 来自 Latin scriptum“写下来的东西”，而 scriptum 来自 scribere“写”。因此它适合作为 SCRIB / SCRIPT 词根家族的直接联想。",
+      "parts": [
+        {
+          "text": "script",
+          "role": "root-association",
+          "meaningEn": "written",
+          "meaningZh": "写下的文字；书写",
+          "morphemeId": "scrib"
+        }
+      ],
+      "rootStoryIds": [
+        "scrib"
+      ],
+      "relatedWords": [
+        "describe",
+        "prescribe",
+        "subscribe"
+      ],
+      "sourceIds": [
+        "ls-scribo",
+        "wik-script"
+      ]
+    },
+    {
+      "word": "credible",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "worthy of belief",
+      "literalZh": "值得相信",
+      "meaningBridgeZh": "credible 来自 credere“相信、信任”这一词族，所以它的核心就是“能够让人相信的”，即“可信的”。",
+      "parts": [
+        {
+          "text": "cred",
+          "role": "root",
+          "meaningEn": "believe; trust",
+          "meaningZh": "相信；信任",
+          "morphemeId": "cred"
+        }
+      ],
+      "rootStoryIds": [
+        "cred"
+      ],
+      "relatedWords": [
+        "credit",
+        "incredible"
+      ],
+      "sourceIds": [
+        "ls-credo",
+        "wik-credible"
+      ]
+    },
+    {
+      "word": "credit",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "belief / trust given",
+      "literalZh": "给予信任",
+      "meaningBridgeZh": "credit 与 credere“相信、信任”直接相关。无论是“信用”“认可”还是“学分”，背后都有“被认可、被信任、被记入”的关系。",
+      "parts": [
+        {
+          "text": "cred",
+          "role": "root",
+          "meaningEn": "believe; trust",
+          "meaningZh": "相信；信任",
+          "morphemeId": "cred"
+        }
+      ],
+      "rootStoryIds": [
+        "cred"
+      ],
+      "relatedWords": [
+        "credible",
+        "incredible"
+      ],
+      "sourceIds": [
+        "ls-credo",
+        "wik-credit"
+      ]
+    },
+    {
+      "word": "incredible",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "not believable",
+      "literalZh": "难以相信",
+      "meaningBridgeZh": "in- 在这里表示否定，credible 表示“可信的”。因此 incredible 最直接的构词理解就是“不可信到令人难以相信”，再发展出“惊人的”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "not",
+          "meaningZh": "不；否定"
+        },
+        {
+          "text": "cred",
+          "role": "root",
+          "meaningEn": "believe; trust",
+          "meaningZh": "相信；信任",
+          "morphemeId": "cred"
+        }
+      ],
+      "rootStoryIds": [
+        "cred"
+      ],
+      "relatedWords": [
+        "credible",
+        "credit"
+      ],
+      "sourceIds": [
+        "ls-credo",
+        "wik-incredible"
+      ]
+    },
+    {
+      "word": "visible",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "able to be seen",
+      "literalZh": "能够被看见",
+      "meaningBridgeZh": "visible 来自 videre“看见”这一词族，因此它的核心就是“可以被看见的”。",
+      "parts": [
+        {
+          "text": "vis",
+          "role": "root",
+          "meaningEn": "see",
+          "meaningZh": "看；看见",
+          "morphemeId": "vid"
+        }
+      ],
+      "rootStoryIds": [
+        "vid"
+      ],
+      "relatedWords": [
+        "vision",
+        "revise"
+      ],
+      "sourceIds": [
+        "ls-video",
+        "wik-visible"
+      ]
+    },
+    {
+      "word": "vision",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "seeing / sight",
+      "literalZh": "看见；视觉",
+      "meaningBridgeZh": "vision 来自 Latin visio，而 visio 与 videre“看见”直接相关，所以它表示“视觉、视野、想象中的景象”。",
+      "parts": [
+        {
+          "text": "vis",
+          "role": "root",
+          "meaningEn": "see",
+          "meaningZh": "看；看见",
+          "morphemeId": "vid"
+        }
+      ],
+      "rootStoryIds": [
+        "vid"
+      ],
+      "relatedWords": [
+        "visible",
+        "revise"
+      ],
+      "sourceIds": [
+        "ls-video",
+        "wik-vision"
+      ]
+    },
+    {
+      "word": "revise",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "look at again",
+      "literalZh": "再看一次",
+      "meaningBridgeZh": "re- 表示“再、回”，vis 与“看”有关。把内容重新看一遍并进行修正，就是 revise“复习；修订”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "again; back",
+          "meaningZh": "再；重新"
+        },
+        {
+          "text": "vis",
+          "role": "root",
+          "meaningEn": "see; look",
+          "meaningZh": "看；查看",
+          "morphemeId": "vid"
+        }
+      ],
+      "rootStoryIds": [
+        "vid"
+      ],
+      "relatedWords": [
+        "visible",
+        "vision"
+      ],
+      "sourceIds": [
+        "ls-video",
+        "wik-revise"
+      ]
+    },
+    {
+      "word": "audible",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "able to be heard",
+      "literalZh": "能够被听见",
+      "meaningBridgeZh": "audible 与 audire“听”直接相关，因此它表示“能听见的”。",
+      "parts": [
+        {
+          "text": "aud",
+          "role": "root",
+          "meaningEn": "hear",
+          "meaningZh": "听；听见",
+          "morphemeId": "aud"
+        }
+      ],
+      "rootStoryIds": [
+        "aud"
+      ],
+      "relatedWords": [
+        "audience",
+        "audition"
+      ],
+      "sourceIds": [
+        "ls-audio",
+        "wik-audible"
+      ]
+    },
+    {
+      "word": "audience",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "people who hear",
+      "literalZh": "正在听的人群",
+      "meaningBridgeZh": "audience 与 audire“听”相关，最核心的角色关系就是“听的人”，因此发展成“听众、观众”。",
+      "parts": [
+        {
+          "text": "aud",
+          "role": "root",
+          "meaningEn": "hear; listen",
+          "meaningZh": "听；倾听",
+          "morphemeId": "aud"
+        }
+      ],
+      "rootStoryIds": [
+        "aud"
+      ],
+      "relatedWords": [
+        "audible",
+        "audition"
+      ],
+      "sourceIds": [
+        "ls-audio",
+        "wik-audience"
+      ]
+    },
+    {
+      "word": "audition",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a hearing / listening test",
+      "literalZh": "通过听来进行的试演或测试",
+      "meaningBridgeZh": "audition 来自与 audire“听”相关的词形，原本围绕“听、听取”展开，后来形成“试镜、试演”这一现代用法。",
+      "parts": [
+        {
+          "text": "aud",
+          "role": "root",
+          "meaningEn": "hear; listen",
+          "meaningZh": "听；倾听",
+          "morphemeId": "aud"
+        }
+      ],
+      "rootStoryIds": [
+        "aud"
+      ],
+      "relatedWords": [
+        "audible",
+        "audience"
+      ],
+      "sourceIds": [
+        "ls-audio",
+        "wik-audition"
+      ]
+    },
+    {
+      "word": "transmit",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "send across",
+      "literalZh": "跨过去发送",
+      "meaningBridgeZh": "trans- 表示“跨越”，mit 表示“发送”。把信息、信号或东西从一端送到另一端，就是 transmit“传输、传送”。",
+      "parts": [
+        {
+          "text": "trans-",
+          "role": "prefix",
+          "meaningEn": "across",
+          "meaningZh": "跨越；横跨"
+        },
+        {
+          "text": "mit",
+          "role": "root",
+          "meaningEn": "send; let go",
+          "meaningZh": "发送；放出",
+          "morphemeId": "mit"
+        }
+      ],
+      "rootStoryIds": [
+        "mit"
+      ],
+      "relatedWords": [
+        "submit",
+        "dismiss",
+        "permit"
+      ],
+      "sourceIds": [
+        "ls-mitto",
+        "wik-transmit"
+      ]
+    },
+    {
+      "word": "submit",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "send under / place under",
+      "literalZh": "送到下面；置于其下",
+      "meaningBridgeZh": "sub- 表示“在下”，mit 表示“送”。把材料送到某个权威之下可理解为“提交”，把自己置于其下又可发展为“服从”。",
+      "parts": [
+        {
+          "text": "sub-",
+          "role": "prefix",
+          "meaningEn": "under",
+          "meaningZh": "在下；置于下方"
+        },
+        {
+          "text": "mit",
+          "role": "root",
+          "meaningEn": "send; let go",
+          "meaningZh": "发送；放出",
+          "morphemeId": "mit"
+        }
+      ],
+      "rootStoryIds": [
+        "mit"
+      ],
+      "relatedWords": [
+        "transmit",
+        "dismiss",
+        "permit"
+      ],
+      "sourceIds": [
+        "ls-mitto",
+        "wik-submit"
+      ]
+    },
+    {
+      "word": "dismiss",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "send away",
+      "literalZh": "送走",
+      "meaningBridgeZh": "dis- 有“分开、离开”的方向，miss/mit 表示“发送”。把某人送走，就是 dismiss“让离开；解散；驳回”。",
+      "parts": [
+        {
+          "text": "dis-",
+          "role": "prefix",
+          "meaningEn": "apart; away",
+          "meaningZh": "分开；离开"
+        },
+        {
+          "text": "miss",
+          "role": "root",
+          "meaningEn": "send",
+          "meaningZh": "发送；放出",
+          "morphemeId": "mit"
+        }
+      ],
+      "rootStoryIds": [
+        "mit"
+      ],
+      "relatedWords": [
+        "transmit",
+        "submit",
+        "permit"
+      ],
+      "sourceIds": [
+        "ls-mitto",
+        "wik-dismiss"
+      ]
+    },
+    {
+      "word": "permit",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "let pass through",
+      "literalZh": "允许通过",
+      "meaningBridgeZh": "per- 有“通过”的方向，mit 表示“放出、发送”。让某人或某事可以通过，就发展成 permit“允许、许可”。",
+      "parts": [
+        {
+          "text": "per-",
+          "role": "prefix",
+          "meaningEn": "through",
+          "meaningZh": "通过"
+        },
+        {
+          "text": "mit",
+          "role": "root",
+          "meaningEn": "send; let go",
+          "meaningZh": "发送；放行",
+          "morphemeId": "mit"
+        }
+      ],
+      "rootStoryIds": [
+        "mit"
+      ],
+      "relatedWords": [
+        "transmit",
+        "submit",
+        "dismiss"
+      ],
+      "sourceIds": [
+        "ls-mitto",
+        "wik-permit"
+      ]
+    },
+    {
+      "word": "accept",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "take to oneself",
+      "literalZh": "接过来、收下",
+      "meaningBridgeZh": "accept 来自 Latin accipere，其中 ad- 同化为 ac-，与 capere“拿、取得”结合。把东西接到自己这里，就是“接受”。",
+      "parts": [
+        {
+          "text": "ac- (ad-)",
+          "role": "prefix",
+          "meaningEn": "to; toward",
+          "meaningZh": "向；朝向"
+        },
+        {
+          "text": "cept",
+          "role": "root",
+          "meaningEn": "take; receive",
+          "meaningZh": "拿；接受",
+          "morphemeId": "cap"
+        }
+      ],
+      "rootStoryIds": [
+        "cap"
+      ],
+      "relatedWords": [
+        "concept",
+        "capture",
+        "receive"
+      ],
+      "sourceIds": [
+        "ls-capio",
+        "wik-accept"
+      ]
+    },
+    {
+      "word": "concept",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "take together in the mind",
+      "literalZh": "在头脑中把信息抓到一起",
+      "meaningBridgeZh": "concept 经由 Latin concipere，与 con- 和 capere“拿、取得”相关。把多个信息“抓到一起”形成一个想法，就是“概念”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "共同；一起"
+        },
+        {
+          "text": "cept",
+          "role": "root",
+          "meaningEn": "take; seize",
+          "meaningZh": "拿；取得",
+          "morphemeId": "cap"
+        }
+      ],
+      "rootStoryIds": [
+        "cap"
+      ],
+      "relatedWords": [
+        "accept",
+        "capture",
+        "receive"
+      ],
+      "sourceIds": [
+        "ls-capio",
+        "wik-concept"
+      ]
+    },
+    {
+      "word": "capture",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "take / seize",
+      "literalZh": "抓住、取得",
+      "meaningBridgeZh": "capture 来自与 capere“拿、抓住”相关的 Latin 词形，因此它几乎直接保留了“抓住、捕获”的动作。",
+      "parts": [
+        {
+          "text": "capt",
+          "role": "root-association",
+          "meaningEn": "take; seize",
+          "meaningZh": "抓住；取得",
+          "morphemeId": "cap"
+        }
+      ],
+      "rootStoryIds": [
+        "cap"
+      ],
+      "relatedWords": [
+        "accept",
+        "concept",
+        "receive"
+      ],
+      "sourceIds": [
+        "ls-capio",
+        "wik-capture"
+      ]
+    },
+    {
+      "word": "receive",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "take back / take in",
+      "literalZh": "接收、拿到",
+      "meaningBridgeZh": "receive 经由 Latin recipere，与 re- 和 capere“拿、取得”相关。英语中的拼写已经发生较大变化，所以这里按词源家族理解，比强行按现代字母拆分更可靠。",
+      "parts": [
+        {
+          "text": "ceiv",
+          "role": "root-association",
+          "meaningEn": "take; receive",
+          "meaningZh": "拿；接收",
+          "morphemeId": "cap"
+        }
+      ],
+      "rootStoryIds": [
+        "cap"
+      ],
+      "relatedWords": [
+        "accept",
+        "concept",
+        "capture"
+      ],
+      "sourceIds": [
+        "ls-capio",
+        "wik-receive"
+      ]
+    },
+    {
+      "word": "fact",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a thing done",
+      "literalZh": "做出来的事情",
+      "meaningBridgeZh": "fact 来自 Latin factum“做成的事”，而 factum 来自 facere“做”。所以 fact 最初并不是“抽象事实”，而是“已经发生、已经做成的事情”。",
+      "parts": [
+        {
+          "text": "fact",
+          "role": "root-association",
+          "meaningEn": "done; made",
+          "meaningZh": "做成；造成",
+          "morphemeId": "fac"
+        }
+      ],
+      "rootStoryIds": [
+        "fac"
+      ],
+      "relatedWords": [
+        "factory",
+        "perfect"
+      ],
+      "sourceIds": [
+        "ls-facio",
+        "wik-fact"
+      ]
+    },
+    {
+      "word": "factory",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "place of making",
+      "literalZh": "制造东西的地方",
+      "meaningBridgeZh": "factory 的词源家族与 facere“做、制造”相关，因此它作为“制造东西的场所”非常自然地发展为“工厂”。",
+      "parts": [
+        {
+          "text": "fact",
+          "role": "root-association",
+          "meaningEn": "make; do",
+          "meaningZh": "做；制造",
+          "morphemeId": "fac"
+        }
+      ],
+      "rootStoryIds": [
+        "fac"
+      ],
+      "relatedWords": [
+        "fact",
+        "perfect"
+      ],
+      "sourceIds": [
+        "ls-facio",
+        "wik-factory"
+      ]
+    },
+    {
+      "word": "perfect",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "make thoroughly / complete",
+      "literalZh": "彻底做成",
+      "meaningBridgeZh": "perfect 来自 Latin perficere，由 per- 与 facere 的变体组成，核心是“把事情彻底做成、完成”，因此发展出“完整的、完美的”。",
+      "parts": [
+        {
+          "text": "per-",
+          "role": "prefix",
+          "meaningEn": "through; completely",
+          "meaningZh": "彻底；完全"
+        },
+        {
+          "text": "fect",
+          "role": "root",
+          "meaningEn": "make; do",
+          "meaningZh": "做；使成为",
+          "morphemeId": "fac"
+        }
+      ],
+      "rootStoryIds": [
+        "fac"
+      ],
+      "relatedWords": [
+        "fact",
+        "factory"
+      ],
+      "sourceIds": [
+        "ls-facio",
+        "wik-perfect"
+      ]
+    },
+    {
+      "word": "depend",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "hang down from",
+      "literalZh": "悬挂在……之下",
+      "meaningBridgeZh": "depend 来自 Latin dependere，与 de- 和 pendere“悬挂”相关。某物“挂在”另一物上才能存在，就很自然地形成“依赖”。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "down; from",
+          "meaningZh": "向下；从"
+        },
+        {
+          "text": "pend",
+          "role": "root",
+          "meaningEn": "hang",
+          "meaningZh": "悬挂；悬着",
+          "morphemeId": "pend"
+        }
+      ],
+      "rootStoryIds": [
+        "pend"
+      ],
+      "relatedWords": [
+        "suspend",
+        "pending",
+        "pendant"
+      ],
+      "sourceIds": [
+        "ls-pendeo",
+        "wik-depend"
+      ]
+    },
+    {
+      "word": "suspend",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "hang from below",
+      "literalZh": "悬在下面",
+      "meaningBridgeZh": "sus- 是 sub- 在该词中的同化形式，pend 表示“悬挂”。让某事“悬而未决”就会发展成“暂停、中止”。",
+      "parts": [
+        {
+          "text": "sus- (sub-)",
+          "role": "prefix",
+          "meaningEn": "under",
+          "meaningZh": "在下；下方"
+        },
+        {
+          "text": "pend",
+          "role": "root",
+          "meaningEn": "hang",
+          "meaningZh": "悬挂；悬着",
+          "morphemeId": "pend"
+        }
+      ],
+      "rootStoryIds": [
+        "pend"
+      ],
+      "relatedWords": [
+        "depend",
+        "pending",
+        "pendant"
+      ],
+      "sourceIds": [
+        "ls-pendeo",
+        "wik-suspend"
+      ]
+    },
+    {
+      "word": "pending",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "hanging; not yet settled",
+      "literalZh": "悬而未决",
+      "meaningBridgeZh": "pending 与 pendere“悬挂”同源，因此“还悬着、没有落定”就形成了“待定、尚未处理完”的意思。",
+      "parts": [
+        {
+          "text": "pend",
+          "role": "root",
+          "meaningEn": "hang; remain undecided",
+          "meaningZh": "悬挂；未决",
+          "morphemeId": "pend"
+        }
+      ],
+      "rootStoryIds": [
+        "pend"
+      ],
+      "relatedWords": [
+        "depend",
+        "suspend",
+        "pendant"
+      ],
+      "sourceIds": [
+        "ls-pendeo",
+        "wik-pending"
+      ]
+    },
+    {
+      "word": "pendant",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "something hanging",
+      "literalZh": "悬挂着的东西",
+      "meaningBridgeZh": "pendant 最直观地保留了 PEND 的动作画面：一个悬挂下来的物件，因此现代常表示“吊坠、垂饰”。",
+      "parts": [
+        {
+          "text": "pend",
+          "role": "root-association",
+          "meaningEn": "hang",
+          "meaningZh": "悬挂",
+          "morphemeId": "pend"
+        }
+      ],
+      "rootStoryIds": [
+        "pend"
+      ],
+      "relatedWords": [
+        "depend",
+        "suspend",
+        "pending"
+      ],
+      "sourceIds": [
+        "ls-pendeo",
+        "wik-pendant"
+      ]
+    },
+    {
+      "word": "inject",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "throw in",
+      "literalZh": "投进去",
+      "meaningBridgeZh": "in- 表示“进入”，ject 表示“投、掷”。把某物投进去就是 inject，现代常见于“注射、注入”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "in; into",
+          "meaningZh": "进入；向内"
+        },
+        {
+          "text": "ject",
+          "role": "root",
+          "meaningEn": "throw; cast",
+          "meaningZh": "投；掷",
+          "morphemeId": "ject"
+        }
+      ],
+      "rootStoryIds": [
+        "ject"
+      ],
+      "relatedWords": [
+        "reject",
+        "project",
+        "eject"
+      ],
+      "sourceIds": [
+        "ls-iacio",
+        "wik-inject"
+      ]
+    },
+    {
+      "word": "reject",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "throw back",
+      "literalZh": "扔回去",
+      "meaningBridgeZh": "re- 表示“回、向后”，ject 表示“投、掷”。把东西扔回去，就发展成 reject“拒绝、驳回”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "ject",
+          "role": "root",
+          "meaningEn": "throw; cast",
+          "meaningZh": "投；掷",
+          "morphemeId": "ject"
+        }
+      ],
+      "rootStoryIds": [
+        "ject"
+      ],
+      "relatedWords": [
+        "inject",
+        "project",
+        "eject"
+      ],
+      "sourceIds": [
+        "ls-iacio",
+        "wik-reject"
+      ]
+    },
+    {
+      "word": "project",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "throw forward",
+      "literalZh": "向前投出去",
+      "meaningBridgeZh": "pro- 表示“向前”，ject 表示“投、掷”。把东西向前投，就能理解 project 的“投射”；再抽象化后又形成“项目、规划”等词义。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward",
+          "meaningZh": "向前"
+        },
+        {
+          "text": "ject",
+          "role": "root",
+          "meaningEn": "throw; cast",
+          "meaningZh": "投；掷",
+          "morphemeId": "ject"
+        }
+      ],
+      "rootStoryIds": [
+        "ject"
+      ],
+      "relatedWords": [
+        "inject",
+        "reject",
+        "eject"
+      ],
+      "sourceIds": [
+        "ls-iacio",
+        "wik-project"
+      ]
+    },
+    {
+      "word": "eject",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "throw out",
+      "literalZh": "向外扔出去",
+      "meaningBridgeZh": "e- 来自 ex-，表示“向外”，ject 表示“投、掷”。把某物直接扔出去，就是 eject“弹出、驱逐”。",
+      "parts": [
+        {
+          "text": "e- (ex-)",
+          "role": "prefix",
+          "meaningEn": "out",
+          "meaningZh": "向外"
+        },
+        {
+          "text": "ject",
+          "role": "root",
+          "meaningEn": "throw; cast",
+          "meaningZh": "投；掷",
+          "morphemeId": "ject"
+        }
+      ],
+      "rootStoryIds": [
+        "ject"
+      ],
+      "relatedWords": [
+        "inject",
+        "reject",
+        "project"
+      ],
+      "sourceIds": [
+        "ls-iacio",
+        "wik-eject"
+      ]
+    },
+    {
+      "word": "motion",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "movement",
+      "literalZh": "运动；移动",
+      "meaningBridgeZh": "motion 来自与 movere“移动”相关的 Latin 词形，所以它直接表达“移动、运动”，再进一步用于动作、提议等抽象场景。",
+      "parts": [
+        {
+          "text": "mot",
+          "role": "root",
+          "meaningEn": "move",
+          "meaningZh": "移动；运动",
+          "morphemeId": "mov"
+        }
+      ],
+      "rootStoryIds": [
+        "mov"
+      ],
+      "relatedWords": [
+        "remove",
+        "promote",
+        "motive"
+      ],
+      "sourceIds": [
+        "ls-moveo",
+        "wik-motion"
+      ]
+    },
+    {
+      "word": "remove",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "move back / away",
+      "literalZh": "移开、移走",
+      "meaningBridgeZh": "re- 表示“回、离开原位”，mov 表示“移动”。把东西移开原来的位置，就是 remove“移除”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; away",
+          "meaningZh": "回；离开"
+        },
+        {
+          "text": "mov",
+          "role": "root",
+          "meaningEn": "move",
+          "meaningZh": "移动",
+          "morphemeId": "mov"
+        }
+      ],
+      "rootStoryIds": [
+        "mov"
+      ],
+      "relatedWords": [
+        "motion",
+        "promote",
+        "motive"
+      ],
+      "sourceIds": [
+        "ls-moveo",
+        "wik-remove"
+      ]
+    },
+    {
+      "word": "promote",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "move forward",
+      "literalZh": "向前推动",
+      "meaningBridgeZh": "pro- 表示“向前”，mot/mov 表示“移动”。把某人或某事向前推动，就发展成 promote“促进；晋升；推广”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward",
+          "meaningZh": "向前"
+        },
+        {
+          "text": "mot",
+          "role": "root",
+          "meaningEn": "move",
+          "meaningZh": "移动；推动",
+          "morphemeId": "mov"
+        }
+      ],
+      "rootStoryIds": [
+        "mov"
+      ],
+      "relatedWords": [
+        "motion",
+        "remove",
+        "motive"
+      ],
+      "sourceIds": [
+        "ls-moveo",
+        "wik-promote"
+      ]
+    },
+    {
+      "word": "motive",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "that which moves a person",
+      "literalZh": "推动一个人行动的东西",
+      "meaningBridgeZh": "motive 与 movere“移动、推动”同源。能“推动”人采取行动的原因，就是 motive“动机”。",
+      "parts": [
+        {
+          "text": "mot",
+          "role": "root",
+          "meaningEn": "move; impel",
+          "meaningZh": "推动；使行动",
+          "morphemeId": "mov"
+        }
+      ],
+      "rootStoryIds": [
+        "mov"
+      ],
+      "relatedWords": [
+        "motion",
+        "remove",
+        "promote"
+      ],
+      "sourceIds": [
+        "ls-moveo",
+        "wik-motive"
       ]
     }
   ]
