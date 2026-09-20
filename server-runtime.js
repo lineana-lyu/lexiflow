@@ -3,6 +3,7 @@
 const http = require("http");
 const path = require("path");
 const ecdict = require("./lib/ecdict");
+const morphologyStore = require("./lib/morphology");
 const coreLexicon = require("./lib/core-lexicon");
 const wordFamily = require("./lib/word-family");
 const phraseDictionary = require("./lib/phrase-dictionary");
@@ -82,6 +83,7 @@ function localLookupResult(word, mode = "primary", sourceQuery = "") {
     wordForms: Array.isArray(morphology?.wordForms)
       ? morphology.wordForms
       : (Array.isArray(base.wordForms) ? base.wordForms : []),
+    morphology: morphologyStore.lookup(lemma) || morphologyStore.lookup(surface),
   };
   return lexemeIdentity.sanitizeLexemeExamples(
     lexemeIdentity.attachLexemeIdentity(merged, {
@@ -169,6 +171,7 @@ function localChineseResult(query, { preferredWord = "" } = {}) {
       wordForms:Array.isArray(morphology?.wordForms)
         ? morphology.wordForms
         : (Array.isArray(result.wordForms) ? result.wordForms : []),
+      morphology:morphologyStore.lookup(canonical),
       alternatives:ranked
         .filter(item => item.canonicalWord !== canonical)
         .slice(0, 3)
