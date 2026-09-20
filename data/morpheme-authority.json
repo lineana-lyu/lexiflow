@@ -1,0 +1,787 @@
+{
+  "schema": "lexiflow-morpheme-authority-v1",
+  "scope": "morpheme-facts-only",
+  "policy": {
+    "publishStatus": "verified",
+    "rule": "A morpheme may be published only when its source-language lemma/form and core meaning are supported by an authoritative lexicon or grammar.",
+    "excludes": [
+      "whole-word teaching story",
+      "whole-word semantic bridge",
+      "culture/history anecdote",
+      "AI-invented etymology",
+      "runtime string-prefix inference"
+    ]
+  },
+  "sources": [
+    {
+      "id": "ls-bene",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5168/",
+      "locator": "bene",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-traho",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48709/",
+      "locator": "traho",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-duco",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n14847/",
+      "locator": "duco",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-scribo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43092/",
+      "locator": "scribo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-mitto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n29328/",
+      "locator": "mitto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-capio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6614/",
+      "locator": "capio",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-wordformation",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); digital edition",
+      "access": "Alpheios grammar edition",
+      "url": "https://grammars.alpheios.net/allen-greenough/wordformation.htm",
+      "locator": "§267, prepositions compounded with verbs/adjectives",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-phonetic",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/phonetic-changes",
+      "locator": "§§15–16, phonetic changes and prefix assimilation",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-supine",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/formation-supine",
+      "locator": "§178, formation of the supine stem",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-prae",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37331/",
+      "locator": "prae",
+      "publicDomain": true
+    }
+  ],
+  "morphemes": [
+    {
+      "id": "lat-bene",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BENE"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bene",
+      "sourceForms": [
+        "bene"
+      ],
+      "coreMeaningEn": [
+        "well"
+      ],
+      "coreMeaningZh": [
+        "好地",
+        "良好地"
+      ],
+      "formRelation": "direct",
+      "claimSources": {
+        "lemma": [
+          "ls-bene"
+        ],
+        "meaning": [
+          "ls-bene"
+        ],
+        "forms": [
+          "ls-bene"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-tract",
+      "kind": "root_family",
+      "teachingForms": [
+        "TRAH",
+        "TRACT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "traho",
+      "sourceForms": [
+        "traho",
+        "traxi",
+        "tractum"
+      ],
+      "coreMeaningEn": [
+        "draw",
+        "drag",
+        "haul"
+      ],
+      "coreMeaningZh": [
+        "拉",
+        "拖",
+        "牵引"
+      ],
+      "formRelation": "TRACT reflects the tract- form seen in Latin tractum; not a standalone Latin lemma.",
+      "claimSources": {
+        "lemma": [
+          "ls-traho"
+        ],
+        "meaning": [
+          "ls-traho"
+        ],
+        "forms": [
+          "ls-traho",
+          "ag-phonetic"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-duc",
+      "kind": "root_family",
+      "teachingForms": [
+        "DUC",
+        "DUCT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "duco",
+      "sourceForms": [
+        "duco",
+        "duxi",
+        "ductum"
+      ],
+      "coreMeaningEn": [
+        "lead",
+        "conduct",
+        "bring forward"
+      ],
+      "coreMeaningZh": [
+        "带领",
+        "引导",
+        "带来"
+      ],
+      "formRelation": "DUC follows the verbal base; DUCT reflects the duct- form seen in Latin ductum.",
+      "claimSources": {
+        "lemma": [
+          "ls-duco"
+        ],
+        "meaning": [
+          "ls-duco"
+        ],
+        "forms": [
+          "ls-duco"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-scrib",
+      "kind": "root_family",
+      "teachingForms": [
+        "SCRIB",
+        "SCRIPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "scribo",
+      "sourceForms": [
+        "scribo",
+        "scripsi",
+        "scriptum"
+      ],
+      "coreMeaningEn": [
+        "write",
+        "inscribe"
+      ],
+      "coreMeaningZh": [
+        "写",
+        "书写",
+        "刻写"
+      ],
+      "formRelation": "SCRIPT reflects the script- form; Allen & Greenough documents the phonetic development scriptus from an earlier scrib-tus sequence.",
+      "claimSources": {
+        "lemma": [
+          "ls-scribo"
+        ],
+        "meaning": [
+          "ls-scribo"
+        ],
+        "forms": [
+          "ls-scribo",
+          "ag-phonetic"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-mit",
+      "kind": "root_family",
+      "teachingForms": [
+        "MIT",
+        "MISS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "mitto",
+      "sourceForms": [
+        "mitto",
+        "misi",
+        "missum"
+      ],
+      "coreMeaningEn": [
+        "send",
+        "let go",
+        "send off"
+      ],
+      "coreMeaningZh": [
+        "发送",
+        "放出",
+        "送出"
+      ],
+      "formRelation": "MIT follows the present stem family; MISS reflects the miss- form visible in Latin missum.",
+      "claimSources": {
+        "lemma": [
+          "ls-mitto"
+        ],
+        "meaning": [
+          "ls-mitto"
+        ],
+        "forms": [
+          "ls-mitto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-cap",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAP",
+        "CAPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "capio",
+      "sourceForms": [
+        "capio",
+        "cepi",
+        "captum"
+      ],
+      "coreMeaningEn": [
+        "take",
+        "seize",
+        "grasp"
+      ],
+      "coreMeaningZh": [
+        "拿",
+        "抓住",
+        "取得"
+      ],
+      "formRelation": "CAP follows the verbal base; CAPT reflects the capt- form seen in Latin captum. CEPT/CEIV are not asserted here because they require a separate Romance/English historical derivation layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-capio"
+        ],
+        "meaning": [
+          "ls-capio"
+        ],
+        "forms": [
+          "ls-capio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-prae",
+      "kind": "prefix",
+      "teachingForms": [
+        "PRAE-",
+        "PRE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "prae",
+      "sourceForms": [
+        "prae"
+      ],
+      "coreMeaningEn": [
+        "before",
+        "in front"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前"
+      ],
+      "formRelation": "PRAE- is the Latin form; PRE- is the common English teaching reflex and must be linked to an English-word etymology separately.",
+      "claimSources": {
+        "lemma": [
+          "ls-prae"
+        ],
+        "meaning": [
+          "ls-prae"
+        ],
+        "forms": [
+          "ls-prae"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ad",
+      "kind": "prefix",
+      "teachingForms": [
+        "AD-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ad",
+      "sourceForms": [
+        "ad-"
+      ],
+      "coreMeaningEn": [
+        "to",
+        "towards"
+      ],
+      "coreMeaningZh": [
+        "向",
+        "朝向"
+      ],
+      "variants": [
+        {
+          "form": "ac-",
+          "condition": "attested assimilation before some c- environments"
+        },
+        {
+          "form": "ag-",
+          "condition": "attested assimilation before some g- environments"
+        },
+        {
+          "form": "ap-",
+          "condition": "attested assimilation before some p- environments"
+        },
+        {
+          "form": "at-",
+          "condition": "attested assimilation before some t- environments"
+        }
+      ],
+      "formRelation": "Prefix meaning and assimilated forms are governed by Latin compound phonology, not by English string matching.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-con",
+      "kind": "prefix",
+      "teachingForms": [
+        "CON-",
+        "COM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cum / con-",
+      "sourceForms": [
+        "con-",
+        "com-"
+      ],
+      "coreMeaningEn": [
+        "together",
+        "with"
+      ],
+      "coreMeaningZh": [
+        "共同",
+        "一起"
+      ],
+      "variants": [
+        {
+          "form": "com-",
+          "condition": "before labial consonants in many compounds"
+        },
+        {
+          "form": "coll-",
+          "condition": "attested before l in some compounds"
+        },
+        {
+          "form": "corr-",
+          "condition": "attested before r in some compounds"
+        }
+      ],
+      "formRelation": "Variant selection is phonological and historically variable.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-in-locative",
+      "kind": "prefix",
+      "teachingForms": [
+        "IN-",
+        "IM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "in",
+      "sourceForms": [
+        "in-"
+      ],
+      "coreMeaningEn": [
+        "in",
+        "on",
+        "against"
+      ],
+      "coreMeaningZh": [
+        "在内",
+        "进入",
+        "向着"
+      ],
+      "variants": [
+        {
+          "form": "im-",
+          "condition": "n commonly changes to m before b and m; comparable assimilation also occurs before labials"
+        }
+      ],
+      "formRelation": "This is the prepositional in- family and must not be conflated with negative in-.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-in-negative",
+      "kind": "prefix",
+      "teachingForms": [
+        "IN-",
+        "IM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "in-",
+      "sourceForms": [
+        "in-"
+      ],
+      "coreMeaningEn": [
+        "not"
+      ],
+      "coreMeaningZh": [
+        "不",
+        "非"
+      ],
+      "variants": [
+        {
+          "form": "im-",
+          "condition": "negative in- appears as im- in forms such as impurus / imbellis"
+        }
+      ],
+      "formRelation": "Negative in- is a separate morpheme from prepositional in- and is stored under a different authority id.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-wordformation",
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-inter",
+      "kind": "prefix",
+      "teachingForms": [
+        "INTER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "inter",
+      "sourceForms": [
+        "inter-"
+      ],
+      "coreMeaningEn": [
+        "between"
+      ],
+      "coreMeaningZh": [
+        "在……之间"
+      ],
+      "formRelation": "Direct prepositional prefix.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sub",
+      "kind": "prefix",
+      "teachingForms": [
+        "SUB-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sub",
+      "sourceForms": [
+        "sub-"
+      ],
+      "coreMeaningEn": [
+        "under",
+        "up from under"
+      ],
+      "coreMeaningZh": [
+        "在下",
+        "从下方"
+      ],
+      "variants": [
+        {
+          "form": "surr-",
+          "condition": "attested for subr- in some compounds"
+        },
+        {
+          "form": "summ-",
+          "condition": "attested for subm- in some compounds"
+        }
+      ],
+      "formRelation": "Assimilation is historical and environment-dependent.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ex",
+      "kind": "prefix",
+      "teachingForms": [
+        "EX-",
+        "E-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ex / e",
+      "sourceForms": [
+        "ex-",
+        "e-"
+      ],
+      "coreMeaningEn": [
+        "out"
+      ],
+      "coreMeaningZh": [
+        "向外",
+        "出"
+      ],
+      "variants": [
+        {
+          "form": "ef-",
+          "condition": "attested before f; ecf- also occurs"
+        }
+      ],
+      "formRelation": "Variant behavior follows Latin phonology.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-de",
+      "kind": "prefix",
+      "teachingForms": [
+        "DE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "de",
+      "sourceForms": [
+        "de-"
+      ],
+      "coreMeaningEn": [
+        "down",
+        "utterly"
+      ],
+      "coreMeaningZh": [
+        "向下",
+        "彻底"
+      ],
+      "formRelation": "Allen & Greenough lists de- in compounds with the adverbial values down / utterly.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ob",
+      "kind": "prefix",
+      "teachingForms": [
+        "OB-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ob",
+      "sourceForms": [
+        "ob-"
+      ],
+      "coreMeaningEn": [
+        "towards",
+        "to meet"
+      ],
+      "coreMeaningZh": [
+        "朝向",
+        "迎向"
+      ],
+      "variants": [],
+      "formRelation": "Assimilation may occur in compounds, but no learner-facing variant is published here until each form is explicitly represented and tested.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    }
+  ]
+}
