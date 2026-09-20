@@ -59,8 +59,17 @@ function createEcdictFixture(file){
   insert.run(
     "resolve","rɪˈzɒlv","to solve or settle a problem","v. 解决；处理","v",4,1,"cet4",1500,2200,""
   );
+  insert.run(
+    "ointment","ˈɔɪntmənt","a smooth substance rubbed on the skin as medicine","n. 药膏","n",5,1,"cet4",1200,1500,"s:ointments"
+  );
+  insert.run(
+    "unguent","ˈʌŋɡwənt","a medicinal preparation for external application","n. 药膏","n",0,0,"",32000,41000,"s:unguents"
+  );
+  insert.run(
+    "unguents","ˈʌŋɡwənts","plural of unguent","n. 药膏","n",0,0,"",0,0,"0:unguent/s:unguents"
+  );
   const meta=db.prepare("INSERT INTO metadata(key,value) VALUES(?,?)");
-  meta.run("entry_count","2");
+  meta.run("entry_count","5");
   meta.run("source","lexiflow-runtime-smoke-fixture");
   meta.run("schema","lexiflow-ecdict-v1");
   db.close();
@@ -110,6 +119,14 @@ function createCoreFixture(file){
     INSERT INTO words(word,phonetic,audio_url,learner_rank,pos_summary,tags,collins,oxford,bnc,frq,source)
     VALUES(?,?,?,?,?,?,?,?,?,?,?)
   `).run("response","rɪˈspɒns","",900,"noun|word","cet4",5,1,700,1000,"runtime-smoke");
+  db.prepare(`
+    INSERT INTO words(word,phonetic,audio_url,learner_rank,pos_summary,tags,collins,oxford,bnc,frq,source)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+  `).run("ointment","ˈɔɪntmənt","",780,"noun","cet4",5,1,1200,1500,"runtime-smoke");
+  db.prepare(`
+    INSERT INTO words(word,phonetic,audio_url,learner_rank,pos_summary,tags,collins,oxford,bnc,frq,source)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?)
+  `).run("unguent","ˈʌŋɡwənt","",80,"noun","",0,0,32000,41000,"runtime-smoke");
 
   const sense=db.prepare(`
     INSERT INTO senses(word,pos,definition_en,meaning_zh,example_en,sense_rank,source)
@@ -118,17 +135,21 @@ function createCoreFixture(file){
   sense.run("address","noun","the details of where someone lives","地址","Please write your address here.",900,"runtime-smoke");
   sense.run("address","verb","to deal with a problem or difficult situation","处理；应对","We need to address the problem.",500,"runtime-smoke");
   sense.run("response","noun","something said or done as a reaction","反应；回应","Her response was immediate.",800,"runtime-smoke");
+  sense.run("ointment","noun","a smooth medicinal substance rubbed on the skin","药膏","The doctor applied an ointment to the wound.",780,"runtime-smoke");
+  sense.run("unguent","noun","a medicinal preparation for external use","药膏","The doctor applied an unguent to the wound.",80,"runtime-smoke");
 
   const alias=db.prepare("INSERT INTO zh_aliases(alias,word,rank,source) VALUES(?,?,?,?)");
   alias.run("地址","address",1200,"runtime-smoke");
   alias.run("对付","address",1180,"runtime-smoke");
   alias.run("应对","response",1970,"cc-cedict");
+  alias.run("药膏","ointment",1000,"runtime-smoke");
+  alias.run("药膏","unguent",1000,"runtime-smoke");
 
   const meta=db.prepare("INSERT INTO metadata(key,value) VALUES(?,?)");
   meta.run("schema","lexiflow-core-v3");
-  meta.run("word_count","2");
-  meta.run("sense_count","3");
-  meta.run("zh_alias_count","3");
+  meta.run("word_count","4");
+  meta.run("sense_count","5");
+  meta.run("zh_alias_count","5");
   meta.run("prepared_at",new Date(0).toISOString());
   db.close();
 }
@@ -205,6 +226,35 @@ async function jsonRequest(base,pathname,{method="GET",body=null}={}){
     assert(zhResult.senses?.[0]?.meaningZh==="应对","the selected learning meaning must be the learner's queried Chinese sense");
     assert(zhResult.senses?.[0]?.glossZh==="处理；应对","the original fuller Chinese gloss must be preserved after selecting the learner's intended sense");
     assert(/deal with a problem/i.test(zhResult.senses?.[0]?.senseIntentEn||""),"Chinese sense selection must preserve the matching English semantic intent");
+
+    const pluralLookup=await jsonRequest(base,"/api/dictionary/lookup",{
+      method:"POST",body:{word:"unguents",mode:"primary"},
+    });
+    assert(pluralLookup.status===200&&pluralLookup.payload?.ok===true,"HTTP-01 plural dictionary lookup must succeed locally");
+    const pluralResult=pluralLookup.payload?.result||{};
+    assert(pluralResult.word==="unguent","HTTP-01 inflected surface must canonicalize to the lemma");
+    assert(pluralResult.lexeme?.lemma==="unguent","HTTP-01 lexeme identity must expose the canonical lemma");
+    assert(Array.isArray(pluralResult.lexeme?.acceptedForms)&&pluralResult.lexeme.acceptedForms.includes("unguents")&&pluralResult.lexeme.acceptedForms.includes("unguent"),"HTTP-01 lexeme identity must retain both singular and plural forms");
+    assert(pluralResult.phonetic==="/ˈʌŋɡwənt/","HTTP-04 pronunciation must follow the canonical lemma rather than the queried plural surface");
+    assert(/\bunguent\b/i.test(pluralResult.senses?.[0]?.exampleEn||""),"HTTP-01 a canonical singular example must remain valid for a plural query");
+
+    const ointmentSearch=await jsonRequest(base,"/api/search/smart",{
+      method:"POST",body:{query:"药膏"},
+    });
+    assert(ointmentSearch.status===200&&ointmentSearch.payload?.ok===true,"HTTP-02 Chinese medicine query must resolve locally");
+    const ointmentResult=ointmentSearch.payload?.result||{};
+    assert(ointmentResult.word==="ointment","HTTP-02 learner-friendly common headword must outrank an obscure synonym/inflected candidate");
+    assert(ointmentResult.lexeme?.lemma==="ointment","HTTP-02 result identity must be canonical");
+    assert(/\bointment\b/i.test(ointmentResult.senses?.[0]?.exampleEn||""),"HTTP-02 example must belong to the selected canonical lexeme");
+
+    const preferredUnguent=await jsonRequest(base,"/api/search/smart",{
+      method:"POST",body:{query:"药膏",preferredWord:"unguent"},
+    });
+    assert(preferredUnguent.status===200&&preferredUnguent.payload?.ok===true,"HTTP-03 explicit alternative lookup must succeed");
+    const preferredResult=preferredUnguent.payload?.result||{};
+    assert(preferredResult.word==="unguent","HTTP-03 explicit learner choice must override automatic ranking");
+    assert(preferredResult.lexeme?.lemma==="unguent","HTTP-03 preferred alternative must still return a canonical lexeme contract");
+    assert(/\bunguent\b/i.test(preferredResult.senses?.[0]?.exampleEn||""),"HTTP-03 preferred alternative example must belong to the preferred lexeme");
 
     const firstRead=await jsonRequest(base,"/api/learning-data");
     assert(firstRead.status===200&&firstRead.payload?.ok===true,"learning-data GET must work through the real outer/inner runtime chain");
