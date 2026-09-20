@@ -108,6 +108,14 @@ function createCoreFixture(file){
       source TEXT NOT NULL,
       PRIMARY KEY(alias, word)
     );
+    CREATE TABLE zh_semantic_evidence (
+      alias TEXT NOT NULL,
+      word TEXT NOT NULL COLLATE NOCASE,
+      definition_en TEXT NOT NULL DEFAULT '',
+      rank REAL NOT NULL DEFAULT 0,
+      source TEXT NOT NULL,
+      PRIMARY KEY(alias, word, definition_en)
+    );
     CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   `);
 
@@ -135,7 +143,7 @@ function createCoreFixture(file){
   sense.run("address","noun","the details of where someone lives","地址","Please write your address here.",900,"runtime-smoke");
   sense.run("address","verb","to deal with a problem or difficult situation","处理；应对","We need to address the problem.",500,"runtime-smoke");
   sense.run("response","noun","something said or done as a reaction","反应；回应","Her response was immediate.",800,"runtime-smoke");
-  sense.run("ointment","noun","a smooth medicinal substance rubbed on the skin","药膏","The doctor applied an ointment to the wound.",780,"runtime-smoke");
+  sense.run("ointment","noun","a smooth medicinal substance rubbed on the skin","软膏","The doctor applied an ointment to the wound.",780,"runtime-smoke");
   sense.run("unguent","noun","a medicinal preparation for external use","药膏","The doctor applied an unguent to the wound.",80,"runtime-smoke");
 
   const alias=db.prepare("INSERT INTO zh_aliases(alias,word,rank,source) VALUES(?,?,?,?)");
@@ -145,11 +153,17 @@ function createCoreFixture(file){
   alias.run("药膏","ointment",1000,"runtime-smoke");
   alias.run("药膏","unguent",1000,"runtime-smoke");
 
+  const evidence=db.prepare("INSERT INTO zh_semantic_evidence(alias,word,definition_en,rank,source) VALUES(?,?,?,?,?)");
+  evidence.run("药膏","ointment","ointment",1000,"runtime-smoke");
+  evidence.run("药膏","unguent","unguent",1000,"runtime-smoke");
+  evidence.run("应对","address","to deal with a problem",1200,"runtime-smoke");
+
   const meta=db.prepare("INSERT INTO metadata(key,value) VALUES(?,?)");
-  meta.run("schema","lexiflow-core-v3");
+  meta.run("schema","lexiflow-core-v4");
   meta.run("word_count","4");
   meta.run("sense_count","5");
   meta.run("zh_alias_count","5");
+  meta.run("zh_semantic_evidence_count","3");
   meta.run("prepared_at",new Date(0).toISOString());
   db.close();
 }
@@ -245,6 +259,9 @@ async function jsonRequest(base,pathname,{method="GET",body=null}={}){
     const ointmentResult=ointmentSearch.payload?.result||{};
     assert(ointmentResult.word==="ointment","HTTP-02 learner-friendly common headword must outrank an obscure synonym/inflected candidate");
     assert(ointmentResult.lexeme?.lemma==="ointment","HTTP-02 result identity must be canonical");
+    assert(ointmentResult.chineseSenseMatched===false&&ointmentResult.chineseAliasMatched===true&&ointmentResult.chineseSemanticMatched===true,"HTTP-02 exact alias evidence must validate a Chinese meaning even when the stored Core sense uses a synonymous gloss");
+    assert(ointmentResult.chineseSemanticEvidence?.source==="runtime-smoke","HTTP-02 semantic provenance must survive the HTTP boundary");
+    assert(ointmentResult.senses?.[0]?.meaningZh==="药膏"&&ointmentResult.senses?.[0]?.glossZh==="软膏","HTTP-02 query meaning must be selected while preserving the original dictionary gloss");
     assert(/\bointment\b/i.test(ointmentResult.senses?.[0]?.exampleEn||""),"HTTP-02 example must belong to the selected canonical lexeme");
 
     const preferredUnguent=await jsonRequest(base,"/api/search/smart",{
