@@ -14,7 +14,7 @@ const DEFAULT_ECDICT_DB = path.join(ROOT, "resources", "ecdict.sqlite");
 const DEFAULT_OUTPUT = path.join(ROOT, "resources", "core-lexicon.sqlite");
 const SIMPLE_WIKTIONARY_URL = "https://kaikki.org/simplewiktionary/raw-wiktextract-data.jsonl.gz";
 const CC_CEDICT_URL = "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz";
-const SCHEMA = "lexiflow-core-v3";
+const SCHEMA = "lexiflow-core-v4";
 
 const POS_MAP = new Map([
   ["n", "noun"], ["noun", "noun"], ["proper_noun", "proper noun"],
@@ -274,6 +274,15 @@ async function prepareCoreLexicon({
       PRIMARY KEY(alias, word)
     );
     CREATE INDEX idx_zh_alias_rank ON zh_aliases(alias, rank DESC);
+    CREATE TABLE zh_semantic_evidence (
+      alias TEXT NOT NULL,
+      word TEXT NOT NULL COLLATE NOCASE,
+      definition_en TEXT NOT NULL DEFAULT '',
+      rank REAL NOT NULL DEFAULT 0,
+      source TEXT NOT NULL,
+      PRIMARY KEY(alias, word, definition_en)
+    );
+    CREATE INDEX idx_zh_semantic_evidence_lookup ON zh_semantic_evidence(alias, word COLLATE NOCASE, rank DESC);
     CREATE TABLE metadata (key TEXT PRIMARY KEY, value TEXT NOT NULL);
   `);
 
@@ -297,6 +306,12 @@ async function prepareCoreLexicon({
   const upsertAlias = db.prepare(`
     INSERT INTO zh_aliases(alias,word,rank,source) VALUES(?,?,?,?)
     ON CONFLICT(alias,word) DO UPDATE SET rank=MAX(zh_aliases.rank,excluded.rank), source=CASE WHEN excluded.rank>=zh_aliases.rank THEN excluded.source ELSE zh_aliases.source END
+  `);
+  const upsertSemanticEvidence = db.prepare(`
+    INSERT INTO zh_semantic_evidence(alias,word,definition_en,rank,source) VALUES(?,?,?,?,?)
+    ON CONFLICT(alias,word,definition_en) DO UPDATE SET
+      rank=MAX(zh_semantic_evidence.rank,excluded.rank),
+      source=CASE WHEN excluded.rank>=zh_semantic_evidence.rank THEN excluded.source ELSE zh_semantic_evidence.source END
   `);
   const wordExists = db.prepare("SELECT learner_rank FROM words WHERE word=? COLLATE NOCASE LIMIT 1");
 
@@ -417,7 +432,12 @@ async function prepareCoreLexicon({
       const row = ecdictLookup.get(item.word);
       if (!row) continue;
       const aliases = tokenizeChineseAliases(row.translation);
-      aliases.forEach((alias, index) => upsertAlias.run(alias, item.word, 450 + Number(item.learner_rank || 0) - index * 18, "ecdict"));
+      const evidenceDefinition = normalizeNewlines(row.definition).split(/\r?\n/).map(x => x.trim()).filter(Boolean)[0] || "";
+      aliases.forEach((alias, index) => {
+        const rank = 450 + Number(item.learner_rank || 0) - index * 18;
+        upsertAlias.run(alias, item.word, rank, "ecdict");
+        upsertSemanticEvidence.run(alias, item.word, evidenceDefinition, rank, "ecdict");
+      });
     }
     db.exec("COMMIT");
   } catch (err) {
@@ -451,7 +471,9 @@ async function prepareCoreLexicon({
         const phrasePenalty = Math.max(0, candidate.split(/\s+/).length - 1) * 80;
         const rank = 1800 - index * 90 + Math.min(Number(hit.learner_rank || 0), 350) - phrasePenalty;
         for (const alias of aliases) {
-          if (alias && alias.length <= 16) upsertAlias.run(alias, candidate, rank, "cc-cedict");
+          if (!alias || alias.length > 16) continue;
+          upsertAlias.run(alias, candidate, rank, "cc-cedict");
+          upsertSemanticEvidence.run(alias, candidate, def, rank, "cc-cedict");
         }
       });
       cedictRows += 1;
@@ -466,11 +488,13 @@ async function prepareCoreLexicon({
   const wordCount = Number(db.prepare("SELECT COUNT(*) AS c FROM words").get()?.c || 0);
   const senseCount = Number(db.prepare("SELECT COUNT(*) AS c FROM senses").get()?.c || 0);
   const aliasCount = Number(db.prepare("SELECT COUNT(*) AS c FROM zh_aliases").get()?.c || 0);
+  const semanticEvidenceCount = Number(db.prepare("SELECT COUNT(*) AS c FROM zh_semantic_evidence").get()?.c || 0);
   const meta = db.prepare("INSERT OR REPLACE INTO metadata(key,value) VALUES(?,?)");
   meta.run("schema", SCHEMA);
   meta.run("word_count", String(wordCount));
   meta.run("sense_count", String(senseCount));
   meta.run("zh_alias_count", String(aliasCount));
+  meta.run("zh_semantic_evidence_count", String(semanticEvidenceCount));
   meta.run("simple_wiktionary_source", simpleSource);
   meta.run("cc_cedict_source", cedictSource);
   meta.run("prepared_at", new Date().toISOString());
@@ -481,8 +505,8 @@ async function prepareCoreLexicon({
   await fsp.rm(output, { force: true });
   await fsp.rename(tempDb, output);
   await Promise.all([fsp.rm(simpleGz, { force: true }), fsp.rm(cedictGz, { force: true })]);
-  console.log(`LexiFlow Core prepared: ${wordCount} words, ${senseCount} senses, ${aliasCount} Chinese aliases`);
-  return { outputPath: output, reused: false, wordCount, senseCount, aliasCount };
+  console.log(`LexiFlow Core prepared: ${wordCount} words, ${senseCount} senses, ${aliasCount} Chinese aliases, ${semanticEvidenceCount} semantic evidence rows`);
+  return { outputPath: output, reused: false, wordCount, senseCount, aliasCount, semanticEvidenceCount };
 }
 
 function parseArgs(argv) {
