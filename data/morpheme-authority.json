@@ -620,8 +620,7 @@
       "id": "lat-prae",
       "kind": "prefix",
       "teachingForms": [
-        "PRAE-",
-        "PRE-"
+        "PRAE-"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "prae",
@@ -636,7 +635,7 @@
         "在前",
         "在……之前"
       ],
-      "formRelation": "PRAE- is the Latin form; PRE- is the common English teaching reflex and must be linked to an English-word etymology separately.",
+      "formRelation": "PRAE- is the attested Latin form from prae. English PRE- is a downstream historical reflex and is intentionally not asserted by the source-language authority layer.",
       "claimSources": {
         "lemma": [
           "ls-prae"
