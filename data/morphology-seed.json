@@ -760,6 +760,814 @@
       "headword": "capio",
       "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=capio1",
       "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-pono",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "pono",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pono",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-venio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "venio",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=venio",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-teneo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "teneo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=teneo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-sto",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "sto",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=sto",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-sequor",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "sequor",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=sequor",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-sentio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "sentio",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43681/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-memor",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "memor / memoria",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=memor",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-voco",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "voco / vox",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=voco",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-manus",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "manus",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=manus",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-pes",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "pes, pedis",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n35756/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-lux",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "lux / lumen",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=lux",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-finis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "finis",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=finis",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-gradior",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "gradior / gradus",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=gradior",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-cedo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "cedo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=cedo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-claudo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "claudo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=claudo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-ligo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "ligo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=ligo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-curro",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "curro",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=curro",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-gigno",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "gigno / genus",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=gigno",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-vivo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "vivo / vita",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=vivo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-anima",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "anima",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=anima",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-position",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "position",
+      "url": "https://en.wiktionary.org/wiki/position",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-compose",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "compose",
+      "url": "https://en.wiktionary.org/wiki/compose",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-deposit",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "deposit",
+      "url": "https://en.wiktionary.org/wiki/deposit",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-postpone",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "postpone",
+      "url": "https://en.wiktionary.org/wiki/postpone",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-convene",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "convene",
+      "url": "https://en.wiktionary.org/wiki/convene",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-prevent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "prevent",
+      "url": "https://en.wiktionary.org/wiki/prevent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-invent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "invent",
+      "url": "https://en.wiktionary.org/wiki/invent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-intervene",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "intervene",
+      "url": "https://en.wiktionary.org/wiki/intervene",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-contain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "contain",
+      "url": "https://en.wiktionary.org/wiki/contain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-retain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "retain",
+      "url": "https://en.wiktionary.org/wiki/retain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-detain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "detain",
+      "url": "https://en.wiktionary.org/wiki/detain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sustain",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sustain",
+      "url": "https://en.wiktionary.org/wiki/sustain",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-stable",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "stable",
+      "url": "https://en.wiktionary.org/wiki/stable",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-station",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "station",
+      "url": "https://en.wiktionary.org/wiki/station",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-status",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "status",
+      "url": "https://en.wiktionary.org/wiki/status",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-constant",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "constant",
+      "url": "https://en.wiktionary.org/wiki/constant",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sequence",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sequence",
+      "url": "https://en.wiktionary.org/wiki/sequence",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-consequence",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "consequence",
+      "url": "https://en.wiktionary.org/wiki/consequence",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-subsequent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "subsequent",
+      "url": "https://en.wiktionary.org/wiki/subsequent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pursue",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pursue",
+      "url": "https://en.wiktionary.org/wiki/pursue",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sense",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sense",
+      "url": "https://en.wiktionary.org/wiki/sense",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sensitive",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sensitive",
+      "url": "https://en.wiktionary.org/wiki/sensitive",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-consent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "consent",
+      "url": "https://en.wiktionary.org/wiki/consent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-resent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "resent",
+      "url": "https://en.wiktionary.org/wiki/resent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-memory",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "memory",
+      "url": "https://en.wiktionary.org/wiki/memory",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-memorial",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "memorial",
+      "url": "https://en.wiktionary.org/wiki/memorial",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-commemorate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "commemorate",
+      "url": "https://en.wiktionary.org/wiki/commemorate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-memorable",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "memorable",
+      "url": "https://en.wiktionary.org/wiki/memorable",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-vocal",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "vocal",
+      "url": "https://en.wiktionary.org/wiki/vocal",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-vocabulary",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "vocabulary",
+      "url": "https://en.wiktionary.org/wiki/vocabulary",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-advocate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "advocate",
+      "url": "https://en.wiktionary.org/wiki/advocate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-invoke",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "invoke",
+      "url": "https://en.wiktionary.org/wiki/invoke",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-revoke",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "revoke",
+      "url": "https://en.wiktionary.org/wiki/revoke",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-manual",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "manual",
+      "url": "https://en.wiktionary.org/wiki/manual",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-manufacture",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "manufacture",
+      "url": "https://en.wiktionary.org/wiki/manufacture",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-manuscript",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "manuscript",
+      "url": "https://en.wiktionary.org/wiki/manuscript",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-manipulate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "manipulate",
+      "url": "https://en.wiktionary.org/wiki/manipulate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pedal",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pedal",
+      "url": "https://en.wiktionary.org/wiki/pedal",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pedestrian",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pedestrian",
+      "url": "https://en.wiktionary.org/wiki/pedestrian",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pedicure",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pedicure",
+      "url": "https://en.wiktionary.org/wiki/pedicure",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-biped",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "biped",
+      "url": "https://en.wiktionary.org/wiki/biped",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-lucid",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "lucid",
+      "url": "https://en.wiktionary.org/wiki/lucid",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-illuminate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "illuminate",
+      "url": "https://en.wiktionary.org/wiki/illuminate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-translucent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "translucent",
+      "url": "https://en.wiktionary.org/wiki/translucent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-luminous",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "luminous",
+      "url": "https://en.wiktionary.org/wiki/luminous",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-final",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "final",
+      "url": "https://en.wiktionary.org/wiki/final",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-finish",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "finish",
+      "url": "https://en.wiktionary.org/wiki/finish",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-define",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "define",
+      "url": "https://en.wiktionary.org/wiki/define",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-infinite",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "infinite",
+      "url": "https://en.wiktionary.org/wiki/infinite",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-progress",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "progress",
+      "url": "https://en.wiktionary.org/wiki/progress",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-regress",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "regress",
+      "url": "https://en.wiktionary.org/wiki/regress",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-congress",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "congress",
+      "url": "https://en.wiktionary.org/wiki/congress",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-gradual",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "gradual",
+      "url": "https://en.wiktionary.org/wiki/gradual",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-precede",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "precede",
+      "url": "https://en.wiktionary.org/wiki/precede",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-proceed",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "proceed",
+      "url": "https://en.wiktionary.org/wiki/proceed",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-recede",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "recede",
+      "url": "https://en.wiktionary.org/wiki/recede",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-access",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "access",
+      "url": "https://en.wiktionary.org/wiki/access",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-include",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "include",
+      "url": "https://en.wiktionary.org/wiki/include",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-exclude",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "exclude",
+      "url": "https://en.wiktionary.org/wiki/exclude",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-conclude",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "conclude",
+      "url": "https://en.wiktionary.org/wiki/conclude",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-seclude",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "seclude",
+      "url": "https://en.wiktionary.org/wiki/seclude",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-ligature",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "ligature",
+      "url": "https://en.wiktionary.org/wiki/ligature",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-ligament",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "ligament",
+      "url": "https://en.wiktionary.org/wiki/ligament",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-oblige",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "oblige",
+      "url": "https://en.wiktionary.org/wiki/oblige",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-obligation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "obligation",
+      "url": "https://en.wiktionary.org/wiki/obligation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-current",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "current",
+      "url": "https://en.wiktionary.org/wiki/current",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-course",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "course",
+      "url": "https://en.wiktionary.org/wiki/course",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-occur",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "occur",
+      "url": "https://en.wiktionary.org/wiki/occur",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-recur",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "recur",
+      "url": "https://en.wiktionary.org/wiki/recur",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-generate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "generate",
+      "url": "https://en.wiktionary.org/wiki/generate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-generation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "generation",
+      "url": "https://en.wiktionary.org/wiki/generation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-genetic",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "genetic",
+      "url": "https://en.wiktionary.org/wiki/genetic",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-progeny",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "progeny",
+      "url": "https://en.wiktionary.org/wiki/progeny",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-revive",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "revive",
+      "url": "https://en.wiktionary.org/wiki/revive",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-survive",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "survive",
+      "url": "https://en.wiktionary.org/wiki/survive",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-vital",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "vital",
+      "url": "https://en.wiktionary.org/wiki/vital",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-vivid",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "vivid",
+      "url": "https://en.wiktionary.org/wiki/vivid",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-animal",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "animal",
+      "url": "https://en.wiktionary.org/wiki/animal",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-animate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "animate",
+      "url": "https://en.wiktionary.org/wiki/animate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-animation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "animation",
+      "url": "https://en.wiktionary.org/wiki/animation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-inanimate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "inanimate",
+      "url": "https://en.wiktionary.org/wiki/inanimate",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "morphemes": [
@@ -1015,6 +1823,246 @@
       "narrativeZh": "MOV / MOT 来自拉丁语 movere“移动、使运动”。mov- 常保留在动词词形里，mot- 常出现在名词或派生词中。它们共同表达“位置或状态发生移动”，再进一步延伸到推动、动机和运动等抽象概念。",
       "sourceIds": [
         "ls-moveo"
+      ]
+    },
+    {
+      "id": "pon",
+      "display": "PON / POS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "put; place",
+      "meaningZh": "放；置于",
+      "narrativeZh": "PON / POS 来自拉丁语 ponere“放、安置”。它的核心动作是“把某物放到某个位置”。不同前缀改变放置的方向或关系，所以 position、deposit、postpone 等词虽然表面差异很大，仍能回到“放置”这个动作。",
+      "sourceIds": [
+        "ls-pono"
+      ]
+    },
+    {
+      "id": "ven",
+      "display": "VEN / VENT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "come",
+      "meaningZh": "来；到来",
+      "narrativeZh": "VEN / VENT 来自拉丁语 venire“来、到来”。很多同根词可以理解成“来到一起、提前来到、来到中间”。把它当成一个有方向的“来”，能帮助理解 convene、prevent、intervene 等词。",
+      "sourceIds": [
+        "ls-venio"
+      ]
+    },
+    {
+      "id": "ten",
+      "display": "TEN / TAIN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "hold; keep",
+      "meaningZh": "握住；保持",
+      "narrativeZh": "TEN / TAIN 来自拉丁语 tenere“握住、保持”。它可以是实际握住，也可以抽象成“维持、保留、扣住”。看到 contain、retain、detain 等词时，先抓住“把某物留在某处、不让它离开”的感觉。",
+      "sourceIds": [
+        "ls-teneo"
+      ]
+    },
+    {
+      "id": "sta",
+      "display": "STA / STAT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "stand",
+      "meaningZh": "站立；保持位置",
+      "narrativeZh": "STA / STAT 来自拉丁语 stare“站立”。从“站住不动”可以延伸到稳定、状态、位置和持续存在。很多带 sta/stat 的词，本质上都在讨论“站在哪里、保持什么状态”。",
+      "sourceIds": [
+        "ls-sto"
+      ]
+    },
+    {
+      "id": "sequ",
+      "display": "SEQU / SEC",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "follow",
+      "meaningZh": "跟随；接着",
+      "narrativeZh": "SEQU / SEC 来自拉丁语 sequi“跟随”。它既可以表示一个人跟着另一个人，也可以表示事件按顺序接着发生。sequence、consequence、subsequent 都能从“前后跟随关系”理解。",
+      "sourceIds": [
+        "ls-sequor"
+      ]
+    },
+    {
+      "id": "sens",
+      "display": "SENS / SENT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "feel; perceive",
+      "meaningZh": "感受；察觉",
+      "narrativeZh": "SENS / SENT 来自拉丁语 sentire“感受、察觉”。它不仅是身体感觉，也可以是意见、态度和判断。sense、sensitive、consent 等词都保留了“感觉到、形成感受或意见”的核心。",
+      "sourceIds": [
+        "ls-sentio"
+      ]
+    },
+    {
+      "id": "mem",
+      "display": "MEM",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "remember; mindful",
+      "meaningZh": "记住；记忆",
+      "narrativeZh": "MEM 与拉丁语 memor、memoria 的“记住、记忆”有关。它的核心不是某种记忆技巧，而是“把某件事留在心里”。memory、memorial、commemorate 都围绕保存和唤起记忆展开。",
+      "sourceIds": [
+        "ls-memor"
+      ]
+    },
+    {
+      "id": "voc",
+      "display": "VOC / VOK",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "call; voice",
+      "meaningZh": "呼叫；声音",
+      "narrativeZh": "VOC / VOK 来自拉丁语 vocare“呼叫”和 vox“声音”。它常和“叫出声、命名、发出声音”有关。vocal、vocabulary、invoke、revoke 等词看似用途不同，但都能追溯到“声音或呼叫”的语义网络。",
+      "sourceIds": [
+        "ls-voco"
+      ]
+    },
+    {
+      "id": "manu",
+      "display": "MANU",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "hand",
+      "meaningZh": "手",
+      "narrativeZh": "MANU 来自拉丁语 manus“手”。它经常出现在“用手完成、手工处理、亲手操作”的词里。manual、manuscript、manufacture 等词都可以从“手”这个非常具体的身体动作出发理解。",
+      "sourceIds": [
+        "ls-manus"
+      ]
+    },
+    {
+      "id": "ped",
+      "display": "PED",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "foot",
+      "meaningZh": "脚；足",
+      "narrativeZh": "PED 来自拉丁语 pes, pedis“脚”。它常用于和脚、步行、足部动作有关的词。pedal、pedestrian、biped 等词几乎都能直接从“脚”建立画面，因此是非常适合迁移记忆的一组词根。",
+      "sourceIds": [
+        "ls-pes"
+      ]
+    },
+    {
+      "id": "luc",
+      "display": "LUC / LUM",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "light",
+      "meaningZh": "光；明亮",
+      "narrativeZh": "LUC / LUM 与拉丁语 lux、lumen“光”有关。它既可以描述实际亮度，也可以延伸到“清晰、透亮、照亮”。lucid、luminous、illuminate 等词都保留了“有光、让人看清”的感觉。",
+      "sourceIds": [
+        "ls-lux"
+      ]
+    },
+    {
+      "id": "fin",
+      "display": "FIN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "end; boundary",
+      "meaningZh": "结束；边界",
+      "narrativeZh": "FIN 来自拉丁语 finis“终点、边界”。从“划定边界”可以发展出定义，从“到达终点”可以发展出完成。final、finish、define、infinite 都可以从“有没有边界、是否到终点”来理解。",
+      "sourceIds": [
+        "ls-finis"
+      ]
+    },
+    {
+      "id": "grad",
+      "display": "GRAD / GRESS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "step; walk",
+      "meaningZh": "步；行进",
+      "narrativeZh": "GRAD / GRESS 与拉丁语 gradus“步”和 gradi“行走”有关。前缀改变行进方向：向前走、向后走、走到一起。progress、regress、congress 都可以用“走的方向”建立稳定记忆。",
+      "sourceIds": [
+        "ls-gradior"
+      ]
+    },
+    {
+      "id": "ced",
+      "display": "CED / CEED / CESS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "go; move; yield",
+      "meaningZh": "走；移动；退让",
+      "narrativeZh": "CED / CEED / CESS 来自拉丁语 cedere“走、移动、退让”。不同历史词形形成了 ced、ceed、cess。precede、proceed、recede 的核心区别，主要来自前缀给出的行进方向。",
+      "sourceIds": [
+        "ls-cedo"
+      ]
+    },
+    {
+      "id": "clud",
+      "display": "CLUD / CLUS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "close; shut",
+      "meaningZh": "关闭；封住",
+      "narrativeZh": "CLUD / CLUS 来自拉丁语 claudere“关闭、封住”。前缀决定“关在哪里、把谁关进去或排除在外”。include、exclude、conclude、seclude 都能从“边界被关闭”这一动作理解。",
+      "sourceIds": [
+        "ls-claudo"
+      ]
+    },
+    {
+      "id": "lig",
+      "display": "LIG",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "bind; tie",
+      "meaningZh": "绑；连接",
+      "narrativeZh": "LIG 来自拉丁语 ligare“绑、系、连接”。它可以是真正用绳子绑住，也可以抽象成义务或约束。ligament、ligature、oblige、obligation 都保留了“被连接、被绑定”的核心感觉。",
+      "sourceIds": [
+        "ls-ligo"
+      ]
+    },
+    {
+      "id": "curr",
+      "display": "CURR / CURS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "run",
+      "meaningZh": "跑；运行",
+      "narrativeZh": "CURR / CURS 来自拉丁语 currere“跑”。它既可以表示真正奔跑，也可以抽象成事情“正在运行、沿路径进行”。current、course、occur、recur 等词都可以从“运行轨迹”去理解。",
+      "sourceIds": [
+        "ls-curro"
+      ]
+    },
+    {
+      "id": "gen",
+      "display": "GEN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "beget; produce; kind",
+      "meaningZh": "产生；出生；种类",
+      "narrativeZh": "GEN 与拉丁语 gignere“产生、生育”和 genus“种类、族类”有关。它常出现在生成、世代、血统和种类相关词中。generate、generation、genetic、progeny 都共享“产生生命或产生某类事物”的核心。",
+      "sourceIds": [
+        "ls-gigno"
+      ]
+    },
+    {
+      "id": "viv",
+      "display": "VIV / VIT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "live; life",
+      "meaningZh": "活；生命",
+      "narrativeZh": "VIV / VIT 来自拉丁语 vivere“活着”和 vita“生命”。它可以直接表示生命，也可以引申为有活力、生动。revive、survive、vital、vivid 都能从“保持生命或重新有生命感”理解。",
+      "sourceIds": [
+        "ls-vivo"
+      ]
+    },
+    {
+      "id": "anim",
+      "display": "ANIM",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "breath; life; spirit",
+      "meaningZh": "呼吸；生命；精神",
+      "narrativeZh": "ANIM 来自拉丁语 anima“呼吸、生命、灵魂”。古人把呼吸和生命直接联系起来，所以 animal、animate、animation 等词都带有“有生命、使活起来”的感觉。",
+      "sourceIds": [
+        "ls-anima"
       ]
     }
   ],
@@ -3321,6 +4369,2546 @@
       "sourceIds": [
         "ls-moveo",
         "wik-motive"
+      ]
+    },
+    {
+      "word": "position",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "被放置的位置",
+      "meaningBridgeZh": "position 经由 Latin positio 与 ponere“放置”同源，因此最核心的理解就是“某物被放在哪里”，再发展为位置、职位和立场。",
+      "parts": [
+        {
+          "text": "pos",
+          "role": "root-association",
+          "meaningEn": "put; place",
+          "meaningZh": "放；置于",
+          "morphemeId": "pon"
+        }
+      ],
+      "rootStoryIds": [
+        "pon"
+      ],
+      "relatedWords": [
+        "compose",
+        "deposit",
+        "postpone"
+      ],
+      "sourceIds": [
+        "ls-pono",
+        "wik-position"
+      ]
+    },
+    {
+      "word": "compose",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "放到一起",
+      "meaningBridgeZh": "com- 表示“一起”，pose 来自 ponere“放置”的历史词形。把不同部分放到一起，就是 compose“组成；创作”。",
+      "parts": [
+        {
+          "text": "com-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "一起"
+        },
+        {
+          "text": "pose",
+          "role": "root",
+          "meaningEn": "put; place",
+          "meaningZh": "放置",
+          "morphemeId": "pon"
+        }
+      ],
+      "rootStoryIds": [
+        "pon"
+      ],
+      "relatedWords": [
+        "position",
+        "deposit",
+        "postpone"
+      ],
+      "sourceIds": [
+        "ls-pono",
+        "wik-compose"
+      ]
+    },
+    {
+      "word": "deposit",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把东西放下",
+      "meaningBridgeZh": "de- 有“向下”的方向，posit 来自 ponere“放置”。把东西放下或放到某处保存，就发展成 deposit“存放；存款”。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "down",
+          "meaningZh": "向下"
+        },
+        {
+          "text": "posit",
+          "role": "root",
+          "meaningEn": "put; place",
+          "meaningZh": "放置",
+          "morphemeId": "pon"
+        }
+      ],
+      "rootStoryIds": [
+        "pon"
+      ],
+      "relatedWords": [
+        "position",
+        "compose",
+        "postpone"
+      ],
+      "sourceIds": [
+        "ls-pono",
+        "wik-deposit"
+      ]
+    },
+    {
+      "word": "postpone",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "放到后面",
+      "meaningBridgeZh": "post- 表示“在后”，pone 与 ponere“放置”直接相关。把事情放到后面处理，就是 postpone“推迟”。",
+      "parts": [
+        {
+          "text": "post-",
+          "role": "prefix",
+          "meaningEn": "after",
+          "meaningZh": "在后；之后"
+        },
+        {
+          "text": "pone",
+          "role": "root",
+          "meaningEn": "put; place",
+          "meaningZh": "放置",
+          "morphemeId": "pon"
+        }
+      ],
+      "rootStoryIds": [
+        "pon"
+      ],
+      "relatedWords": [
+        "position",
+        "compose",
+        "deposit"
+      ],
+      "sourceIds": [
+        "ls-pono",
+        "wik-postpone"
+      ]
+    },
+    {
+      "word": "convene",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "来到一起",
+      "meaningBridgeZh": "con- 表示“一起”，vene 来自 venire“来”。大家来到一起，就是 convene“集合；召集会议”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "一起"
+        },
+        {
+          "text": "vene",
+          "role": "root",
+          "meaningEn": "come",
+          "meaningZh": "来；到来",
+          "morphemeId": "ven"
+        }
+      ],
+      "rootStoryIds": [
+        "ven"
+      ],
+      "relatedWords": [
+        "prevent",
+        "invent",
+        "intervene"
+      ],
+      "sourceIds": [
+        "ls-venio",
+        "wik-convene"
+      ]
+    },
+    {
+      "word": "prevent",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "提前来到前面",
+      "meaningBridgeZh": "pre- 表示“在前”，vent 来自 venire“来”。原义接近“提前来到前面阻挡”，因此发展成 prevent“阻止”。",
+      "parts": [
+        {
+          "text": "pre-",
+          "role": "prefix",
+          "meaningEn": "before",
+          "meaningZh": "在前；提前"
+        },
+        {
+          "text": "vent",
+          "role": "root",
+          "meaningEn": "come",
+          "meaningZh": "来；到来",
+          "morphemeId": "ven"
+        }
+      ],
+      "rootStoryIds": [
+        "ven"
+      ],
+      "relatedWords": [
+        "convene",
+        "invent",
+        "intervene"
+      ],
+      "sourceIds": [
+        "ls-venio",
+        "wik-prevent"
+      ]
+    },
+    {
+      "word": "invent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "来到某物面前并发现它",
+      "meaningBridgeZh": "invent 经由 Latin invenire，与 in- 和 venire“来”有关，历史上有“遇到、发现”的意味，后来发展为“发明”。",
+      "parts": [
+        {
+          "text": "vent",
+          "role": "root-association",
+          "meaningEn": "come",
+          "meaningZh": "来；到来",
+          "morphemeId": "ven"
+        }
+      ],
+      "rootStoryIds": [
+        "ven"
+      ],
+      "relatedWords": [
+        "convene",
+        "prevent",
+        "intervene"
+      ],
+      "sourceIds": [
+        "ls-venio",
+        "wik-invent"
+      ]
+    },
+    {
+      "word": "intervene",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "来到两者之间",
+      "meaningBridgeZh": "inter- 表示“在……之间”，vene 来自 venire“来”。来到两个事物之间进行影响，就是 intervene“介入；干预”。",
+      "parts": [
+        {
+          "text": "inter-",
+          "role": "prefix",
+          "meaningEn": "between",
+          "meaningZh": "在……之间"
+        },
+        {
+          "text": "vene",
+          "role": "root",
+          "meaningEn": "come",
+          "meaningZh": "来；到来",
+          "morphemeId": "ven"
+        }
+      ],
+      "rootStoryIds": [
+        "ven"
+      ],
+      "relatedWords": [
+        "convene",
+        "prevent",
+        "invent"
+      ],
+      "sourceIds": [
+        "ls-venio",
+        "wik-intervene"
+      ]
+    },
+    {
+      "word": "contain",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "一起握住、包在里面",
+      "meaningBridgeZh": "con- 有“一起、完全”的方向，tain 来自 tenere“握住”。把内容保持在边界内，就是 contain“包含；容纳”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "一起"
+        },
+        {
+          "text": "tain",
+          "role": "root",
+          "meaningEn": "hold",
+          "meaningZh": "握住；保持",
+          "morphemeId": "ten"
+        }
+      ],
+      "rootStoryIds": [
+        "ten"
+      ],
+      "relatedWords": [
+        "retain",
+        "detain",
+        "sustain"
+      ],
+      "sourceIds": [
+        "ls-teneo",
+        "wik-contain"
+      ]
+    },
+    {
+      "word": "retain",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "往回留住",
+      "meaningBridgeZh": "re- 表示“回、保持”，tain 表示“握住”。把某物继续留住，就是 retain“保留”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回；继续"
+        },
+        {
+          "text": "tain",
+          "role": "root",
+          "meaningEn": "hold",
+          "meaningZh": "握住；保持",
+          "morphemeId": "ten"
+        }
+      ],
+      "rootStoryIds": [
+        "ten"
+      ],
+      "relatedWords": [
+        "contain",
+        "detain",
+        "sustain"
+      ],
+      "sourceIds": [
+        "ls-teneo",
+        "wik-retain"
+      ]
+    },
+    {
+      "word": "detain",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把人扣住",
+      "meaningBridgeZh": "de- 与 tain“握住、保持”结合，形成“把人留住、不让离开”的感觉，因此 detain 表示“拘留；耽搁”。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "down; away",
+          "meaningZh": "向下；离开原进程"
+        },
+        {
+          "text": "tain",
+          "role": "root",
+          "meaningEn": "hold",
+          "meaningZh": "握住；扣住",
+          "morphemeId": "ten"
+        }
+      ],
+      "rootStoryIds": [
+        "ten"
+      ],
+      "relatedWords": [
+        "contain",
+        "retain",
+        "sustain"
+      ],
+      "sourceIds": [
+        "ls-teneo",
+        "wik-detain"
+      ]
+    },
+    {
+      "word": "sustain",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "从下方托住并保持",
+      "meaningBridgeZh": "sus- 是 sub- 的同化形式，tain 表示“保持、握住”。从下方托住并让它继续存在，就是 sustain“维持；支撑”。",
+      "parts": [
+        {
+          "text": "sus- (sub-)",
+          "role": "prefix",
+          "meaningEn": "under",
+          "meaningZh": "在下；从下方"
+        },
+        {
+          "text": "tain",
+          "role": "root",
+          "meaningEn": "hold",
+          "meaningZh": "保持；支撑",
+          "morphemeId": "ten"
+        }
+      ],
+      "rootStoryIds": [
+        "ten"
+      ],
+      "relatedWords": [
+        "contain",
+        "retain",
+        "detain"
+      ],
+      "sourceIds": [
+        "ls-teneo",
+        "wik-sustain"
+      ]
+    },
+    {
+      "word": "stable",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "能站稳的",
+      "meaningBridgeZh": "stable 与 stare“站立”同源，核心感觉是“站得住、不容易倒”，因此表示“稳定的”。",
+      "parts": [
+        {
+          "text": "sta",
+          "role": "root-association",
+          "meaningEn": "stand",
+          "meaningZh": "站立；保持",
+          "morphemeId": "sta"
+        }
+      ],
+      "rootStoryIds": [
+        "sta"
+      ],
+      "relatedWords": [
+        "station",
+        "status",
+        "constant"
+      ],
+      "sourceIds": [
+        "ls-sto",
+        "wik-stable"
+      ]
+    },
+    {
+      "word": "station",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "站立或停留的位置",
+      "meaningBridgeZh": "station 与 stare“站立”相关，本质上是“站住、停留的地方”，因此表示“站点；驻地”。",
+      "parts": [
+        {
+          "text": "stat",
+          "role": "root-association",
+          "meaningEn": "stand",
+          "meaningZh": "站立；位置",
+          "morphemeId": "sta"
+        }
+      ],
+      "rootStoryIds": [
+        "sta"
+      ],
+      "relatedWords": [
+        "stable",
+        "status",
+        "constant"
+      ],
+      "sourceIds": [
+        "ls-sto",
+        "wik-station"
+      ]
+    },
+    {
+      "word": "status",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "站立所处的状态",
+      "meaningBridgeZh": "status 来自 Latin status“站立、状态”，而其词族与 stare“站”相关，所以可以理解成“一个人或事物站在什么状态”。",
+      "parts": [
+        {
+          "text": "stat",
+          "role": "root-association",
+          "meaningEn": "stand; state",
+          "meaningZh": "站立；状态",
+          "morphemeId": "sta"
+        }
+      ],
+      "rootStoryIds": [
+        "sta"
+      ],
+      "relatedWords": [
+        "stable",
+        "station",
+        "constant"
+      ],
+      "sourceIds": [
+        "ls-sto",
+        "wik-status"
+      ]
+    },
+    {
+      "word": "constant",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "一起站稳、不变化",
+      "meaningBridgeZh": "con- 有“共同、完全”的意味，stant 来自 stare“站立”。一直站稳不变，就是 constant“持续的；恒定的”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together; fully",
+          "meaningZh": "共同；持续"
+        },
+        {
+          "text": "stant",
+          "role": "root",
+          "meaningEn": "stand",
+          "meaningZh": "站立；保持",
+          "morphemeId": "sta"
+        }
+      ],
+      "rootStoryIds": [
+        "sta"
+      ],
+      "relatedWords": [
+        "stable",
+        "station",
+        "status"
+      ],
+      "sourceIds": [
+        "ls-sto",
+        "wik-constant"
+      ]
+    },
+    {
+      "word": "sequence",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "一个接着一个跟随",
+      "meaningBridgeZh": "sequence 与 sequi“跟随”同源，因此最核心的画面就是“前一个后面跟着下一个”，也就是“顺序；序列”。",
+      "parts": [
+        {
+          "text": "sequ",
+          "role": "root",
+          "meaningEn": "follow",
+          "meaningZh": "跟随；接着",
+          "morphemeId": "sequ"
+        }
+      ],
+      "rootStoryIds": [
+        "sequ"
+      ],
+      "relatedWords": [
+        "consequence",
+        "subsequent",
+        "pursue"
+      ],
+      "sourceIds": [
+        "ls-sequor",
+        "wik-sequence"
+      ]
+    },
+    {
+      "word": "consequence",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "跟随某事而来的结果",
+      "meaningBridgeZh": "con- 与 sequ“跟随”结合，表示“跟着前面的事情而来”。因此 consequence 就是“后果、结果”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "with; together",
+          "meaningZh": "随同；一起"
+        },
+        {
+          "text": "sequ",
+          "role": "root",
+          "meaningEn": "follow",
+          "meaningZh": "跟随；接着",
+          "morphemeId": "sequ"
+        }
+      ],
+      "rootStoryIds": [
+        "sequ"
+      ],
+      "relatedWords": [
+        "sequence",
+        "subsequent",
+        "pursue"
+      ],
+      "sourceIds": [
+        "ls-sequor",
+        "wik-consequence"
+      ]
+    },
+    {
+      "word": "subsequent",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "随后跟上来的",
+      "meaningBridgeZh": "sub- 在这个历史构词里形成“后续跟随”的关系，sequ 表示“跟随”，所以 subsequent 表示“随后的”。",
+      "parts": [
+        {
+          "text": "sub-",
+          "role": "prefix",
+          "meaningEn": "after; following",
+          "meaningZh": "随后；在后"
+        },
+        {
+          "text": "sequ",
+          "role": "root",
+          "meaningEn": "follow",
+          "meaningZh": "跟随；接着",
+          "morphemeId": "sequ"
+        }
+      ],
+      "rootStoryIds": [
+        "sequ"
+      ],
+      "relatedWords": [
+        "sequence",
+        "consequence",
+        "pursue"
+      ],
+      "sourceIds": [
+        "ls-sequor",
+        "wik-subsequent"
+      ]
+    },
+    {
+      "word": "pursue",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "紧跟在后面追",
+      "meaningBridgeZh": "pursue 经由法语追溯到 Latin prosequi“跟随、追赶”。现代拼写已经看不出 sequ，所以这里按同源关系理解，不做字母硬拆。",
+      "parts": [
+        {
+          "text": "pursue",
+          "role": "root-association",
+          "meaningEn": "follow; chase",
+          "meaningZh": "跟随；追赶",
+          "morphemeId": "sequ"
+        }
+      ],
+      "rootStoryIds": [
+        "sequ"
+      ],
+      "relatedWords": [
+        "sequence",
+        "consequence",
+        "subsequent"
+      ],
+      "sourceIds": [
+        "ls-sequor",
+        "wik-pursue"
+      ]
+    },
+    {
+      "word": "sense",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "感受到的东西",
+      "meaningBridgeZh": "sense 来自 Latin sensus，而 sensus 与 sentire“感受、察觉”直接相关，所以它既表示感觉，也可以表示理解和判断。",
+      "parts": [
+        {
+          "text": "sens",
+          "role": "root",
+          "meaningEn": "feel; perceive",
+          "meaningZh": "感受；察觉",
+          "morphemeId": "sens"
+        }
+      ],
+      "rootStoryIds": [
+        "sens"
+      ],
+      "relatedWords": [
+        "sensitive",
+        "consent",
+        "resent"
+      ],
+      "sourceIds": [
+        "ls-sentio",
+        "wik-sense"
+      ]
+    },
+    {
+      "word": "sensitive",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "容易感受到变化",
+      "meaningBridgeZh": "sensitive 与 sense 同属 sentire“感受”词族，所以核心就是“容易感觉到、对刺激反应明显”。",
+      "parts": [
+        {
+          "text": "sens",
+          "role": "root",
+          "meaningEn": "feel; perceive",
+          "meaningZh": "感受；敏感",
+          "morphemeId": "sens"
+        }
+      ],
+      "rootStoryIds": [
+        "sens"
+      ],
+      "relatedWords": [
+        "sense",
+        "consent",
+        "resent"
+      ],
+      "sourceIds": [
+        "ls-sentio",
+        "wik-sensitive"
+      ]
+    },
+    {
+      "word": "consent",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "共同形成一种感受或意见",
+      "meaningBridgeZh": "con- 表示“一起”，sent 来自 sentire“感受、认为”。大家形成一致意见，就发展成 consent“同意”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "共同；一起"
+        },
+        {
+          "text": "sent",
+          "role": "root",
+          "meaningEn": "feel; think",
+          "meaningZh": "感受；认为",
+          "morphemeId": "sens"
+        }
+      ],
+      "rootStoryIds": [
+        "sens"
+      ],
+      "relatedWords": [
+        "sense",
+        "sensitive",
+        "resent"
+      ],
+      "sourceIds": [
+        "ls-sentio",
+        "wik-consent"
+      ]
+    },
+    {
+      "word": "resent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "再次强烈感受到某事",
+      "meaningBridgeZh": "resent 经由法语来自 Latin resentire“再次感受”。现代义发展为“对某事感到愤恨”，所以这里按历史关联理解，不把 re- 简化成唯一的现代构词规则。",
+      "parts": [
+        {
+          "text": "sent",
+          "role": "root-association",
+          "meaningEn": "feel; perceive",
+          "meaningZh": "感受；察觉",
+          "morphemeId": "sens"
+        }
+      ],
+      "rootStoryIds": [
+        "sens"
+      ],
+      "relatedWords": [
+        "sense",
+        "sensitive",
+        "consent"
+      ],
+      "sourceIds": [
+        "ls-sentio",
+        "wik-resent"
+      ]
+    },
+    {
+      "word": "memory",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "留在心里的记忆",
+      "meaningBridgeZh": "memory 经由 Latin memoria，与 memor“记住、铭记”直接相关，所以它就是 MEM 词根最直观的核心词。",
+      "parts": [
+        {
+          "text": "mem",
+          "role": "root-association",
+          "meaningEn": "remember",
+          "meaningZh": "记住；记忆",
+          "morphemeId": "mem"
+        }
+      ],
+      "rootStoryIds": [
+        "mem"
+      ],
+      "relatedWords": [
+        "memorial",
+        "commemorate",
+        "memorable"
+      ],
+      "sourceIds": [
+        "ls-memor",
+        "wik-memory"
+      ]
+    },
+    {
+      "word": "memorial",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用来保存记忆的事物",
+      "meaningBridgeZh": "memorial 与 memoria“记忆”同源，核心作用就是“让人记住”，因此可以表示纪念物或纪念性的。",
+      "parts": [
+        {
+          "text": "mem",
+          "role": "root",
+          "meaningEn": "remember",
+          "meaningZh": "记住；纪念",
+          "morphemeId": "mem"
+        }
+      ],
+      "rootStoryIds": [
+        "mem"
+      ],
+      "relatedWords": [
+        "memory",
+        "commemorate",
+        "memorable"
+      ],
+      "sourceIds": [
+        "ls-memor",
+        "wik-memorial"
+      ]
+    },
+    {
+      "word": "commemorate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "共同唤起并保存记忆",
+      "meaningBridgeZh": "commemorate 来自与 memor“记住”相关的 Latin 构词，核心是“让某人某事继续被记住”，因此表示“纪念”。",
+      "parts": [
+        {
+          "text": "memor",
+          "role": "root-association",
+          "meaningEn": "remember",
+          "meaningZh": "记住；纪念",
+          "morphemeId": "mem"
+        }
+      ],
+      "rootStoryIds": [
+        "mem"
+      ],
+      "relatedWords": [
+        "memory",
+        "memorial",
+        "memorable"
+      ],
+      "sourceIds": [
+        "ls-memor",
+        "wik-commemorate"
+      ]
+    },
+    {
+      "word": "memorable",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "值得被记住的",
+      "meaningBridgeZh": "memorable 与 memor“记得”直接相关，所以就是“容易记住、值得记住的”。",
+      "parts": [
+        {
+          "text": "memor",
+          "role": "root-association",
+          "meaningEn": "remember",
+          "meaningZh": "记住；铭记",
+          "morphemeId": "mem"
+        }
+      ],
+      "rootStoryIds": [
+        "mem"
+      ],
+      "relatedWords": [
+        "memory",
+        "memorial",
+        "commemorate"
+      ],
+      "sourceIds": [
+        "ls-memor",
+        "wik-memorable"
+      ]
+    },
+    {
+      "word": "vocal",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "与声音有关的",
+      "meaningBridgeZh": "vocal 来自 vox“声音”词族，因此核心就是“声音的、用嗓音表达的”。",
+      "parts": [
+        {
+          "text": "voc",
+          "role": "root",
+          "meaningEn": "voice; call",
+          "meaningZh": "声音；呼叫",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocabulary",
+        "advocate",
+        "invoke",
+        "revoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-vocal"
+      ]
+    },
+    {
+      "word": "vocabulary",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "与词语和叫法有关的集合",
+      "meaningBridgeZh": "vocabulary 经由 Latin vocabularium 与 vocabulum“名称、词”相关，而 vocabulum 来自 vocare“呼叫、命名”。",
+      "parts": [
+        {
+          "text": "voc",
+          "role": "root-association",
+          "meaningEn": "call; name",
+          "meaningZh": "呼叫；命名",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocal",
+        "advocate",
+        "invoke",
+        "revoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-vocabulary"
+      ]
+    },
+    {
+      "word": "advocate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "为某人发声",
+      "meaningBridgeZh": "advocate 经由 Latin advocare“召来、呼请”形成，后来发展成“为某人发声、支持”。这里最值得记的是 VOC 的“声音/呼叫”关系。",
+      "parts": [
+        {
+          "text": "voc",
+          "role": "root-association",
+          "meaningEn": "call; voice",
+          "meaningZh": "呼叫；发声",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocal",
+        "vocabulary",
+        "invoke",
+        "revoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-advocate"
+      ]
+    },
+    {
+      "word": "invoke",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "呼叫进来、求助于",
+      "meaningBridgeZh": "in- 表示“向内、进入”，voke 来自 vocare“呼叫”。把某种力量或权威“叫来”，就是 invoke“援引；调用；祈求”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "in; upon",
+          "meaningZh": "向内；向……求助"
+        },
+        {
+          "text": "voke",
+          "role": "root",
+          "meaningEn": "call",
+          "meaningZh": "呼叫；召唤",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocal",
+        "vocabulary",
+        "advocate",
+        "revoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-invoke"
+      ]
+    },
+    {
+      "word": "revoke",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把先前的召唤收回来",
+      "meaningBridgeZh": "re- 表示“回、向后”，voke 来自 vocare“呼叫”。把已经作出的授权或决定“叫回来”，就发展成 revoke“撤销”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back",
+          "meaningZh": "回；收回"
+        },
+        {
+          "text": "voke",
+          "role": "root",
+          "meaningEn": "call",
+          "meaningZh": "呼叫；召回",
+          "morphemeId": "voc"
+        }
+      ],
+      "rootStoryIds": [
+        "voc"
+      ],
+      "relatedWords": [
+        "vocal",
+        "vocabulary",
+        "advocate",
+        "invoke"
+      ],
+      "sourceIds": [
+        "ls-voco",
+        "wik-revoke"
+      ]
+    },
+    {
+      "word": "manual",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用手完成的",
+      "meaningBridgeZh": "manual 直接来自 Latin manualis“手的”，而 manualis 来自 manus“手”，所以就是“手工的；手动的”。",
+      "parts": [
+        {
+          "text": "manu",
+          "role": "root",
+          "meaningEn": "hand",
+          "meaningZh": "手",
+          "morphemeId": "manu"
+        }
+      ],
+      "rootStoryIds": [
+        "manu"
+      ],
+      "relatedWords": [
+        "manufacture",
+        "manuscript",
+        "manipulate"
+      ],
+      "sourceIds": [
+        "ls-manus",
+        "wik-manual"
+      ]
+    },
+    {
+      "word": "manufacture",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用手制造",
+      "meaningBridgeZh": "manufacture 历史上包含 manus“手”和 facere“做”的组合，原义非常接近“用手做出来”，后来泛化为“制造”。",
+      "parts": [
+        {
+          "text": "manu",
+          "role": "root-association",
+          "meaningEn": "hand",
+          "meaningZh": "手；手工",
+          "morphemeId": "manu"
+        }
+      ],
+      "rootStoryIds": [
+        "manu"
+      ],
+      "relatedWords": [
+        "manual",
+        "manuscript",
+        "manipulate"
+      ],
+      "sourceIds": [
+        "ls-manus",
+        "wik-manufacture"
+      ]
+    },
+    {
+      "word": "manuscript",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "手写的文字",
+      "meaningBridgeZh": "manuscript 历史上就是 manus“手”与 scriptum“写下的东西”的组合，因此最直观的理解就是“手写稿”。",
+      "parts": [
+        {
+          "text": "manu",
+          "role": "root-association",
+          "meaningEn": "hand",
+          "meaningZh": "手；手写",
+          "morphemeId": "manu"
+        }
+      ],
+      "rootStoryIds": [
+        "manu"
+      ],
+      "relatedWords": [
+        "manual",
+        "manufacture",
+        "manipulate"
+      ],
+      "sourceIds": [
+        "ls-manus",
+        "wik-manuscript"
+      ]
+    },
+    {
+      "word": "manipulate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用手处理、操控",
+      "meaningBridgeZh": "manipulate 的词源与 manus“手”有关，早期强调手工处理和操作，后来发展成更抽象的“操纵、控制”。",
+      "parts": [
+        {
+          "text": "mani",
+          "role": "root-association",
+          "meaningEn": "hand",
+          "meaningZh": "手；操作",
+          "morphemeId": "manu"
+        }
+      ],
+      "rootStoryIds": [
+        "manu"
+      ],
+      "relatedWords": [
+        "manual",
+        "manufacture",
+        "manuscript"
+      ],
+      "sourceIds": [
+        "ls-manus",
+        "wik-manipulate"
+      ]
+    },
+    {
+      "word": "pedal",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用脚踩的",
+      "meaningBridgeZh": "pedal 与 Latin pes, pedis“脚”直接相关，因此可以表示踏板，也可以表示“用脚踩”。",
+      "parts": [
+        {
+          "text": "ped",
+          "role": "root",
+          "meaningEn": "foot",
+          "meaningZh": "脚；足",
+          "morphemeId": "ped"
+        }
+      ],
+      "rootStoryIds": [
+        "ped"
+      ],
+      "relatedWords": [
+        "pedestrian",
+        "pedicure",
+        "biped"
+      ],
+      "sourceIds": [
+        "ls-pes",
+        "wik-pedal"
+      ]
+    },
+    {
+      "word": "pedestrian",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "步行的人",
+      "meaningBridgeZh": "pedestrian 与 pes, pedis“脚”相关，最初围绕“步行、徒步”展开，因此表示“行人；步行的”。",
+      "parts": [
+        {
+          "text": "ped",
+          "role": "root",
+          "meaningEn": "foot",
+          "meaningZh": "脚；步行",
+          "morphemeId": "ped"
+        }
+      ],
+      "rootStoryIds": [
+        "ped"
+      ],
+      "relatedWords": [
+        "pedal",
+        "pedicure",
+        "biped"
+      ],
+      "sourceIds": [
+        "ls-pes",
+        "wik-pedestrian"
+      ]
+    },
+    {
+      "word": "pedicure",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "足部护理",
+      "meaningBridgeZh": "pedicure 中 ped- 指“脚”，因此整个词围绕足部护理展开。",
+      "parts": [
+        {
+          "text": "ped",
+          "role": "root",
+          "meaningEn": "foot",
+          "meaningZh": "脚；足部",
+          "morphemeId": "ped"
+        }
+      ],
+      "rootStoryIds": [
+        "ped"
+      ],
+      "relatedWords": [
+        "pedal",
+        "pedestrian",
+        "biped"
+      ],
+      "sourceIds": [
+        "ls-pes",
+        "wik-pedicure"
+      ]
+    },
+    {
+      "word": "biped",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "两只脚的动物",
+      "meaningBridgeZh": "bi- 表示“两个”，ped 表示“脚”。两只脚行走的，就是 biped“两足动物”。",
+      "parts": [
+        {
+          "text": "bi-",
+          "role": "prefix",
+          "meaningEn": "two",
+          "meaningZh": "两个"
+        },
+        {
+          "text": "ped",
+          "role": "root",
+          "meaningEn": "foot",
+          "meaningZh": "脚；足",
+          "morphemeId": "ped"
+        }
+      ],
+      "rootStoryIds": [
+        "ped"
+      ],
+      "relatedWords": [
+        "pedal",
+        "pedestrian",
+        "pedicure"
+      ],
+      "sourceIds": [
+        "ls-pes",
+        "wik-biped"
+      ]
+    },
+    {
+      "word": "lucid",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "有光、清晰可见",
+      "meaningBridgeZh": "lucid 与 lux“光”同源，从“有光、明亮”进一步发展成“清晰易懂”。",
+      "parts": [
+        {
+          "text": "luc",
+          "role": "root",
+          "meaningEn": "light",
+          "meaningZh": "光；明亮",
+          "morphemeId": "luc"
+        }
+      ],
+      "rootStoryIds": [
+        "luc"
+      ],
+      "relatedWords": [
+        "illuminate",
+        "translucent",
+        "luminous"
+      ],
+      "sourceIds": [
+        "ls-lux",
+        "wik-lucid"
+      ]
+    },
+    {
+      "word": "illuminate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把光照进去",
+      "meaningBridgeZh": "illuminate 与 lumen“光”相关，核心就是“让某物被光照亮”，再引申为“阐明”。",
+      "parts": [
+        {
+          "text": "lum",
+          "role": "root",
+          "meaningEn": "light",
+          "meaningZh": "光；照亮",
+          "morphemeId": "luc"
+        }
+      ],
+      "rootStoryIds": [
+        "luc"
+      ],
+      "relatedWords": [
+        "lucid",
+        "translucent",
+        "luminous"
+      ],
+      "sourceIds": [
+        "ls-lux",
+        "wik-illuminate"
+      ]
+    },
+    {
+      "word": "translucent",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "让光穿过去",
+      "meaningBridgeZh": "trans- 表示“穿过”，luc 与“光”有关。能让光穿过去但并非完全透明，就是 translucent“半透明的”。",
+      "parts": [
+        {
+          "text": "trans-",
+          "role": "prefix",
+          "meaningEn": "across; through",
+          "meaningZh": "穿过"
+        },
+        {
+          "text": "luc",
+          "role": "root",
+          "meaningEn": "light",
+          "meaningZh": "光；明亮",
+          "morphemeId": "luc"
+        }
+      ],
+      "rootStoryIds": [
+        "luc"
+      ],
+      "relatedWords": [
+        "lucid",
+        "illuminate",
+        "luminous"
+      ],
+      "sourceIds": [
+        "ls-lux",
+        "wik-translucent"
+      ]
+    },
+    {
+      "word": "luminous",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "发光、充满光的",
+      "meaningBridgeZh": "luminous 来自 lumen“光”，因此表示“发光的；明亮的”。",
+      "parts": [
+        {
+          "text": "lum",
+          "role": "root",
+          "meaningEn": "light",
+          "meaningZh": "光；明亮",
+          "morphemeId": "luc"
+        }
+      ],
+      "rootStoryIds": [
+        "luc"
+      ],
+      "relatedWords": [
+        "lucid",
+        "illuminate",
+        "translucent"
+      ],
+      "sourceIds": [
+        "ls-lux",
+        "wik-luminous"
+      ]
+    },
+    {
+      "word": "final",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "到达终点或边界的",
+      "meaningBridgeZh": "final 与 finis“终点、边界”直接相关，因此就是“最后的、最终的”。",
+      "parts": [
+        {
+          "text": "fin",
+          "role": "root",
+          "meaningEn": "end; boundary",
+          "meaningZh": "结束；边界",
+          "morphemeId": "fin"
+        }
+      ],
+      "rootStoryIds": [
+        "fin"
+      ],
+      "relatedWords": [
+        "finish",
+        "define",
+        "infinite"
+      ],
+      "sourceIds": [
+        "ls-finis",
+        "wik-final"
+      ]
+    },
+    {
+      "word": "finish",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "到达终点",
+      "meaningBridgeZh": "finish 经由法语追溯到 Latin finire“结束”，而 finire 来自 finis“终点、边界”，所以核心就是“做到终点”。",
+      "parts": [
+        {
+          "text": "fin",
+          "role": "root-association",
+          "meaningEn": "end",
+          "meaningZh": "结束；完成",
+          "morphemeId": "fin"
+        }
+      ],
+      "rootStoryIds": [
+        "fin"
+      ],
+      "relatedWords": [
+        "final",
+        "define",
+        "infinite"
+      ],
+      "sourceIds": [
+        "ls-finis",
+        "wik-finish"
+      ]
+    },
+    {
+      "word": "define",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把边界划清楚",
+      "meaningBridgeZh": "de- 与 finire“划定边界、结束”结合，define 的核心可理解为“把一个概念的边界说清楚”，即“定义”。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "fully; down",
+          "meaningZh": "明确；完整"
+        },
+        {
+          "text": "fin",
+          "role": "root",
+          "meaningEn": "boundary; end",
+          "meaningZh": "边界；界限",
+          "morphemeId": "fin"
+        }
+      ],
+      "rootStoryIds": [
+        "fin"
+      ],
+      "relatedWords": [
+        "final",
+        "finish",
+        "infinite"
+      ],
+      "sourceIds": [
+        "ls-finis",
+        "wik-define"
+      ]
+    },
+    {
+      "word": "infinite",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "没有边界",
+      "meaningBridgeZh": "in- 表示否定，finite 与 finis“边界”相关。没有边界，就是 infinite“无限的”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "not",
+          "meaningZh": "不；没有"
+        },
+        {
+          "text": "fin",
+          "role": "root",
+          "meaningEn": "boundary; end",
+          "meaningZh": "边界；终点",
+          "morphemeId": "fin"
+        }
+      ],
+      "rootStoryIds": [
+        "fin"
+      ],
+      "relatedWords": [
+        "final",
+        "finish",
+        "define"
+      ],
+      "sourceIds": [
+        "ls-finis",
+        "wik-infinite"
+      ]
+    },
+    {
+      "word": "progress",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "向前走",
+      "meaningBridgeZh": "pro- 表示“向前”，gress 来自 gradi“行走”。向前走，就是 progress“进步；进展”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward",
+          "meaningZh": "向前"
+        },
+        {
+          "text": "gress",
+          "role": "root",
+          "meaningEn": "step; walk",
+          "meaningZh": "步；行进",
+          "morphemeId": "grad"
+        }
+      ],
+      "rootStoryIds": [
+        "grad"
+      ],
+      "relatedWords": [
+        "regress",
+        "congress",
+        "gradual"
+      ],
+      "sourceIds": [
+        "ls-gradior",
+        "wik-progress"
+      ]
+    },
+    {
+      "word": "regress",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "往回走",
+      "meaningBridgeZh": "re- 表示“回、向后”，gress 表示“行走”。往回走，就是 regress“退步；回归”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "gress",
+          "role": "root",
+          "meaningEn": "step; walk",
+          "meaningZh": "步；行进",
+          "morphemeId": "grad"
+        }
+      ],
+      "rootStoryIds": [
+        "grad"
+      ],
+      "relatedWords": [
+        "progress",
+        "congress",
+        "gradual"
+      ],
+      "sourceIds": [
+        "ls-gradior",
+        "wik-regress"
+      ]
+    },
+    {
+      "word": "congress",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "走到一起",
+      "meaningBridgeZh": "congress 经由 Latin congressus 与 congredi“走到一起、相遇”相关，因此历史核心是“聚到一起”，后来成为“大会、国会”。",
+      "parts": [
+        {
+          "text": "gress",
+          "role": "root-association",
+          "meaningEn": "step; go",
+          "meaningZh": "行走；汇合",
+          "morphemeId": "grad"
+        }
+      ],
+      "rootStoryIds": [
+        "grad"
+      ],
+      "relatedWords": [
+        "progress",
+        "regress",
+        "gradual"
+      ],
+      "sourceIds": [
+        "ls-gradior",
+        "wik-congress"
+      ]
+    },
+    {
+      "word": "gradual",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "一步一步的",
+      "meaningBridgeZh": "gradual 与 gradus“步、台阶”直接相关，所以就是“一步一步变化的、渐进的”。",
+      "parts": [
+        {
+          "text": "grad",
+          "role": "root",
+          "meaningEn": "step",
+          "meaningZh": "步；阶段",
+          "morphemeId": "grad"
+        }
+      ],
+      "rootStoryIds": [
+        "grad"
+      ],
+      "relatedWords": [
+        "progress",
+        "regress",
+        "congress"
+      ],
+      "sourceIds": [
+        "ls-gradior",
+        "wik-gradual"
+      ]
+    },
+    {
+      "word": "precede",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "走在前面",
+      "meaningBridgeZh": "pre- 表示“在前”，cede 表示“走”。走在别人前面，就是 precede“先于；在……之前”。",
+      "parts": [
+        {
+          "text": "pre-",
+          "role": "prefix",
+          "meaningEn": "before",
+          "meaningZh": "在前"
+        },
+        {
+          "text": "cede",
+          "role": "root",
+          "meaningEn": "go; move",
+          "meaningZh": "走；移动",
+          "morphemeId": "ced"
+        }
+      ],
+      "rootStoryIds": [
+        "ced"
+      ],
+      "relatedWords": [
+        "proceed",
+        "recede",
+        "access"
+      ],
+      "sourceIds": [
+        "ls-cedo",
+        "wik-precede"
+      ]
+    },
+    {
+      "word": "proceed",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "向前走",
+      "meaningBridgeZh": "pro- 表示“向前”，ceed 来自 cedere“走”。继续向前走，就是 proceed“继续进行”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward",
+          "meaningZh": "向前"
+        },
+        {
+          "text": "ceed",
+          "role": "root",
+          "meaningEn": "go; move",
+          "meaningZh": "走；移动",
+          "morphemeId": "ced"
+        }
+      ],
+      "rootStoryIds": [
+        "ced"
+      ],
+      "relatedWords": [
+        "precede",
+        "recede",
+        "access"
+      ],
+      "sourceIds": [
+        "ls-cedo",
+        "wik-proceed"
+      ]
+    },
+    {
+      "word": "recede",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "向后退",
+      "meaningBridgeZh": "re- 表示“回、向后”，cede 表示“走”。向后走，就是 recede“后退；退去”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "cede",
+          "role": "root",
+          "meaningEn": "go; move",
+          "meaningZh": "走；移动",
+          "morphemeId": "ced"
+        }
+      ],
+      "rootStoryIds": [
+        "ced"
+      ],
+      "relatedWords": [
+        "precede",
+        "proceed",
+        "access"
+      ],
+      "sourceIds": [
+        "ls-cedo",
+        "wik-recede"
+      ]
+    },
+    {
+      "word": "access",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "走近、进入某处",
+      "meaningBridgeZh": "access 来自 Latin accedere“走近、接近”，与 cedere“走”同源。现代拼写变成 cess，因此更适合作为 CED/CESS 的词源关联理解。",
+      "parts": [
+        {
+          "text": "cess",
+          "role": "root-association",
+          "meaningEn": "go; approach",
+          "meaningZh": "走近；进入",
+          "morphemeId": "ced"
+        }
+      ],
+      "rootStoryIds": [
+        "ced"
+      ],
+      "relatedWords": [
+        "precede",
+        "proceed",
+        "recede"
+      ],
+      "sourceIds": [
+        "ls-cedo",
+        "wik-access"
+      ]
+    },
+    {
+      "word": "include",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "关在里面",
+      "meaningBridgeZh": "in- 表示“进入、在内”，clude 来自 claudere“关闭”。把某物关在范围里面，就是 include“包含”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "in",
+          "meaningZh": "在内"
+        },
+        {
+          "text": "clude",
+          "role": "root",
+          "meaningEn": "close; shut",
+          "meaningZh": "关闭；封住",
+          "morphemeId": "clud"
+        }
+      ],
+      "rootStoryIds": [
+        "clud"
+      ],
+      "relatedWords": [
+        "exclude",
+        "conclude",
+        "seclude"
+      ],
+      "sourceIds": [
+        "ls-claudo",
+        "wik-include"
+      ]
+    },
+    {
+      "word": "exclude",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "关在外面",
+      "meaningBridgeZh": "ex- 表示“向外”，clude 表示“关闭”。把某物关在范围外，就是 exclude“排除”。",
+      "parts": [
+        {
+          "text": "ex-",
+          "role": "prefix",
+          "meaningEn": "out",
+          "meaningZh": "向外"
+        },
+        {
+          "text": "clude",
+          "role": "root",
+          "meaningEn": "close; shut",
+          "meaningZh": "关闭；封住",
+          "morphemeId": "clud"
+        }
+      ],
+      "rootStoryIds": [
+        "clud"
+      ],
+      "relatedWords": [
+        "include",
+        "conclude",
+        "seclude"
+      ],
+      "sourceIds": [
+        "ls-claudo",
+        "wik-exclude"
+      ]
+    },
+    {
+      "word": "conclude",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把讨论收拢并关闭",
+      "meaningBridgeZh": "conclude 与 concludere“围住、关闭”相关，因此“把事情关起来、收束起来”就发展成“结束；得出结论”。",
+      "parts": [
+        {
+          "text": "clud",
+          "role": "root-association",
+          "meaningEn": "close; shut",
+          "meaningZh": "关闭；收束",
+          "morphemeId": "clud"
+        }
+      ],
+      "rootStoryIds": [
+        "clud"
+      ],
+      "relatedWords": [
+        "include",
+        "exclude",
+        "seclude"
+      ],
+      "sourceIds": [
+        "ls-claudo",
+        "wik-conclude"
+      ]
+    },
+    {
+      "word": "seclude",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "把某人关到一边",
+      "meaningBridgeZh": "se- 表示“分开”，clude 表示“关闭”。把某人隔离到一边，就是 seclude“使隔离；使隐居”。",
+      "parts": [
+        {
+          "text": "se-",
+          "role": "prefix",
+          "meaningEn": "apart",
+          "meaningZh": "分开"
+        },
+        {
+          "text": "clude",
+          "role": "root",
+          "meaningEn": "close; shut",
+          "meaningZh": "关闭；隔开",
+          "morphemeId": "clud"
+        }
+      ],
+      "rootStoryIds": [
+        "clud"
+      ],
+      "relatedWords": [
+        "include",
+        "exclude",
+        "conclude"
+      ],
+      "sourceIds": [
+        "ls-claudo",
+        "wik-seclude"
+      ]
+    },
+    {
+      "word": "ligature",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把东西绑在一起的东西",
+      "meaningBridgeZh": "ligature 与 ligare“绑、系”直接相关，因此可以表示连接、结扎或连字。",
+      "parts": [
+        {
+          "text": "lig",
+          "role": "root",
+          "meaningEn": "bind; tie",
+          "meaningZh": "绑；连接",
+          "morphemeId": "lig"
+        }
+      ],
+      "rootStoryIds": [
+        "lig"
+      ],
+      "relatedWords": [
+        "ligament",
+        "oblige",
+        "obligation"
+      ],
+      "sourceIds": [
+        "ls-ligo",
+        "wik-ligature"
+      ]
+    },
+    {
+      "word": "ligament",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把骨骼连接在一起的带状组织",
+      "meaningBridgeZh": "ligament 来自 ligare“绑、连接”词族，因此非常贴合“把不同部分连接在一起”的核心动作。",
+      "parts": [
+        {
+          "text": "lig",
+          "role": "root",
+          "meaningEn": "bind; tie",
+          "meaningZh": "绑；连接",
+          "morphemeId": "lig"
+        }
+      ],
+      "rootStoryIds": [
+        "lig"
+      ],
+      "relatedWords": [
+        "ligature",
+        "oblige",
+        "obligation"
+      ],
+      "sourceIds": [
+        "ls-ligo",
+        "wik-ligament"
+      ]
+    },
+    {
+      "word": "oblige",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把某人绑定在某种责任上",
+      "meaningBridgeZh": "oblige 来自 Latin obligare“绑住、约束”，后来从真实的“绑定”发展成“使有义务”。",
+      "parts": [
+        {
+          "text": "lig",
+          "role": "root-association",
+          "meaningEn": "bind",
+          "meaningZh": "绑定；约束",
+          "morphemeId": "lig"
+        }
+      ],
+      "rootStoryIds": [
+        "lig"
+      ],
+      "relatedWords": [
+        "ligature",
+        "ligament",
+        "obligation"
+      ],
+      "sourceIds": [
+        "ls-ligo",
+        "wik-oblige"
+      ]
+    },
+    {
+      "word": "obligation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "一种把人约束住的责任",
+      "meaningBridgeZh": "obligation 与 obligare“绑定、约束”直接相关，所以“义务”可以理解为一种把你和责任绑定在一起的关系。",
+      "parts": [
+        {
+          "text": "lig",
+          "role": "root-association",
+          "meaningEn": "bind",
+          "meaningZh": "绑定；约束",
+          "morphemeId": "lig"
+        }
+      ],
+      "rootStoryIds": [
+        "lig"
+      ],
+      "relatedWords": [
+        "ligature",
+        "ligament",
+        "oblige"
+      ],
+      "sourceIds": [
+        "ls-ligo",
+        "wik-obligation"
+      ]
+    },
+    {
+      "word": "current",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "正在流动、运行的",
+      "meaningBridgeZh": "current 与 currere“跑”同源，可以把它理解成“正在跑、正在流动的东西”，因此既能表示水流、电流，也能表示“当前的”。",
+      "parts": [
+        {
+          "text": "curr",
+          "role": "root",
+          "meaningEn": "run",
+          "meaningZh": "跑；运行",
+          "morphemeId": "curr"
+        }
+      ],
+      "rootStoryIds": [
+        "curr"
+      ],
+      "relatedWords": [
+        "course",
+        "occur",
+        "recur"
+      ],
+      "sourceIds": [
+        "ls-curro",
+        "wik-current"
+      ]
+    },
+    {
+      "word": "course",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "运行经过的路线",
+      "meaningBridgeZh": "course 来自 Latin cursus“跑过的路程”，而 cursus 来自 currere“跑”，所以它可以表示路线、过程或课程。",
+      "parts": [
+        {
+          "text": "curs",
+          "role": "root-association",
+          "meaningEn": "run; course",
+          "meaningZh": "运行；路线",
+          "morphemeId": "curr"
+        }
+      ],
+      "rootStoryIds": [
+        "curr"
+      ],
+      "relatedWords": [
+        "current",
+        "occur",
+        "recur"
+      ],
+      "sourceIds": [
+        "ls-curro",
+        "wik-course"
+      ]
+    },
+    {
+      "word": "occur",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "跑到面前、发生",
+      "meaningBridgeZh": "occur 来自 Latin occurrere“跑来相遇、出现”，与 currere“跑”同源，因此现代“发生、出现”可以理解成“事情跑到眼前”。",
+      "parts": [
+        {
+          "text": "curr",
+          "role": "root-association",
+          "meaningEn": "run",
+          "meaningZh": "运行；出现",
+          "morphemeId": "curr"
+        }
+      ],
+      "rootStoryIds": [
+        "curr"
+      ],
+      "relatedWords": [
+        "current",
+        "course",
+        "recur"
+      ],
+      "sourceIds": [
+        "ls-curro",
+        "wik-occur"
+      ]
+    },
+    {
+      "word": "recur",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "再次跑回来",
+      "meaningBridgeZh": "re- 表示“再次、回来”，cur 来自 currere“跑”。再次回来发生，就是 recur“复发；再次出现”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "again; back",
+          "meaningZh": "再次；回来"
+        },
+        {
+          "text": "cur",
+          "role": "root",
+          "meaningEn": "run",
+          "meaningZh": "跑；运行",
+          "morphemeId": "curr"
+        }
+      ],
+      "rootStoryIds": [
+        "curr"
+      ],
+      "relatedWords": [
+        "current",
+        "course",
+        "occur"
+      ],
+      "sourceIds": [
+        "ls-curro",
+        "wik-recur"
+      ]
+    },
+    {
+      "word": "generate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "产生新的事物",
+      "meaningBridgeZh": "generate 与 gignere“产生、生育”同源，因此核心就是“产生、生成”。",
+      "parts": [
+        {
+          "text": "gen",
+          "role": "root",
+          "meaningEn": "produce; beget",
+          "meaningZh": "产生；生成",
+          "morphemeId": "gen"
+        }
+      ],
+      "rootStoryIds": [
+        "gen"
+      ],
+      "relatedWords": [
+        "generation",
+        "genetic",
+        "progeny"
+      ],
+      "sourceIds": [
+        "ls-gigno",
+        "wik-generate"
+      ]
+    },
+    {
+      "word": "generation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "产生出来的一代",
+      "meaningBridgeZh": "generation 与 generate 同根，可以理解成“被产生出来的一代人或一批事物”。",
+      "parts": [
+        {
+          "text": "gen",
+          "role": "root",
+          "meaningEn": "produce; kind",
+          "meaningZh": "产生；世代",
+          "morphemeId": "gen"
+        }
+      ],
+      "rootStoryIds": [
+        "gen"
+      ],
+      "relatedWords": [
+        "generate",
+        "genetic",
+        "progeny"
+      ],
+      "sourceIds": [
+        "ls-gigno",
+        "wik-generation"
+      ]
+    },
+    {
+      "word": "genetic",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "与出生、种类来源有关的",
+      "meaningBridgeZh": "genetic 经由 Greek/Latin 词源网络与“产生、出生”相关，因此现代表示“遗传的、基因的”。",
+      "parts": [
+        {
+          "text": "gen",
+          "role": "root-association",
+          "meaningEn": "birth; origin",
+          "meaningZh": "出生；来源",
+          "morphemeId": "gen"
+        }
+      ],
+      "rootStoryIds": [
+        "gen"
+      ],
+      "relatedWords": [
+        "generate",
+        "generation",
+        "progeny"
+      ],
+      "sourceIds": [
+        "ls-gigno",
+        "wik-genetic"
+      ]
+    },
+    {
+      "word": "progeny",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "向前产生出来的后代",
+      "meaningBridgeZh": "progeny 来自 Latin progenies“后代”，与 gignere“产生、生育”相关，因此最核心就是“产生出来的下一代”。",
+      "parts": [
+        {
+          "text": "gen",
+          "role": "root-association",
+          "meaningEn": "beget; produce",
+          "meaningZh": "产生；生育",
+          "morphemeId": "gen"
+        }
+      ],
+      "rootStoryIds": [
+        "gen"
+      ],
+      "relatedWords": [
+        "generate",
+        "generation",
+        "genetic"
+      ],
+      "sourceIds": [
+        "ls-gigno",
+        "wik-progeny"
+      ]
+    },
+    {
+      "word": "revive",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "重新活过来",
+      "meaningBridgeZh": "re- 表示“再次”，vive 来自 vivere“活”。再次活起来，就是 revive“复苏；使恢复活力”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "again",
+          "meaningZh": "再次"
+        },
+        {
+          "text": "vive",
+          "role": "root",
+          "meaningEn": "live",
+          "meaningZh": "活；生命",
+          "morphemeId": "viv"
+        }
+      ],
+      "rootStoryIds": [
+        "viv"
+      ],
+      "relatedWords": [
+        "survive",
+        "vital",
+        "vivid"
+      ],
+      "sourceIds": [
+        "ls-vivo",
+        "wik-revive"
+      ]
+    },
+    {
+      "word": "survive",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "在某事之后仍然活着",
+      "meaningBridgeZh": "survive 经由 Latin supervivere，与 vivere“活”同源，核心就是“经历之后仍活着、继续存在”。",
+      "parts": [
+        {
+          "text": "vive",
+          "role": "root-association",
+          "meaningEn": "live",
+          "meaningZh": "活；继续存在",
+          "morphemeId": "viv"
+        }
+      ],
+      "rootStoryIds": [
+        "viv"
+      ],
+      "relatedWords": [
+        "revive",
+        "vital",
+        "vivid"
+      ],
+      "sourceIds": [
+        "ls-vivo",
+        "wik-survive"
+      ]
+    },
+    {
+      "word": "vital",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "与生命直接相关的",
+      "meaningBridgeZh": "vital 来自 vita“生命”，所以表示“生命的；至关重要的”。",
+      "parts": [
+        {
+          "text": "vit",
+          "role": "root",
+          "meaningEn": "life",
+          "meaningZh": "生命；活力",
+          "morphemeId": "viv"
+        }
+      ],
+      "rootStoryIds": [
+        "viv"
+      ],
+      "relatedWords": [
+        "revive",
+        "survive",
+        "vivid"
+      ],
+      "sourceIds": [
+        "ls-vivo",
+        "wik-vital"
+      ]
+    },
+    {
+      "word": "vivid",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "像活着一样鲜明",
+      "meaningBridgeZh": "vivid 与 vivus“活着的”相关，因此从“充满生命力”发展出“鲜明、生动”的含义。",
+      "parts": [
+        {
+          "text": "viv",
+          "role": "root",
+          "meaningEn": "live; alive",
+          "meaningZh": "活；有生命力",
+          "morphemeId": "viv"
+        }
+      ],
+      "rootStoryIds": [
+        "viv"
+      ],
+      "relatedWords": [
+        "revive",
+        "survive",
+        "vital"
+      ],
+      "sourceIds": [
+        "ls-vivo",
+        "wik-vivid"
+      ]
+    },
+    {
+      "word": "animal",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "有生命、会呼吸的生物",
+      "meaningBridgeZh": "animal 来自 Latin animal“有生命、会呼吸的生物”，与 anima“呼吸、生命”直接相关。",
+      "parts": [
+        {
+          "text": "anim",
+          "role": "root",
+          "meaningEn": "life; breath",
+          "meaningZh": "生命；呼吸",
+          "morphemeId": "anim"
+        }
+      ],
+      "rootStoryIds": [
+        "anim"
+      ],
+      "relatedWords": [
+        "animate",
+        "animation",
+        "inanimate"
+      ],
+      "sourceIds": [
+        "ls-anima",
+        "wik-animal"
+      ]
+    },
+    {
+      "word": "animate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "赋予生命、使活起来",
+      "meaningBridgeZh": "animate 来自 animare“赋予生命、使有精神”，而 animare 来自 anima“生命、呼吸”。",
+      "parts": [
+        {
+          "text": "anim",
+          "role": "root",
+          "meaningEn": "life; spirit",
+          "meaningZh": "生命；精神",
+          "morphemeId": "anim"
+        }
+      ],
+      "rootStoryIds": [
+        "anim"
+      ],
+      "relatedWords": [
+        "animal",
+        "animation",
+        "inanimate"
+      ],
+      "sourceIds": [
+        "ls-anima",
+        "wik-animate"
+      ]
+    },
+    {
+      "word": "animation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "使事物活起来的过程",
+      "meaningBridgeZh": "animation 与 animate 同源，本质上就是“使静止的东西获得生命感或运动感”。",
+      "parts": [
+        {
+          "text": "anim",
+          "role": "root",
+          "meaningEn": "life; spirit",
+          "meaningZh": "生命；活力",
+          "morphemeId": "anim"
+        }
+      ],
+      "rootStoryIds": [
+        "anim"
+      ],
+      "relatedWords": [
+        "animal",
+        "animate",
+        "inanimate"
+      ],
+      "sourceIds": [
+        "ls-anima",
+        "wik-animation"
+      ]
+    },
+    {
+      "word": "inanimate",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "没有生命的",
+      "meaningBridgeZh": "in- 表示否定，animate 与 anima“生命”相关，所以 inanimate 就是“没有生命的；无生命的”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "not",
+          "meaningZh": "不；没有"
+        },
+        {
+          "text": "anim",
+          "role": "root",
+          "meaningEn": "life",
+          "meaningZh": "生命",
+          "morphemeId": "anim"
+        }
+      ],
+      "rootStoryIds": [
+        "anim"
+      ],
+      "relatedWords": [
+        "animal",
+        "animate",
+        "animation"
+      ],
+      "sourceIds": [
+        "ls-anima",
+        "wik-inanimate"
       ]
     }
   ]
