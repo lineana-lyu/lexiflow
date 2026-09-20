@@ -66,14 +66,28 @@ function priorityCompare(a, b) {
   return String(a.word).localeCompare(String(b.word));
 }
 
+function exchangeLemma(value) {
+  for (const part of clean(value).split("/")) {
+    const index = part.indexOf(":");
+    if (index <= 0) continue;
+    const type = part.slice(0, index).trim();
+    const form = part.slice(index + 1).trim().toLowerCase();
+    if (type === "0" && alphaWord(form)) return form;
+  }
+  return "";
+}
+
 function examRows(db, tag) {
   return db.prepare(`
-    SELECT word, tag, frq, bnc, collins, oxford
+    SELECT word, tag, frq, bnc, collins, oxford, exchange
     FROM entries
     WHERE (' ' || lower(tag) || ' ') LIKE ?
   `).all(`% ${tag.toLowerCase()} %`)
     .filter(row => alphaWord(row.word))
-    .map(row => ({ ...row, word: clean(row.word).toLowerCase() }))
+    .map(row => {
+      const word = clean(row.word).toLowerCase();
+      return { ...row, word, lemma: exchangeLemma(row.exchange) || word };
+    })
     .sort(priorityCompare);
 }
 
@@ -91,9 +105,13 @@ function percent(part, whole) {
   return Number((part / whole * 100).toFixed(1));
 }
 
+function isCovered(row, covered) {
+  return covered.has(row.word) || covered.has(row.lemma);
+}
+
 function cohort(rows, covered, limit) {
   const scoped = rows.slice(0, Math.min(limit, rows.length));
-  const matched = scoped.filter(row => covered.has(row.word));
+  const matched = scoped.filter(row => isCovered(row, covered));
   return {
     size: scoped.length,
     covered: matched.length,
@@ -102,17 +120,20 @@ function cohort(rows, covered, limit) {
 }
 
 function auditExam(rows, covered, { top, backlog }) {
-  const matched = rows.filter(row => covered.has(row.word));
-  const uncovered = rows.filter(row => !covered.has(row.word));
+  const matched = rows.filter(row => isCovered(row, covered));
+  const uncovered = rows.filter(row => !isCovered(row, covered));
+  const viaLemma = matched.filter(row => !covered.has(row.word) && covered.has(row.lemma));
   return {
     totalTaggedWords: rows.length,
     coveredWords: matched.length,
+    coveredViaLemma: viaLemma.length,
     coveragePct: percent(matched.length, rows.length),
     top100: cohort(rows, covered, 100),
     top300: cohort(rows, covered, 300),
     topN: cohort(rows, covered, top),
     backlog: uncovered.slice(0, backlog).map(row => ({
       word: row.word,
+      lemma: row.lemma !== row.word ? row.lemma : "",
       frq: Number(row.frq || 0),
       bnc: Number(row.bnc || 0),
       collins: Number(row.collins || 0),
@@ -144,8 +165,8 @@ function buildAudit(ecdictPath, morphologyPath, options) {
       methodology: {
         examSource: "ECDICT tag tokens: cet4 / cet6",
         ranking: "positive frq ascending, then positive bnc ascending, then Collins stars and Oxford 3000 flags",
-        coverageDefinition: "exact word has a non-uncertain LexiFlow morphology record",
-        backlogDefinition: "highest-ranked uncovered exam-tagged words; candidates only, not automatic morphology eligibility",
+        coverageDefinition: "surface word or ECDICT exchange lemma has a non-uncertain LexiFlow morphology record, matching runtime lookup behavior",
+        backlogDefinition: "highest-ranked uncovered exam-tagged words after lemma resolution; candidates only, not automatic morphology eligibility",
       },
       morphology: {
         words: covered.size,
@@ -170,9 +191,9 @@ function scoreLine(label, value) {
 function backlogTable(items) {
   if (!items.length) return "_No uncovered candidates in this slice._";
   return [
-    "| Word | FRQ rank | BNC rank | Collins | Oxford 3000 |",
-    "| --- | ---: | ---: | ---: | ---: |",
-    ...items.map(item => `| ${item.word} | ${item.frq || "—"} | ${item.bnc || "—"} | ${item.collins || "—"} | ${item.oxford ? "yes" : "—"} |`),
+    "| Word | Lemma | FRQ rank | BNC rank | Collins | Oxford 3000 |",
+    "| --- | --- | ---: | ---: | ---: | ---: |",
+    ...items.map(item => `| ${item.word} | ${item.lemma || "—"} | ${item.frq || "—"} | ${item.bnc || "—"} | ${item.collins || "—"} | ${item.oxford ? "yes" : "—"} |`),
   ].join("\n");
 }
 
@@ -195,7 +216,7 @@ function markdown(audit, top) {
     blocks.push(
       `## ${label}`,
       "",
-      `Overall exact-card coverage: **${item.coveredWords} / ${item.totalTaggedWords} (${item.coveragePct}%)**.`,
+      `Runtime-aligned coverage: **${item.coveredWords} / ${item.totalTaggedWords} (${item.coveragePct}%)**; ${item.coveredViaLemma} are inherited through ECDICT lemma resolution.`,
       "",
       "| Priority slice | Covered | Coverage |",
       "| --- | ---: | ---: |",
@@ -239,6 +260,8 @@ if (require.main === module) {
 
 module.exports = {
   parseArgs,
+  exchangeLemma,
+  isCovered,
   priorityCompare,
   buildAudit,
   markdown,
