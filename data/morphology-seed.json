@@ -1576,6 +1576,462 @@
       "headword": "γένεσις",
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n21872/",
       "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-nascor",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "nascor / natus",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=nascor",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-socius",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "socius",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=socius",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-communis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "communis",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=communis",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-sedeo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "sedeo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=sedeo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-fero",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "fero",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=fero",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-quaero",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "quaero",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=quaero",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-creo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "creo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=creo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-pungo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "pungo",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pungo",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-magnus",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "magnus / maior",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=magnus",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-fortis",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "fortis",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=fortis",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-state",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "state",
+      "url": "https://en.wiktionary.org/wiki/state",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-provide",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "provide",
+      "url": "https://en.wiktionary.org/wiki/provide",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-continue",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "continue",
+      "url": "https://en.wiktionary.org/wiki/continue",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-process",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "process",
+      "url": "https://en.wiktionary.org/wiki/process",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-effect",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "effect",
+      "url": "https://en.wiktionary.org/wiki/effect",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-nation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "nation",
+      "url": "https://en.wiktionary.org/wiki/nation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-national",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "national",
+      "url": "https://en.wiktionary.org/wiki/national",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-native",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "native",
+      "url": "https://en.wiktionary.org/wiki/native",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-nature",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "nature",
+      "url": "https://en.wiktionary.org/wiki/nature",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-social",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "social",
+      "url": "https://en.wiktionary.org/wiki/social",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-society",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "society",
+      "url": "https://en.wiktionary.org/wiki/society",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-associate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "associate",
+      "url": "https://en.wiktionary.org/wiki/associate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sociable",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sociable",
+      "url": "https://en.wiktionary.org/wiki/sociable",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-community",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "community",
+      "url": "https://en.wiktionary.org/wiki/community",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-communicate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "communicate",
+      "url": "https://en.wiktionary.org/wiki/communicate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-common",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "common",
+      "url": "https://en.wiktionary.org/wiki/common",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-communion",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "communion",
+      "url": "https://en.wiktionary.org/wiki/communion",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-president",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "president",
+      "url": "https://en.wiktionary.org/wiki/president",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-reside",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "reside",
+      "url": "https://en.wiktionary.org/wiki/reside",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-resident",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "resident",
+      "url": "https://en.wiktionary.org/wiki/resident",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-sedentary",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "sedentary",
+      "url": "https://en.wiktionary.org/wiki/sedentary",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-session",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "session",
+      "url": "https://en.wiktionary.org/wiki/session",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-offer",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "offer",
+      "url": "https://en.wiktionary.org/wiki/offer",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-refer",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "refer",
+      "url": "https://en.wiktionary.org/wiki/refer",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-transfer",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "transfer",
+      "url": "https://en.wiktionary.org/wiki/transfer",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-prefer",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "prefer",
+      "url": "https://en.wiktionary.org/wiki/prefer",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-differ",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "differ",
+      "url": "https://en.wiktionary.org/wiki/differ",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-require",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "require",
+      "url": "https://en.wiktionary.org/wiki/require",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-inquire",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "inquire",
+      "url": "https://en.wiktionary.org/wiki/inquire",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-acquire",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "acquire",
+      "url": "https://en.wiktionary.org/wiki/acquire",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-query",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "query",
+      "url": "https://en.wiktionary.org/wiki/query",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-create",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "create",
+      "url": "https://en.wiktionary.org/wiki/create",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-creative",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "creative",
+      "url": "https://en.wiktionary.org/wiki/creative",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-creature",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "creature",
+      "url": "https://en.wiktionary.org/wiki/creature",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-recreate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "recreate",
+      "url": "https://en.wiktionary.org/wiki/recreate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-point",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "point",
+      "url": "https://en.wiktionary.org/wiki/point",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-punctuation",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "punctuation",
+      "url": "https://en.wiktionary.org/wiki/punctuation",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-puncture",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "puncture",
+      "url": "https://en.wiktionary.org/wiki/puncture",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-pungent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "pungent",
+      "url": "https://en.wiktionary.org/wiki/pungent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-major",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "major",
+      "url": "https://en.wiktionary.org/wiki/major",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-majority",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "majority",
+      "url": "https://en.wiktionary.org/wiki/majority",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-magnificent",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "magnificent",
+      "url": "https://en.wiktionary.org/wiki/magnificent",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-magnitude",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "magnitude",
+      "url": "https://en.wiktionary.org/wiki/magnitude",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-force",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "force",
+      "url": "https://en.wiktionary.org/wiki/force",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-fortify",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "fortify",
+      "url": "https://en.wiktionary.org/wiki/fortify",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-reinforce",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "reinforce",
+      "url": "https://en.wiktionary.org/wiki/reinforce",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-effort",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "effort",
+      "url": "https://en.wiktionary.org/wiki/effort",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "morphemes": [
@@ -2072,6 +2528,126 @@
       "narrativeZh": "ANIM 来自拉丁语 anima“呼吸、生命、灵魂”。古人把呼吸和生命直接联系起来，所以 animal、animate、animation 等词都带有“有生命、使活起来”的感觉。",
       "sourceIds": [
         "ls-anima"
+      ]
+    },
+    {
+      "id": "nat",
+      "display": "NAT / NASC",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "be born; arise",
+      "meaningZh": "出生；产生",
+      "narrativeZh": "NAT / NASC 来自拉丁语 nasci“出生、产生”和其过去分词 natus“出生的”。它既可以指真正的出生，也会延伸到出生地、天然属性和族群。nation、native、nature 等词都能从“出生、由何而生”这个核心去理解。",
+      "sourceIds": [
+        "ls-nascor"
+      ]
+    },
+    {
+      "id": "soci",
+      "display": "SOCI",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "companion; ally; associate",
+      "meaningZh": "伙伴；同伴；联合",
+      "narrativeZh": "SOCI 来自拉丁语 socius“伙伴、同伴、盟友”。当人们作为伙伴生活或行动时，就形成社会关系。因此 social、society、associate 等词都可以从“人与人连接成伙伴关系”去理解。",
+      "sourceIds": [
+        "ls-socius"
+      ]
+    },
+    {
+      "id": "commun",
+      "display": "COMMUN",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "common; shared",
+      "meaningZh": "共同；共享",
+      "narrativeZh": "COMMUN 来自拉丁语 communis“共同的、共享的”。它强调多人拥有或参与同一件事。community 是共享生活空间的人群，communicate 是把信息变成彼此共享的内容，common 则直接表示共同存在。",
+      "sourceIds": [
+        "ls-communis"
+      ]
+    },
+    {
+      "id": "sed",
+      "display": "SED / SID / SESS",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "sit; be seated",
+      "meaningZh": "坐；停留",
+      "narrativeZh": "SED / SID / SESS 来自拉丁语 sedere“坐”。从“坐在某个位置”可以发展出居住、主持和会期等抽象意义。resident 是“坐下来住在那里的人”，president 历史上则带有“坐在前面主持”的关系。",
+      "sourceIds": [
+        "ls-sedeo"
+      ]
+    },
+    {
+      "id": "fer",
+      "display": "FER",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "bear; carry; bring",
+      "meaningZh": "携带；带来；承受",
+      "narrativeZh": "FER 来自拉丁语 ferre“携带、带来、承受”。不同前缀改变携带的方向：transfer 是跨过去带，refer 是带回去联系，offer 的历史构词则有“把某物带到面前”的意味。",
+      "sourceIds": [
+        "ls-fero"
+      ]
+    },
+    {
+      "id": "quaer",
+      "display": "QUAER / QUIR",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "seek; ask; inquire",
+      "meaningZh": "寻找；询问；求取",
+      "narrativeZh": "QUAER / QUIR 来自拉丁语 quaerere“寻找、询问、求取”。require、inquire、acquire 看起来拼写不同，但都保留“寻找、取得或提出要求”的历史关系。遇到 quir/quer 时，可以先想到“主动去求、去找”。",
+      "sourceIds": [
+        "ls-quaero"
+      ]
+    },
+    {
+      "id": "cre",
+      "display": "CRE",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "create; produce; bring forth",
+      "meaningZh": "创造；产生；使出现",
+      "narrativeZh": "CRE 来自拉丁语 creare“创造、产生、使出现”。它强调把原本不存在的东西带出来。create、creative、creature 都围绕“产生新的东西”展开，因此这个词根非常适合建立“从无到有”的动作联想。",
+      "sourceIds": [
+        "ls-creo"
+      ]
+    },
+    {
+      "id": "punct",
+      "display": "PUNCT / PUNG",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "prick; puncture",
+      "meaningZh": "刺；点；刺穿",
+      "narrativeZh": "PUNCT / PUNG 来自拉丁语 pungere“刺、戳”。一个极小的刺痕就是“点”，因此 point、puncture、punctuation 都能从“刺出一个点或界标”理解；pungent 的“刺激性”也保留了像被刺到一样的感觉。",
+      "sourceIds": [
+        "ls-pungo"
+      ]
+    },
+    {
+      "id": "magn",
+      "display": "MAGN / MAJ",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "great; large; greater",
+      "meaningZh": "大；重要；更大",
+      "narrativeZh": "MAGN / MAJ 来自拉丁语 magnus“大、重要”和比较级 maior“更大”。magnitude 直接表达大小，magnificent 带有宏大感，而 major、majority 则通过 maior 这一历史词形表达“更大、主要、多数”。",
+      "sourceIds": [
+        "ls-magnus"
+      ]
+    },
+    {
+      "id": "fort",
+      "display": "FORT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "strong; powerful",
+      "meaningZh": "强；有力量",
+      "narrativeZh": "FORT 来自拉丁语 fortis“强壮、有力量”。它进入法语和英语后形成 force、fortify、reinforce 等词。虽然现代拼写和词性会变化，但核心始终围绕“增加力量、让某物更强”。",
+      "sourceIds": [
+        "ls-fortis"
       ]
     }
   ],
@@ -6919,6 +7495,1401 @@
       "sourceIds": [
         "ls-anima",
         "wik-inanimate"
+      ]
+    },
+    {
+      "word": "state",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "所处的站位或状态",
+      "meaningBridgeZh": "state 经由 Latin status 与 stare“站立”相关，因此可以把它理解成“一个人或事物站在什么位置、保持什么状态”。",
+      "parts": [
+        {
+          "text": "stat",
+          "role": "root-association",
+          "meaningEn": "stand; state",
+          "meaningZh": "站立；状态",
+          "morphemeId": "sta"
+        }
+      ],
+      "rootStoryIds": [
+        "sta"
+      ],
+      "relatedWords": [
+        "status",
+        "stable",
+        "station"
+      ],
+      "sourceIds": [
+        "ls-sto",
+        "wik-state"
+      ]
+    },
+    {
+      "word": "provide",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "提前看见并准备好",
+      "meaningBridgeZh": "pro- 表示“向前、提前”，vide 来自 videre“看”。历史上的“提前看见”进一步发展成“预先准备、提供所需之物”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward; beforehand",
+          "meaningZh": "向前；提前"
+        },
+        {
+          "text": "vide",
+          "role": "root",
+          "meaningEn": "see",
+          "meaningZh": "看；预见",
+          "morphemeId": "vid"
+        }
+      ],
+      "rootStoryIds": [
+        "vid"
+      ],
+      "relatedWords": [
+        "vision",
+        "visible",
+        "revise"
+      ],
+      "sourceIds": [
+        "ls-video",
+        "wik-provide"
+      ]
+    },
+    {
+      "word": "continue",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "持续保持在一起",
+      "meaningBridgeZh": "continue 来自 Latin continuare，而 continuus 与 continere“连接、保持在一起”相关，最终仍能追溯到 tenere“保持”。因此这里按词根关联理解为“保持不断”。",
+      "parts": [
+        {
+          "text": "tin / ten",
+          "role": "root-association",
+          "meaningEn": "hold; keep",
+          "meaningZh": "保持；连接",
+          "morphemeId": "ten"
+        }
+      ],
+      "rootStoryIds": [
+        "ten"
+      ],
+      "relatedWords": [
+        "contain",
+        "retain",
+        "sustain"
+      ],
+      "sourceIds": [
+        "ls-teneo",
+        "wik-continue"
+      ]
+    },
+    {
+      "word": "process",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "向前行进的过程",
+      "meaningBridgeZh": "process 来自 Latin processus，而 processus 来自 procedere“向前走”。因此现代“过程”可以理解成事情一步步向前推进的路径。",
+      "parts": [
+        {
+          "text": "cess",
+          "role": "root-association",
+          "meaningEn": "go; move",
+          "meaningZh": "走；推进",
+          "morphemeId": "ced"
+        }
+      ],
+      "rootStoryIds": [
+        "ced"
+      ],
+      "relatedWords": [
+        "proceed",
+        "precede",
+        "recede"
+      ],
+      "sourceIds": [
+        "ls-cedo",
+        "wik-process"
+      ]
+    },
+    {
+      "word": "effect",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "被做出来的结果",
+      "meaningBridgeZh": "effect 来自 Latin effectus，而 effectus 来自 efficere“做成、完成”。因此 effect 的核心可以理解为“被做出来、造成的结果”。",
+      "parts": [
+        {
+          "text": "fect",
+          "role": "root-association",
+          "meaningEn": "make; do",
+          "meaningZh": "做；造成",
+          "morphemeId": "fac"
+        }
+      ],
+      "rootStoryIds": [
+        "fac"
+      ],
+      "relatedWords": [
+        "perfect",
+        "fact",
+        "factory"
+      ],
+      "sourceIds": [
+        "ls-facio",
+        "wik-effect"
+      ]
+    },
+    {
+      "word": "nation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "由出生或共同来源形成的人群",
+      "meaningBridgeZh": "nation 来自 Latin natio“出生、族群”，与 nasci“出生”直接相关，因此历史核心是“由共同出生来源形成的一群人”。",
+      "parts": [
+        {
+          "text": "nat",
+          "role": "root",
+          "meaningEn": "be born; arise",
+          "meaningZh": "出生；产生",
+          "morphemeId": "nat"
+        }
+      ],
+      "rootStoryIds": [
+        "nat"
+      ],
+      "relatedWords": [
+        "national",
+        "native",
+        "nature"
+      ],
+      "sourceIds": [
+        "ls-nascor",
+        "wik-nation"
+      ]
+    },
+    {
+      "word": "national",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "属于一个 nation 的",
+      "meaningBridgeZh": "national 由 nation 派生，而 nation 与 Latin natio / nasci“出生、族群”相关，所以这里按同一词源家族理解。",
+      "parts": [
+        {
+          "text": "nat",
+          "role": "root",
+          "meaningEn": "birth; people",
+          "meaningZh": "出生；族群",
+          "morphemeId": "nat"
+        }
+      ],
+      "rootStoryIds": [
+        "nat"
+      ],
+      "relatedWords": [
+        "nation",
+        "native",
+        "nature"
+      ],
+      "sourceIds": [
+        "ls-nascor",
+        "wik-national"
+      ]
+    },
+    {
+      "word": "native",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "在某地出生的",
+      "meaningBridgeZh": "native 来自 Latin nativus“由出生而来的”，与 nasci“出生”同源，因此表示“本地出生的；天生的”。",
+      "parts": [
+        {
+          "text": "nat",
+          "role": "root",
+          "meaningEn": "be born",
+          "meaningZh": "出生；天生",
+          "morphemeId": "nat"
+        }
+      ],
+      "rootStoryIds": [
+        "nat"
+      ],
+      "relatedWords": [
+        "nation",
+        "national",
+        "nature"
+      ],
+      "sourceIds": [
+        "ls-nascor",
+        "wik-native"
+      ]
+    },
+    {
+      "word": "nature",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "与出生和固有属性有关",
+      "meaningBridgeZh": "nature 来自 Latin natura，而 natura 与 nasci“出生”相关。一个事物“生来是什么样”逐渐发展成“本性、自然”。",
+      "parts": [
+        {
+          "text": "nat",
+          "role": "root-association",
+          "meaningEn": "birth; innate quality",
+          "meaningZh": "出生；固有属性",
+          "morphemeId": "nat"
+        }
+      ],
+      "rootStoryIds": [
+        "nat"
+      ],
+      "relatedWords": [
+        "nation",
+        "national",
+        "native"
+      ],
+      "sourceIds": [
+        "ls-nascor",
+        "wik-nature"
+      ]
+    },
+    {
+      "word": "social",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "伙伴关系中的、社会的",
+      "meaningBridgeZh": "social 来自 Latin socialis，而 socialis 来自 socius“伙伴”。人与人结成伙伴关系，就形成社会性的联系。",
+      "parts": [
+        {
+          "text": "soci",
+          "role": "root",
+          "meaningEn": "companion; associate",
+          "meaningZh": "伙伴；联合",
+          "morphemeId": "soci"
+        }
+      ],
+      "rootStoryIds": [
+        "soci"
+      ],
+      "relatedWords": [
+        "society",
+        "associate",
+        "sociable"
+      ],
+      "sourceIds": [
+        "ls-socius",
+        "wik-social"
+      ]
+    },
+    {
+      "word": "society",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "由伙伴关系组成的人群",
+      "meaningBridgeZh": "society 经由 Latin societas，与 socius“伙伴”直接相关，所以可以理解成“由共同关系连接起来的人群”。",
+      "parts": [
+        {
+          "text": "soci",
+          "role": "root",
+          "meaningEn": "companion; association",
+          "meaningZh": "伙伴；群体关系",
+          "morphemeId": "soci"
+        }
+      ],
+      "rootStoryIds": [
+        "soci"
+      ],
+      "relatedWords": [
+        "social",
+        "associate",
+        "sociable"
+      ],
+      "sourceIds": [
+        "ls-socius",
+        "wik-society"
+      ]
+    },
+    {
+      "word": "associate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把人连接成伙伴",
+      "meaningBridgeZh": "associate 来自 Latin associare“联合、结伴”，其中核心来自 socius“伙伴”。因此现代义仍围绕“联系、伙伴、同事”。",
+      "parts": [
+        {
+          "text": "soci",
+          "role": "root-association",
+          "meaningEn": "companion; ally",
+          "meaningZh": "伙伴；联合",
+          "morphemeId": "soci"
+        }
+      ],
+      "rootStoryIds": [
+        "soci"
+      ],
+      "relatedWords": [
+        "social",
+        "society",
+        "sociable"
+      ],
+      "sourceIds": [
+        "ls-socius",
+        "wik-associate"
+      ]
+    },
+    {
+      "word": "sociable",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "喜欢与伙伴相处的",
+      "meaningBridgeZh": "sociable 与 socius“伙伴”同源，因此就是“容易与人交往、喜欢社交的”。",
+      "parts": [
+        {
+          "text": "soci",
+          "role": "root",
+          "meaningEn": "companion",
+          "meaningZh": "伙伴；社交",
+          "morphemeId": "soci"
+        }
+      ],
+      "rootStoryIds": [
+        "soci"
+      ],
+      "relatedWords": [
+        "social",
+        "society",
+        "associate"
+      ],
+      "sourceIds": [
+        "ls-socius",
+        "wik-sociable"
+      ]
+    },
+    {
+      "word": "community",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "共享某些东西的人群",
+      "meaningBridgeZh": "community 来自 Latin communitas，而 communitas 来自 communis“共同、共享”。因此 community 的核心就是“共享空间、身份或利益的人群”。",
+      "parts": [
+        {
+          "text": "commun",
+          "role": "root",
+          "meaningEn": "common; shared",
+          "meaningZh": "共同；共享",
+          "morphemeId": "commun"
+        }
+      ],
+      "rootStoryIds": [
+        "commun"
+      ],
+      "relatedWords": [
+        "communicate",
+        "common",
+        "communion"
+      ],
+      "sourceIds": [
+        "ls-communis",
+        "wik-community"
+      ]
+    },
+    {
+      "word": "communicate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "让信息成为共同拥有的",
+      "meaningBridgeZh": "communicate 来自 Latin communicare“分享、使共同”，与 communis“共同”同源。把信息分享出去，就是让它成为双方共同拥有的内容。",
+      "parts": [
+        {
+          "text": "commun",
+          "role": "root",
+          "meaningEn": "common; shared",
+          "meaningZh": "共同；分享",
+          "morphemeId": "commun"
+        }
+      ],
+      "rootStoryIds": [
+        "commun"
+      ],
+      "relatedWords": [
+        "community",
+        "common",
+        "communion"
+      ],
+      "sourceIds": [
+        "ls-communis",
+        "wik-communicate"
+      ]
+    },
+    {
+      "word": "common",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "多人共同拥有或出现的",
+      "meaningBridgeZh": "common 经由法语追溯到 Latin communis“共同的”，所以它最直接地保留了 COMMUN 的核心意义。",
+      "parts": [
+        {
+          "text": "comm",
+          "role": "root-association",
+          "meaningEn": "common; shared",
+          "meaningZh": "共同；共有",
+          "morphemeId": "commun"
+        }
+      ],
+      "rootStoryIds": [
+        "commun"
+      ],
+      "relatedWords": [
+        "community",
+        "communicate",
+        "communion"
+      ],
+      "sourceIds": [
+        "ls-communis",
+        "wik-common"
+      ]
+    },
+    {
+      "word": "communion",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "共同参与、共享",
+      "meaningBridgeZh": "communion 来自 Latin communio“共享、参与”，与 communis“共同”同源，因此核心就是“共同拥有或共同参与”。",
+      "parts": [
+        {
+          "text": "commun",
+          "role": "root",
+          "meaningEn": "common; shared",
+          "meaningZh": "共同；共享",
+          "morphemeId": "commun"
+        }
+      ],
+      "rootStoryIds": [
+        "commun"
+      ],
+      "relatedWords": [
+        "community",
+        "communicate",
+        "common"
+      ],
+      "sourceIds": [
+        "ls-communis",
+        "wik-communion"
+      ]
+    },
+    {
+      "word": "president",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "坐在前面主持的人",
+      "meaningBridgeZh": "president 来自 Latin praesidens，源自动词 praesidere“坐在前面、主持”，而 sedere 表示“坐”。所以它的历史画面是“坐在前面主持的人”。",
+      "parts": [
+        {
+          "text": "sid",
+          "role": "root-association",
+          "meaningEn": "sit",
+          "meaningZh": "坐；主持位置",
+          "morphemeId": "sed"
+        }
+      ],
+      "rootStoryIds": [
+        "sed"
+      ],
+      "relatedWords": [
+        "reside",
+        "resident",
+        "session"
+      ],
+      "sourceIds": [
+        "ls-sedeo",
+        "wik-president"
+      ]
+    },
+    {
+      "word": "reside",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "坐下来停留在某处",
+      "meaningBridgeZh": "reside 来自 Latin residere“坐下、留下”，与 sedere“坐”同源，因此现代表示“居住、定居”。",
+      "parts": [
+        {
+          "text": "sid",
+          "role": "root-association",
+          "meaningEn": "sit; remain",
+          "meaningZh": "坐；停留",
+          "morphemeId": "sed"
+        }
+      ],
+      "rootStoryIds": [
+        "sed"
+      ],
+      "relatedWords": [
+        "president",
+        "resident",
+        "sedentary",
+        "session"
+      ],
+      "sourceIds": [
+        "ls-sedeo",
+        "wik-reside"
+      ]
+    },
+    {
+      "word": "resident",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "在某处坐下来居住的人",
+      "meaningBridgeZh": "resident 与 reside 同源，核心是“在某处停留下来的人”，因此表示“居民；住户”。",
+      "parts": [
+        {
+          "text": "sid",
+          "role": "root-association",
+          "meaningEn": "sit; remain",
+          "meaningZh": "停留；居住",
+          "morphemeId": "sed"
+        }
+      ],
+      "rootStoryIds": [
+        "sed"
+      ],
+      "relatedWords": [
+        "president",
+        "reside",
+        "sedentary",
+        "session"
+      ],
+      "sourceIds": [
+        "ls-sedeo",
+        "wik-resident"
+      ]
+    },
+    {
+      "word": "sedentary",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "长期坐着的",
+      "meaningBridgeZh": "sedentary 来自 Latin sedentarius，与 sedere“坐”直接相关，因此表示“久坐的；少活动的”。",
+      "parts": [
+        {
+          "text": "sed",
+          "role": "root",
+          "meaningEn": "sit",
+          "meaningZh": "坐；久坐",
+          "morphemeId": "sed"
+        }
+      ],
+      "rootStoryIds": [
+        "sed"
+      ],
+      "relatedWords": [
+        "president",
+        "reside",
+        "resident",
+        "session"
+      ],
+      "sourceIds": [
+        "ls-sedeo",
+        "wik-sedentary"
+      ]
+    },
+    {
+      "word": "session",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "一段坐下来进行事情的时间",
+      "meaningBridgeZh": "session 来自 Latin sessio“坐、会议”，而 sessio 来自 sedere“坐”，所以可以理解成“一群人坐下来进行活动的一段时间”。",
+      "parts": [
+        {
+          "text": "sess",
+          "role": "root",
+          "meaningEn": "sit",
+          "meaningZh": "坐；会议",
+          "morphemeId": "sed"
+        }
+      ],
+      "rootStoryIds": [
+        "sed"
+      ],
+      "relatedWords": [
+        "president",
+        "reside",
+        "resident"
+      ],
+      "sourceIds": [
+        "ls-sedeo",
+        "wik-session"
+      ]
+    },
+    {
+      "word": "offer",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把东西带到面前",
+      "meaningBridgeZh": "offer 来自 Latin offerre，由 ob- 与 ferre“带来、携带”组成。把某物带到别人面前，就发展成“提供、提出”。",
+      "parts": [
+        {
+          "text": "fer",
+          "role": "root-association",
+          "meaningEn": "carry; bring",
+          "meaningZh": "带来；提供",
+          "morphemeId": "fer"
+        }
+      ],
+      "rootStoryIds": [
+        "fer"
+      ],
+      "relatedWords": [
+        "refer",
+        "transfer",
+        "prefer",
+        "differ"
+      ],
+      "sourceIds": [
+        "ls-fero",
+        "wik-offer"
+      ]
+    },
+    {
+      "word": "refer",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "带回去联系",
+      "meaningBridgeZh": "re- 表示“回”，fer 表示“带”。把问题或信息带回到某个来源，就是 refer“提及；参考；转交”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "fer",
+          "role": "root",
+          "meaningEn": "carry; bring",
+          "meaningZh": "携带；带回",
+          "morphemeId": "fer"
+        }
+      ],
+      "rootStoryIds": [
+        "fer"
+      ],
+      "relatedWords": [
+        "offer",
+        "transfer",
+        "prefer",
+        "differ"
+      ],
+      "sourceIds": [
+        "ls-fero",
+        "wik-refer"
+      ]
+    },
+    {
+      "word": "transfer",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "跨过去带",
+      "meaningBridgeZh": "trans- 表示“跨越”，fer 表示“携带”。把人、物或信息从一处带到另一处，就是 transfer“转移；传输”。",
+      "parts": [
+        {
+          "text": "trans-",
+          "role": "prefix",
+          "meaningEn": "across",
+          "meaningZh": "跨越"
+        },
+        {
+          "text": "fer",
+          "role": "root",
+          "meaningEn": "carry; bring",
+          "meaningZh": "携带；带来",
+          "morphemeId": "fer"
+        }
+      ],
+      "rootStoryIds": [
+        "fer"
+      ],
+      "relatedWords": [
+        "offer",
+        "refer",
+        "prefer",
+        "differ"
+      ],
+      "sourceIds": [
+        "ls-fero",
+        "wik-transfer"
+      ]
+    },
+    {
+      "word": "prefer",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "把某物放到前面优先考虑",
+      "meaningBridgeZh": "prefer 来自 Latin praeferre“拿到前面、置于前面”，其中 ferre 是“携带”。把一个选择放到另一个前面，就是“更喜欢、优先选择”。",
+      "parts": [
+        {
+          "text": "fer",
+          "role": "root-association",
+          "meaningEn": "carry; bring",
+          "meaningZh": "带；置于前面",
+          "morphemeId": "fer"
+        }
+      ],
+      "rootStoryIds": [
+        "fer"
+      ],
+      "relatedWords": [
+        "offer",
+        "refer",
+        "transfer",
+        "differ"
+      ],
+      "sourceIds": [
+        "ls-fero",
+        "wik-prefer"
+      ]
+    },
+    {
+      "word": "differ",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "带向不同方向",
+      "meaningBridgeZh": "differ 来自 Latin differre“带开、分开”，其中 dis- 表示分离，ferre 表示携带，后来发展为“不同、有差异”。",
+      "parts": [
+        {
+          "text": "fer",
+          "role": "root-association",
+          "meaningEn": "carry; bring",
+          "meaningZh": "带开；形成差异",
+          "morphemeId": "fer"
+        }
+      ],
+      "rootStoryIds": [
+        "fer"
+      ],
+      "relatedWords": [
+        "offer",
+        "refer",
+        "transfer",
+        "prefer"
+      ],
+      "sourceIds": [
+        "ls-fero",
+        "wik-differ"
+      ]
+    },
+    {
+      "word": "require",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "反复或明确地求取",
+      "meaningBridgeZh": "require 来自 Latin requirere“寻找、询问、要求”，与 quaerere“寻找、求取”同源，因此现代的“需要、要求”仍保留主动求取的感觉。",
+      "parts": [
+        {
+          "text": "quir",
+          "role": "root-association",
+          "meaningEn": "seek; ask",
+          "meaningZh": "寻找；要求",
+          "morphemeId": "quaer"
+        }
+      ],
+      "rootStoryIds": [
+        "quaer"
+      ],
+      "relatedWords": [
+        "inquire",
+        "acquire",
+        "query"
+      ],
+      "sourceIds": [
+        "ls-quaero",
+        "wik-require"
+      ]
+    },
+    {
+      "word": "inquire",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "主动去询问、寻找答案",
+      "meaningBridgeZh": "inquire 来自 Latin inquirere，与 quaerere“寻找、询问”相关，因此就是“通过提问去寻找信息”。",
+      "parts": [
+        {
+          "text": "quir",
+          "role": "root-association",
+          "meaningEn": "seek; ask",
+          "meaningZh": "询问；寻找",
+          "morphemeId": "quaer"
+        }
+      ],
+      "rootStoryIds": [
+        "quaer"
+      ],
+      "relatedWords": [
+        "require",
+        "acquire",
+        "query"
+      ],
+      "sourceIds": [
+        "ls-quaero",
+        "wik-inquire"
+      ]
+    },
+    {
+      "word": "acquire",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "通过寻求而取得",
+      "meaningBridgeZh": "acquire 来自 Latin acquirere“获得、取得”，其中核心与 quaerere“寻求”相关，因此可以理解成“通过求取而获得”。",
+      "parts": [
+        {
+          "text": "quir",
+          "role": "root-association",
+          "meaningEn": "seek; obtain",
+          "meaningZh": "求取；获得",
+          "morphemeId": "quaer"
+        }
+      ],
+      "rootStoryIds": [
+        "quaer"
+      ],
+      "relatedWords": [
+        "require",
+        "inquire",
+        "query"
+      ],
+      "sourceIds": [
+        "ls-quaero",
+        "wik-acquire"
+      ]
+    },
+    {
+      "word": "query",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "提出问题去寻找答案",
+      "meaningBridgeZh": "query 经由 Latin quaere“询问、寻找”而来，与 quaerere 同源，因此直接保留了“询问、查询”的核心。",
+      "parts": [
+        {
+          "text": "quer",
+          "role": "root-association",
+          "meaningEn": "ask; seek",
+          "meaningZh": "询问；寻找",
+          "morphemeId": "quaer"
+        }
+      ],
+      "rootStoryIds": [
+        "quaer"
+      ],
+      "relatedWords": [
+        "require",
+        "inquire",
+        "acquire"
+      ],
+      "sourceIds": [
+        "ls-quaero",
+        "wik-query"
+      ]
+    },
+    {
+      "word": "create",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "使新的东西出现",
+      "meaningBridgeZh": "create 来自 Latin creare“创造、产生”，几乎直接保留了 CRE 的核心：把新的事物带出来。",
+      "parts": [
+        {
+          "text": "cre",
+          "role": "root",
+          "meaningEn": "create; produce",
+          "meaningZh": "创造；产生",
+          "morphemeId": "cre"
+        }
+      ],
+      "rootStoryIds": [
+        "cre"
+      ],
+      "relatedWords": [
+        "creative",
+        "creature",
+        "recreate"
+      ],
+      "sourceIds": [
+        "ls-creo",
+        "wik-create"
+      ]
+    },
+    {
+      "word": "creative",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "能够创造新事物的",
+      "meaningBridgeZh": "creative 由 create 派生，而 create 来自 creare“创造、产生”，所以它表示“有创造力的”。",
+      "parts": [
+        {
+          "text": "cre",
+          "role": "root",
+          "meaningEn": "create; produce",
+          "meaningZh": "创造；产生",
+          "morphemeId": "cre"
+        }
+      ],
+      "rootStoryIds": [
+        "cre"
+      ],
+      "relatedWords": [
+        "create",
+        "creature",
+        "recreate"
+      ],
+      "sourceIds": [
+        "ls-creo",
+        "wik-creative"
+      ]
+    },
+    {
+      "word": "creature",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "被创造或产生出来的生命",
+      "meaningBridgeZh": "creature 来自 Latin creatura“被创造之物”，而 creatura 来自 creare“创造”，因此核心就是“被产生出来的事物或生物”。",
+      "parts": [
+        {
+          "text": "cre",
+          "role": "root",
+          "meaningEn": "create; produce",
+          "meaningZh": "创造；产生",
+          "morphemeId": "cre"
+        }
+      ],
+      "rootStoryIds": [
+        "cre"
+      ],
+      "relatedWords": [
+        "create",
+        "creative",
+        "recreate"
+      ],
+      "sourceIds": [
+        "ls-creo",
+        "wik-creature"
+      ]
+    },
+    {
+      "word": "recreate",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "",
+      "literalZh": "重新创造",
+      "meaningBridgeZh": "re- 表示“再次”，create 来自 creare“创造”。重新创造、重新恢复活力，就形成 recreate 的相关意义。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "again",
+          "meaningZh": "再次；重新"
+        },
+        {
+          "text": "cre",
+          "role": "root",
+          "meaningEn": "create; produce",
+          "meaningZh": "创造；产生",
+          "morphemeId": "cre"
+        }
+      ],
+      "rootStoryIds": [
+        "cre"
+      ],
+      "relatedWords": [
+        "create",
+        "creative",
+        "creature"
+      ],
+      "sourceIds": [
+        "ls-creo",
+        "wik-recreate"
+      ]
+    },
+    {
+      "word": "point",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "像针刺留下的小点",
+      "meaningBridgeZh": "point 经由法语追溯到 Latin punctum“刺痕、点”，而 punctum 来自 pungere“刺”。因此“点”最初就带有一个小刺痕的画面。",
+      "parts": [
+        {
+          "text": "point / punct",
+          "role": "root-association",
+          "meaningEn": "prick; point",
+          "meaningZh": "刺；点",
+          "morphemeId": "punct"
+        }
+      ],
+      "rootStoryIds": [
+        "punct"
+      ],
+      "relatedWords": [
+        "punctuation",
+        "puncture",
+        "pungent"
+      ],
+      "sourceIds": [
+        "ls-pungo",
+        "wik-point"
+      ]
+    },
+    {
+      "word": "punctuation",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "用点和符号划分句子",
+      "meaningBridgeZh": "punctuation 来自 punctum“点、刺痕”词族，早期标点本质上就是在文字间做出记号，因此与 PUNCT 的“点、刺”直接相关。",
+      "parts": [
+        {
+          "text": "punct",
+          "role": "root",
+          "meaningEn": "prick; point",
+          "meaningZh": "点；标记",
+          "morphemeId": "punct"
+        }
+      ],
+      "rootStoryIds": [
+        "punct"
+      ],
+      "relatedWords": [
+        "point",
+        "puncture",
+        "pungent"
+      ],
+      "sourceIds": [
+        "ls-pungo",
+        "wik-punctuation"
+      ]
+    },
+    {
+      "word": "puncture",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "刺出一个孔",
+      "meaningBridgeZh": "puncture 来自 Latin punctura“刺、刺孔”，与 pungere“刺”直接相关，所以就是“刺穿；刺孔”。",
+      "parts": [
+        {
+          "text": "punct",
+          "role": "root",
+          "meaningEn": "prick; puncture",
+          "meaningZh": "刺；刺穿",
+          "morphemeId": "punct"
+        }
+      ],
+      "rootStoryIds": [
+        "punct"
+      ],
+      "relatedWords": [
+        "point",
+        "punctuation",
+        "pungent"
+      ],
+      "sourceIds": [
+        "ls-pungo",
+        "wik-puncture"
+      ]
+    },
+    {
+      "word": "pungent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "像刺一样强烈刺激",
+      "meaningBridgeZh": "pungent 来自 Latin pungere“刺”。气味或味道强烈到像“刺”一样刺激感官，就形成 pungent“刺鼻的；辛辣的”。",
+      "parts": [
+        {
+          "text": "pung",
+          "role": "root",
+          "meaningEn": "prick",
+          "meaningZh": "刺；刺激",
+          "morphemeId": "punct"
+        }
+      ],
+      "rootStoryIds": [
+        "punct"
+      ],
+      "relatedWords": [
+        "point",
+        "punctuation",
+        "puncture"
+      ],
+      "sourceIds": [
+        "ls-pungo",
+        "wik-pungent"
+      ]
+    },
+    {
+      "word": "major",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "更大的、较重要的",
+      "meaningBridgeZh": "major 来自 Latin maior“更大”，而 maior 是 magnus“大”的比较级历史词形，因此表示“主要的；更重要的”。",
+      "parts": [
+        {
+          "text": "maj",
+          "role": "root-association",
+          "meaningEn": "greater",
+          "meaningZh": "更大；更重要",
+          "morphemeId": "magn"
+        }
+      ],
+      "rootStoryIds": [
+        "magn"
+      ],
+      "relatedWords": [
+        "majority",
+        "magnificent",
+        "magnitude"
+      ],
+      "sourceIds": [
+        "ls-magnus",
+        "wik-major"
+      ]
+    },
+    {
+      "word": "majority",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "较大的那一部分",
+      "meaningBridgeZh": "majority 由 major 派生，而 major 来自 Latin maior“更大”，因此“更大的部分”自然发展为“多数”。",
+      "parts": [
+        {
+          "text": "maj",
+          "role": "root-association",
+          "meaningEn": "greater",
+          "meaningZh": "更大；多数",
+          "morphemeId": "magn"
+        }
+      ],
+      "rootStoryIds": [
+        "magn"
+      ],
+      "relatedWords": [
+        "major",
+        "magnificent",
+        "magnitude"
+      ],
+      "sourceIds": [
+        "ls-magnus",
+        "wik-majority"
+      ]
+    },
+    {
+      "word": "magnificent",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "宏大而令人赞叹的",
+      "meaningBridgeZh": "magnificent 的 magn- 来自 magnus“大、伟大”，因此核心是“规模大、气势强”，进一步表示“宏伟的；壮丽的”。",
+      "parts": [
+        {
+          "text": "magn",
+          "role": "root",
+          "meaningEn": "great; large",
+          "meaningZh": "大；伟大",
+          "morphemeId": "magn"
+        }
+      ],
+      "rootStoryIds": [
+        "magn"
+      ],
+      "relatedWords": [
+        "major",
+        "majority",
+        "magnitude"
+      ],
+      "sourceIds": [
+        "ls-magnus",
+        "wik-magnificent"
+      ]
+    },
+    {
+      "word": "magnitude",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "大小、量级",
+      "meaningBridgeZh": "magnitude 来自 Latin magnitudo“大、大小”，而 magnitudo 来自 magnus“大”，因此直接表示“大小；量级”。",
+      "parts": [
+        {
+          "text": "magn",
+          "role": "root",
+          "meaningEn": "great; large",
+          "meaningZh": "大；量级",
+          "morphemeId": "magn"
+        }
+      ],
+      "rootStoryIds": [
+        "magn"
+      ],
+      "relatedWords": [
+        "major",
+        "majority",
+        "magnificent"
+      ],
+      "sourceIds": [
+        "ls-magnus",
+        "wik-magnitude"
+      ]
+    },
+    {
+      "word": "force",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "力量",
+      "meaningBridgeZh": "force 经由法语追溯到 Latin fortis“强、有力量”，所以它的核心就是“力量、强制力”。",
+      "parts": [
+        {
+          "text": "forc / fort",
+          "role": "root-association",
+          "meaningEn": "strong; force",
+          "meaningZh": "强；力量",
+          "morphemeId": "fort"
+        }
+      ],
+      "rootStoryIds": [
+        "fort"
+      ],
+      "relatedWords": [
+        "fortify",
+        "reinforce",
+        "effort"
+      ],
+      "sourceIds": [
+        "ls-fortis",
+        "wik-force"
+      ]
+    },
+    {
+      "word": "fortify",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "使变得更强",
+      "meaningBridgeZh": "fortify 来自 Late Latin fortificare“使强壮”，其核心来自 fortis“强”，因此表示“加强；巩固”。",
+      "parts": [
+        {
+          "text": "fort",
+          "role": "root",
+          "meaningEn": "strong",
+          "meaningZh": "强；加强",
+          "morphemeId": "fort"
+        }
+      ],
+      "rootStoryIds": [
+        "fort"
+      ],
+      "relatedWords": [
+        "force",
+        "reinforce",
+        "effort"
+      ],
+      "sourceIds": [
+        "ls-fortis",
+        "wik-fortify"
+      ]
+    },
+    {
+      "word": "reinforce",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "再次加强力量",
+      "meaningBridgeZh": "reinforce 经由法语词源与 force“力量”同族，re- 表示再次，因此核心就是“再增加力量、强化”。",
+      "parts": [
+        {
+          "text": "forc",
+          "role": "root-association",
+          "meaningEn": "force; strength",
+          "meaningZh": "力量；加强",
+          "morphemeId": "fort"
+        }
+      ],
+      "rootStoryIds": [
+        "fort"
+      ],
+      "relatedWords": [
+        "force",
+        "fortify",
+        "effort"
+      ],
+      "sourceIds": [
+        "ls-fortis",
+        "wik-reinforce"
+      ]
+    },
+    {
+      "word": "effort",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "",
+      "literalZh": "努力用出力量",
+      "meaningBridgeZh": "effort 经由 Old French esforz / esforcier 与 Latin fortis“强”词族相关，现代意义发展为“投入力量、努力”。",
+      "parts": [
+        {
+          "text": "for / fort",
+          "role": "root-association",
+          "meaningEn": "strength",
+          "meaningZh": "力量；努力",
+          "morphemeId": "fort"
+        }
+      ],
+      "rootStoryIds": [
+        "fort"
+      ],
+      "relatedWords": [
+        "force",
+        "fortify",
+        "reinforce"
+      ],
+      "sourceIds": [
+        "ls-fortis",
+        "wik-effort"
       ]
     }
   ]
