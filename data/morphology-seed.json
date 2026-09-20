@@ -120,6 +120,230 @@
       "headword": "alleviate",
       "url": "https://www.etymonline.com/word/alleviate",
       "license": "Reference-only factual verification; no source text copied"
+    },
+    {
+      "id": "ls-forma",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "forma / formo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18566/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-spectio",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "spectio / specio",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n44933/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-rumpo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "rumpo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n42012/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "ls-struo",
+      "kind": "classical_dictionary",
+      "name": "Lewis & Short Latin Dictionary",
+      "headword": "struo",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n45638/",
+      "license": "Public-domain source text via Perseus"
+    },
+    {
+      "id": "wik-beneficial",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "beneficial",
+      "url": "https://en.wiktionary.org/wiki/beneficial",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-benefactor",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "benefactor",
+      "url": "https://en.wiktionary.org/wiki/benefactor",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-predict",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "predict",
+      "url": "https://en.wiktionary.org/wiki/predict",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-dictate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "dictate",
+      "url": "https://en.wiktionary.org/wiki/dictate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-dictionary",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "dictionary",
+      "url": "https://en.wiktionary.org/wiki/dictionary",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-attract",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "attract",
+      "url": "https://en.wiktionary.org/wiki/attract",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-distract",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "distract",
+      "url": "https://en.wiktionary.org/wiki/distract",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-extract",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "extract",
+      "url": "https://en.wiktionary.org/wiki/extract",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-produce",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "produce",
+      "url": "https://en.wiktionary.org/wiki/produce",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-reduce",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "reduce",
+      "url": "https://en.wiktionary.org/wiki/reduce",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-deduce",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "deduce",
+      "url": "https://en.wiktionary.org/wiki/deduce",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-conduct",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "conduct",
+      "url": "https://en.wiktionary.org/wiki/conduct",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-gravity",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "gravity",
+      "url": "https://en.wiktionary.org/wiki/gravity",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-aggravate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "aggravate",
+      "url": "https://en.wiktionary.org/wiki/aggravate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-elevate",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "elevate",
+      "url": "https://en.wiktionary.org/wiki/elevate",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-levity",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "levity",
+      "url": "https://en.wiktionary.org/wiki/levity",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-transform",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "transform",
+      "url": "https://en.wiktionary.org/wiki/transform",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-conform",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "conform",
+      "url": "https://en.wiktionary.org/wiki/conform",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-inspect",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "inspect",
+      "url": "https://en.wiktionary.org/wiki/inspect",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-respect",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "respect",
+      "url": "https://en.wiktionary.org/wiki/respect",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-interrupt",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "interrupt",
+      "url": "https://en.wiktionary.org/wiki/interrupt",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-rupture",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "rupture",
+      "url": "https://en.wiktionary.org/wiki/rupture",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-construct",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "construct",
+      "url": "https://en.wiktionary.org/wiki/construct",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-structure",
+      "kind": "english_etymology",
+      "name": "Wiktionary",
+      "headword": "structure",
+      "url": "https://en.wiktionary.org/wiki/structure",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "morphemes": [
@@ -194,6 +418,54 @@
       "sourceIds": [
         "ls-levis",
         "ls-levo"
+      ]
+    },
+    {
+      "id": "form",
+      "display": "FORM",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "shape; form; fashion",
+      "meaningZh": "形状；形式；塑造",
+      "narrativeZh": "FORM 来自拉丁语 forma“形状、外形”和 formare“塑造、成形”。它的核心不是抽象的“形式”两个字，而是“给某物一个形状”。所以遇到 form 时，可以先想：这个词是在改变形状、形成形状，还是让某物符合某种形状。",
+      "sourceIds": [
+        "ls-forma"
+      ]
+    },
+    {
+      "id": "spect",
+      "display": "SPEC / SPECT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "look; see; observe",
+      "meaningZh": "看；观察",
+      "narrativeZh": "SPEC / SPECT 与拉丁语 specio 一组“看、观察”的词有关。它进入英语后，经常保留“看向、查看、观察”的动作线索。看到 spect 时，可以先问：这个词里的“看”是向里看、回头看，还是仔细查看。",
+      "sourceIds": [
+        "ls-spectio"
+      ]
+    },
+    {
+      "id": "rupt",
+      "display": "RUPT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "break; burst; tear apart",
+      "meaningZh": "打破；破裂；断开",
+      "narrativeZh": "RUPT 来自拉丁语 rumpere，核心动作是“打破、使破裂、使断开”。很多现代词虽然表达的是流程、关系或连续性的中断，但背后仍能抓住“原本连着的东西被打断”这一画面。",
+      "sourceIds": [
+        "ls-rumpo"
+      ]
+    },
+    {
+      "id": "struct",
+      "display": "STRUCT",
+      "type": "root",
+      "language": "Latin",
+      "meaningEn": "build; pile; arrange",
+      "meaningZh": "建造；堆叠；组织",
+      "narrativeZh": "STRUCT 来自拉丁语 struere“堆叠、排列、建造”的词族。它的核心感觉是“把多个部分组织起来，形成一个整体”。因此看到 struct 时，可以优先联想到结构、搭建和组织，而不是把它当成孤立字母组合。",
+      "sourceIds": [
+        "ls-struo"
       ]
     }
   ],
@@ -422,6 +694,798 @@
         "ls-levis",
         "ls-levo",
         "etym-alleviate"
+      ]
+    },
+    {
+      "word": "beneficial",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "connected with benefit; producing a good result",
+      "literalZh": "带来好的结果",
+      "meaningBridgeZh": "beneficial 与 benefit 同属 bene- 这一“好、向好”的词源网络，所以它表示“有益的、能带来好结果的”。",
+      "parts": [
+        {
+          "text": "bene-",
+          "role": "root-association",
+          "meaningEn": "well; good",
+          "meaningZh": "好；有益",
+          "morphemeId": "bene"
+        }
+      ],
+      "rootStoryIds": [
+        "bene"
+      ],
+      "relatedWords": [
+        "benefit",
+        "benefactor",
+        "benevolent"
+      ],
+      "sourceIds": [
+        "ls-bene",
+        "wik-beneficial"
+      ]
+    },
+    {
+      "word": "benefactor",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a person who does good",
+      "literalZh": "做善事、带来好处的人",
+      "meaningBridgeZh": "benefactor 的历史构词与“做得好、施予好处”直接相关，因此现代词义落在“恩人、捐助者、行善者”这一方向。",
+      "parts": [
+        {
+          "text": "bene-",
+          "role": "root-association",
+          "meaningEn": "well; good",
+          "meaningZh": "好；善意",
+          "morphemeId": "bene"
+        }
+      ],
+      "rootStoryIds": [
+        "bene"
+      ],
+      "relatedWords": [
+        "benefit",
+        "beneficial",
+        "benevolent"
+      ],
+      "sourceIds": [
+        "ls-bene",
+        "wik-benefactor"
+      ]
+    },
+    {
+      "word": "predict",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "say beforehand",
+      "literalZh": "提前说出来",
+      "meaningBridgeZh": "pre- 表示“在前、提前”，dict 表示“说”。把结果在事情发生前说出来，就是“预测”。",
+      "parts": [
+        {
+          "text": "pre-",
+          "role": "prefix",
+          "meaningEn": "before",
+          "meaningZh": "在前；提前"
+        },
+        {
+          "text": "dict",
+          "role": "root",
+          "meaningEn": "say; speak",
+          "meaningZh": "说；表达",
+          "morphemeId": "dict"
+        }
+      ],
+      "rootStoryIds": [
+        "dict"
+      ],
+      "relatedWords": [
+        "dictate",
+        "contradict",
+        "dictionary"
+      ],
+      "sourceIds": [
+        "ls-dictio",
+        "wik-predict"
+      ]
+    },
+    {
+      "word": "dictate",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "say repeatedly / say for another to write",
+      "literalZh": "说出来让别人记录",
+      "meaningBridgeZh": "dictate 来自与 Latin dicere“说”相关的词形，核心仍然是“说出、口述”。因此它既可以表示“口述”，也进一步发展出“命令、规定”的含义。",
+      "parts": [
+        {
+          "text": "dict",
+          "role": "root",
+          "meaningEn": "say; speak",
+          "meaningZh": "说；表达",
+          "morphemeId": "dict"
+        }
+      ],
+      "rootStoryIds": [
+        "dict"
+      ],
+      "relatedWords": [
+        "predict",
+        "contradict",
+        "dictionary"
+      ],
+      "sourceIds": [
+        "ls-dictio",
+        "wik-dictate"
+      ]
+    },
+    {
+      "word": "dictionary",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a work concerned with words and expressions",
+      "literalZh": "与词语、表达有关的工具书",
+      "meaningBridgeZh": "dictionary 的历史来源经过 Latin dictio“说法、词语”等词形，与“说、表达”的 DICT 词族相连，所以它适合作为 DICT 的同根联想，而不是简单按现代拼写硬拆。",
+      "parts": [
+        {
+          "text": "dict",
+          "role": "root-association",
+          "meaningEn": "say; word; expression",
+          "meaningZh": "说；词语；表达",
+          "morphemeId": "dict"
+        }
+      ],
+      "rootStoryIds": [
+        "dict"
+      ],
+      "relatedWords": [
+        "dictate",
+        "predict",
+        "contradict"
+      ],
+      "sourceIds": [
+        "ls-dictio",
+        "wik-dictionary"
+      ]
+    },
+    {
+      "word": "attract",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "draw toward",
+      "literalZh": "朝某处拉过来",
+      "meaningBridgeZh": "at- 是 ad- 在这个词里的同化形式，表示“朝向”；tract 保留“拉”的动作。把某物拉向自己，就很自然地发展为“吸引”。",
+      "parts": [
+        {
+          "text": "at- (ad-)",
+          "role": "prefix",
+          "meaningEn": "toward",
+          "meaningZh": "朝向"
+        },
+        {
+          "text": "tract",
+          "role": "root",
+          "meaningEn": "draw; pull",
+          "meaningZh": "拉；牵引",
+          "morphemeId": "tract"
+        }
+      ],
+      "rootStoryIds": [
+        "tract"
+      ],
+      "relatedWords": [
+        "distract",
+        "extract",
+        "retract"
+      ],
+      "sourceIds": [
+        "ls-traho",
+        "wik-attract"
+      ]
+    },
+    {
+      "word": "distract",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "draw apart",
+      "literalZh": "向不同方向拉开",
+      "meaningBridgeZh": "dis- 有“分开”的方向，tract 表示“拉”。注意力被“拉开”，就形成了现代英语里的“使分心”。",
+      "parts": [
+        {
+          "text": "dis-",
+          "role": "prefix",
+          "meaningEn": "apart; away",
+          "meaningZh": "分开；离开"
+        },
+        {
+          "text": "tract",
+          "role": "root",
+          "meaningEn": "draw; pull",
+          "meaningZh": "拉；牵引",
+          "morphemeId": "tract"
+        }
+      ],
+      "rootStoryIds": [
+        "tract"
+      ],
+      "relatedWords": [
+        "attract",
+        "extract",
+        "retract"
+      ],
+      "sourceIds": [
+        "ls-traho",
+        "wik-distract"
+      ]
+    },
+    {
+      "word": "extract",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "draw out",
+      "literalZh": "向外拉出来",
+      "meaningBridgeZh": "ex- 表示“向外”，tract 表示“拉”。把某物从里面拉出来，就是“提取、抽取”。",
+      "parts": [
+        {
+          "text": "ex-",
+          "role": "prefix",
+          "meaningEn": "out",
+          "meaningZh": "向外"
+        },
+        {
+          "text": "tract",
+          "role": "root",
+          "meaningEn": "draw; pull",
+          "meaningZh": "拉；牵引",
+          "morphemeId": "tract"
+        }
+      ],
+      "rootStoryIds": [
+        "tract"
+      ],
+      "relatedWords": [
+        "attract",
+        "distract",
+        "retract"
+      ],
+      "sourceIds": [
+        "ls-traho",
+        "wik-extract"
+      ]
+    },
+    {
+      "word": "produce",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "lead forth",
+      "literalZh": "向前带出来",
+      "meaningBridgeZh": "pro- 表示“向前、向外”，duc 表示“带领”。把某物带出来、使它出现，就能理解到“生产、产生”。",
+      "parts": [
+        {
+          "text": "pro-",
+          "role": "prefix",
+          "meaningEn": "forward; forth",
+          "meaningZh": "向前；向外"
+        },
+        {
+          "text": "duc",
+          "role": "root",
+          "meaningEn": "lead; bring",
+          "meaningZh": "带领；带来",
+          "morphemeId": "duc"
+        }
+      ],
+      "rootStoryIds": [
+        "duc"
+      ],
+      "relatedWords": [
+        "reduce",
+        "deduce",
+        "conduct"
+      ],
+      "sourceIds": [
+        "ls-duco",
+        "wik-produce"
+      ]
+    },
+    {
+      "word": "reduce",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "lead back",
+      "literalZh": "往回带",
+      "meaningBridgeZh": "re- 表示“回、向后”，duc 表示“带领”。历史上的“带回”进一步发展出“使回到更小、更低状态”，也就是“减少、降低”。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回；向后"
+        },
+        {
+          "text": "duc",
+          "role": "root",
+          "meaningEn": "lead; bring",
+          "meaningZh": "带领；带来",
+          "morphemeId": "duc"
+        }
+      ],
+      "rootStoryIds": [
+        "duc"
+      ],
+      "relatedWords": [
+        "produce",
+        "deduce",
+        "conduct"
+      ],
+      "sourceIds": [
+        "ls-duco",
+        "wik-reduce"
+      ]
+    },
+    {
+      "word": "deduce",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "lead down / lead away",
+      "literalZh": "向下或向外引出",
+      "meaningBridgeZh": "de- 带有“向下、离开”的方向，duc 表示“带领”。从已知信息一步步“引出”结论，就形成了现代“推断、演绎”的含义。",
+      "parts": [
+        {
+          "text": "de-",
+          "role": "prefix",
+          "meaningEn": "down; away",
+          "meaningZh": "向下；离开"
+        },
+        {
+          "text": "duc",
+          "role": "root",
+          "meaningEn": "lead; bring",
+          "meaningZh": "带领；引导",
+          "morphemeId": "duc"
+        }
+      ],
+      "rootStoryIds": [
+        "duc"
+      ],
+      "relatedWords": [
+        "produce",
+        "reduce",
+        "conduct"
+      ],
+      "sourceIds": [
+        "ls-duco",
+        "wik-deduce"
+      ]
+    },
+    {
+      "word": "conduct",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "lead together / bring along",
+      "literalZh": "带到一起；引导同行",
+      "meaningBridgeZh": "con- 有“共同、一起”的方向，duct/duc 表示“带领”。因此 conduct 的核心始终与“引导、带领”有关，再根据场景发展为“实施、指挥、传导”等含义。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "共同；一起"
+        },
+        {
+          "text": "duct",
+          "role": "root",
+          "meaningEn": "lead; conduct",
+          "meaningZh": "带领；引导",
+          "morphemeId": "duc"
+        }
+      ],
+      "rootStoryIds": [
+        "duc"
+      ],
+      "relatedWords": [
+        "produce",
+        "reduce",
+        "deduce"
+      ],
+      "sourceIds": [
+        "ls-duco",
+        "wik-conduct"
+      ]
+    },
+    {
+      "word": "gravity",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "heaviness; weight",
+      "literalZh": "重量；沉重",
+      "meaningBridgeZh": "gravity 来自与 Latin gravis“重、沉重”相关的词形。它既可以表示物理上的“重力”，也保留了“严重、庄重”的抽象重量感。",
+      "parts": [
+        {
+          "text": "grav",
+          "role": "root",
+          "meaningEn": "heavy; weighty",
+          "meaningZh": "重；有分量",
+          "morphemeId": "grav"
+        }
+      ],
+      "rootStoryIds": [
+        "grav"
+      ],
+      "relatedWords": [
+        "gravitate",
+        "aggravate",
+        "grave"
+      ],
+      "sourceIds": [
+        "ls-gravis",
+        "wik-gravity"
+      ]
+    },
+    {
+      "word": "aggravate",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "make heavier",
+      "literalZh": "使变得更重",
+      "meaningBridgeZh": "ag- 是 ad- 的同化形式，grav 表示“重”。“让问题更重”很自然地发展成“使恶化、加重”。",
+      "parts": [
+        {
+          "text": "ag- (ad-)",
+          "role": "prefix",
+          "meaningEn": "to; toward",
+          "meaningZh": "使向；加强方向"
+        },
+        {
+          "text": "grav",
+          "role": "root",
+          "meaningEn": "heavy; weighty",
+          "meaningZh": "重；有分量",
+          "morphemeId": "grav"
+        }
+      ],
+      "rootStoryIds": [
+        "grav"
+      ],
+      "relatedWords": [
+        "gravity",
+        "gravitate",
+        "grave"
+      ],
+      "sourceIds": [
+        "ls-gravis",
+        "wik-aggravate"
+      ]
+    },
+    {
+      "word": "elevate",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "raise up; make lighter",
+      "literalZh": "抬高；使向上",
+      "meaningBridgeZh": "e- 来自 ex- 的“向外、向上”方向，lev 与“轻、举起、减轻”相关。把某物抬高，就是 elevate“提升、举起”。",
+      "parts": [
+        {
+          "text": "e- (ex-)",
+          "role": "prefix",
+          "meaningEn": "out; up",
+          "meaningZh": "向外；向上"
+        },
+        {
+          "text": "lev",
+          "role": "root",
+          "meaningEn": "light; raise",
+          "meaningZh": "轻；举起",
+          "morphemeId": "lev"
+        }
+      ],
+      "rootStoryIds": [
+        "lev"
+      ],
+      "relatedWords": [
+        "alleviate",
+        "levity",
+        "elevation"
+      ],
+      "sourceIds": [
+        "ls-levis",
+        "wik-elevate"
+      ]
+    },
+    {
+      "word": "levity",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "lightness",
+      "literalZh": "轻；轻盈",
+      "meaningBridgeZh": "levity 来自与 Latin levis“轻”相关的词形。由物理上的“轻”进一步发展成态度上的“不严肃、轻率”，因此能和 LEV 的核心感觉直接对应起来。",
+      "parts": [
+        {
+          "text": "lev",
+          "role": "root",
+          "meaningEn": "light",
+          "meaningZh": "轻",
+          "morphemeId": "lev"
+        }
+      ],
+      "rootStoryIds": [
+        "lev"
+      ],
+      "relatedWords": [
+        "elevate",
+        "alleviate",
+        "elevation"
+      ],
+      "sourceIds": [
+        "ls-levis",
+        "wik-levity"
+      ]
+    },
+    {
+      "word": "transform",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "change the form across / into another form",
+      "literalZh": "改变形状，变成另一种形式",
+      "meaningBridgeZh": "trans- 表示“跨越、转变”，form 表示“形状、塑造”。形状发生跨越式改变，就是 transform“转变、改造”。",
+      "parts": [
+        {
+          "text": "trans-",
+          "role": "prefix",
+          "meaningEn": "across; beyond; change",
+          "meaningZh": "跨越；转变"
+        },
+        {
+          "text": "form",
+          "role": "root",
+          "meaningEn": "shape; form",
+          "meaningZh": "形状；形式",
+          "morphemeId": "form"
+        }
+      ],
+      "rootStoryIds": [
+        "form"
+      ],
+      "relatedWords": [
+        "conform",
+        "formation",
+        "reform"
+      ],
+      "sourceIds": [
+        "ls-forma",
+        "wik-transform"
+      ]
+    },
+    {
+      "word": "conform",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "shape together / shape according to",
+      "literalZh": "塑造成一致的形状",
+      "meaningBridgeZh": "con- 有“共同、一起”的方向，form 是“塑造、成形”。让自己的形式与某个标准一致，就能理解为“遵从、符合”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together; with",
+          "meaningZh": "共同；与……一致"
+        },
+        {
+          "text": "form",
+          "role": "root",
+          "meaningEn": "shape; form",
+          "meaningZh": "形状；塑造",
+          "morphemeId": "form"
+        }
+      ],
+      "rootStoryIds": [
+        "form"
+      ],
+      "relatedWords": [
+        "transform",
+        "formation",
+        "reform"
+      ],
+      "sourceIds": [
+        "ls-forma",
+        "wik-conform"
+      ]
+    },
+    {
+      "word": "inspect",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "look into",
+      "literalZh": "往里面看",
+      "meaningBridgeZh": "in- 表示“向内”，spect 表示“看、观察”。往里面仔细看，就是 inspect“检查、查看”。",
+      "parts": [
+        {
+          "text": "in-",
+          "role": "prefix",
+          "meaningEn": "in; into",
+          "meaningZh": "向内"
+        },
+        {
+          "text": "spect",
+          "role": "root",
+          "meaningEn": "look; observe",
+          "meaningZh": "看；观察",
+          "morphemeId": "spect"
+        }
+      ],
+      "rootStoryIds": [
+        "spect"
+      ],
+      "relatedWords": [
+        "respect",
+        "spectator",
+        "inspect"
+      ],
+      "sourceIds": [
+        "ls-spectio",
+        "wik-inspect"
+      ]
+    },
+    {
+      "word": "respect",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "look back at; regard",
+      "literalZh": "回头看；认真看待",
+      "meaningBridgeZh": "re- 表示“回、向后”，spect 表示“看”。“回头认真看待某人或某事”逐渐发展出“重视、尊重”的意义。",
+      "parts": [
+        {
+          "text": "re-",
+          "role": "prefix",
+          "meaningEn": "back; again",
+          "meaningZh": "回；再次"
+        },
+        {
+          "text": "spect",
+          "role": "root",
+          "meaningEn": "look; observe",
+          "meaningZh": "看；观察",
+          "morphemeId": "spect"
+        }
+      ],
+      "rootStoryIds": [
+        "spect"
+      ],
+      "relatedWords": [
+        "inspect",
+        "spectator",
+        "prospect"
+      ],
+      "sourceIds": [
+        "ls-spectio",
+        "wik-respect"
+      ]
+    },
+    {
+      "word": "interrupt",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "break between",
+      "literalZh": "从中间打断",
+      "meaningBridgeZh": "inter- 表示“在……之间”，rupt 表示“打破、断开”。从中间把连续的事情打断，就是 interrupt“中断、打断”。",
+      "parts": [
+        {
+          "text": "inter-",
+          "role": "prefix",
+          "meaningEn": "between",
+          "meaningZh": "在……之间"
+        },
+        {
+          "text": "rupt",
+          "role": "root",
+          "meaningEn": "break; burst",
+          "meaningZh": "打破；断开",
+          "morphemeId": "rupt"
+        }
+      ],
+      "rootStoryIds": [
+        "rupt"
+      ],
+      "relatedWords": [
+        "rupture",
+        "disrupt",
+        "erupt"
+      ],
+      "sourceIds": [
+        "ls-rumpo",
+        "wik-interrupt"
+      ]
+    },
+    {
+      "word": "rupture",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a breaking",
+      "literalZh": "破裂；断裂",
+      "meaningBridgeZh": "rupture 直接来自与 Latin rumpere“打破、使破裂”相关的词形，所以它几乎保留了 RUPT 最核心的动作：原本完整或连续的东西发生破裂。",
+      "parts": [
+        {
+          "text": "rupt",
+          "role": "root",
+          "meaningEn": "break; burst",
+          "meaningZh": "打破；破裂",
+          "morphemeId": "rupt"
+        }
+      ],
+      "rootStoryIds": [
+        "rupt"
+      ],
+      "relatedWords": [
+        "interrupt",
+        "disrupt",
+        "erupt"
+      ],
+      "sourceIds": [
+        "ls-rumpo",
+        "wik-rupture"
+      ]
+    },
+    {
+      "word": "construct",
+      "confidence": "verified",
+      "mode": "decomposition",
+      "literalEn": "build together",
+      "literalZh": "把各部分搭建到一起",
+      "meaningBridgeZh": "con- 表示“一起”，struct 来自“堆叠、建造”。把不同部分组合并搭建起来，就是 construct“建造、构造”。",
+      "parts": [
+        {
+          "text": "con-",
+          "role": "prefix",
+          "meaningEn": "together",
+          "meaningZh": "共同；一起"
+        },
+        {
+          "text": "struct",
+          "role": "root",
+          "meaningEn": "build; arrange",
+          "meaningZh": "建造；组织",
+          "morphemeId": "struct"
+        }
+      ],
+      "rootStoryIds": [
+        "struct"
+      ],
+      "relatedWords": [
+        "structure",
+        "instruct",
+        "destruction"
+      ],
+      "sourceIds": [
+        "ls-struo",
+        "wik-construct"
+      ]
+    },
+    {
+      "word": "structure",
+      "confidence": "verified",
+      "mode": "association",
+      "literalEn": "a building or arrangement of parts",
+      "literalZh": "各部分被组织起来形成的整体",
+      "meaningBridgeZh": "structure 来自 Latin structura，而 structura 又和 struere“堆叠、建造”直接相关，因此它很自然地表示“组织起来的整体结构”。",
+      "parts": [
+        {
+          "text": "struct",
+          "role": "root",
+          "meaningEn": "build; arrange",
+          "meaningZh": "建造；组织",
+          "morphemeId": "struct"
+        }
+      ],
+      "rootStoryIds": [
+        "struct"
+      ],
+      "relatedWords": [
+        "construct",
+        "instruct",
+        "destruction"
+      ],
+      "sourceIds": [
+        "ls-struo",
+        "wik-structure"
       ]
     }
   ]
