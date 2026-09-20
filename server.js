@@ -24,6 +24,7 @@ const {
   PersistentSentenceFeedbackStore,
 } = require("./lib/sentence-feedback-store");
 const ecdict = require("./lib/ecdict");
+const morphologyStore = require("./lib/morphology");
 const lexemeIdentity = require("./lib/lexeme-identity");
 const { rankChineseCandidates } = require("./lib/lookup-candidate-ranker");
 
@@ -157,15 +158,30 @@ function defaultLearningData() {
   };
 }
 
+function hydrateLearningMorphology(data) {
+  if (!data || !Array.isArray(data.cards)) return data;
+  let changed = false;
+  const cards = data.cards.map(card => {
+    if (!card || typeof card !== "object" || card.morphology) return card;
+    const word = String(card.word || "").trim().toLowerCase();
+    if (!/^[a-z][a-z'-]*$/.test(word)) return card;
+    const morphology = morphologyStore.lookup(word);
+    if (!morphology) return card;
+    changed = true;
+    return { ...card, morphology };
+  });
+  return changed ? { ...data, cards } : data;
+}
+
 async function loadLearningData() {
   try {
     const parsed = JSON.parse(await fsp.readFile(LEARNING_FILE, "utf8"));
     if (!parsed || !Array.isArray(parsed.cards) || !Array.isArray(parsed.activities)) throw new Error("INVALID_DATA");
-    return {
+    return hydrateLearningMorphology({
       ...defaultLearningData(),
       ...parsed,
       settings: { dailyGoal: 3, ...(parsed.settings || {}) },
-    };
+    });
   } catch {
     return defaultLearningData();
   }
@@ -177,11 +193,11 @@ async function saveLearningData(value) {
     err.code = "LEARNING_DATA_INVALID";
     throw err;
   }
-  const clean = {
+  const clean = hydrateLearningMorphology({
     ...defaultLearningData(),
     ...value,
     settings: { dailyGoal: 3, ...(value.settings || {}) },
-  };
+  });
   await writeJsonAtomic(LEARNING_FILE, clean);
   return clean;
 }
