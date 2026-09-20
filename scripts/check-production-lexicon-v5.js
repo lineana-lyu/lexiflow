@@ -4,52 +4,10 @@ const assert = require("assert");
 const coreLexicon = require("../lib/core-lexicon");
 const ecdict = require("../lib/ecdict");
 const lexemeIdentity = require("../lib/lexeme-identity");
-const { rankChineseCandidates } = require("../lib/lookup-candidate-ranker");
+const { trustedChineseCandidates } = require("../lib/chinese-candidate-resolver");
 
 function clean(value) {
   return String(value ?? "").trim();
-}
-
-function canonicalCandidate(surface, sourceQuery = "") {
-  const word = clean(surface).toLowerCase();
-  if (!word) return { word:"", canonicalWord:"", morphology:null };
-  const morphology = /\s/.test(word)
-    ? null
-    : ecdict.lookupExact(word, "primary", { sourceQuery, autoResolved:Boolean(sourceQuery) });
-  return {
-    word,
-    canonicalWord: lexemeIdentity.exchangeBaseForm(morphology) || word,
-    morphology,
-  };
-}
-
-function trustedChineseCandidates(query, preferredWord = "") {
-  const core = coreLexicon.chineseCandidates(query, 12).map(item => {
-    const identity = canonicalCandidate(item.word, query);
-    return {
-      ...item,
-      ...identity,
-      learnerRank:Number(item.learner_rank || 0),
-      aliasRank:Number(item.rank || 0),
-      source:item.source || "core-lexicon",
-    };
-  });
-  const local = ecdict.searchChinese(query, 8).map(item => {
-    const identity = canonicalCandidate(item?.result?.word, query);
-    return {
-      ...identity,
-      localSearchScore:Number(item.score || 0),
-      learnerRank:Number(item?.result?.coreRank || 0),
-      source:"ecdict-reverse",
-      fallbackResult:item.result,
-    };
-  });
-  const preferred = clean(preferredWord).toLowerCase();
-  if (preferred && ![...core, ...local].some(item => item.word === preferred || item.canonicalWord === preferred)) {
-    const identity = canonicalCandidate(preferred, query);
-    core.push({ ...identity, source:"explicit-user-choice" });
-  }
-  return rankChineseCandidates([...core, ...local], { preferredWord:preferred, limit:12 });
 }
 
 function printCandidates(label, candidates) {
