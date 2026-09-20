@@ -12,8 +12,8 @@ function assert(condition, message) {
 (async () => {
   const seed = JSON.parse(fs.readFileSync(DEFAULT_SEED, "utf8"));
   const summary = validateSeed(seed);
-  assert(summary.morphemeCount >= 61, "Expected at least 61 verified root stories");
-  assert(summary.wordCount >= 241, "Expected at least 241 verified word mappings");
+  assert(summary.morphemeCount >= 68, "Expected at least 68 verified root stories");
+  assert(summary.wordCount >= 254, "Expected at least 254 verified word mappings");
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lexiflow-morphology-"));
   const dbPath = path.join(dir, "morphology.sqlite");
@@ -237,6 +237,41 @@ function assert(condition, message) {
 
   const international = morphology.lookup("international");
   assert(international?.rootStories?.[0]?.id === "nat", "international must reuse NAT/NASC");
+
+  const program = morphology.lookup("program");
+  assert(program?.parts?.map(part => part.text).join("+") === "pro-+gram", "program decomposition mismatch");
+  assert(program?.rootStories?.[0]?.id === "graph", "program must attach GRAPH/GRAM");
+
+  const policy = morphology.lookup("policy");
+  assert(policy?.mode === "association", "policy must avoid a fake modern letter split");
+  assert(policy?.rootStories?.[0]?.id === "polis", "policy must attach POL/POLIT");
+
+  const power = morphology.lookup("power");
+  assert(power?.mode === "association", "power must be a historical root-family association");
+  assert(power?.rootStories?.[0]?.id === "pot", "power must attach POT/POSS");
+
+  const remain = morphology.lookup("remain");
+  assert(remain?.mode === "association", "remain must avoid a misleading modern spelling split");
+  assert(remain?.rootStories?.[0]?.id === "mane", "remain must attach MANE");
+
+  const record = morphology.lookup("record");
+  assert(record?.parts?.map(part => part.text).join("+") === "re-+cord", "record decomposition mismatch");
+  assert(record?.rootStories?.[0]?.id === "cord", "record must attach COR/CORD");
+
+  const support = morphology.lookup("support");
+  assert(support?.parts?.map(part => part.text).join("+") === "sup- (sub-)+port", "support decomposition mismatch");
+  assert(support?.rootStories?.[0]?.id === "port", "support must reuse PORT");
+
+  const actually = morphology.lookup("actually");
+  assert(actually?.rootStories?.[0]?.id === "act", "actually must reuse ACT/AG");
+
+  const special = morphology.lookup("special");
+  assert(special?.mode === "association", "special must be presented as historical association");
+  assert(special?.rootStories?.[0]?.id === "spect", "special must reuse SPEC/SPECT");
+
+  const view = morphology.lookup("view");
+  assert(view?.mode === "association", "view must be presented as historical association");
+  assert(view?.rootStories?.[0]?.id === "vid", "view must reuse VID/VIS");
 
   const voice = morphology.lookup("voice");
   assert(voice?.rootStories?.[0]?.id === "voc", "voice must reuse VOC/VOK");
