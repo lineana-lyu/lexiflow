@@ -163,14 +163,59 @@ function result(word, exampleEn = "", extra = {}) {
   assert.strictEqual(ranked[0].canonicalWord, "unguent");
 }
 
-// RANK-04 multiple sources for one lemma collapse to one canonical candidate.
+// RANK-04 multiple sources for one lemma collapse into one evidence object
+// before scoring, so semantic and learner signals are additive rather than
+// competing source rows.
 {
   const ranked = ranker.rankChineseCandidates([
-    { word: "unguents", canonicalWord: "unguent", learnerRank: 80, source: "ai-resolver" },
-    { word: "unguent", canonicalWord: "unguent", learnerRank: 100, source: "ecdict-reverse" },
+    {
+      word: "unguents",
+      canonicalWord: "unguent",
+      learnerRank: 0,
+      localSearchScore: 1200,
+      source: "ecdict-reverse",
+    },
+    {
+      word: "unguent",
+      canonicalWord: "unguent",
+      learnerRank: 100,
+      learningScore: 450,
+      coreEvidence: true,
+      source: "core-lexicon",
+    },
     { word: "ointment", canonicalWord: "ointment", learnerRank: 500, source: "core-lexicon" },
   ]);
+  const merged = ranked.find(item => item.canonicalWord === "unguent");
+  assert(merged);
   assert.strictEqual(ranked.filter(item => item.canonicalWord === "unguent").length, 1);
+  assert.strictEqual(merged.word, "unguent");
+  assert.strictEqual(merged.learnerRank, 100);
+  assert.strictEqual(merged.learningScore, 450);
+  assert.strictEqual(merged.localSearchScore, 1200);
+  assert(merged.sources.includes("ecdict-reverse") && merged.sources.includes("core-lexicon"));
+}
+
+// RANK-05 Core semantic-intent evidence must survive the shared ranker.
+{
+  const ranked = ranker.rankChineseCandidates([
+    {
+      word: "address",
+      canonicalWord: "address",
+      learnerRank: 620,
+      learningScore: 4300,
+      aliasRank: 1180,
+      source: "core-lexicon",
+    },
+    {
+      word: "response",
+      canonicalWord: "response",
+      learnerRank: 900,
+      learningScore: 2300,
+      aliasRank: 1970,
+      source: "core-lexicon",
+    },
+  ]);
+  assert.strictEqual(ranked[0].canonicalWord, "address");
 }
 
 // Stable key semantics for downstream consumers.
