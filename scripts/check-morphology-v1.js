@@ -12,8 +12,8 @@ function assert(condition, message) {
 (async () => {
   const seed = JSON.parse(fs.readFileSync(DEFAULT_SEED, "utf8"));
   const summary = validateSeed(seed);
-  assert(summary.morphemeCount >= 41, "Expected at least 41 verified root stories");
-  assert(summary.wordCount >= 152, "Expected at least 152 verified word mappings");
+  assert(summary.morphemeCount >= 51, "Expected at least 51 verified root stories");
+  assert(summary.wordCount >= 199, "Expected at least 199 verified word mappings");
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lexiflow-morphology-"));
   const dbPath = path.join(dir, "morphology.sqlite");
@@ -157,6 +157,52 @@ function assert(condition, message) {
   const inanimate = morphology.lookup("inanimate");
   assert(inanimate?.rootStories?.[0]?.id === "anim", "inanimate must attach ANIM");
 
+  const state = morphology.lookup("state");
+  assert(state?.rootStories?.[0]?.id === "sta", "state must reuse STA/STAT rather than duplicate a root");
+
+  const provide = morphology.lookup("provide");
+  assert(provide?.rootStories?.[0]?.id === "vid", "provide must reuse VID/VIS");
+
+  const continueWord = morphology.lookup("continue");
+  assert(continueWord?.mode === "association", "continue must avoid a misleading modern spelling split");
+  assert(continueWord?.rootStories?.[0]?.id === "ten", "continue must reuse TEN/TAIN");
+
+  const national = morphology.lookup("national");
+  assert(national?.rootStories?.[0]?.id === "nat", "national must attach NAT/NASC");
+
+  const community = morphology.lookup("community");
+  assert(community?.rootStories?.[0]?.id === "commun", "community must attach COMMUN");
+
+  const president = morphology.lookup("president");
+  assert(president?.rootStories?.[0]?.id === "sed", "president must attach SED/SID/SESS");
+
+  const offer = morphology.lookup("offer");
+  assert(offer?.mode === "association", "offer must not fake a modern letter split");
+  assert(offer?.rootStories?.[0]?.id === "fer", "offer must attach FER");
+
+  const requireWord = morphology.lookup("require");
+  assert(requireWord?.rootStories?.[0]?.id === "quaer", "require must attach QUAER/QUIR");
+
+  const createWord = morphology.lookup("create");
+  assert(createWord?.rootStories?.[0]?.id === "cre", "create must attach CRE");
+
+  const point = morphology.lookup("point");
+  assert(point?.mode === "association", "point must be presented as historical association");
+  assert(point?.rootStories?.[0]?.id === "punct", "point must attach PUNCT/PUNG");
+
+  const major = morphology.lookup("major");
+  assert(major?.rootStories?.[0]?.id === "magn", "major must attach MAGN/MAJ");
+
+  const force = morphology.lookup("force");
+  assert(force?.mode === "association", "force must use historical association");
+  assert(force?.rootStories?.[0]?.id === "fort", "force must attach FORT");
+
+  const processWord = morphology.lookup("process");
+  assert(processWord?.rootStories?.[0]?.id === "ced", "process must reuse CED/CEED/CESS");
+
+  const effectWord = morphology.lookup("effect");
+  assert(effectWord?.rootStories?.[0]?.id === "fac", "effect must reuse FAC/FIC/FECT");
+
   assert(morphology.lookup("ride") === null, "Unknown words must not receive guessed morphology");
 
   const serverRuntime=fs.readFileSync(path.join(__dirname,"..","server-runtime.js"),"utf8");
@@ -173,7 +219,7 @@ function assert(condition, message) {
   assert(index.includes("./morphology-view-v1.js"), "Morphology renderer must be loaded");
 
   const status = morphology.status();
-  assert(status.available && status.words >= 152 && status.morphemes >= 41, "Morphology database status must be healthy");
+  assert(status.available && status.words >= 199 && status.morphemes >= 51, "Morphology database status must be healthy");
 
   morphology.close();
   fs.rmSync(dir, { recursive:true, force:true });
