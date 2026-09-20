@@ -12,8 +12,8 @@ function assert(condition, message) {
 (async () => {
   const seed = JSON.parse(fs.readFileSync(DEFAULT_SEED, "utf8"));
   const summary = validateSeed(seed);
-  assert(summary.morphemeCount >= 6, "Expected verified root stories");
-  assert(summary.wordCount >= 7, "Expected verified word mappings");
+  assert(summary.morphemeCount >= 10, "Expected at least 10 verified root stories");
+  assert(summary.wordCount >= 31, "Expected at least 31 verified word mappings");
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lexiflow-morphology-"));
   const dbPath = path.join(dir, "morphology.sqlite");
@@ -41,6 +41,23 @@ function assert(condition, message) {
   assert(benefit?.mode === "association", "benefit must not pretend to be a direct modern decomposition");
   assert(benefit.rootStories?.[0]?.id === "bene", "benefit must attach BENE story");
 
+  const transform = morphology.lookup("transform");
+  assert(transform?.parts?.some(part => part.morphemeId === "form"), "transform must attach FORM");
+  assert(transform.literalZh.includes("改变形状"), "transform must explain the form-change bridge");
+
+  const inspect = morphology.lookup("inspect");
+  assert(inspect?.parts?.map(part => part.text).join("+") === "in-+spect", "inspect decomposition mismatch");
+  assert(inspect.rootStories?.[0]?.id === "spect", "inspect must attach SPEC/SPECT");
+
+  const interrupt = morphology.lookup("interrupt");
+  assert(interrupt?.rootStories?.[0]?.id === "rupt", "interrupt must attach RUPT");
+  assert(interrupt.literalZh === "从中间打断", "interrupt literal bridge mismatch");
+
+  const construct = morphology.lookup("construct");
+  assert(construct?.rootStories?.[0]?.id === "struct", "construct must attach STRUCT");
+  assert(construct.sources.some(source => source.kind === "classical_dictionary"), "construct missing classical source");
+  assert(construct.sources.some(source => source.kind === "english_etymology"), "construct missing English etymology source");
+
   assert(morphology.lookup("ride") === null, "Unknown words must not receive guessed morphology");
 
   const serverRuntime=fs.readFileSync(path.join(__dirname,"..","server-runtime.js"),"utf8");
@@ -57,7 +74,7 @@ function assert(condition, message) {
   assert(index.includes("./morphology-view-v1.js"), "Morphology renderer must be loaded");
 
   const status = morphology.status();
-  assert(status.available && status.words >= 7, "Morphology database status must be healthy");
+  assert(status.available && status.words >= 31 && status.morphemes >= 10, "Morphology database status must be healthy");
 
   morphology.close();
   fs.rmSync(dir, { recursive:true, force:true });
