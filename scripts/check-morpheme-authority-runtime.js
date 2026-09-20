@@ -80,6 +80,34 @@ assert(phon?.stemDerivation?.sources?.includes("lsj-aphonos"), "PHON stem mappin
 assert(authority.findByTeachingForm("GRAPH")[0]?.id === "grc-graph", "GRAPH teaching lookup mismatch");
 assert(authority.findByTeachingForm("BIO")[0]?.id === "grc-bio", "BIO teaching lookup mismatch");
 
+const ab = authority.getById("lat-ab");
+assert(ab?.coreMeaningEn?.includes("away"), "A-/AB- must retain AWAY");
+
+const perIntensive = authority.getById("lat-per-intensive");
+assert(perIntensive?.coreMeaningEn?.includes("very"), "intensive PER- must retain VERY");
+assert(perIntensive?.formRelation?.includes("does not cover prepositional per"), "PER- intensive must stay separated from prepositional per");
+
+const dia = authority.getById("grc-dia");
+assert(dia?.sourceLemma === "διά" && dia?.coreMeaningEn?.includes("through"), "DIA- must resolve to διά / THROUGH");
+
+const meta = authority.getById("grc-meta");
+assert(meta?.sourceLemma === "μετά", "META- must resolve to μετά");
+assert(!meta?.coreMeaningEn?.includes("self-referential"), "META- authority must not import modern English semantic extensions");
+
+const para = authority.getById("grc-para");
+assert(para?.sourceLemma === "παρά", "PARA- must resolve to παρά");
+
+const peri = authority.getById("grc-peri");
+assert(peri?.coreMeaningEn?.includes("around"), "PERI- must retain AROUND");
+
+const hyper = authority.getById("grc-hyper");
+assert(hyper?.coreMeaningEn?.includes("above") && hyper?.coreMeaningEn?.includes("beyond"), "HYPER- must retain ABOVE/BEYOND");
+
+const hypo = authority.getById("grc-hypo");
+assert(hypo?.coreMeaningEn?.includes("under"), "HYPO- must retain UNDER");
+
+assert(authority.findByTeachingForm("PRE-").length === 0, "English PRE- reflex must not be published by the Latin source-language authority layer");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
