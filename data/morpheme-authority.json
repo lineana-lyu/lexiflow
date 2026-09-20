@@ -180,6 +180,126 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n99002/",
       "locator": "σύν",
       "publicDomain": true
+    },
+    {
+      "id": "smyth-word-formation",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=3",
+      "locator": "§§822–828, especially roots/stems and compound λογο-γράφο-ς; root γραφ",
+      "publicDomain": true
+    },
+    {
+      "id": "smyth-stems",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=2:chapter=10",
+      "locator": "§§191–193, stems and roots; λογο- as stem of λόγος",
+      "publicDomain": true
+    },
+    {
+      "id": "smyth-declension",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=2:chapter=11",
+      "locator": "§204, second declension = O-declension, stems in ο",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-grapho",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n22825/",
+      "locator": "γράφω",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-logos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n63772/",
+      "locator": "λόγος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-bios",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n19972/",
+      "locator": "βίος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-ge",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%CE%B3%E1%BF%86/",
+      "locator": "γῆ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-geographo",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n22050/",
+      "locator": "γεωγραφέω",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-phone",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%CF%86%CF%89%CE%BD%CE%AE/",
+      "locator": "φωνή",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-aphonos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n18610/",
+      "locator": "ἄφωνος (from φωνή)",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -1182,6 +1302,238 @@
         ],
         "forms": [
           "lsj-syn"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-graph",
+      "kind": "root_family",
+      "teachingForms": [
+        "GRAPH"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "γράφω",
+      "sourceForms": [
+        "γράφω",
+        "γραφ-"
+      ],
+      "sourceStem": "γραφ-",
+      "coreMeaningEn": [
+        "write",
+        "draw",
+        "scratch/inscribe"
+      ],
+      "coreMeaningZh": [
+        "写",
+        "画",
+        "刻写"
+      ],
+      "formRelation": "Smyth explicitly identifies root γραφ and gives λογο-γράφο-ς as a compound; GRAPH is the conventional Latin-letter teaching transliteration of γραφ-.",
+      "stemDerivation": {
+        "sourceStem": "γραφ-",
+        "method": "explicit root in Smyth; compound evidence in λογο-γράφο-ς",
+        "sources": [
+          "smyth-word-formation"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-grapho"
+        ],
+        "meaning": [
+          "lsj-grapho"
+        ],
+        "forms": [
+          "lsj-grapho",
+          "smyth-word-formation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-log",
+      "kind": "root_family",
+      "teachingForms": [
+        "LOG",
+        "LOGO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "λόγος",
+      "sourceForms": [
+        "λόγος",
+        "λογο-"
+      ],
+      "sourceStem": "λογο-",
+      "coreMeaningEn": [
+        "word",
+        "speech",
+        "account",
+        "reason"
+      ],
+      "coreMeaningZh": [
+        "词",
+        "言语",
+        "陈述",
+        "道理"
+      ],
+      "formRelation": "Smyth explicitly gives λογο- as the stem of λόγος and λογο-γράφο-ς as a compound; LOG/LOGO represent that attested stem family.",
+      "stemDerivation": {
+        "sourceStem": "λογο-",
+        "method": "explicit noun stem in Smyth and compound λογο-γράφο-ς",
+        "sources": [
+          "smyth-stems",
+          "smyth-word-formation"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-logos"
+        ],
+        "meaning": [
+          "lsj-logos"
+        ],
+        "forms": [
+          "lsj-logos",
+          "smyth-stems",
+          "smyth-word-formation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-bio",
+      "kind": "root_family",
+      "teachingForms": [
+        "BIO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "βίος",
+      "sourceForms": [
+        "βίος",
+        "βιο-"
+      ],
+      "sourceStem": "βιο-",
+      "coreMeaningEn": [
+        "life",
+        "manner of living"
+      ],
+      "coreMeaningZh": [
+        "生命",
+        "生活",
+        "生活方式"
+      ],
+      "formRelation": "βίος is a second-declension noun; Smyth defines the second declension as O-stems, supporting βιο- as the source stem. BIO is the Latin-letter teaching transliteration of βιο-.",
+      "stemDerivation": {
+        "sourceStem": "βιο-",
+        "method": "second-declension O-stem rule applied to attested βίος",
+        "sources": [
+          "smyth-declension"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-bios"
+        ],
+        "meaning": [
+          "lsj-bios"
+        ],
+        "forms": [
+          "lsj-bios",
+          "smyth-declension"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-geo",
+      "kind": "root_family",
+      "teachingForms": [
+        "GEO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "γῆ",
+      "sourceForms": [
+        "γῆ",
+        "γεω-"
+      ],
+      "sourceStem": "γεω-",
+      "coreMeaningEn": [
+        "earth",
+        "land"
+      ],
+      "coreMeaningZh": [
+        "地",
+        "土地",
+        "大地"
+      ],
+      "formRelation": "LSJ attests γεω- in γεωγραφέω 'describe the earth's surface'; GEO is therefore tied to an attested Greek compound form, not inferred from English spelling.",
+      "stemDerivation": {
+        "sourceStem": "γεω-",
+        "method": "attested compound form γεω- in LSJ γεωγραφέω",
+        "sources": [
+          "lsj-geographo"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-ge"
+        ],
+        "meaning": [
+          "lsj-ge",
+          "lsj-geographo"
+        ],
+        "forms": [
+          "lsj-geographo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-phon",
+      "kind": "root_family",
+      "teachingForms": [
+        "PHON"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "φωνή",
+      "sourceForms": [
+        "φωνή",
+        "φων-"
+      ],
+      "sourceStem": "φων-",
+      "coreMeaningEn": [
+        "sound",
+        "voice"
+      ],
+      "coreMeaningZh": [
+        "声音",
+        "嗓音",
+        "语音"
+      ],
+      "formRelation": "LSJ identifies ἄφωνος as formed from φωνή, directly exposing φων- in composition. PHON is the Latin-letter teaching transliteration of that attested compound stem.",
+      "stemDerivation": {
+        "sourceStem": "φων-",
+        "method": "attested compound form in LSJ ἄφωνος (from φωνή)",
+        "sources": [
+          "lsj-aphonos"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-phone"
+        ],
+        "meaning": [
+          "lsj-phone"
+        ],
+        "forms": [
+          "lsj-phone",
+          "lsj-aphonos"
         ],
         "variants": []
       },
