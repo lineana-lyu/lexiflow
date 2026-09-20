@@ -152,10 +152,23 @@ function localChineseResult(query, { preferredWord = "" } = {}) {
   const ranked = trustedChineseCandidates(query, preferredWord);
   for (const candidate of ranked) {
     const canonical = candidate.canonicalWord || candidate.word;
-    let result = coreLexicon.lookupChineseWord(canonical, query);
-    if (!result && candidate.word !== canonical) result = coreLexicon.lookupChineseWord(candidate.word, query);
-    if (!result && candidate.fallbackResult) result = candidate.fallbackResult;
-    if (!result) continue;
+    const semantic = candidate.semanticResult;
+    if (!semantic || semantic.chineseSenseMatched !== true) continue;
+
+    const learner = candidate.dictionaryResult || {};
+    let result = {
+      ...learner,
+      ...semantic,
+      word:canonical,
+      phonetic:clean(semantic.phonetic) || clean(learner.phonetic),
+      audioUrl:clean(semantic.audioUrl) || clean(learner.audioUrl),
+      audioUrls:Array.isArray(semantic.audioUrls)&&semantic.audioUrls.length
+        ? semantic.audioUrls
+        : (Array.isArray(learner.audioUrls)?learner.audioUrls:[]),
+      tags:Array.isArray(learner.tags)&&learner.tags.length ? learner.tags : (Array.isArray(semantic.tags)?semantic.tags:[]),
+      frequency:learner.frequency || semantic.frequency || {},
+      chineseSenseMatched:true,
+    };
 
     const morphology = /\s/.test(canonical)
       ? null
