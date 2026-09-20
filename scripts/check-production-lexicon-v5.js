@@ -29,6 +29,7 @@ try {
 
   assert(coreStatus.available, "PROD-00 LexiFlow Core production database must exist");
   assert(Number(coreStatus.words || 0) > 50000, "PROD-00 production Core must contain a real full-size lexicon");
+  assert(Number(coreStatus.zhSemanticEvidence || 0) > 10000, "PROD-00 production Core must persist Chinese semantic evidence, not only reverse aliases");
   assert(ecdictStatus.available, "PROD-00 production ECDICT database must exist");
   assert(Number(ecdictStatus.entries || 0) > 500000, "PROD-00 production ECDICT must contain the full corpus");
 
@@ -52,7 +53,20 @@ try {
 
   const ointment = coreLexicon.lookupChineseWord("ointment", "药膏");
   assert(ointment, "PROD-02 production Core must resolve ointment for 药膏");
-  assert(ointment.chineseSenseMatched === true, "PROD-02 ointment must have an actual 药膏 sense match");
+  assert(ointment.chineseSemanticMatched === true, "PROD-02 ointment must have trusted semantic evidence for 药膏");
+  assert(
+    ointment.chineseSenseMatched === true || ointment.chineseAliasMatched === true,
+    "PROD-02 semantic acceptance must come from a matching Core sense or persisted alias evidence"
+  );
+  assert(
+    ointment.chineseSemanticEvidence?.source,
+    "PROD-02 semantic evidence must preserve its production provenance"
+  );
+  assert.strictEqual(
+    ointment.senses?.[0]?.meaningZh,
+    "药膏",
+    "PROD-02 selected Chinese meaning must match the learner query after semantic validation"
+  );
   const ointmentMorphology = ecdict.lookupExact("ointment", "primary", { sourceQuery:"药膏", autoResolved:true });
   const ointmentLexeme = lexemeIdentity.attachLexemeIdentity(ointment, {
     candidateSurface:"ointment",
