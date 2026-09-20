@@ -12,8 +12,8 @@ function assert(condition, message) {
 (async () => {
   const seed = JSON.parse(fs.readFileSync(DEFAULT_SEED, "utf8"));
   const summary = validateSeed(seed);
-  assert(summary.morphemeCount >= 21, "Expected at least 21 verified root stories");
-  assert(summary.wordCount >= 71, "Expected at least 71 verified word mappings");
+  assert(summary.morphemeCount >= 41, "Expected at least 41 verified root stories");
+  assert(summary.wordCount >= 152, "Expected at least 152 verified word mappings");
 
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lexiflow-morphology-"));
   const dbPath = path.join(dir, "morphology.sqlite");
@@ -95,6 +95,68 @@ function assert(condition, message) {
   const promote = morphology.lookup("promote");
   assert(promote?.rootStories?.[0]?.id === "mov", "promote must attach MOV/MOT");
 
+  const postpone = morphology.lookup("postpone");
+  assert(postpone?.rootStories?.[0]?.id === "pon", "postpone must attach PON/POS");
+  assert(postpone.literalZh === "放到后面", "postpone literal bridge mismatch");
+
+  const prevent = morphology.lookup("prevent");
+  assert(prevent?.rootStories?.[0]?.id === "ven", "prevent must attach VEN/VENT");
+
+  const contain = morphology.lookup("contain");
+  assert(contain?.rootStories?.[0]?.id === "ten", "contain must attach TEN/TAIN");
+
+  const stable = morphology.lookup("stable");
+  assert(stable?.rootStories?.[0]?.id === "sta", "stable must attach STA/STAT");
+
+  const consequence = morphology.lookup("consequence");
+  assert(consequence?.rootStories?.[0]?.id === "sequ", "consequence must attach SEQU/SEC");
+
+  const consent = morphology.lookup("consent");
+  assert(consent?.rootStories?.[0]?.id === "sens", "consent must attach SENS/SENT");
+
+  const memory = morphology.lookup("memory");
+  assert(memory?.rootStories?.[0]?.id === "mem", "memory must attach MEM");
+
+  const invoke = morphology.lookup("invoke");
+  assert(invoke?.rootStories?.[0]?.id === "voc", "invoke must attach VOC/VOK");
+
+  const manual = morphology.lookup("manual");
+  assert(manual?.rootStories?.[0]?.id === "manu", "manual must attach MANU");
+
+  const biped = morphology.lookup("biped");
+  assert(biped?.rootStories?.[0]?.id === "ped", "biped must attach PED");
+
+  const translucent = morphology.lookup("translucent");
+  assert(translucent?.rootStories?.[0]?.id === "luc", "translucent must attach LUC/LUM");
+
+  const infinite = morphology.lookup("infinite");
+  assert(infinite?.rootStories?.[0]?.id === "fin", "infinite must attach FIN");
+
+  const progress = morphology.lookup("progress");
+  assert(progress?.rootStories?.[0]?.id === "grad", "progress must attach GRAD/GRESS");
+
+  const proceed = morphology.lookup("proceed");
+  assert(proceed?.rootStories?.[0]?.id === "ced", "proceed must attach CED/CEED/CESS");
+
+  const include = morphology.lookup("include");
+  assert(include?.rootStories?.[0]?.id === "clud", "include must attach CLUD/CLUS");
+
+  const obligation = morphology.lookup("obligation");
+  assert(obligation?.rootStories?.[0]?.id === "lig", "obligation must attach LIG");
+
+  const recur = morphology.lookup("recur");
+  assert(recur?.rootStories?.[0]?.id === "curr", "recur must attach CURR/CURS");
+
+  const genetic = morphology.lookup("genetic");
+  assert(genetic?.rootStories?.[0]?.id === "gen", "genetic must attach GEN");
+  assert(genetic.rootStories?.[0]?.language === "Greek / Latin", "GEN must expose mixed Greek/Latin provenance");
+
+  const revive = morphology.lookup("revive");
+  assert(revive?.rootStories?.[0]?.id === "viv", "revive must attach VIV/VIT");
+
+  const inanimate = morphology.lookup("inanimate");
+  assert(inanimate?.rootStories?.[0]?.id === "anim", "inanimate must attach ANIM");
+
   assert(morphology.lookup("ride") === null, "Unknown words must not receive guessed morphology");
 
   const serverRuntime=fs.readFileSync(path.join(__dirname,"..","server-runtime.js"),"utf8");
@@ -111,7 +173,7 @@ function assert(condition, message) {
   assert(index.includes("./morphology-view-v1.js"), "Morphology renderer must be loaded");
 
   const status = morphology.status();
-  assert(status.available && status.words >= 71 && status.morphemes >= 21, "Morphology database status must be healthy");
+  assert(status.available && status.words >= 152 && status.morphemes >= 41, "Morphology database status must be healthy");
 
   morphology.close();
   fs.rmSync(dir, { recursive:true, force:true });
