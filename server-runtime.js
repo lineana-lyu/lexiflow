@@ -9,7 +9,7 @@ const phraseDictionary = require("./lib/phrase-dictionary");
 const exampleEnrichment = require("./lib/example-enrichment");
 const expressionQuery = require("./lib/expression-query");
 const lexemeIdentity = require("./lib/lexeme-identity");
-const { rankChineseCandidates } = require("./lib/lookup-candidate-ranker");
+const { trustedChineseCandidates } = require("./lib/chinese-candidate-resolver");
 const kokoroTts = require("./lib/kokoro-tts");
 
 const HOST = "127.0.0.1";
@@ -145,49 +145,6 @@ async function ensureWholePhrasePhonetic(result, phrase) {
     wholeExpressionPhonetic:true,
     pronunciationSource:"composed-exact-word-ipa",
   };
-}
-
-function canonicalCandidate(surface, sourceQuery = "") {
-  const word = clean(surface).toLowerCase();
-  if (!word) return { word:"", canonicalWord:"", morphology:null };
-  const morphology = /\s/.test(word)
-    ? null
-    : ecdict.lookupExact(word, "primary", { sourceQuery, autoResolved:Boolean(sourceQuery) });
-  return {
-    word,
-    canonicalWord: lexemeIdentity.exchangeBaseForm(morphology) || word,
-    morphology,
-  };
-}
-
-function trustedChineseCandidates(query, preferredWord = "") {
-  const core = coreLexicon.chineseCandidates(query, 12).map(item => {
-    const identity = canonicalCandidate(item.word, query);
-    return {
-      ...item,
-      ...identity,
-      learningScore:Number(item.learning_score || 0),
-      learnerRank:Number(item.learner_rank || 0),
-      aliasRank:Number(item.rank || 0),
-      source:item.source || "core-lexicon",
-    };
-  });
-  const local = ecdict.searchChinese(query, 8).map(item => {
-    const identity = canonicalCandidate(item?.result?.word, query);
-    return {
-      ...identity,
-      localSearchScore:Number(item.score || 0),
-      learnerRank:Number(item?.result?.coreRank || 0),
-      source:"ecdict-reverse",
-      fallbackResult:item.result,
-    };
-  });
-  const preferred = clean(preferredWord).toLowerCase();
-  if (preferred && ![...core, ...local].some(item => item.word === preferred || item.canonicalWord === preferred)) {
-    const identity = canonicalCandidate(preferred, query);
-    core.push({ ...identity, source:"explicit-user-choice" });
-  }
-  return rankChineseCandidates([...core, ...local], { preferredWord:preferred, limit:12 });
 }
 
 function localChineseResult(query, { preferredWord = "" } = {}) {
