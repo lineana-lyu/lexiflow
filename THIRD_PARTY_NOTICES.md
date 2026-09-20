@@ -134,6 +134,12 @@ Dictionary* as made available by the Perseus Digital Library / Scaife ATLAS.
 English word-etymology relationships used by the morphology seed are
 cross-checked against English Wiktionary entries.
 
+For selected entries, LexiFlow also uses the Online Etymology Dictionary as a
+reference-only cross-check of factual derivation. No Etymonline prose is copied
+into the distributed morphology data.
+
+- Reference: https://www.etymonline.com/
+
 - Project: English Wiktionary
 - Source: https://en.wiktionary.org/
 - Licenses: Creative Commons Attribution-ShareAlike and GNU Free Documentation
