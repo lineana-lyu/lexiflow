@@ -76,22 +76,6 @@
       "url": "https://en.wiktionary.org/wiki/proceed",
       "locator": "English proceed / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
-    },
-    {
-      "id": "etym-reject-etymonline",
-      "sourceType": "english_etymology_reference",
-      "work": "Online Etymology Dictionary",
-      "url": "https://www.etymonline.com/word/reject",
-      "locator": "reject (v.)",
-      "license": "Reference-only factual verification; no source prose copied"
-    },
-    {
-      "id": "wik-reject",
-      "sourceType": "english_etymology_reference",
-      "work": "Wiktionary",
-      "url": "https://en.wiktionary.org/wiki/reject",
-      "locator": "English reject / Etymology",
-      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -187,30 +171,6 @@
         "wik-proceed"
       ],
       "status": "verified"
-    },
-    {
-      "id": "tx-ject",
-      "authorityId": "lat-ject-pending",
-      "englishTeachingForm": "JECT",
-      "mappingType": "historical_stem_reflex",
-      "sourceForm": "iacere / reicere",
-      "targetForm": "ject",
-      "pathway": [
-        "Latin iacere",
-        "Latin reicere / reiectus",
-        "Middle English rejecten",
-        "English reject"
-      ],
-      "evidenceWords": [
-        "reject",
-        "rejection"
-      ],
-      "factSummary": "English JECT is supported by the reicere/reiectus branch of Latin iacere 'throw'; publication remains blocked until the corresponding Latin authority record is created and linked.",
-      "sourceIds": [
-        "etym-reject-etymonline",
-        "wik-reject"
-      ],
-      "status": "blocked_authority_missing"
     }
   ]
 }
