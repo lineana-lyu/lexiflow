@@ -1,0 +1,216 @@
+{
+  "schema": "lexiflow-morpheme-transmission-v1",
+  "scope": "historical-english-mapping",
+  "policy": {
+    "rule": "A downstream English teaching form may be published only when it is linked to an existing source-language authority morpheme and independently supported by at least two English etymology references.",
+    "minIndependentEvidence": 2,
+    "noAuthorityMutation": true,
+    "excludes": [
+      "whole-word teaching story",
+      "semantic bridge",
+      "AI-invented spelling change",
+      "runtime string matching"
+    ]
+  },
+  "sources": [
+    {
+      "id": "etym-pre-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/pre-",
+      "locator": "pre-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-pre",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/pre-",
+      "locator": "English pre- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-perfect-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/perfect",
+      "locator": "perfect (adj.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-perfect",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/perfect",
+      "locator": "English perfect / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-retain-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/retain",
+      "locator": "retain (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-retain",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/retain",
+      "locator": "English retain / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-proceed-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/proceed",
+      "locator": "proceed (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-proceed",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/proceed",
+      "locator": "English proceed / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-reject-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/reject",
+      "locator": "reject (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-reject",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/reject",
+      "locator": "English reject / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    }
+  ],
+  "mappings": [
+    {
+      "id": "tx-pre",
+      "authorityId": "lat-prae",
+      "englishTeachingForm": "PRE-",
+      "mappingType": "historical_reflex",
+      "sourceForm": "prae-",
+      "targetForm": "pre-",
+      "pathway": [
+        "Latin prae-",
+        "Medieval Latin / Old French pre-",
+        "English pre-"
+      ],
+      "evidenceWords": [
+        "pre-",
+        "predate"
+      ],
+      "factSummary": "English pre- is a reduced/historical reflex of Latin prae-, retaining the core 'before' relation.",
+      "sourceIds": [
+        "etym-pre-etymonline",
+        "wik-pre"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-fect",
+      "authorityId": "lat-fac",
+      "englishTeachingForm": "FECT",
+      "mappingType": "historical_stem_reflex",
+      "sourceForm": "fact-/fic- family of facere/perficere",
+      "targetForm": "fect",
+      "pathway": [
+        "Latin facere",
+        "Latin perficere / perfectus",
+        "Old French parfit / Latin-restored perfect",
+        "English -fect teaching form"
+      ],
+      "evidenceWords": [
+        "perfect",
+        "perfection"
+      ],
+      "factSummary": "The English teaching form FECT is supported through the historical perficere/perfectus branch of the facere family; it is not asserted as a standalone Latin lemma.",
+      "sourceIds": [
+        "etym-perfect-etymonline",
+        "wik-perfect"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-tain",
+      "authorityId": "lat-ten",
+      "englishTeachingForm": "TAIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "tenere / retinere",
+      "targetForm": "tain",
+      "pathway": [
+        "Latin tenere / retinere",
+        "Old French retenir",
+        "Middle English retain",
+        "English -tain teaching form"
+      ],
+      "evidenceWords": [
+        "retain"
+      ],
+      "factSummary": "English TAIN is supported by the Romance-to-English development visible in retain from Latin tenere/retinere; it is not a Latin source form.",
+      "sourceIds": [
+        "etym-retain-etymonline",
+        "wik-retain"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceed",
+      "authorityId": "lat-ced",
+      "englishTeachingForm": "CEED",
+      "mappingType": "romance_english_spelling_reflex",
+      "sourceForm": "cedere / procedere",
+      "targetForm": "ceed",
+      "pathway": [
+        "Latin cedere / procedere",
+        "Old French proceder",
+        "Middle English proceden",
+        "English proceed"
+      ],
+      "evidenceWords": [
+        "proceed"
+      ],
+      "factSummary": "English CEED is a later spelling reflex represented by proceed from Latin cedere/procedere; Latin authority remains CED/CESS.",
+      "sourceIds": [
+        "etym-proceed-etymonline",
+        "wik-proceed"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ject",
+      "authorityId": "lat-ject-pending",
+      "englishTeachingForm": "JECT",
+      "mappingType": "historical_stem_reflex",
+      "sourceForm": "iacere / reicere",
+      "targetForm": "ject",
+      "pathway": [
+        "Latin iacere",
+        "Latin reicere / reiectus",
+        "Middle English rejecten",
+        "English reject"
+      ],
+      "evidenceWords": [
+        "reject",
+        "rejection"
+      ],
+      "factSummary": "English JECT is supported by the reicere/reiectus branch of Latin iacere 'throw'; publication remains blocked until the corresponding Latin authority record is created and linked.",
+      "sourceIds": [
+        "etym-reject-etymonline",
+        "wik-reject"
+      ],
+      "status": "blocked_authority_missing"
+    }
+  ]
+}
