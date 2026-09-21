@@ -22,7 +22,9 @@
       "name": "ECDICT wordroot.txt",
       "repository": "skywind3000/ECDICT",
       "url": "https://raw.githubusercontent.com/skywind3000/ECDICT/master/wordroot.txt",
-      "license": "MIT (repository notice); discovery use only"
+      "license": "MIT (repository notice); discovery use only",
+      "snapshotUrl": "https://raw.githubusercontent.com/skywind3000/ECDICT/undefined/wordroot.txt",
+      "snapshotDate": "2026-09-21"
     },
     {
       "id": "legacy-morphology-seed",
