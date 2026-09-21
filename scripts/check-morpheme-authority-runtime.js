@@ -184,7 +184,9 @@ const vita = authority.getById("lat-vita");
 assert(vita?.sourceLemma === "vita", "VITA must resolve to vita");
 assert(!vita?.teachingForms?.includes("VIT"), "Shortened VIT teaching form must remain withheld");
 
-const ject = authority.getById("lat-ject");\nassert(ject?.sourceForms?.includes("jectum"), "JECT must preserve attested Latin jectum compound form");\nassert(authority.findByTeachingForm("JECT")[0]?.id === "lat-ject", "JECT must resolve directly from Latin authority");
+const ject = authority.getById("lat-ject");
+assert(ject?.sourceForms?.includes("jectum"), "JECT must preserve attested Latin jectum compound form");
+assert(authority.findByTeachingForm("JECT")[0]?.id === "lat-ject", "JECT must resolve directly from Latin authority");
 
 for (const item of [
   authority.getById("lat-bene"),
