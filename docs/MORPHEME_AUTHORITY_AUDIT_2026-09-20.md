@@ -86,3 +86,23 @@ Boundary decisions made during this audit:
 This keeps the source-language layer conservative: familiar classroom root
 spellings are not accepted merely because they are pedagogically common.
 
+## 2026-09-21 JECT correction
+
+An earlier audit decision withheld `JECT` because the base `iacio/jacio`
+to English teaching-form chain had not yet been sourced.
+
+A stronger source-language check changed that conclusion. Lewis & Short
+directly records Latin compounds such as `proicio/projicio, jeci, jectum` and
+`deicio/dejicio, jeci, jectum`, explicitly identifying `jacio` as the
+source verb.
+
+Therefore:
+
+- `JECT` is now published in the Latin authority layer;
+- it is **not** treated as an English-only transmission mapping;
+- the previous runtime guard that required `JECT` to be absent was replaced
+  with a guard requiring direct Latin authority resolution.
+
+This is an intentional evidence-driven correction: stronger primary lexical
+evidence supersedes an earlier conservative withholding decision.
+
