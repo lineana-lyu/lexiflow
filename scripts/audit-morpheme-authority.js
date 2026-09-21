@@ -70,6 +70,12 @@ function audit(data){
       if(!meaningEvidence.some(s=>s.sourceType==="historical_lexicon")){
         findings.push({severity:"critical",type:"root_without_lexicon_meaning",id:item.id});
       }
+      if(!lemmaEvidence.some(s=>s.sourceType==="historical_lexicon" && s.language===item.sourceLanguage)){
+        findings.push({severity:"critical",type:"root_lemma_language_mismatch",id:item.id,detail:item.sourceLanguage});
+      }
+      if(!meaningEvidence.some(s=>s.sourceType==="historical_lexicon" && s.language===item.sourceLanguage)){
+        findings.push({severity:"critical",type:"root_meaning_language_mismatch",id:item.id,detail:item.sourceLanguage});
+      }
     }
 
     if((item.variants||[]).length){
