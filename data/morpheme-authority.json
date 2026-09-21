@@ -384,6 +384,174 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n108092/",
       "locator": "ὑπό",
       "publicDomain": true
+    },
+    {
+      "id": "ls-dictio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n13820/",
+      "locator": "dictio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-facio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n17516/",
+      "locator": "facio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-fero",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n17964/",
+      "locator": "fero",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-rumpo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n42012/",
+      "locator": "rumpo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sentio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43681/",
+      "locator": "sentio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-spectio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n44933/",
+      "locator": "spectio / specio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-struo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n45638/",
+      "locator": "struo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-moveo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=moveo",
+      "locator": "moveo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pono",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pono",
+      "locator": "pono",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-porto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=porto",
+      "locator": "porto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-teneo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=teneo",
+      "locator": "teneo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-venio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=venio",
+      "locator": "venio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-voco",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=voco",
+      "locator": "voco",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-video",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=video",
+      "locator": "video",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2011,6 +2179,537 @@
         ],
         "forms": [
           "lsj-hypo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-dict",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "DICT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "dictio",
+      "sourceForms": [
+        "dictio"
+      ],
+      "coreMeaningEn": [
+        "saying",
+        "speaking",
+        "uttering"
+      ],
+      "coreMeaningZh": [
+        "说",
+        "表达",
+        "言说"
+      ],
+      "formRelation": "Lewis & Short explicitly derives dictio from dico and defines it as saying/speaking/uttering. DICT is kept as a conservative teaching form tied to the attested dictio family; the fuller DIC/DICT verbal alternation belongs to a later audited expansion.",
+      "claimSources": {
+        "lemma": [
+          "ls-dictio"
+        ],
+        "meaning": [
+          "ls-dictio"
+        ],
+        "forms": [
+          "ls-dictio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fac",
+      "kind": "root_family",
+      "teachingForms": [
+        "FAC",
+        "FACT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "facio",
+      "sourceForms": [
+        "facio",
+        "feci",
+        "factum"
+      ],
+      "coreMeaningEn": [
+        "make",
+        "do",
+        "cause"
+      ],
+      "coreMeaningZh": [
+        "做",
+        "制造",
+        "使成为"
+      ],
+      "formRelation": "FAC follows the facio family; FACT reflects the fact- form in attested Latin factum. English FECT/FIC reflexes are intentionally not asserted by this source-language layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-facio"
+        ],
+        "meaning": [
+          "ls-facio"
+        ],
+        "forms": [
+          "ls-facio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fer",
+      "kind": "root_family",
+      "teachingForms": [
+        "FER"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "fero",
+      "sourceForms": [
+        "fero",
+        "tuli",
+        "latum",
+        "ferre"
+      ],
+      "coreMeaningEn": [
+        "bear",
+        "carry",
+        "bring"
+      ],
+      "coreMeaningZh": [
+        "携带",
+        "承载",
+        "带来"
+      ],
+      "formRelation": "FER follows the present/infinite family of Latin fero/ferre. The irregular perfect tuli and supine latum are retained as source forms but are not collapsed into a single English teaching root.",
+      "claimSources": {
+        "lemma": [
+          "ls-fero"
+        ],
+        "meaning": [
+          "ls-fero"
+        ],
+        "forms": [
+          "ls-fero"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-mov",
+      "kind": "root_family",
+      "teachingForms": [
+        "MOV",
+        "MOT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "moveo",
+      "sourceForms": [
+        "moveo",
+        "movi",
+        "motum"
+      ],
+      "coreMeaningEn": [
+        "move",
+        "set in motion"
+      ],
+      "coreMeaningZh": [
+        "移动",
+        "使运动"
+      ],
+      "formRelation": "MOV follows the moveo/movi family; MOT reflects the mot- form in Latin motum.",
+      "claimSources": {
+        "lemma": [
+          "ls-moveo"
+        ],
+        "meaning": [
+          "ls-moveo"
+        ],
+        "forms": [
+          "ls-moveo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-pon",
+      "kind": "root_family",
+      "teachingForms": [
+        "PON",
+        "POSIT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pono",
+      "sourceForms": [
+        "pono",
+        "posui",
+        "positum"
+      ],
+      "coreMeaningEn": [
+        "put",
+        "place",
+        "set"
+      ],
+      "coreMeaningZh": [
+        "放",
+        "安置",
+        "设置"
+      ],
+      "formRelation": "PON follows the present family of pono; POSIT reflects the posit- form in Latin positum. English POS- is not separately asserted here without a downstream historical mapping.",
+      "claimSources": {
+        "lemma": [
+          "ls-pono"
+        ],
+        "meaning": [
+          "ls-pono"
+        ],
+        "forms": [
+          "ls-pono"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-port",
+      "kind": "root_family",
+      "teachingForms": [
+        "PORT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "porto",
+      "sourceForms": [
+        "porto",
+        "portare"
+      ],
+      "coreMeaningEn": [
+        "carry",
+        "bear",
+        "convey"
+      ],
+      "coreMeaningZh": [
+        "携带",
+        "搬运",
+        "运送"
+      ],
+      "formRelation": "PORT is directly tied to the Latin porto/portare family.",
+      "claimSources": {
+        "lemma": [
+          "ls-porto"
+        ],
+        "meaning": [
+          "ls-porto"
+        ],
+        "forms": [
+          "ls-porto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-rupt",
+      "kind": "root_family",
+      "teachingForms": [
+        "RUPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "rumpo",
+      "sourceForms": [
+        "rumpo",
+        "rupi",
+        "ruptum"
+      ],
+      "coreMeaningEn": [
+        "break",
+        "burst",
+        "tear",
+        "rend"
+      ],
+      "coreMeaningZh": [
+        "打破",
+        "爆裂",
+        "撕裂",
+        "断开"
+      ],
+      "formRelation": "RUPT reflects the rupt- form in attested Latin ruptum; Lewis & Short explicitly gives the root rup and the break/burst/tear sense family.",
+      "claimSources": {
+        "lemma": [
+          "ls-rumpo"
+        ],
+        "meaning": [
+          "ls-rumpo"
+        ],
+        "forms": [
+          "ls-rumpo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sent",
+      "kind": "root_family",
+      "teachingForms": [
+        "SENT",
+        "SENS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sentio",
+      "sourceForms": [
+        "sentio",
+        "sensi",
+        "sensum"
+      ],
+      "coreMeaningEn": [
+        "feel",
+        "perceive",
+        "discern by the senses"
+      ],
+      "coreMeaningZh": [
+        "感受",
+        "察觉",
+        "感知"
+      ],
+      "formRelation": "SENT follows the present family of sentio; SENS reflects the sens- form visible in sensi/sensum.",
+      "claimSources": {
+        "lemma": [
+          "ls-sentio"
+        ],
+        "meaning": [
+          "ls-sentio"
+        ],
+        "forms": [
+          "ls-sentio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-spect",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "SPECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "spectio",
+      "sourceForms": [
+        "spectio"
+      ],
+      "coreMeaningEn": [
+        "observing",
+        "looking"
+      ],
+      "coreMeaningZh": [
+        "观察",
+        "观看"
+      ],
+      "formRelation": "Lewis & Short defines spectio as an observing and explicitly derives it from specio. SPECT is published conservatively from the attested spectio family; SPEC is withheld until the underlying verbal stem chain is separately sourced.",
+      "claimSources": {
+        "lemma": [
+          "ls-spectio"
+        ],
+        "meaning": [
+          "ls-spectio"
+        ],
+        "forms": [
+          "ls-spectio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-struct",
+      "kind": "root_family",
+      "teachingForms": [
+        "STRUCT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "struo",
+      "sourceForms": [
+        "struo",
+        "struxi",
+        "structum"
+      ],
+      "coreMeaningEn": [
+        "place together",
+        "pile up",
+        "arrange",
+        "build"
+      ],
+      "coreMeaningZh": [
+        "堆放",
+        "排列",
+        "组织",
+        "建造"
+      ],
+      "formRelation": "STRUCT reflects the struct- form in Latin structum; Lewis & Short gives struo with the meanings place upon one another, pile up, arrange, build.",
+      "claimSources": {
+        "lemma": [
+          "ls-struo"
+        ],
+        "meaning": [
+          "ls-struo"
+        ],
+        "forms": [
+          "ls-struo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ten",
+      "kind": "root_family",
+      "teachingForms": [
+        "TEN",
+        "TENT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "teneo",
+      "sourceForms": [
+        "teneo",
+        "tenui",
+        "tentum"
+      ],
+      "coreMeaningEn": [
+        "hold",
+        "keep",
+        "retain"
+      ],
+      "coreMeaningZh": [
+        "握住",
+        "保持",
+        "留住"
+      ],
+      "formRelation": "TEN follows the present family of teneo; TENT reflects the tent- form in Latin tentum. English TAIN is a later historical reflex and is not asserted here.",
+      "claimSources": {
+        "lemma": [
+          "ls-teneo"
+        ],
+        "meaning": [
+          "ls-teneo"
+        ],
+        "forms": [
+          "ls-teneo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ven",
+      "kind": "root_family",
+      "teachingForms": [
+        "VEN",
+        "VENT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "venio",
+      "sourceForms": [
+        "venio",
+        "veni",
+        "ventum"
+      ],
+      "coreMeaningEn": [
+        "come",
+        "arrive"
+      ],
+      "coreMeaningZh": [
+        "来",
+        "到来"
+      ],
+      "formRelation": "VEN follows the present family of venio; VENT reflects the vent- form in Latin ventum.",
+      "claimSources": {
+        "lemma": [
+          "ls-venio"
+        ],
+        "meaning": [
+          "ls-venio"
+        ],
+        "forms": [
+          "ls-venio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-voc",
+      "kind": "root_family",
+      "teachingForms": [
+        "VOC"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "voco",
+      "sourceForms": [
+        "voco",
+        "vocare"
+      ],
+      "coreMeaningEn": [
+        "call",
+        "summon",
+        "name"
+      ],
+      "coreMeaningZh": [
+        "呼叫",
+        "召唤",
+        "命名"
+      ],
+      "formRelation": "VOC is directly tied to the Latin voco/vocare family. English VOK spellings are not source-language forms and are excluded.",
+      "claimSources": {
+        "lemma": [
+          "ls-voco"
+        ],
+        "meaning": [
+          "ls-voco"
+        ],
+        "forms": [
+          "ls-voco"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vid",
+      "kind": "root_family",
+      "teachingForms": [
+        "VID",
+        "VIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "video",
+      "sourceForms": [
+        "video",
+        "vidi",
+        "visum"
+      ],
+      "coreMeaningEn": [
+        "see",
+        "perceive"
+      ],
+      "coreMeaningZh": [
+        "看见",
+        "观察",
+        "察觉"
+      ],
+      "formRelation": "VID follows the video/vidi family; VIS reflects the vis- form in Latin visum.",
+      "claimSources": {
+        "lemma": [
+          "ls-video"
+        ],
+        "meaning": [
+          "ls-video"
+        ],
+        "forms": [
+          "ls-video"
         ],
         "variants": []
       },
