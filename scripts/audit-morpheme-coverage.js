@@ -149,6 +149,8 @@ function auditCoverage(candidates, authority, transmission) {
 
   const ecdictSource = (candidates.sources || []).find(s => s.id === "ecdict-wordroot");
   assert(clean(ecdictSource?.snapshotDate), "ECDICT candidate snapshot date is required");
+  assert(/^[0-9a-f]{40}$/i.test(clean(ecdictSource?.blobSha)), "ECDICT candidate blob SHA is required");
+  assert(clean(ecdictSource?.snapshotUrl) && !clean(ecdictSource?.snapshotUrl).includes("undefined"), "ECDICT pinned snapshot URL is required");
   assert(clean(ecdictSource?.url), "ECDICT discovery source URL is required");
 
   const index = buildPublishedIndex(authority, transmission);
