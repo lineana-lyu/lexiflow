@@ -108,6 +108,44 @@ assert(hypo?.coreMeaningEn?.includes("under"), "HYPO- must retain UNDER");
 
 assert(authority.findByTeachingForm("PRE-").length === 0, "English PRE- reflex must not be published by the Latin source-language authority layer");
 
+const fac = authority.getById("lat-fac");
+assert(fac?.sourceLemma === "facio", "FAC/FACT must resolve to facio");
+assert(fac?.sourceForms?.includes("factum"), "FAC/FACT must preserve factum");
+assert(!fac?.teachingForms?.includes("FECT"), "English FECT reflex must not be asserted by Latin authority");
+
+const fero = authority.getById("lat-fer");
+assert(fero?.sourceLemma === "fero", "FER must resolve to fero");
+assert(fero?.sourceForms?.includes("latum"), "FER record must preserve irregular Latin latum source form");
+
+const rupt = authority.getById("lat-rupt");
+assert(rupt?.sourceForms?.includes("ruptum"), "RUPT must preserve ruptum");
+assert(rupt?.coreMeaningEn?.includes("break"), "RUPT must retain BREAK");
+
+const sent = authority.getById("lat-sent");
+assert(sent?.sourceLemma === "sentio", "SENT/SENS must resolve to sentio");
+assert(sent?.sourceForms?.includes("sensum"), "SENT/SENS must preserve sensum");
+
+const spect = authority.getById("lat-spect");
+assert(spect?.sourceLemma === "spectio", "SPECT must remain conservatively tied to spectio");
+assert(!spect?.teachingForms?.includes("SPEC"), "SPEC must stay withheld until the verbal stem chain is separately sourced");
+
+const struct = authority.getById("lat-struct");
+assert(struct?.sourceForms?.includes("structum"), "STRUCT must preserve structum");
+
+const ten = authority.getById("lat-ten");
+assert(ten?.sourceLemma === "teneo", "TEN/TENT must resolve to teneo");
+assert(!ten?.teachingForms?.includes("TAIN"), "English TAIN reflex must not be asserted by Latin authority");
+
+const ven = authority.getById("lat-ven");
+assert(ven?.sourceForms?.includes("ventum"), "VEN/VENT must preserve ventum");
+
+const voc = authority.getById("lat-voc");
+assert(voc?.sourceLemma === "voco", "VOC must resolve to voco");
+assert(!voc?.teachingForms?.includes("VOK"), "English VOK spelling must not be asserted by Latin authority");
+
+const vid = authority.getById("lat-vid");
+assert(vid?.sourceForms?.includes("visum"), "VID/VIS must preserve visum");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
