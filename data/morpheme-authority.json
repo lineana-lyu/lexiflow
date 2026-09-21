@@ -660,6 +660,30 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51147/",
       "locator": "vita",
       "publicDomain": true
+    },
+    {
+      "id": "ls-proicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n38690/",
+      "locator": "proicio / projicio, jeci, jectum [jacio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-deicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n12804/",
+      "locator": "deicio / dejicio, jeci, jectum [jacio]",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -3165,6 +3189,48 @@
         ],
         "forms": [
           "ls-vita"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ject",
+      "kind": "root_family",
+      "teachingForms": [
+        "JECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "jacio / iacio",
+      "sourceForms": [
+        "jacio",
+        "iacio",
+        "jeci",
+        "jectum"
+      ],
+      "coreMeaningEn": [
+        "throw",
+        "cast",
+        "hurl"
+      ],
+      "coreMeaningZh": [
+        "投",
+        "掷",
+        "抛"
+      ],
+      "formRelation": "Lewis & Short compound entries for proicio/projicio and deicio/dejicio directly record jeci, jectum and identify jacio as the source verb. JECT is therefore an attested Latin compound-stem form, not an English-only teaching invention.",
+      "claimSources": {
+        "lemma": [
+          "ls-proicio",
+          "ls-deicio"
+        ],
+        "meaning": [
+          "ls-proicio",
+          "ls-deicio"
+        ],
+        "forms": [
+          "ls-proicio",
+          "ls-deicio"
         ],
         "variants": []
       },
