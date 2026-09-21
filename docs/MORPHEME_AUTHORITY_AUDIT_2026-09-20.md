@@ -62,3 +62,27 @@ Critical findings fail CI. Review findings are printed for manual follow-up.
 The audit is intentionally structural/offline. It validates provenance metadata,
 source classes, host policy, and evidence relationships without making network
 availability a release dependency.
+
+## 2026-09-21 Latin root-family expansion
+
+The next authority batch added FORM, GRAD/GRESS, STA/STAT, CED/CESS,
+CLUD/CLUS, CURR/CURS, GEN, VIV and VITA after re-checking their Latin source
+forms.
+
+Boundary decisions made during this audit:
+
+- `CEED` is not published from Latin `cedo / cessi / cessum`; it belongs to a
+  later English historical mapping layer.
+- `VIT` is not collapsed into `vivo`; `VIV` is sourced from `vivo`, while
+  `VITA` is stored separately from the attested noun `vita`.
+- `JECT` remains withheld. Latin `iacio/jacio` is authoritative for the verb
+  'throw/cast', but the English teaching form `JECT` still needs a separately
+  sourced transmission/stem chain before publication.
+- `CLUS` is allowed because Lewis & Short directly records `clausum` and
+  notes `cludo` as a frequent compound form of `claudo`.
+- `GEN` is allowed because Lewis & Short explicitly identifies root `gen-`
+  under `gigno`.
+
+This keeps the source-language layer conservative: familiar classroom root
+spellings are not accepted merely because they are pedagogically common.
+
