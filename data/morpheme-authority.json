@@ -552,6 +552,114 @@
       "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=video",
       "locator": "video",
       "publicDomain": true
+    },
+    {
+      "id": "ls-formo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18596/",
+      "locator": "formo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gradior",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19798/",
+      "locator": "gradior",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n45457/",
+      "locator": "sto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-cedo-motion",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n7275/",
+      "locator": "cedo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-claudo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n8535/",
+      "locator": "claudo / cludo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-curro",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n12030/",
+      "locator": "curro",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gigno",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19570/",
+      "locator": "gigno",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vivo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51238/",
+      "locator": "vivo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vita",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51147/",
+      "locator": "vita",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2710,6 +2818,353 @@
         ],
         "forms": [
           "ls-video"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-form",
+      "kind": "root_family",
+      "teachingForms": [
+        "FORM"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "formo",
+      "sourceForms": [
+        "formo",
+        "formavi",
+        "formatum"
+      ],
+      "coreMeaningEn": [
+        "shape",
+        "fashion",
+        "form"
+      ],
+      "coreMeaningZh": [
+        "塑造",
+        "使成形",
+        "形成"
+      ],
+      "formRelation": "FORM is directly preserved in Latin formo/formare. Lewis & Short defines formo as to shape, fashion, form.",
+      "claimSources": {
+        "lemma": [
+          "ls-formo"
+        ],
+        "meaning": [
+          "ls-formo"
+        ],
+        "forms": [
+          "ls-formo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-grad",
+      "kind": "root_family",
+      "teachingForms": [
+        "GRAD",
+        "GRESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "gradior",
+      "sourceForms": [
+        "gradior",
+        "gressus"
+      ],
+      "coreMeaningEn": [
+        "take steps",
+        "step",
+        "walk",
+        "go"
+      ],
+      "coreMeaningZh": [
+        "迈步",
+        "行走",
+        "前行"
+      ],
+      "formRelation": "GRAD is visible in gradior; GRESS is the attested participial/perfect-family form gressus.",
+      "claimSources": {
+        "lemma": [
+          "ls-gradior"
+        ],
+        "meaning": [
+          "ls-gradior"
+        ],
+        "forms": [
+          "ls-gradior"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sta",
+      "kind": "root_family",
+      "teachingForms": [
+        "STA",
+        "STAT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sto",
+      "sourceForms": [
+        "sto",
+        "steti",
+        "statum"
+      ],
+      "coreMeaningEn": [
+        "stand",
+        "stand still",
+        "remain standing"
+      ],
+      "coreMeaningZh": [
+        "站立",
+        "站住",
+        "保持位置"
+      ],
+      "formRelation": "Lewis & Short explicitly identifies root sta- for sto; STAT reflects the stat- form in Latin statum.",
+      "claimSources": {
+        "lemma": [
+          "ls-sto"
+        ],
+        "meaning": [
+          "ls-sto"
+        ],
+        "forms": [
+          "ls-sto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ced",
+      "kind": "root_family",
+      "teachingForms": [
+        "CED",
+        "CESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cedo",
+      "sourceForms": [
+        "cedo",
+        "cessi",
+        "cessum"
+      ],
+      "coreMeaningEn": [
+        "go",
+        "move",
+        "walk",
+        "withdraw"
+      ],
+      "coreMeaningZh": [
+        "走",
+        "移动",
+        "退开"
+      ],
+      "formRelation": "CED is visible in cedo; CESS reflects the cess- forms cessi/cessum. English CEED is intentionally excluded from this Latin authority layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-cedo-motion"
+        ],
+        "meaning": [
+          "ls-cedo-motion"
+        ],
+        "forms": [
+          "ls-cedo-motion"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-clud",
+      "kind": "root_family",
+      "teachingForms": [
+        "CLUD",
+        "CLUS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "claudo",
+      "sourceForms": [
+        "claudo",
+        "cludo",
+        "clausi",
+        "clausum"
+      ],
+      "coreMeaningEn": [
+        "shut",
+        "close",
+        "shut up"
+      ],
+      "coreMeaningZh": [
+        "关闭",
+        "封闭",
+        "关住"
+      ],
+      "formRelation": "Lewis & Short records cludo as a frequent compound form of claudo and clausi/clausum as the closed-form family; CLUD/CLUS are therefore source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-claudo"
+        ],
+        "meaning": [
+          "ls-claudo"
+        ],
+        "forms": [
+          "ls-claudo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-curr",
+      "kind": "root_family",
+      "teachingForms": [
+        "CURR",
+        "CURS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "curro",
+      "sourceForms": [
+        "curro",
+        "cucurri",
+        "cursum"
+      ],
+      "coreMeaningEn": [
+        "run",
+        "move quickly",
+        "hasten"
+      ],
+      "coreMeaningZh": [
+        "跑",
+        "快速移动",
+        "疾行"
+      ],
+      "formRelation": "CURR is visible in curro; CURS reflects the curs- form in Latin cursum.",
+      "claimSources": {
+        "lemma": [
+          "ls-curro"
+        ],
+        "meaning": [
+          "ls-curro"
+        ],
+        "forms": [
+          "ls-curro"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-gen",
+      "kind": "root_family",
+      "teachingForms": [
+        "GEN"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "gigno",
+      "sourceForms": [
+        "gigno",
+        "genui",
+        "genitum",
+        "gen-"
+      ],
+      "coreMeaningEn": [
+        "beget",
+        "bear",
+        "bring forth",
+        "produce"
+      ],
+      "coreMeaningZh": [
+        "生育",
+        "产生",
+        "生出",
+        "生成"
+      ],
+      "formRelation": "Lewis & Short explicitly marks root gen- under gigno, so GEN is not inferred from English spelling.",
+      "claimSources": {
+        "lemma": [
+          "ls-gigno"
+        ],
+        "meaning": [
+          "ls-gigno"
+        ],
+        "forms": [
+          "ls-gigno"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-viv",
+      "kind": "root_family",
+      "teachingForms": [
+        "VIV"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "vivo",
+      "sourceForms": [
+        "vivo",
+        "vixi",
+        "victum"
+      ],
+      "coreMeaningEn": [
+        "live",
+        "be alive",
+        "have life"
+      ],
+      "coreMeaningZh": [
+        "活着",
+        "生存",
+        "有生命"
+      ],
+      "formRelation": "VIV is directly grounded in Latin vivo. VIT is not asserted here because it belongs to the separate vita/historical-derivation path.",
+      "claimSources": {
+        "lemma": [
+          "ls-vivo"
+        ],
+        "meaning": [
+          "ls-vivo"
+        ],
+        "forms": [
+          "ls-vivo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vita",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "VITA"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "vita",
+      "sourceForms": [
+        "vita"
+      ],
+      "coreMeaningEn": [
+        "life"
+      ],
+      "coreMeaningZh": [
+        "生命",
+        "生活"
+      ],
+      "formRelation": "VITA is the attested Latin noun vita 'life'. The shortened English teaching form VIT is intentionally withheld until a downstream historical mapping is sourced.",
+      "claimSources": {
+        "lemma": [
+          "ls-vita"
+        ],
+        "meaning": [
+          "ls-vita"
+        ],
+        "forms": [
+          "ls-vita"
         ],
         "variants": []
       },
