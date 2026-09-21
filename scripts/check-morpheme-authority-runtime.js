@@ -146,6 +146,46 @@ assert(!voc?.teachingForms?.includes("VOK"), "English VOK spelling must not be a
 const vid = authority.getById("lat-vid");
 assert(vid?.sourceForms?.includes("visum"), "VID/VIS must preserve visum");
 
+const form = authority.getById("lat-form");
+assert(form?.sourceLemma === "formo", "FORM must resolve to formo");
+assert(form?.sourceForms?.includes("formatum"), "FORM must preserve formatum");
+
+const grad = authority.getById("lat-grad");
+assert(grad?.sourceLemma === "gradior", "GRAD/GRESS must resolve to gradior");
+assert(grad?.sourceForms?.includes("gressus"), "GRAD/GRESS must preserve gressus");
+
+const sta = authority.getById("lat-sta");
+assert(sta?.sourceLemma === "sto", "STA/STAT must resolve to sto");
+assert(sta?.sourceForms?.includes("statum"), "STA/STAT must preserve statum");
+
+const ced = authority.getById("lat-ced");
+assert(ced?.sourceLemma === "cedo", "CED/CESS must resolve to cedo");
+assert(ced?.sourceForms?.includes("cessum"), "CED/CESS must preserve cessum");
+assert(!ced?.teachingForms?.includes("CEED"), "English CEED must not leak into Latin authority");
+
+const clud = authority.getById("lat-clud");
+assert(clud?.sourceLemma === "claudo", "CLUD/CLUS must resolve to claudo");
+assert(clud?.sourceForms?.includes("cludo"), "CLUD must be backed by attested cludo compound form");
+assert(clud?.sourceForms?.includes("clausum"), "CLUS must preserve clausum family");
+
+const curr = authority.getById("lat-curr");
+assert(curr?.sourceLemma === "curro", "CURR/CURS must resolve to curro");
+assert(curr?.sourceForms?.includes("cursum"), "CURR/CURS must preserve cursum");
+
+const gen = authority.getById("lat-gen");
+assert(gen?.sourceLemma === "gigno", "GEN must resolve to gigno");
+assert(gen?.sourceForms?.includes("gen-"), "GEN must preserve the lexicon's explicit root gen-");
+
+const viv = authority.getById("lat-viv");
+assert(viv?.sourceLemma === "vivo", "VIV must resolve to vivo");
+assert(!viv?.teachingForms?.includes("VIT"), "VIT must not be collapsed into the VIVO authority record");
+
+const vita = authority.getById("lat-vita");
+assert(vita?.sourceLemma === "vita", "VITA must resolve to vita");
+assert(!vita?.teachingForms?.includes("VIT"), "Shortened VIT teaching form must remain withheld");
+
+assert(authority.findByTeachingForm("JECT").length === 0, "JECT must remain withheld until the iacio/jacio to English JECT historical chain is sourced");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
