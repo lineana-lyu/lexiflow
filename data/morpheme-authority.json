@@ -972,6 +972,90 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n96265/",
       "locator": "στάσιμος; from στάσις",
       "publicDomain": true
+    },
+    {
+      "id": "ls-trans",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48739/",
+      "locator": "trans; composition alternation trans / tra",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-tres",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48969/",
+      "locator": "tres / tria",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-tribus-tri",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n49003/",
+      "locator": "tribus; etymological note f. tri-, root in tres",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-rego",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n40913/",
+      "locator": "rego, rexi, rectum",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hydor",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n106502/",
+      "locator": "ὕδωρ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hydrophoros",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n106477/",
+      "locator": "ὑδροφόρος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-epi-headword",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%E1%BC%90%CF%80%CE%AF/",
+      "locator": "ἐπί",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -3857,6 +3941,203 @@
         "forms": [
           "lsj-stasis",
           "lsj-stasimos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-trans",
+      "kind": "prefix",
+      "teachingForms": [
+        "TRANS-",
+        "TRA-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "trans",
+      "sourceForms": [
+        "trans-",
+        "tra-"
+      ],
+      "coreMeaningEn": [
+        "across",
+        "over",
+        "beyond",
+        "through"
+      ],
+      "coreMeaningZh": [
+        "横跨",
+        "越过",
+        "在另一边",
+        "穿过"
+      ],
+      "formRelation": "Lewis & Short directly records trans as a Latin preposition and compound prefix, and states that in some phonological environments the compound spelling varies between trans- and tra-.",
+      "claimSources": {
+        "lemma": [
+          "ls-trans"
+        ],
+        "meaning": [
+          "ls-trans"
+        ],
+        "forms": [
+          "ls-trans"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-tri",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "TRI"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "tres / tria",
+      "sourceForms": [
+        "tres",
+        "tria",
+        "tri-"
+      ],
+      "coreMeaningEn": [
+        "three"
+      ],
+      "coreMeaningZh": [
+        "三",
+        "三个"
+      ],
+      "formRelation": "Lewis & Short gives Latin tres/tria 'three' and explicitly notes tri- in the etymological formation of tribus. TRI is therefore source-language grounded rather than inferred from English compounds.",
+      "claimSources": {
+        "lemma": [
+          "ls-tres",
+          "ls-tribus-tri"
+        ],
+        "meaning": [
+          "ls-tres"
+        ],
+        "forms": [
+          "ls-tres",
+          "ls-tribus-tri"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-reg",
+      "kind": "root_family",
+      "teachingForms": [
+        "REG",
+        "RECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "rego",
+      "sourceForms": [
+        "rego",
+        "rexi",
+        "rectum"
+      ],
+      "coreMeaningEn": [
+        "guide",
+        "direct",
+        "keep straight"
+      ],
+      "coreMeaningZh": [
+        "引导",
+        "指挥",
+        "使保持正直方向"
+      ],
+      "formRelation": "REG follows Latin rego; RECT reflects the rect- form in Latin rectum. RIG is not published here until its compound-vowel-change chain is separately sourced.",
+      "claimSources": {
+        "lemma": [
+          "ls-rego"
+        ],
+        "meaning": [
+          "ls-rego"
+        ],
+        "forms": [
+          "ls-rego"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hydro",
+      "kind": "root_family",
+      "teachingForms": [
+        "HYDRO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὕδωρ",
+      "sourceForms": [
+        "ὕδωρ",
+        "ὑδρο-"
+      ],
+      "sourceStem": "ὑδρο-",
+      "coreMeaningEn": [
+        "water"
+      ],
+      "coreMeaningZh": [
+        "水"
+      ],
+      "formRelation": "LSJ defines ὕδωρ as water and directly attests the compound form ὑδρο- in ὑδροφόρος 'carrying water'. HYDRO is the Latin-letter teaching label for that attested Greek compound form. HYDR remains outside the authority layer pending a separate derivational analysis.",
+      "stemDerivation": {
+        "sourceStem": "ὑδρο-",
+        "method": "attested compound form ὑδρο- in LSJ ὑδροφόρος",
+        "sources": [
+          "lsj-hydrophoros"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-hydor"
+        ],
+        "meaning": [
+          "lsj-hydor"
+        ],
+        "forms": [
+          "lsj-hydor",
+          "lsj-hydrophoros"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-epi",
+      "kind": "prefix",
+      "teachingForms": [
+        "EPI-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ἐπί",
+      "sourceForms": [
+        "ἐπί",
+        "ἐπι-"
+      ],
+      "coreMeaningEn": [
+        "on",
+        "upon",
+        "over",
+        "against"
+      ],
+      "coreMeaningZh": [
+        "在……上",
+        "在……之上",
+        "覆盖",
+        "朝向"
+      ],
+      "formRelation": "Ancient Greek ἐπί functions as a preposition and compound prefix; LexiFlow publishes only the conservative EPI- teaching form here. EPH-/EP- remain deferred until their elision/euphony rules are represented by an approved grammar source.",
+      "claimSources": {
+        "lemma": [
+          "lsj-epi-headword"
+        ],
+        "meaning": [
+          "lsj-epi-headword"
+        ],
+        "forms": [
+          "lsj-epi-headword"
         ],
         "variants": []
       },
