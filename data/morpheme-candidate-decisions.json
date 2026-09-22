@@ -237,6 +237,19 @@
       "relatedAuthorityIds": [
         "lat-curr"
       ]
+    },
+    {
+      "id": "decision-mob-move",
+      "candidateId": "ecdict:mob, mot, mov",
+      "form": "MOB",
+      "disposition": "closed_not_publish",
+      "reason": "Latin moveo directly supports MOV/MOT through moveo/movi/motum. MOB is a pedagogical truncation associated with later mobilis/mobile forms, not a separately attested source-language root in this family; LexiFlow therefore keeps MOV/MOT and does not publish MOB as an independent morpheme.",
+      "relatedAuthorityIds": [
+        "lat-mov"
+      ],
+      "sourceIds": [
+        "ls-moveo"
+      ]
     }
   ]
 }
