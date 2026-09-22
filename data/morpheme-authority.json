@@ -876,6 +876,66 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51150/",
       "locator": "vitalis; adj. vita; of/belonging to life",
       "publicDomain": true
+    },
+    {
+      "id": "ls-conficio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n10108/",
+      "locator": "conficio, feci, fectum; facio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-actio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n613/",
+      "locator": "actio; f. ago; doing, performing, acting",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-adigo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n798/",
+      "locator": "adigo, egi, actum; ago",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-monos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n68641/",
+      "locator": "μόνος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-monogenes",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n68501/",
+      "locator": "μονογενής",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2576,14 +2636,17 @@
       "kind": "root_family",
       "teachingForms": [
         "FAC",
-        "FACT"
+        "FACT",
+        "FIC"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "facio",
       "sourceForms": [
         "facio",
         "feci",
-        "factum"
+        "factum",
+        "conficio",
+        "fectum"
       ],
       "coreMeaningEn": [
         "make",
@@ -2595,16 +2658,19 @@
         "制造",
         "使成为"
       ],
-      "formRelation": "FAC follows the facio family; FACT reflects the fact- form in attested Latin factum. English FECT/FIC reflexes are intentionally not asserted by this source-language layer.",
+      "formRelation": "FAC/FACT are directly grounded in facio/factum. Latin compounds such as conficio directly attest the -fic- present-stem branch and fectum; FIC is therefore source-language grounded. FECT remains a downstream English teaching mapping, while FEC is not published as a separate morpheme.",
       "claimSources": {
         "lemma": [
-          "ls-facio"
+          "ls-facio",
+          "ls-conficio"
         ],
         "meaning": [
-          "ls-facio"
+          "ls-facio",
+          "ls-conficio"
         ],
         "forms": [
-          "ls-facio"
+          "ls-facio",
+          "ls-conficio"
         ],
         "variants": []
       },
@@ -3603,6 +3669,101 @@
         ],
         "forms": [
           "ls-pes"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ag",
+      "kind": "root_family",
+      "teachingForms": [
+        "AG",
+        "ACT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ago",
+      "sourceForms": [
+        "ago",
+        "ag-",
+        "egi",
+        "actum",
+        "actio"
+      ],
+      "coreMeaningEn": [
+        "do",
+        "act",
+        "perform",
+        "drive"
+      ],
+      "coreMeaningZh": [
+        "做",
+        "行动",
+        "执行",
+        "推动"
+      ],
+      "formRelation": "Lewis & Short defines actio as derived from ago and as doing/performing/acting; compounds such as adigo directly preserve the ago family with egi, actum. AG/ACT are therefore source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "meaning": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "forms": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-mon",
+      "kind": "root_family",
+      "teachingForms": [
+        "MON",
+        "MONO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μόνος",
+      "sourceForms": [
+        "μόνος",
+        "μονο-"
+      ],
+      "sourceStem": "μονο-",
+      "coreMeaningEn": [
+        "alone",
+        "single",
+        "only"
+      ],
+      "coreMeaningZh": [
+        "单独",
+        "单一",
+        "唯一"
+      ],
+      "formRelation": "LSJ defines μόνος as alone/single and directly attests μονο- in compounds such as μονογενής. MON/MONO are Latin-letter teaching labels for that verified Greek family.",
+      "stemDerivation": {
+        "sourceStem": "μονο-",
+        "method": "attested compound form in LSJ μονογενής and related mono- compounds",
+        "sources": [
+          "lsj-monos",
+          "lsj-monogenes"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-monos"
+        ],
+        "meaning": [
+          "lsj-monos",
+          "lsj-monogenes"
+        ],
+        "forms": [
+          "lsj-monos",
+          "lsj-monogenes"
         ],
         "variants": []
       },
