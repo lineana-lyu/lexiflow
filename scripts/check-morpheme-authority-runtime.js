@@ -22,7 +22,9 @@ assert(new Set(inPrefix.map(item => item.id)).has("lat-in-negative"), "Negative 
 
 const cap = authority.getById("lat-cap");
 assert(cap?.teachingForms?.includes("CAPT"), "CAP family must expose attested CAPT teaching form");
-assert(!cap?.teachingForms?.includes("CEPT"), "CEPT must not be asserted by the Latin authority layer without the separate Romance/English derivation layer");
+assert(cap?.teachingForms?.includes("CEPT"), "CEPT must be backed by attested Latin receptum/acceptum compound forms");
+assert(cap?.sourceForms?.includes("receptum"), "CEPT must preserve Latin receptum");
+assert(cap?.sourceForms?.includes("acceptum"), "CEPT must preserve Latin acceptum");
 
 const ad = authority.getById("lat-ad");
 assert(ad?.variants?.some(item => item.form === "at-"), "AD- assimilation must include attested at-");
