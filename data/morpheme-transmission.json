@@ -460,6 +460,22 @@
       "url": "https://en.wiktionary.org/wiki/course",
       "locator": "English course / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-cide",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-cide",
+      "locator": "-cide",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-cide",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-cide",
+      "locator": "English -cide / Etymology 1 and Etymology 2",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -1152,6 +1168,31 @@
       "sourceIds": [
         "etym-course",
         "wik-course"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cide",
+      "authorityId": "lat-caed",
+      "englishTeachingForm": "CIDE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin -cida / -cidium < caedo",
+      "targetForm": "-cide",
+      "pathway": [
+        "Latin caedo 'cut/kill'",
+        "Latin -cida 'killer/cutter' and -cidium 'killing'",
+        "Middle French -cide",
+        "English -cide"
+      ],
+      "evidenceWords": [
+        "homicide",
+        "fratricide",
+        "insecticide"
+      ],
+      "factSummary": "English -cide is a later French/English form descending from Latin -cida/-cidium, themselves built on the caedo 'cut/kill' family. It therefore belongs downstream from CID/CIS authority rather than being published as a Classical Latin root form.",
+      "sourceIds": [
+        "etym-cide",
+        "wik-cide"
       ],
       "status": "verified"
     }
