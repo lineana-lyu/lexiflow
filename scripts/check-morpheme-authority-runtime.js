@@ -312,6 +312,26 @@ assert(cadFallFamily?.teachingForms?.includes("CAD"), "CAD must be source-langua
 assert(cadFallFamily?.teachingForms?.includes("CAS"), "CAS must be source-language grounded");
 assert(cadFallFamily?.teachingForms?.includes("CID"), "Fall-family CID must be source-language grounded");
 
+const absPrefix = authority.getById("lat-ab");
+assert(absPrefix?.teachingForms?.includes("ABS-"), "ABS- must be grounded as a Latin ab-family form");
+
+const claudFamily = authority.getById("lat-clud");
+assert(claudFamily?.teachingForms?.includes("CLAUS"), "CLAUS must be grounded by Latin clausi/clausum");
+assert(claudFamily?.teachingForms?.includes("CLUD"), "CLUD must remain in the claudo family");
+assert(claudFamily?.teachingForms?.includes("CLUS"), "CLUS must remain in the claudo family");
+
+const sedSitFamily = authority.getById("lat-sed-sit");
+assert(sedSitFamily?.sourceLemma === "sedeo", "SED/SID/SESS sit family must resolve to Latin sedeo");
+assert(sedSitFamily?.teachingForms?.includes("SED"), "SED sit-family form must be source-language grounded");
+assert(sedSitFamily?.teachingForms?.includes("SID"), "SID must be grounded by sedeo compounds such as assideo");
+assert(sedSitFamily?.teachingForms?.includes("SESS"), "SESS must be grounded by Latin sessum");
+
+const sedAuthorities = authority.findByTeachingForm("SED").map(item => item.id).sort();
+assert(
+  sedAuthorities.length === 2 && sedAuthorities[0] === "lat-se" && sedAuthorities[1] === "lat-sed-sit",
+  "SED must remain an explicit homograph between the separative prefix and the sit family"
+);
+
 const cidAuthorities = authority.findByTeachingForm("CID").map(item => item.id).sort();
 assert(
   cidAuthorities.length === 2 && cidAuthorities[0] === "lat-cad" && cidAuthorities[1] === "lat-caed",
