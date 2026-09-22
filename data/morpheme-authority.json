@@ -1056,6 +1056,18 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%E1%BC%90%CF%80%CE%AF/",
       "locator": "ἐπί",
       "publicDomain": true
+    },
+    {
+      "id": "ls-corrigo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n11292/",
+      "locator": "corrigo (conr-), rexi, rectum; v. a. rego",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -4028,6 +4040,7 @@
       "kind": "root_family",
       "teachingForms": [
         "REG",
+        "RIG",
         "RECT"
       ],
       "sourceLanguage": "Latin",
@@ -4035,7 +4048,8 @@
       "sourceForms": [
         "rego",
         "rexi",
-        "rectum"
+        "rectum",
+        "corrigo"
       ],
       "coreMeaningEn": [
         "guide",
@@ -4047,16 +4061,19 @@
         "指挥",
         "使保持正直方向"
       ],
-      "formRelation": "REG follows Latin rego; RECT reflects the rect- form in Latin rectum. RIG is not published here until its compound-vowel-change chain is separately sourced.",
+      "formRelation": "REG follows Latin rego; RECT reflects rectum; Lewis & Short directly records corrigo as a compound of rego, grounding the -rig- compound form. REG/RIG/RECT therefore stay in the source-language authority layer.",
       "claimSources": {
         "lemma": [
-          "ls-rego"
+          "ls-rego",
+          "ls-corrigo"
         ],
         "meaning": [
-          "ls-rego"
+          "ls-rego",
+          "ls-corrigo"
         ],
         "forms": [
-          "ls-rego"
+          "ls-rego",
+          "ls-corrigo"
         ],
         "variants": []
       },
