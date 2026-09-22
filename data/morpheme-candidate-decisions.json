@@ -180,6 +180,63 @@
       "relatedAuthorityIds": [
         "grc-epi"
       ]
+    },
+    {
+      "id": "decision-cap2-head",
+      "candidateId": "ecdict:cap2, capit, cipit",
+      "form": "CAP",
+      "disposition": "closed_not_publish",
+      "reason": "The indexed candidate cap2 denotes the CAPUT 'head' family, not CAP < capio 'take'. LexiFlow publishes the evidenced source forms CAPIT/CIPIT and intentionally does not publish ambiguous CAP for the head family.",
+      "relatedAuthorityIds": [
+        "lat-caput"
+      ],
+      "sourceIds": [
+        "ls-caput",
+        "ls-praeceps"
+      ]
+    },
+    {
+      "id": "decision-cur-run",
+      "candidateId": "ecdict:cur1, curr, cor1, corr, curs, cour1, cours",
+      "form": "CUR",
+      "disposition": "closed_not_publish",
+      "reason": "Latin curro directly supports CURR/CURS. CUR is only a pedagogical truncation and adds no distinct source-language fact.",
+      "relatedAuthorityIds": [
+        "lat-curr"
+      ],
+      "sourceIds": [
+        "ls-curro"
+      ]
+    },
+    {
+      "id": "decision-cor-run",
+      "candidateId": "ecdict:cur1, curr, cor1, corr, curs, cour1, cours",
+      "form": "COR",
+      "disposition": "closed_not_publish",
+      "reason": "COR is too ambiguous to publish as a 'run' morpheme: it collides with unrelated Latin cor 'heart' and occurs in mixed Romance spellings. CURR/CURS plus downstream COURS provide the safer model.",
+      "relatedAuthorityIds": [
+        "lat-curr"
+      ]
+    },
+    {
+      "id": "decision-corr-run",
+      "candidateId": "ecdict:cur1, curr, cor1, corr, curs, cour1, cours",
+      "form": "CORR",
+      "disposition": "closed_not_publish",
+      "reason": "CORR appears in later Romance/English formations but is not required as a separate source-language morpheme. Publishing it would overgeneralize a mixed spelling family.",
+      "relatedAuthorityIds": [
+        "lat-curr"
+      ]
+    },
+    {
+      "id": "decision-cour-run",
+      "candidateId": "ecdict:cur1, curr, cor1, corr, curs, cour1, cours",
+      "form": "COUR",
+      "disposition": "closed_not_publish",
+      "reason": "COUR is an arbitrary truncation of later French/English forms such as courier/course. COURS has a specific historical transmission mapping; COUR is intentionally not published.",
+      "relatedAuthorityIds": [
+        "lat-curr"
+      ]
     }
   ]
 }
