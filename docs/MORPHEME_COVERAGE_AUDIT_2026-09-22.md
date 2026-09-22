@@ -219,3 +219,66 @@ Learning Engine Check #860 completed successfully after:
 - learning-engine deterministic checks.
 
 The branch remains a draft PR and has not been merged into `main`.
+
+## P1 batch — TRANS / TRI / REG / HYDRO / EPI and downstream forms
+
+This batch resolved the next high-value P1 group without widening source-language
+claims beyond the evidence.
+
+### Source-language authority added
+
+- `TRANS- / TRA-` ← Latin `trans`
+  - Lewis & Short directly documents compound spelling alternation between
+    `trans-` and `tra-` in specific phonological environments.
+- `TRI` ← Latin `tres / tria`
+  - Lewis & Short also explicitly references `tri-` in the formation of
+    `tribus`.
+- `REG / RIG / RECT` ← Latin `rego, rexi, rectum`
+  - `RIG` is source-language grounded by `corrigo`, which Lewis & Short
+    explicitly marks as a compound of `rego`.
+- `HYDRO` ← Ancient Greek `ὕδωρ`
+  - Greek compound form `ὑδρο-` is directly attested in LSJ
+    `ὑδροφόρος`.
+- `EPI-` ← Ancient Greek `ἐπί`
+  - only the conservative EPI- teaching form is published.
+
+### Transmission mappings added
+
+- `VOKE` → Latin `VOC` family through Old French / English forms such as
+  `invoke`.
+- `VISE` → Latin `VID / VIS` family through French / English
+  `revise`.
+- `PHONE / PHONY / PHONO` → Greek `PHON` family as learned English
+  combining/suffix forms.
+- `CLOS` → Latin `CLUD / CLUS` family through Old French `clos/clore`.
+- `HYDR` → Greek `HYDRO` family as the reduced learned combining form.
+
+### Deferred forms
+
+- `EPH`
+- `EP`
+
+Both are retained as candidate-level deferred forms until an approved Ancient
+Greek grammar source is attached to the exact elision/euphony rule.
+
+### Coverage result after the batch
+
+- authority: **77 morphemes / 88 sources**
+- transmission: **23 mappings / 46 sources**
+- ECDICT raw coverage: **65 covered / 31 partial / 429 missing**
+- workflow: **65 complete / 7 closed / 2 deferred / 451 actionable**
+- actionable bands: **P0 0 / P1 42 / P2 409**
+
+The highest remaining P1 queue now begins with:
+
+- JECT / JET / JAC
+- EN / EM
+- CURR / CURS / CORR / COUR / COURS
+- BI / BIN
+- CAPIT / CIPIT
+- CIS / CID / CIDE
+- CLAUS
+- AB / ABS
+- MOV / MOT / MOB
+- SED / SID / SESS
+
