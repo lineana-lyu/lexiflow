@@ -200,6 +200,31 @@ assert(metr?.sourceStem === "μετρ- / μετρο-", "METR must preserve Greek
 assert(!metr?.teachingForms?.includes("METER"), "English METER must remain outside Ancient Greek authority");
 assert(!metr?.teachingForms?.includes("METRY"), "English METRY must remain outside Ancient Greek authority");
 
+const genFamily = authority.getById("lat-gen");
+assert(genFamily?.teachingForms?.includes("GENER"), "GENER must be backed by Latin genus/generis");
+assert(genFamily?.sourceForms?.includes("generis"), "GENER must preserve Latin generis");
+
+const dictFamily = authority.getById("lat-dict");
+assert(dictFamily?.teachingForms?.includes("DIC"), "DIC must be backed by Latin root dic-");
+assert(dictFamily?.teachingForms?.includes("DICT"), "DICT must remain in the dico family");
+
+const capFamily = authority.getById("lat-cap");
+assert(capFamily?.teachingForms?.includes("CIP"), "CIP must be backed by Latin recipio/accipio");
+assert(capFamily?.teachingForms?.includes("CEPT"), "CEPT must be backed by Latin receptum/acceptum");
+assert(!capFamily?.teachingForms?.includes("CEIVE"), "CEIVE must remain outside Latin authority");
+assert(!capFamily?.teachingForms?.includes("CEIT"), "CEIT must remain outside Latin authority");
+
+const pedFamily = authority.getById("lat-ped");
+assert(pedFamily?.sourceLemma === "pes", "PED must resolve to Latin pes");
+assert(pedFamily?.sourceForms?.includes("pedis"), "PED must preserve Latin pedis");
+assert(!pedFamily?.teachingForms?.includes("PEDI"), "PEDI must not be published as a separate Latin authority form");
+assert(!pedFamily?.teachingForms?.includes("PEDE"), "PEDE must not be published as a separate Latin authority form");
+
+const vivFamily = authority.getById("lat-viv");
+assert(!vivFamily?.teachingForms?.includes("VIVI"), "VIVI must remain a non-published surface sequence");
+const vitaFamily = authority.getById("lat-vita");
+assert(!vitaFamily?.teachingForms?.includes("VIT"), "VIT must remain outside source-language authority");
+
 const pon = authority.getById("lat-pon");
 assert(pon?.teachingForms?.includes("PONE"), "PONE must be backed by Latin ponere");
 assert(!pon?.teachingForms?.includes("POSE"), "POSE must remain outside Latin authority");
