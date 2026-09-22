@@ -300,6 +300,24 @@ assert(caputFamily?.teachingForms?.includes("CAPIT"), "CAPIT must be backed by L
 assert(caputFamily?.teachingForms?.includes("CIPIT"), "CIPIT must be backed by Latin praecipitis");
 assert(!caputFamily?.teachingForms?.includes("CAP"), "Ambiguous CAP must not be published for the head family");
 
+const caedCutFamily = authority.getById("lat-caed");
+assert(caedCutFamily?.sourceLemma === "caedo", "CID/CIS cut family must resolve to Latin caedo");
+assert(caedCutFamily?.teachingForms?.includes("CID"), "Cut-family CID must be source-language grounded");
+assert(caedCutFamily?.teachingForms?.includes("CIS"), "Cut-family CIS must be source-language grounded");
+assert(!caedCutFamily?.teachingForms?.includes("CIDE"), "English CIDE must remain outside Latin source authority");
+
+const cadFallFamily = authority.getById("lat-cad");
+assert(cadFallFamily?.sourceLemma === "cado", "CAD/CAS/CID fall family must resolve to Latin cado");
+assert(cadFallFamily?.teachingForms?.includes("CAD"), "CAD must be source-language grounded");
+assert(cadFallFamily?.teachingForms?.includes("CAS"), "CAS must be source-language grounded");
+assert(cadFallFamily?.teachingForms?.includes("CID"), "Fall-family CID must be source-language grounded");
+
+const cidAuthorities = authority.findByTeachingForm("CID").map(item => item.id).sort();
+assert(
+  cidAuthorities.length === 2 && cidAuthorities[0] === "lat-cad" && cidAuthorities[1] === "lat-caed",
+  "CID must remain an explicit two-family homograph in authority"
+);
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
