@@ -8,6 +8,7 @@ const CANDIDATE_FILE = path.join(ROOT, "data", "morpheme-candidates.json");
 const AUTHORITY_FILE = path.join(ROOT, "data", "morpheme-authority.json");
 const TRANSMISSION_FILE = path.join(ROOT, "data", "morpheme-transmission.json");
 const DECISION_FILE = path.join(ROOT, "data", "morpheme-candidate-decisions.json");
+const COLLISION_FILE = path.join(ROOT, "data", "morpheme-collisions.json");
 
 const ALLOWED_DISPOSITIONS = new Set([
   "closed_not_publish",
@@ -108,7 +109,84 @@ function buildDecisionIndex(decisions, candidates, authority) {
   return index;
 }
 
-function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = new Map()) {
+function buildCollisionIndex(collisions, candidates, authority, transmission) {
+  assert(
+    collisions?.schema === "lexiflow-morpheme-collisions-v1",
+    "Unsupported morpheme collision schema"
+  );
+  assert(
+    collisions?.policy?.candidateBindingPrecedence === true,
+    "Collision registry must give candidate bindings precedence"
+  );
+
+  const candidateMap = new Map(
+    [...(candidates.ecdictCandidates || []), ...(candidates.legacyCandidates || [])]
+      .map(candidate => [candidate.id, candidate])
+  );
+  const authorityMap = new Map((authority.morphemes || []).map(item => [item.id, item]));
+  const transmissionMap = new Map((transmission.mappings || []).map(item => [item.id, item]));
+  const index = new Map();
+  const collisionIds = new Set();
+  const collisionForms = new Set();
+  let bindingCount = 0;
+
+  for (const collision of collisions.collisions || []) {
+    const id = clean(collision.id);
+    const form = normalizeForm(collision.form);
+    const bindings = Array.isArray(collision.bindings) ? collision.bindings : [];
+
+    assert(id, "Collision id is required");
+    assert(!collisionIds.has(id), `Duplicate collision id: ${id}`);
+    collisionIds.add(id);
+    assert(form, `Collision form is required: ${id}`);
+    assert(!collisionForms.has(form), `Duplicate collision surface form: ${form}`);
+    collisionForms.add(form);
+    assert(clean(collision.reason), `Collision reason is required: ${id}`);
+    assert(bindings.length >= 2, `Collision must bind at least two candidate families: ${id}`);
+
+    for (const binding of bindings) {
+      const candidateId = clean(binding.candidateId);
+      assert(candidateMap.has(candidateId), `Unknown candidateId in collision ${id}: ${candidateId}`);
+      const candidateForms = new Set(splitCandidateForms(candidateMap.get(candidateId).root));
+      assert(candidateForms.has(form), `Collision form ${form} is not part of candidate ${candidateId}`);
+
+      const authorityIds = [...new Set((binding.authorityIds || []).map(clean).filter(Boolean))];
+      const transmissionIds = [...new Set((binding.transmissionIds || []).map(clean).filter(Boolean))];
+      assert(
+        authorityIds.length + transmissionIds.length > 0,
+        `Collision binding must target authority or transmission: ${candidateId}::${form}`
+      );
+
+      for (const authorityId of authorityIds) {
+        const item = authorityMap.get(authorityId);
+        assert(item, `Unknown authorityId ${authorityId} in collision ${id}`);
+        const forms = new Set((item.teachingForms || []).map(normalizeForm));
+        assert(forms.has(form), `Authority ${authorityId} does not publish collision form ${form}`);
+      }
+      for (const transmissionId of transmissionIds) {
+        const item = transmissionMap.get(transmissionId);
+        assert(item, `Unknown transmissionId ${transmissionId} in collision ${id}`);
+        assert(
+          normalizeForm(item.englishTeachingForm) === form,
+          `Transmission ${transmissionId} does not publish collision form ${form}`
+        );
+      }
+
+      const key = `${candidateId}::${form}`;
+      assert(!index.has(key), `Duplicate collision binding: ${key}`);
+      index.set(key, { collisionId: id, form, authorityIds, transmissionIds });
+      bindingCount += 1;
+    }
+  }
+
+  return {
+    index,
+    collisionCount: (collisions.collisions || []).length,
+    bindingCount,
+  };
+}
+
+function assessCandidate(candidate, index, decisionIndex, collisionIndex, legacySignalByForm = new Map()) {
   const forms = splitCandidateForms(candidate.root);
   const authorityMatches = [];
   const transmissionMatches = [];
@@ -117,6 +195,7 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
   const closedForms = [];
   const deferredForms = [];
   const ambiguousAuthorityForms = [];
+  const collisionResolvedForms = [];
 
   for (const form of forms) {
     const decision = decisionIndex.get(`${candidate.id}::${form}`);
@@ -135,8 +214,26 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
       continue;
     }
 
-    const authorityIds = index.authorityByForm.get(form) || [];
-    const transmissionIds = index.transmissionByForm.get(form) || [];
+    const rawAuthorityIds = index.authorityByForm.get(form) || [];
+    const rawTransmissionIds = index.transmissionByForm.get(form) || [];
+    const collisionBinding = collisionIndex.get(`${candidate.id}::${form}`);
+
+    const authorityIds = collisionBinding
+      ? rawAuthorityIds.filter(id => collisionBinding.authorityIds.includes(id))
+      : rawAuthorityIds;
+    const transmissionIds = collisionBinding
+      ? rawTransmissionIds.filter(id => collisionBinding.transmissionIds.includes(id))
+      : rawTransmissionIds;
+
+    if (collisionBinding) {
+      collisionResolvedForms.push({
+        form,
+        collisionId: collisionBinding.collisionId,
+        authorityIds,
+        transmissionIds,
+      });
+    }
+
     if (authorityIds.length) {
       authorityMatches.push({ form, ids: authorityIds });
       if (authorityIds.length > 1) ambiguousAuthorityForms.push(form);
@@ -189,6 +286,7 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
   if (/\d/.test(clean(candidate.root))) riskFlags.push("indexed_homograph");
   if (/\band\b|\//i.test(clean(candidate.originHint))) riskFlags.push("mixed_origin_hint");
   if (ambiguousAuthorityForms.length) riskFlags.push("authority_form_ambiguous");
+  if (collisionResolvedForms.length) riskFlags.push("collision_binding_applied");
   if (coverageState === "partial") riskFlags.push("authority_or_transmission_gap");
   if (closedForms.length) riskFlags.push("candidate_forms_intentionally_unpublished");
   if (deferredForms.length) riskFlags.push("candidate_forms_deferred");
@@ -210,6 +308,7 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
     actionableUnresolvedForms,
     closedForms,
     deferredForms,
+    collisionResolvedForms,
     riskFlags,
     priorityScore,
     priorityBand,
@@ -228,7 +327,7 @@ function countWorkflowStates(rows) {
   return out;
 }
 
-function auditCoverage(candidates, authority, transmission, decisions) {
+function auditCoverage(candidates, authority, transmission, decisions, collisions) {
   assert(candidates?.schema === "lexiflow-morpheme-candidates-v1", "Unsupported candidate schema");
   assert(candidates?.policy?.candidateOnly === true, "Candidate dataset must remain candidate-only");
   assert(candidates?.policy?.publishForbidden === true, "Candidate dataset must forbid direct publication");
@@ -256,6 +355,8 @@ function auditCoverage(candidates, authority, transmission, decisions) {
 
   const index = buildPublishedIndex(authority, transmission);
   const decisionIndex = buildDecisionIndex(decisions, candidates, authority);
+  const collisionRegistry = buildCollisionIndex(collisions, candidates, authority, transmission);
+  const collisionIndex = collisionRegistry.index;
   const legacySignalByForm = new Map();
   for (const candidate of candidates.legacyCandidates || []) {
     for (const form of splitCandidateForms(candidate.root)) {
@@ -267,10 +368,10 @@ function auditCoverage(candidates, authority, transmission, decisions) {
   }
 
   const legacyRows = (candidates.legacyCandidates || []).map(candidate =>
-    assessCandidate(candidate, index, decisionIndex, legacySignalByForm)
+    assessCandidate(candidate, index, decisionIndex, collisionIndex, legacySignalByForm)
   );
   const ecdictRows = (candidates.ecdictCandidates || []).map(candidate =>
-    assessCandidate(candidate, index, decisionIndex, legacySignalByForm)
+    assessCandidate(candidate, index, decisionIndex, collisionIndex, legacySignalByForm)
   );
 
   const topGaps = ecdictRows
@@ -298,6 +399,39 @@ function auditCoverage(candidates, authority, transmission, decisions) {
     "CAP2 must not surface-match the CAP < capio authority family"
   );
 
+  // Regression: the same normalized CID surface belongs to two distinct Latin
+  // families. Candidate-specific collision bindings must keep the cut/kill
+  // candidate on caedo and the fall candidate on cado.
+  const cidCutRow = ecdictRows.find(row => row.id === "ecdict:cis, cid1, -cide");
+  const cidFallRow = ecdictRows.find(row => row.id === "ecdict:cad, cas, cid2");
+  const legacyCidRow = legacyRows.find(row => row.id === "legacy:cid");
+  assert(cidCutRow && cidFallRow && legacyCidRow, "CID collision regression rows are required");
+
+  const cutCidMatch = cidCutRow.authorityMatches.find(item => item.form === "CID");
+  const fallCidMatch = cidFallRow.authorityMatches.find(item => item.form === "CID");
+  const legacyCidMatch = legacyCidRow.authorityMatches.find(item => item.form === "CID");
+
+  assert(
+    cutCidMatch?.ids?.length === 1 && cutCidMatch.ids[0] === "lat-caed",
+    "CID1 cut/kill candidate must resolve only to caedo authority"
+  );
+  assert(
+    fallCidMatch?.ids?.length === 1 && fallCidMatch.ids[0] === "lat-cad",
+    "CID2 fall candidate must resolve only to cado authority"
+  );
+  assert(
+    legacyCidMatch?.ids?.length === 1 && legacyCidMatch.ids[0] === "lat-caed",
+    "Legacy CID/CIS cut candidate must resolve only to caedo authority"
+  );
+  assert(
+    cidCutRow.collisionResolvedForms.some(item => item.form === "CID" && item.collisionId === "collision-cid-caedo-cado"),
+    "CID1 must be resolved through the collision registry"
+  );
+  assert(
+    cidFallRow.collisionResolvedForms.some(item => item.form === "CID" && item.collisionId === "collision-cid-caedo-cado"),
+    "CID2 must be resolved through the collision registry"
+  );
+
   return {
     generatedAt: "2026-09-22",
     authorityCount: (authority.morphemes || []).length,
@@ -305,6 +439,8 @@ function auditCoverage(candidates, authority, transmission, decisions) {
     transmissionCount: (transmission.mappings || []).length,
     transmissionSourceCount: (transmission.sources || []).length,
     candidateDecisionCount: (decisions.decisions || []).length,
+    collisionCount: collisionRegistry.collisionCount,
+    collisionBindingCount: collisionRegistry.bindingCount,
     candidateCounts: {
       legacy: legacyRows.length,
       ecdict: ecdictRows.length,
@@ -339,6 +475,7 @@ function formatSummary(result) {
     `ECDICT raw coverage: covered ${result.rawCoverage.ecdict.covered}, partial ${result.rawCoverage.ecdict.partial}, missing ${result.rawCoverage.ecdict.missing}.`,
     `ECDICT workflow: complete ${result.workflow.ecdict.complete}, closed ${result.workflow.ecdict.closed_complete}, deferred ${result.workflow.ecdict.deferred_only}, actionable ${result.workflow.ecdict.actionable}.`,
     `Candidate decisions: closed ${result.decisionCounts.closed_not_publish}, deferred ${result.decisionCounts.deferred_needs_evidence}.`,
+    `Collision registry: ${result.collisionCount} surfaces / ${result.collisionBindingCount} candidate bindings.`,
     `Actionable priority bands: P0 ${result.actionablePriorityCounts.P0}, P1 ${result.actionablePriorityCounts.P1}, P2 ${result.actionablePriorityCounts.P2}.`,
     "",
     "Top actionable candidates (priority is coverage value, not factual confidence):",
@@ -357,7 +494,8 @@ if (require.main === module) {
     const authority = JSON.parse(fs.readFileSync(AUTHORITY_FILE, "utf8"));
     const transmission = JSON.parse(fs.readFileSync(TRANSMISSION_FILE, "utf8"));
     const decisions = JSON.parse(fs.readFileSync(DECISION_FILE, "utf8"));
-    const result = auditCoverage(candidates, authority, transmission, decisions);
+    const collisions = JSON.parse(fs.readFileSync(COLLISION_FILE, "utf8"));
+    const result = auditCoverage(candidates, authority, transmission, decisions, collisions);
     if (process.argv.includes("--json")) {
       console.log(JSON.stringify(result, null, 2));
     } else {
@@ -378,4 +516,5 @@ module.exports = {
   AUTHORITY_FILE,
   TRANSMISSION_FILE,
   DECISION_FILE,
+  COLLISION_FILE,
 };
