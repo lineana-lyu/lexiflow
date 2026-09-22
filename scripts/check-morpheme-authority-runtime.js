@@ -280,6 +280,26 @@ assert(epiPrefix?.teachingForms?.includes("EPI-"), "EPI- must be source-language
 assert(!epiPrefix?.teachingForms?.includes("EPH-"), "EPH- remains deferred pending approved grammar evidence");
 assert(!epiPrefix?.teachingForms?.includes("EP-"), "EP- remains deferred pending approved grammar evidence");
 
+const jacLie = authority.getById("lat-jac-lie");
+assert(jacLie?.sourceLemma === "iaceo / jaceo", "JAC must resolve to Latin iaceo/jaceo 'lie'");
+assert(jacLie?.teachingForms?.includes("JAC"), "JAC must be published as the lie/situated family");
+assert(authority.findByTeachingForm("JAC")[0]?.id === "lat-jac-lie", "JAC must not resolve to the JECT throw family");
+assert(authority.findByTeachingForm("JECT")[0]?.id === "lat-ject", "JECT must remain the iacio throw family");
+
+const bisFamily = authority.getById("lat-bis");
+assert(bisFamily?.sourceLemma === "bis", "BIS must resolve to Latin bis");
+assert(!bisFamily?.teachingForms?.includes("BI"), "English BI must remain outside source-language authority");
+
+const biniFamily = authority.getById("lat-bini");
+assert(biniFamily?.sourceLemma === "bini", "BINI must resolve to Latin bini");
+assert(!biniFamily?.teachingForms?.includes("BIN"), "English BIN must remain outside source-language authority");
+
+const caputFamily = authority.getById("lat-caput");
+assert(caputFamily?.sourceLemma === "caput", "CAPIT/CIPIT must resolve to Latin caput");
+assert(caputFamily?.teachingForms?.includes("CAPIT"), "CAPIT must be backed by Latin capitis");
+assert(caputFamily?.teachingForms?.includes("CIPIT"), "CIPIT must be backed by Latin praecipitis");
+assert(!caputFamily?.teachingForms?.includes("CAP"), "Ambiguous CAP must not be published for the head family");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
