@@ -76,6 +76,54 @@
       "url": "https://en.wiktionary.org/wiki/proceed",
       "locator": "English proceed / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-meter",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/meter",
+      "locator": "meter (n.3), measuring-device combining element",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-meter",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-meter",
+      "locator": "English -meter / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-metry",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-metry",
+      "locator": "-metry",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-metry",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-metry",
+      "locator": "English -metry / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-graphy",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-graphy",
+      "locator": "-graphy",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-graphy",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-graphy",
+      "locator": "English -graphy / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -169,6 +217,79 @@
       "sourceIds": [
         "etym-proceed-etymonline",
         "wik-proceed"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-meter",
+      "authorityId": "grc-metr",
+      "englishTeachingForm": "METER",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Greek μέτρον / French -mètre",
+      "targetForm": "-meter",
+      "pathway": [
+        "Ancient Greek μέτρον",
+        "French -mètre / learned combining use",
+        "English -meter"
+      ],
+      "evidenceWords": [
+        "hydrometer",
+        "thermometer",
+        "voltmeter"
+      ],
+      "factSummary": "English -meter as a measuring-device combining element is a learned borrowing ultimately from Greek μέτρον 'measure'; it is downstream from the Greek authority form, not an Ancient Greek teaching form itself.",
+      "sourceIds": [
+        "etym-meter",
+        "wik-meter"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-metry",
+      "authorityId": "grc-metr",
+      "englishTeachingForm": "METRY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Greek -μετρία / μέτρον",
+      "targetForm": "-metry",
+      "pathway": [
+        "Ancient Greek -μετρία from μέτρον",
+        "Latin -metria",
+        "Old French -metrie",
+        "English -metry"
+      ],
+      "evidenceWords": [
+        "geometry",
+        "anthropometry",
+        "optometry"
+      ],
+      "factSummary": "English -metry is a historical suffix meaning measuring/measurement, transmitted through Greek -μετρία, Latin -metria and Old French -metrie.",
+      "sourceIds": [
+        "etym-metry",
+        "wik-metry"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-graphy",
+      "authorityId": "grc-graph",
+      "englishTeachingForm": "GRAPHY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Greek -γραφία / γραφή / γράφω family",
+      "targetForm": "-graphy",
+      "pathway": [
+        "Ancient Greek -γραφία / γραφή",
+        "French or German -graphie",
+        "English -graphy"
+      ],
+      "evidenceWords": [
+        "geography",
+        "biography",
+        "photography"
+      ],
+      "factSummary": "English -graphy is a historical noun-forming element from Greek writing/drawing forms in the γράφω family, transmitted through Continental -graphie forms.",
+      "sourceIds": [
+        "etym-graphy",
+        "wik-graphy"
       ],
       "status": "verified"
     }
