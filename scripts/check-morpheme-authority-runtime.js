@@ -127,7 +127,8 @@ assert(sent?.sourceForms?.includes("sensum"), "SENT/SENS must preserve sensum");
 
 const spect = authority.getById("lat-spect");
 assert(spect?.sourceLemma === "spectio", "SPECT must remain conservatively tied to spectio");
-assert(!spect?.teachingForms?.includes("SPEC"), "SPEC must stay withheld until the verbal stem chain is separately sourced");
+assert(spect?.teachingForms?.includes("SPEC"), "SPEC must be backed by Latin specio");
+assert(spect?.teachingForms?.includes("SPIC"), "SPIC must be backed by Latin spicio/compound forms");
 
 const struct = authority.getById("lat-struct");
 assert(struct?.sourceForms?.includes("structum"), "STRUCT must preserve structum");
@@ -187,6 +188,16 @@ assert(!vita?.teachingForms?.includes("VIT"), "Shortened VIT teaching form must 
 const ject = authority.getById("lat-ject");
 assert(ject?.sourceForms?.includes("jectum"), "JECT must preserve attested Latin jectum compound form");
 assert(authority.findByTeachingForm("JECT")[0]?.id === "lat-ject", "JECT must resolve directly from Latin authority");
+
+const vert = authority.getById("lat-vert");
+assert(vert?.sourceLemma === "verto", "VERT/VERS must resolve to verto");
+assert(vert?.sourceForms?.includes("versum"), "VERS must preserve Latin versum");
+
+const metr = authority.getById("grc-metr");
+assert(metr?.sourceLemma === "μέτρον", "METR must resolve to μέτρον");
+assert(metr?.sourceStem === "μετρ- / μετρο-", "METR must preserve Greek source stems");
+assert(!metr?.teachingForms?.includes("METER"), "English METER must remain outside Ancient Greek authority");
+assert(!metr?.teachingForms?.includes("METRY"), "English METRY must remain outside Ancient Greek authority");
 
 for (const item of [
   authority.getById("lat-bene"),
