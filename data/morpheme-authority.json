@@ -1128,6 +1128,54 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37380/",
       "locator": "praeceps, cipitis; prae-caput",
       "publicDomain": true
+    },
+    {
+      "id": "ls-caedo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6011/",
+      "locator": "caedo, cecidi, caesum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-concido-caedo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n9810/",
+      "locator": "con-cido, cidi, cisum [caedo]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-cado",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5980/",
+      "locator": "cado, cecidi, casum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-accido-cado",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n357/",
+      "locator": "ac-cido, cidi [cado]",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -4367,6 +4415,100 @@
         "forms": [
           "ls-caput",
           "ls-praeceps"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-caed",
+      "kind": "root_family",
+      "teachingForms": [
+        "CID",
+        "CIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "caedo",
+      "sourceForms": [
+        "caedo",
+        "cecidi",
+        "caesum",
+        "concido",
+        "concidi",
+        "concisum"
+      ],
+      "coreMeaningEn": [
+        "cut",
+        "hew",
+        "strike",
+        "kill"
+      ],
+      "coreMeaningZh": [
+        "切",
+        "砍",
+        "击打",
+        "杀"
+      ],
+      "formRelation": "CID/CIS are grounded in Latin caedo and its compounds. Lewis & Short records con-cido, cidi, cisum as a caedo compound, directly attesting the -cid- and -cis- branches. English CIDE is kept out of source-language authority and handled as later French/English transmission.",
+      "claimSources": {
+        "lemma": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "meaning": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "forms": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-cad",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAD",
+        "CAS",
+        "CID"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cado",
+      "sourceForms": [
+        "cado",
+        "cecidi",
+        "casum",
+        "accido",
+        "accidi"
+      ],
+      "coreMeaningEn": [
+        "fall",
+        "fall down",
+        "drop",
+        "happen"
+      ],
+      "coreMeaningZh": [
+        "落下",
+        "跌倒",
+        "下降",
+        "发生"
+      ],
+      "formRelation": "CAD and CAS are directly visible in cado/casum. The separate fall-family CID is directly attested by compounds such as accido, cidi < cado. This CID is a homograph of CID < caedo 'cut/kill' and must be resolved by family identity rather than surface spelling.",
+      "claimSources": {
+        "lemma": [
+          "ls-cado",
+          "ls-accido-cado"
+        ],
+        "meaning": [
+          "ls-cado",
+          "ls-accido-cado"
+        ],
+        "forms": [
+          "ls-cado",
+          "ls-accido-cado"
         ],
         "variants": []
       },
