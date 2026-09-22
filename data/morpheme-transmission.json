@@ -348,6 +348,38 @@
       "url": "https://en.wiktionary.org/wiki/close",
       "locator": "English close / Etymology 1",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-phono",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/phono-",
+      "locator": "phono-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phono",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/phono-",
+      "locator": "English phono- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-hydro",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/hydro-",
+      "locator": "hydro-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-hydro",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/hydro",
+      "locator": "English hydro / Etymology; surface analysis hydr- + -o-",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -846,6 +878,54 @@
       "sourceIds": [
         "etym-close",
         "wik-close"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phono",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONO",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek φωνή / learned phōno-",
+      "targetForm": "phono-",
+      "pathway": [
+        "Ancient Greek φωνή",
+        "learned Greek-derived combining form phōno-",
+        "English phono-"
+      ],
+      "evidenceWords": [
+        "phonograph",
+        "phonology",
+        "phonogram"
+      ],
+      "factSummary": "English phono- is a learned combining form from the Greek φωνή family and is modeled downstream from the PHON authority record.",
+      "sourceIds": [
+        "etym-phono",
+        "wik-phono"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-hydr",
+      "authorityId": "grc-hydro",
+      "englishTeachingForm": "HYDR",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek ὕδωρ / ὑδρο-",
+      "targetForm": "hydr-",
+      "pathway": [
+        "Ancient Greek ὕδωρ with compound ὑδρο-",
+        "learned scientific hydro-/hydr- combining use",
+        "English hydr- before vowels or suffixal formations"
+      ],
+      "evidenceWords": [
+        "hydrate",
+        "hydrogen",
+        "hydric"
+      ],
+      "factSummary": "English hydr- is the reduced learned combining variant of hydro- in scientific formations; HYDRO remains the source-language-backed Greek compound form.",
+      "sourceIds": [
+        "etym-hydro",
+        "wik-hydro"
       ],
       "status": "verified"
     }
