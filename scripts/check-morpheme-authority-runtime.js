@@ -326,10 +326,15 @@ assert(sedSitFamily?.teachingForms?.includes("SED"), "SED sit-family form must b
 assert(sedSitFamily?.teachingForms?.includes("SID"), "SID must be grounded by sedeo compounds such as assideo");
 assert(sedSitFamily?.teachingForms?.includes("SESS"), "SESS must be grounded by Latin sessum");
 
-const sedAuthorities = authority.findByTeachingForm("SED").map(item => item.id).sort();
+const sedRootAuthorities = authority.findByTeachingForm("SED").map(item => item.id);
+const sedPrefixAuthorities = authority.findByTeachingForm("SED-").map(item => item.id);
 assert(
-  sedAuthorities.length === 2 && sedAuthorities[0] === "lat-se" && sedAuthorities[1] === "lat-sed-sit",
-  "SED must remain an explicit homograph between the separative prefix and the sit family"
+  sedRootAuthorities.length === 1 && sedRootAuthorities[0] === "lat-sed-sit",
+  "Exact authority lookup for SED must return the sit family"
+);
+assert(
+  sedPrefixAuthorities.length === 1 && sedPrefixAuthorities[0] === "lat-se",
+  "Exact authority lookup for SED- must return the separative prefix"
 );
 
 const cidAuthorities = authority.findByTeachingForm("CID").map(item => item.id).sort();
