@@ -1176,6 +1176,42 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n357/",
       "locator": "ac-cido, cidi [cado]",
       "publicDomain": true
+    },
+    {
+      "id": "ls-ab-prefix",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n4/",
+      "locator": "ab, a, abs; forms include aps/abs/as-",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sedeo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43305/",
+      "locator": "sedeo, sedi, sessum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-assideo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n4056/",
+      "locator": "assideo / adsideo, sedi, sessum [sedeo]",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2434,13 +2470,15 @@
       "kind": "prefix",
       "teachingForms": [
         "A-",
-        "AB-"
+        "AB-",
+        "ABS-"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "a / ab",
       "sourceForms": [
         "a-",
-        "ab-"
+        "ab-",
+        "abs-"
       ],
       "coreMeaningEn": [
         "away"
@@ -2449,16 +2487,19 @@
         "离开",
         "向外离去"
       ],
-      "formRelation": "Allen & Greenough §267 lists a/ab as verbal prefixes retaining the adverbial sense AWAY.",
+      "formRelation": "Latin AB-/A- and strengthened ABS- are source-language forms. Allen & Greenough gives the away-prefix family, while Lewis & Short directly records ab, a, abs and related historical variants; ABS is therefore not an English-only spelling invention.",
       "claimSources": {
         "lemma": [
-          "ag-wordformation"
+          "ag-wordformation",
+          "ls-ab-prefix"
         ],
         "meaning": [
-          "ag-wordformation"
+          "ag-wordformation",
+          "ls-ab-prefix"
         ],
         "forms": [
-          "ag-wordformation"
+          "ag-wordformation",
+          "ls-ab-prefix"
         ],
         "variants": []
       },
@@ -3555,7 +3596,8 @@
       "kind": "root_family",
       "teachingForms": [
         "CLUD",
-        "CLUS"
+        "CLUS",
+        "CLAUS"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "claudo",
@@ -3575,7 +3617,7 @@
         "封闭",
         "关住"
       ],
-      "formRelation": "Lewis & Short records cludo as a frequent compound form of claudo and clausi/clausum as the closed-form family; CLUD/CLUS are therefore source-language grounded.",
+      "formRelation": "Lewis & Short records claudo (with frequent compound cludo) and the perfect/supine family clausi/clausum. CLAUS, CLUD, and CLUS are therefore all source-language grounded; CLOS remains a later Romance/English transmission form.",
       "claimSources": {
         "lemma": [
           "ls-claudo"
@@ -4509,6 +4551,55 @@
         "forms": [
           "ls-cado",
           "ls-accido-cado"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sed-sit",
+      "kind": "root_family",
+      "teachingForms": [
+        "SED",
+        "SID",
+        "SESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sedeo",
+      "sourceForms": [
+        "sedeo",
+        "sedi",
+        "sessum",
+        "assideo",
+        "adsideo",
+        "assedi",
+        "assessum"
+      ],
+      "coreMeaningEn": [
+        "sit",
+        "be seated",
+        "remain seated",
+        "settle"
+      ],
+      "coreMeaningZh": [
+        "坐",
+        "就座",
+        "坐着",
+        "安坐"
+      ],
+      "formRelation": "SED and SESS are directly grounded in sedeo/sessum. Compound forms such as assideo/adsideo, explicitly marked by Lewis & Short as compounds of sedeo, ground the SID branch. This sit-family SED is distinct from the unrelated separative prefix SE-/SED- 'apart'.",
+      "claimSources": {
+        "lemma": [
+          "ls-sedeo",
+          "ls-assideo"
+        ],
+        "meaning": [
+          "ls-sedeo",
+          "ls-assideo"
+        ],
+        "forms": [
+          "ls-sedeo",
+          "ls-assideo"
         ],
         "variants": []
       },
