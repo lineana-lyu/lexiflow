@@ -188,6 +188,22 @@
       "url": "https://en.wiktionary.org/wiki/spectro-",
       "locator": "English spectro- / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-surmise",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/surmise",
+      "locator": "surmise (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-surmise",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/surmise",
+      "locator": "English surmise / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -449,6 +465,29 @@
       "sourceIds": [
         "etym-spectro",
         "wik-spectro"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-mise",
+      "authorityId": "lat-mit",
+      "englishTeachingForm": "MISE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "French mettre / surmis(e), ultimately Latin mittere",
+      "targetForm": "-mise",
+      "pathway": [
+        "Latin mittere",
+        "Old French metre/mettre",
+        "Old French surmis/surmise",
+        "English surmise"
+      ],
+      "evidenceWords": [
+        "surmise"
+      ],
+      "factSummary": "English -mise in surmise is a Romance reflex through French mettre from Latin mittere. It is a downstream form and not a Classical Latin root form.",
+      "sourceIds": [
+        "etym-surmise",
+        "wik-surmise"
       ],
       "status": "verified"
     }
