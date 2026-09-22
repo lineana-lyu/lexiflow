@@ -732,6 +732,30 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n67261/",
       "locator": "μετρονόμοι",
       "publicDomain": true
+    },
+    {
+      "id": "ls-specio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n44917/",
+      "locator": "specio (spicio), spexi",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-inspicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n23931/",
+      "locator": "inspicio, spexi, spectum",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2672,33 +2696,44 @@
     },
     {
       "id": "lat-spect",
-      "kind": "root_or_combining_form",
+      "kind": "root_family",
       "teachingForms": [
+        "SPEC",
+        "SPIC",
         "SPECT"
       ],
       "sourceLanguage": "Latin",
-      "sourceLemma": "spectio",
+      "sourceLemma": "specio / spicio",
       "sourceForms": [
-        "spectio"
+        "specio",
+        "spicio",
+        "spexi",
+        "spectum"
       ],
       "coreMeaningEn": [
-        "observing",
-        "looking"
+        "look",
+        "look at",
+        "behold",
+        "inspect"
       ],
       "coreMeaningZh": [
+        "看",
+        "观看",
         "观察",
-        "观看"
+        "审视"
       ],
-      "formRelation": "Lewis & Short defines spectio as an observing and explicitly derives it from specio. SPECT is published conservatively from the attested spectio family; SPEC is withheld until the underlying verbal stem chain is separately sourced.",
+      "formRelation": "Lewis & Short directly records specio with the variant spicio; Latin compounds such as inspicio preserve the spic- form and record spexi, spectum. SPEC/SPIC/SPECT are therefore source-language grounded. SPECTRO remains outside this authority record pending later derivational evidence.",
       "claimSources": {
         "lemma": [
-          "ls-spectio"
+          "ls-specio"
         ],
         "meaning": [
-          "ls-spectio"
+          "ls-specio",
+          "ls-inspicio"
         ],
         "forms": [
-          "ls-spectio"
+          "ls-specio",
+          "ls-inspicio"
         ],
         "variants": []
       },
