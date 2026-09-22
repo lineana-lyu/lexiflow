@@ -936,6 +936,42 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n68501/",
       "locator": "μονογενής",
       "publicDomain": true
+    },
+    {
+      "id": "ls-constans",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n10613/",
+      "locator": "constans, antis; participle/adjective from consto",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-stasis",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n96270/",
+      "locator": "στάσις",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-stasimos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n96265/",
+      "locator": "στάσιμος; from στάσις",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -3230,14 +3266,18 @@
       "kind": "root_family",
       "teachingForms": [
         "STA",
-        "STAT"
+        "STAT",
+        "STANT"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "sto",
       "sourceForms": [
         "sto",
         "steti",
-        "statum"
+        "statum",
+        "constans",
+        "constantis",
+        "stant-"
       ],
       "coreMeaningEn": [
         "stand",
@@ -3249,16 +3289,18 @@
         "站住",
         "保持位置"
       ],
-      "formRelation": "Lewis & Short explicitly identifies root sta- for sto; STAT reflects the stat- form in Latin statum.",
+      "formRelation": "Lewis & Short explicitly identifies root sta- under sto; STAT reflects statum, while STANT is directly visible in the participial/adjectival branch constans, -antis. STANCE is downstream Romance/English and is not a Latin source form.",
       "claimSources": {
         "lemma": [
           "ls-sto"
         ],
         "meaning": [
-          "ls-sto"
+          "ls-sto",
+          "ls-constans"
         ],
         "forms": [
-          "ls-sto"
+          "ls-sto",
+          "ls-constans"
         ],
         "variants": []
       },
@@ -3764,6 +3806,57 @@
         "forms": [
           "lsj-monos",
           "lsj-monogenes"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-stas",
+      "kind": "root_family",
+      "teachingForms": [
+        "STAS"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "στάσις",
+      "sourceForms": [
+        "στάσις",
+        "στασ-",
+        "στασι-"
+      ],
+      "sourceStem": "στασ- / στασι-",
+      "coreMeaningEn": [
+        "standing",
+        "position",
+        "placing",
+        "setting"
+      ],
+      "coreMeaningZh": [
+        "站立",
+        "位置",
+        "安置",
+        "设立"
+      ],
+      "formRelation": "LSJ defines στάσις as standing/posture and directly derives στάσιμος from στάσις, exposing the stas-/stasi- stem family. STAS is kept separate from Latin STA/STAT/STANT.",
+      "stemDerivation": {
+        "sourceStem": "στασ- / στασι-",
+        "method": "attested noun στάσις plus derivative στάσιμος in LSJ",
+        "sources": [
+          "lsj-stasis",
+          "lsj-stasimos"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-stasis"
+        ],
+        "meaning": [
+          "lsj-stasis",
+          "lsj-stasimos"
+        ],
+        "forms": [
+          "lsj-stasis",
+          "lsj-stasimos"
         ],
         "variants": []
       },
