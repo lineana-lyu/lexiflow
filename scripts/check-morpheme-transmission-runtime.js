@@ -54,6 +54,14 @@ const ceit=transmission.getByTeachingForm("CEIT");
 assert(ceit?.authorityId==="lat-cap","CEIT must map to CAP/CIP/CEPT authority");
 assert(authority.findByTeachingForm("CEIT").length===0,"CEIT must remain outside Latin authority");
 
+const cede=transmission.getByTeachingForm("CEDE");
+assert(cede?.authorityId==="lat-ced","CEDE must map to CED/CESS authority");
+assert(authority.findByTeachingForm("CEDE").length===0,"CEDE must remain outside Latin authority");
+
+const stance=transmission.getByTeachingForm("STANCE");
+assert(stance?.authorityId==="lat-sta","STANCE must map to STA/STAT/STANT authority");
+assert(authority.findByTeachingForm("STANCE").length===0,"STANCE must remain outside Latin authority");
+
 for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
