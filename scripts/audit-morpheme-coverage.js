@@ -284,6 +284,20 @@ function auditCoverage(candidates, authority, transmission, decisions) {
 
   const actionableRows = ecdictRows.filter(row => row.actionableUnresolvedForms.length > 0);
 
+  // Regression: indexed homographs must honor candidate-specific review
+  // decisions before any surface-form match. CAP2 is the CAPUT/head family,
+  // not CAP < capio "take".
+  const cap2Row = ecdictRows.find(row => row.id === "ecdict:cap2, capit, cipit");
+  assert(cap2Row, "CAP2 coverage regression row is required");
+  assert(
+    cap2Row.closedForms.some(item => item.form === "CAP" && item.decisionId === "decision-cap2-head"),
+    "CAP2 must be closed by the caput-specific decision instead of matching CAP < capio"
+  );
+  assert(
+    !cap2Row.authorityMatches.some(item => item.form === "CAP"),
+    "CAP2 must not surface-match the CAP < capio authority family"
+  );
+
   return {
     generatedAt: "2026-09-22",
     authorityCount: (authority.morphemes || []).length,
