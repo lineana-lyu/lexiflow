@@ -15,6 +15,7 @@ const ALLOWED_TYPES = new Set([
   "romance_english_spelling_reflex",
   "learned_borrowing_combining_form",
   "learned_borrowing_suffix",
+  "historical_analogy_replacement",
 ]);
 const FORBIDDEN_FIELDS = new Set([
   "story","storyZh","narrative","narrativeZh","meaningBridgeZh","semanticEvolution","relatedWords"
