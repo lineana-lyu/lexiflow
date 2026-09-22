@@ -33,7 +33,20 @@ const graphy=transmission.getByTeachingForm("GRAPHY");
 assert(graphy?.authorityId==="grc-graph","GRAPHY must map to Greek GRAPH authority");
 assert(authority.findByTeachingForm("GRAPHY").length===0,"GRAPHY must remain outside Ancient Greek authority");
 
-for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy"]){
+const pose=transmission.getByTeachingForm("POSE");
+assert(pose?.authorityId==="lat-pon","POSE must map to PON/PONE/POSIT authority");
+assert(pose?.mappingType==="historical_analogy_replacement","POSE must preserve the analogy/replacement relationship");
+
+const pound=transmission.getByTeachingForm("POUND");
+assert(pound?.authorityId==="lat-pon","POUND must map to PON/PONE/POSIT authority");
+
+const late=transmission.getByTeachingForm("LATE");
+assert(late?.authorityId==="lat-fer","LATE must map to FER/LAT authority");
+
+const spectro=transmission.getByTeachingForm("SPECTRO");
+assert(spectro?.authorityId==="lat-spect","SPECTRO must map to SPEC/SPIC/SPECT authority");
+
+for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
   assert(evidence?.sources?.length>=2,`${id} must retain two-source evidence`);
