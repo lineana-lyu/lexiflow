@@ -768,6 +768,18 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26049/",
       "locator": "latus, participle of fero",
       "publicDomain": true
+    },
+    {
+      "id": "ag-present-stem",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/present-stem",
+      "locator": "§176 d, Note 2: mitt-i-tis (MIT), consonant doubling before stem vowel",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -946,7 +958,7 @@
         "放出",
         "送出"
       ],
-      "formRelation": "MIT follows the present stem family; MISS reflects the miss- form visible in Latin missum.",
+      "formRelation": "MIT is the root-level teaching form; MISS reflects Latin missum. Allen & Greenough §176 explicitly analyzes mitt-i-tis as root MIT with consonant doubling in the present stem, so MITT is not published as a separate morpheme.",
       "claimSources": {
         "lemma": [
           "ls-mitto"
@@ -955,7 +967,8 @@
           "ls-mitto"
         ],
         "forms": [
-          "ls-mitto"
+          "ls-mitto",
+          "ag-present-stem"
         ],
         "variants": []
       },
