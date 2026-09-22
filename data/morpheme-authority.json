@@ -1068,6 +1068,66 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n11292/",
       "locator": "corrigo (conr-), rexi, rectum; v. a. rego",
       "publicDomain": true
+    },
+    {
+      "id": "ls-iaceo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=iaceo",
+      "locator": "iaceo / jaceo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-bis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5395/",
+      "locator": "bis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-bini",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5362/",
+      "locator": "bini",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-caput",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6724/",
+      "locator": "caput, capitis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-praeceps",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37380/",
+      "locator": "praeceps, cipitis; prae-caput",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -4155,6 +4215,158 @@
         ],
         "forms": [
           "lsj-epi-headword"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-jac-lie",
+      "kind": "root_family",
+      "teachingForms": [
+        "JAC"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "iaceo / jaceo",
+      "sourceForms": [
+        "iaceo",
+        "jaceo",
+        "iacere",
+        "jacere"
+      ],
+      "coreMeaningEn": [
+        "lie",
+        "be situated",
+        "rest"
+      ],
+      "coreMeaningZh": [
+        "躺",
+        "位于",
+        "处于"
+      ],
+      "formRelation": "JAC is kept separate from JECT. Latin iaceo/jaceo is the stative 'lie/be situated' family seen in adjacent-type formations, whereas JECT belongs to iacio 'throw'. The discovery candidate conflates these related but semantically distinct Latin families.",
+      "claimSources": {
+        "lemma": [
+          "ls-iaceo"
+        ],
+        "meaning": [
+          "ls-iaceo"
+        ],
+        "forms": [
+          "ls-iaceo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-bis",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bis",
+      "sourceForms": [
+        "bis"
+      ],
+      "coreMeaningEn": [
+        "twice",
+        "two times",
+        "double"
+      ],
+      "coreMeaningZh": [
+        "两次",
+        "双重"
+      ],
+      "formRelation": "BIS is the attested Latin numeral adverb meaning twice. English BI- is modeled downstream rather than being inserted as a Classical Latin teaching form without a direct source-language entry.",
+      "claimSources": {
+        "lemma": [
+          "ls-bis"
+        ],
+        "meaning": [
+          "ls-bis"
+        ],
+        "forms": [
+          "ls-bis"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-bini",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BINI"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bini",
+      "sourceForms": [
+        "bini",
+        "bina",
+        "binum"
+      ],
+      "coreMeaningEn": [
+        "two by two",
+        "two each",
+        "two at a time"
+      ],
+      "coreMeaningZh": [
+        "两个一组",
+        "每次两个",
+        "各两个"
+      ],
+      "formRelation": "BINI is the attested Latin distributive numeral. English BIN- is treated as a later learned/Romance variant rather than as an independent Classical Latin prefix.",
+      "claimSources": {
+        "lemma": [
+          "ls-bini"
+        ],
+        "meaning": [
+          "ls-bini"
+        ],
+        "forms": [
+          "ls-bini"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-caput",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAPIT",
+        "CIPIT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "caput",
+      "sourceForms": [
+        "caput",
+        "capitis",
+        "praeceps",
+        "praecipitis"
+      ],
+      "coreMeaningEn": [
+        "head"
+      ],
+      "coreMeaningZh": [
+        "头",
+        "头部"
+      ],
+      "formRelation": "CAPIT is directly visible in the genitive capitis. Latin praeceps has genitive praecipitis and Lewis & Short explicitly analyzes it as prae-caput, directly grounding the compound CIPIT form. This head-family is distinct from CAP/CIP/CEPT < capio 'take'.",
+      "claimSources": {
+        "lemma": [
+          "ls-caput",
+          "ls-praeceps"
+        ],
+        "meaning": [
+          "ls-caput",
+          "ls-praeceps"
+        ],
+        "forms": [
+          "ls-caput",
+          "ls-praeceps"
         ],
         "variants": []
       },
