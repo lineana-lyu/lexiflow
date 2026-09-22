@@ -13,6 +13,8 @@ const ALLOWED_TYPES = new Set([
   "historical_stem_reflex",
   "romance_reflex",
   "romance_english_spelling_reflex",
+  "learned_borrowing_combining_form",
+  "learned_borrowing_suffix",
 ]);
 const FORBIDDEN_FIELDS = new Set([
   "story","storyZh","narrative","narrativeZh","meaningBridgeZh","semanticEvolution","relatedWords"
