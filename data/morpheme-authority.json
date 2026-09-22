@@ -780,6 +780,102 @@
       "url": "https://dcc.dickinson.edu/grammar/latin/present-stem",
       "locator": "§176 d, Note 2: mitt-i-tis (MIT), consonant doubling before stem vowel",
       "publicDomain": true
+    },
+    {
+      "id": "ls-genus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19477/",
+      "locator": "genus, generis; root GEN",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-dicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n13801/",
+      "locator": "dicio; root dic-; cf. dico",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-praedico",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37518/",
+      "locator": "praedico, dixi, dictum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-recipio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n40577/",
+      "locator": "recipio, cepi, ceptum [capio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-accipio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n363/",
+      "locator": "accipio, cepi, ceptum [capio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pes",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n35756/",
+      "locator": "pes, pedis; foot",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vivus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51239/",
+      "locator": "vivus; adj. vivo; alive/living",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vitalis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51150/",
+      "locator": "vitalis; adj. vita; of/belonging to life",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -979,14 +1075,22 @@
       "kind": "root_family",
       "teachingForms": [
         "CAP",
-        "CAPT"
+        "CAPT",
+        "CIP",
+        "CEPT"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "capio",
       "sourceForms": [
         "capio",
         "cepi",
-        "captum"
+        "captum",
+        "recipio",
+        "recepi",
+        "receptum",
+        "accipio",
+        "accepi",
+        "acceptum"
       ],
       "coreMeaningEn": [
         "take",
@@ -998,16 +1102,22 @@
         "抓住",
         "取得"
       ],
-      "formRelation": "CAP follows the verbal base; CAPT reflects the capt- form seen in Latin captum. CEPT/CEIV are not asserted here because they require a separate Romance/English historical derivation layer.",
+      "formRelation": "CAP/CAPT are directly grounded in capio/captum. Latin compounds recipio and accipio, explicitly marked from capio, directly attest the -cip- present-stem and -cept- participial forms. CEIVE/CEIT remain later Romance/English transmission forms.",
       "claimSources": {
         "lemma": [
-          "ls-capio"
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
         ],
         "meaning": [
-          "ls-capio"
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
         ],
         "forms": [
-          "ls-capio"
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
         ],
         "variants": []
       },
@@ -2415,35 +2525,47 @@
     },
     {
       "id": "lat-dict",
-      "kind": "root_or_combining_form",
+      "kind": "root_family",
       "teachingForms": [
+        "DIC",
         "DICT"
       ],
       "sourceLanguage": "Latin",
-      "sourceLemma": "dictio",
+      "sourceLemma": "dico",
       "sourceForms": [
-        "dictio"
+        "dic-",
+        "dictio",
+        "praedico",
+        "praedixi",
+        "praedictum"
       ],
       "coreMeaningEn": [
-        "saying",
-        "speaking",
-        "uttering"
+        "say",
+        "speak",
+        "utter",
+        "declare"
       ],
       "coreMeaningZh": [
         "说",
         "表达",
-        "言说"
+        "说出",
+        "宣告"
       ],
-      "formRelation": "Lewis & Short explicitly derives dictio from dico and defines it as saying/speaking/uttering. DICT is kept as a conservative teaching form tied to the attested dictio family; the fuller DIC/DICT verbal alternation belongs to a later audited expansion.",
+      "formRelation": "Lewis & Short explicitly identifies root dic- and derives dictio from dico; compounds such as praedico preserve the dico family and show the dictum/-(d)ict- participial branch. DIC/DICT are source-language grounded.",
       "claimSources": {
         "lemma": [
-          "ls-dictio"
+          "ls-dicio",
+          "ls-dictio",
+          "ls-praedico"
         ],
         "meaning": [
-          "ls-dictio"
+          "ls-dictio",
+          "ls-praedico"
         ],
         "forms": [
-          "ls-dictio"
+          "ls-dicio",
+          "ls-dictio",
+          "ls-praedico"
         ],
         "variants": []
       },
@@ -3199,7 +3321,8 @@
       "id": "lat-gen",
       "kind": "root_family",
       "teachingForms": [
-        "GEN"
+        "GEN",
+        "GENER"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "gigno",
@@ -3207,7 +3330,10 @@
         "gigno",
         "genui",
         "genitum",
-        "gen-"
+        "gen-",
+        "genus",
+        "generis",
+        "gener-"
       ],
       "coreMeaningEn": [
         "beget",
@@ -3221,16 +3347,19 @@
         "生出",
         "生成"
       ],
-      "formRelation": "Lewis & Short explicitly marks root gen- under gigno, so GEN is not inferred from English spelling.",
+      "formRelation": "Lewis & Short explicitly marks root GEN under both gigno and genus; the oblique stem gener- is directly visible in Latin generis. GEN/GENER are therefore source-language grounded.",
       "claimSources": {
         "lemma": [
-          "ls-gigno"
+          "ls-gigno",
+          "ls-genus"
         ],
         "meaning": [
-          "ls-gigno"
+          "ls-gigno",
+          "ls-genus"
         ],
         "forms": [
-          "ls-gigno"
+          "ls-gigno",
+          "ls-genus"
         ],
         "variants": []
       },
@@ -3247,7 +3376,8 @@
       "sourceForms": [
         "vivo",
         "vixi",
-        "victum"
+        "victum",
+        "vivus"
       ],
       "coreMeaningEn": [
         "live",
@@ -3259,16 +3389,18 @@
         "生存",
         "有生命"
       ],
-      "formRelation": "VIV is directly grounded in Latin vivo. VIT is not asserted here because it belongs to the separate vita/historical-derivation path.",
+      "formRelation": "VIV is directly grounded in Latin vivo and the related adjective vivus. VIVI is an inflected/sequence form rather than a separately published morpheme; VIT belongs to the vita/vitalis path and is not collapsed into VIV.",
       "claimSources": {
         "lemma": [
           "ls-vivo"
         ],
         "meaning": [
-          "ls-vivo"
+          "ls-vivo",
+          "ls-vivus"
         ],
         "forms": [
-          "ls-vivo"
+          "ls-vivo",
+          "ls-vivus"
         ],
         "variants": []
       },
@@ -3283,7 +3415,8 @@
       "sourceLanguage": "Latin",
       "sourceLemma": "vita",
       "sourceForms": [
-        "vita"
+        "vita",
+        "vitalis"
       ],
       "coreMeaningEn": [
         "life"
@@ -3292,16 +3425,18 @@
         "生命",
         "生活"
       ],
-      "formRelation": "VITA is the attested Latin noun vita 'life'. The shortened English teaching form VIT is intentionally withheld until a downstream historical mapping is sourced.",
+      "formRelation": "VITA is the attested Latin noun vita 'life'; Latin vitalis is explicitly derived from vita. The learner truncation VIT is not published as a source-language morpheme.",
       "claimSources": {
         "lemma": [
           "ls-vita"
         ],
         "meaning": [
-          "ls-vita"
+          "ls-vita",
+          "ls-vitalis"
         ],
         "forms": [
-          "ls-vita"
+          "ls-vita",
+          "ls-vitalis"
         ],
         "variants": []
       },
@@ -3433,6 +3568,41 @@
           "lsj-metron",
           "lsj-metronomoi",
           "lsj-perimetron"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ped",
+      "kind": "root_family",
+      "teachingForms": [
+        "PED"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pes",
+      "sourceForms": [
+        "pes",
+        "pedis",
+        "ped-"
+      ],
+      "coreMeaningEn": [
+        "foot"
+      ],
+      "coreMeaningZh": [
+        "脚",
+        "足"
+      ],
+      "formRelation": "Lewis & Short gives Latin pes, genitive pedis, 'foot'. PED is the source-language stem visible in pedis. PEDI/PEDE are not published as independent Latin morphemes.",
+      "claimSources": {
+        "lemma": [
+          "ls-pes"
+        ],
+        "meaning": [
+          "ls-pes"
+        ],
+        "forms": [
+          "ls-pes"
         ],
         "variants": []
       },
