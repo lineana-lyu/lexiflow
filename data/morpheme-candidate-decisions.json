@@ -52,6 +52,59 @@
       "relatedAuthorityIds": [
         "lat-ten"
       ]
+    },
+    {
+      "id": "decision-vivi",
+      "candidateId": "ecdict:viv, vivi, vit",
+      "form": "VIVI",
+      "disposition": "closed_not_publish",
+      "reason": "Latin authority already has VIV from vivo/vivus. The sequence vivi- is not required as a separate learner morpheme; publishing it would duplicate an inflected/derived surface sequence rather than add a distinct source-language fact.",
+      "relatedAuthorityIds": [
+        "lat-viv"
+      ],
+      "sourceIds": [
+        "ls-vivus"
+      ]
+    },
+    {
+      "id": "decision-vit",
+      "candidateId": "ecdict:viv, vivi, vit",
+      "form": "VIT",
+      "disposition": "closed_not_publish",
+      "reason": "Lewis & Short explicitly derives vitalis from vita. LexiFlow therefore keeps VITA as the source-language authority form instead of publishing the pedagogical truncation VIT.",
+      "relatedAuthorityIds": [
+        "lat-vita"
+      ],
+      "sourceIds": [
+        "ls-vita",
+        "ls-vitalis"
+      ]
+    },
+    {
+      "id": "decision-pedi-foot",
+      "candidateId": "ecdict:ped1, pedi, -pede",
+      "form": "PEDI",
+      "disposition": "closed_not_publish",
+      "reason": "Latin pes, pedis directly supports PED as the source-language stem. PEDI is not needed as an independent morpheme record; word-level analysis can link relevant forms back to PED.",
+      "relatedAuthorityIds": [
+        "lat-ped"
+      ],
+      "sourceIds": [
+        "ls-pes"
+      ]
+    },
+    {
+      "id": "decision-pede",
+      "candidateId": "ecdict:ped1, pedi, -pede",
+      "form": "PEDE",
+      "disposition": "closed_not_publish",
+      "reason": "Latin pes, pedis directly supports PED. The learner form PEDE is a downstream word-shape/pedagogical variant rather than a separately attested source-language morpheme, so it is intentionally not published.",
+      "relatedAuthorityIds": [
+        "lat-ped"
+      ],
+      "sourceIds": [
+        "ls-pes"
+      ]
     }
   ]
 }
