@@ -126,7 +126,8 @@ assert(sent?.sourceLemma === "sentio", "SENT/SENS must resolve to sentio");
 assert(sent?.sourceForms?.includes("sensum"), "SENT/SENS must preserve sensum");
 
 const spect = authority.getById("lat-spect");
-assert(spect?.sourceLemma === "specio / spicio", "SPEC/SPIC/SPECT must resolve to the Latin specio/spicio family");\nassert(spect?.sourceForms?.includes("spectum"), "SPECT must preserve Latin spectum");
+assert(spect?.sourceLemma === "specio / spicio", "SPEC/SPIC/SPECT must resolve to the Latin specio/spicio family");
+assert(spect?.sourceForms?.includes("spectum"), "SPECT must preserve Latin spectum");
 assert(spect?.teachingForms?.includes("SPEC"), "SPEC must be backed by Latin specio");
 assert(spect?.teachingForms?.includes("SPIC"), "SPIC must be backed by Latin spicio/compound forms");
 
