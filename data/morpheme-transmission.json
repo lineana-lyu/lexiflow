@@ -380,6 +380,86 @@
       "url": "https://en.wiktionary.org/wiki/hydro",
       "locator": "English hydro / Etymology; surface analysis hydr- + -o-",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-en-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/en-",
+      "locator": "en- (1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-en-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/en-",
+      "locator": "English en- / Etymology; alternative form em-",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-bi-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/bi-",
+      "locator": "bi-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-bi-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/bi-",
+      "locator": "English bi- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-bin-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/bin-",
+      "locator": "English bin-; alternative form of bi-",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-binary",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/binary",
+      "locator": "binary (adj.) from Latin bini",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "etym-jet",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/jet",
+      "locator": "jet (v.1 / n.1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-jet",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/jet",
+      "locator": "English jet / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-course",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/course",
+      "locator": "course (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-course",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/course",
+      "locator": "English course / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -926,6 +1006,152 @@
       "sourceIds": [
         "etym-hydro",
         "wik-hydro"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-en",
+      "authorityId": "lat-in-locative",
+      "englishTeachingForm": "EN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin in-",
+      "targetForm": "en-",
+      "pathway": [
+        "Latin in-",
+        "Old French en-",
+        "Middle English en-",
+        "English en-"
+      ],
+      "evidenceWords": [
+        "enclose",
+        "enrich",
+        "enthrone"
+      ],
+      "factSummary": "English en- is largely a French/Middle English reflex of Latin in- in the sense 'in/into/on' and related verb-forming uses.",
+      "sourceIds": [
+        "etym-en-prefix",
+        "wik-en-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-em",
+      "authorityId": "lat-in-locative",
+      "englishTeachingForm": "EM",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin in- via Old French en-/em-",
+      "targetForm": "em-",
+      "pathway": [
+        "Latin in-",
+        "Old French en-/em-",
+        "Middle English em-",
+        "English em-"
+      ],
+      "evidenceWords": [
+        "embark",
+        "embed",
+        "empower"
+      ],
+      "factSummary": "English em- is the assimilated/orthographic partner of en- in French-derived formations, ultimately linked to Latin in-.",
+      "sourceIds": [
+        "etym-en-prefix",
+        "wik-en-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-bi",
+      "authorityId": "lat-bis",
+      "englishTeachingForm": "BI",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Latin bis / bi- tradition",
+      "targetForm": "bi-",
+      "pathway": [
+        "Latin bis 'twice' / learned bi-",
+        "English learned combining form bi-"
+      ],
+      "evidenceWords": [
+        "biannual",
+        "bicycle",
+        "bifocal"
+      ],
+      "factSummary": "English bi- is a learned combining form meaning two/twice/double, historically tied to the Latin two-family represented here by bis.",
+      "sourceIds": [
+        "etym-bi-prefix",
+        "wik-bi-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-bin",
+      "authorityId": "lat-bini",
+      "englishTeachingForm": "BIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin bini / French bin- development",
+      "targetForm": "bin-",
+      "pathway": [
+        "Latin bini 'two each'",
+        "French/learned bin- development",
+        "English bin- before some vowels"
+      ],
+      "evidenceWords": [
+        "binary",
+        "binaural",
+        "binocular"
+      ],
+      "factSummary": "English bin- is a later variant associated with the Latin bini/bis family and is not stored as a separate Classical Latin prefix.",
+      "sourceIds": [
+        "etym-binary",
+        "wik-bin-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-jet",
+      "authorityId": "lat-ject",
+      "englishTeachingForm": "JET",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin iacio / iactare",
+      "targetForm": "jet",
+      "pathway": [
+        "Latin iacio / iactare",
+        "Late Latin iectare",
+        "Old French/French jeter / jet",
+        "English jet"
+      ],
+      "evidenceWords": [
+        "jet",
+        "jetty"
+      ],
+      "factSummary": "English JET descends through French throwing/casting forms ultimately tied to the Latin iacio family; it is not a Classical Latin root form.",
+      "sourceIds": [
+        "etym-jet",
+        "wik-jet"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cours",
+      "authorityId": "lat-curr",
+      "englishTeachingForm": "COURS",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin cursus / currere",
+      "targetForm": "cours-/course",
+      "pathway": [
+        "Latin currere / cursus",
+        "Old French cors/course",
+        "Middle English course",
+        "English course"
+      ],
+      "evidenceWords": [
+        "course",
+        "recourse",
+        "discourse"
+      ],
+      "factSummary": "English cours-/course forms descend through Old French from Latin cursus, the participial/noun family of currere.",
+      "sourceIds": [
+        "etym-course",
+        "wik-course"
       ],
       "status": "verified"
     }
