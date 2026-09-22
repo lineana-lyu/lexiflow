@@ -199,6 +199,15 @@ assert(metr?.sourceStem === "μετρ- / μετρο-", "METR must preserve Greek
 assert(!metr?.teachingForms?.includes("METER"), "English METER must remain outside Ancient Greek authority");
 assert(!metr?.teachingForms?.includes("METRY"), "English METRY must remain outside Ancient Greek authority");
 
+const pon = authority.getById("lat-pon");
+assert(pon?.teachingForms?.includes("PONE"), "PONE must be backed by Latin ponere");
+assert(!pon?.teachingForms?.includes("POSE"), "POSE must remain outside Latin authority");
+assert(!pon?.teachingForms?.includes("POUND"), "POUND must remain outside Latin authority");
+
+const ferFamily = authority.getById("lat-fer");
+assert(ferFamily?.teachingForms?.includes("LAT"), "LAT must be backed by Latin latus/latum");
+assert(!ferFamily?.teachingForms?.includes("LATE"), "LATE must remain outside Latin authority");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
