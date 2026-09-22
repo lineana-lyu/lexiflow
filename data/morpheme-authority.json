@@ -756,6 +756,18 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n23931/",
       "locator": "inspicio, spexi, spectum",
       "publicDomain": true
+    },
+    {
+      "id": "ls-latus-fero",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26049/",
+      "locator": "latus, participle of fero",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -2467,7 +2479,8 @@
       "id": "lat-fer",
       "kind": "root_family",
       "teachingForms": [
-        "FER"
+        "FER",
+        "LAT"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "fero",
@@ -2487,16 +2500,18 @@
         "承载",
         "带来"
       ],
-      "formRelation": "FER follows the present/infinite family of Latin fero/ferre. The irregular perfect tuli and supine latum are retained as source forms but are not collapsed into a single English teaching root.",
+      "formRelation": "FER follows the present/infinite family of Latin fero/ferre. LAT reflects the suppletive participial form latus/latum, explicitly linked by Lewis & Short to fero. LATE remains a downstream English teaching form.",
       "claimSources": {
         "lemma": [
-          "ls-fero"
+          "ls-fero",
+          "ls-latus-fero"
         ],
         "meaning": [
           "ls-fero"
         ],
         "forms": [
-          "ls-fero"
+          "ls-fero",
+          "ls-latus-fero"
         ],
         "variants": []
       },
@@ -2544,14 +2559,16 @@
       "kind": "root_family",
       "teachingForms": [
         "PON",
-        "POSIT"
+        "POSIT",
+        "PONE"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "pono",
       "sourceForms": [
         "pono",
         "posui",
-        "positum"
+        "positum",
+        "ponere"
       ],
       "coreMeaningEn": [
         "put",
@@ -2563,7 +2580,7 @@
         "安置",
         "设置"
       ],
-      "formRelation": "PON follows the present family of pono; POSIT reflects the posit- form in Latin positum. English POS- is not separately asserted here without a downstream historical mapping.",
+      "formRelation": "PON follows Latin pono; PONE is directly grounded in the infinitive ponere; POSIT reflects the posit- form in Latin positum. POS/POSE/POUND are not source-language aliases and require separate disposition or transmission evidence.",
       "claimSources": {
         "lemma": [
           "ls-pono"
