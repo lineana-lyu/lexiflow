@@ -256,6 +256,30 @@ const ferFamily = authority.getById("lat-fer");
 assert(ferFamily?.teachingForms?.includes("LAT"), "LAT must be backed by Latin latus/latum");
 assert(!ferFamily?.teachingForms?.includes("LATE"), "LATE must remain outside Latin authority");
 
+const transPrefix = authority.getById("lat-trans");
+assert(transPrefix?.teachingForms?.includes("TRANS-"), "TRANS- must be backed by Latin trans");
+assert(transPrefix?.teachingForms?.includes("TRA-"), "TRA- must preserve the attested Latin compound reduction");
+
+const triFamily = authority.getById("lat-tri");
+assert(triFamily?.sourceLemma === "tres / tria", "TRI must resolve to Latin tres/tria");
+assert(triFamily?.teachingForms?.includes("TRI"), "TRI must be source-language grounded");
+
+const regFamily = authority.getById("lat-reg");
+assert(regFamily?.sourceLemma === "rego", "REG/RIG/RECT must resolve to Latin rego");
+assert(regFamily?.teachingForms?.includes("RIG"), "RIG must be backed by Latin corrigo");
+assert(regFamily?.teachingForms?.includes("RECT"), "RECT must preserve Latin rectum");
+
+const hydroFamily = authority.getById("grc-hydro");
+assert(hydroFamily?.sourceLemma === "ὕδωρ", "HYDRO must resolve to Greek ὕδωρ");
+assert(hydroFamily?.sourceStem === "ὑδρο-", "HYDRO must preserve attested Greek ὑδρο- compound form");
+assert(!hydroFamily?.teachingForms?.includes("HYDR"), "HYDR must remain outside Ancient Greek authority");
+
+const epiPrefix = authority.getById("grc-epi");
+assert(epiPrefix?.sourceLemma === "ἐπί", "EPI- must resolve to Greek ἐπί");
+assert(epiPrefix?.teachingForms?.includes("EPI-"), "EPI- must be source-language grounded");
+assert(!epiPrefix?.teachingForms?.includes("EPH-"), "EPH- remains deferred pending approved grammar evidence");
+assert(!epiPrefix?.teachingForms?.includes("EP-"), "EP- remains deferred pending approved grammar evidence");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
