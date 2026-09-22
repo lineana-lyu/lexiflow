@@ -119,6 +119,22 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
   const ambiguousAuthorityForms = [];
 
   for (const form of forms) {
+    const decision = decisionIndex.get(`${candidate.id}::${form}`);
+
+    // Candidate-specific review decisions take precedence over surface-form
+    // matching. This is required for indexed homographs such as cap1/cap2:
+    // CAP < capio ("take") must not satisfy CAP2 < caput ("head").
+    if (decision?.disposition === "closed_not_publish") {
+      unresolvedForms.push(form);
+      closedForms.push({ form, decisionId: decision.id, reason: decision.reason });
+      continue;
+    }
+    if (decision?.disposition === "deferred_needs_evidence") {
+      unresolvedForms.push(form);
+      deferredForms.push({ form, decisionId: decision.id, reason: decision.reason });
+      continue;
+    }
+
     const authorityIds = index.authorityByForm.get(form) || [];
     const transmissionIds = index.transmissionByForm.get(form) || [];
     if (authorityIds.length) {
@@ -131,14 +147,7 @@ function assessCandidate(candidate, index, decisionIndex, legacySignalByForm = n
 
     if (!authorityIds.length && !transmissionIds.length) {
       unresolvedForms.push(form);
-      const decision = decisionIndex.get(`${candidate.id}::${form}`);
-      if (decision?.disposition === "closed_not_publish") {
-        closedForms.push({ form, decisionId: decision.id, reason: decision.reason });
-      } else if (decision?.disposition === "deferred_needs_evidence") {
-        deferredForms.push({ form, decisionId: decision.id, reason: decision.reason });
-      } else {
-        actionableUnresolvedForms.push(form);
-      }
+      actionableUnresolvedForms.push(form);
     }
   }
 
