@@ -282,3 +282,100 @@ The highest remaining P1 queue now begins with:
 - MOV / MOT / MOB
 - SED / SID / SESS
 
+## P1 batch — JAC/JET, EN/EM, CURR/COURS, BI/BIN, CAPIT/CIPIT
+
+This batch resolved another five high-priority candidate families and fixed an
+indexed-homograph false-coverage bug.
+
+### JECT / JET / JAC
+
+The discovery family mixed two related but distinct Latin verbs:
+
+- `JECT` remains under Latin `iacio` "throw/cast";
+- `JAC` is now a separate authority family under `iaceo/jaceo`
+  "lie/be situated";
+- `JET` is downstream Romance/English transmission through French
+  `jeter/jet`.
+
+LexiFlow therefore no longer treats JAC and JECT as one semantic root.
+
+### EN / EM
+
+`EN` and `EM` are modeled as transmission mappings to the existing Latin
+locative `IN-` authority family:
+
+- Latin `in-`
+- Old French `en-/em-`
+- Middle/Modern English `en-/em-`
+
+They are not inserted as independent Classical Latin prefixes.
+
+### CURR / CURS / COURS
+
+Source-language authority remains:
+
+- `CURR`
+- `CURS`
+
+A verified transmission mapping now covers `COURS` through:
+
+- Latin `currere / cursus`
+- Old French `cors/course`
+- English `course`
+
+Candidate forms `CUR`, `COR`, `CORR`, and `COUR` are intentionally
+closed as unsafe or unnecessary pedagogical truncations.
+
+### BI / BIN
+
+The source-language layer now keeps two actual Latin numeral bases separate:
+
+- `BIS` — twice / double;
+- `BINI` — two by two / two each.
+
+English learner forms are downstream:
+
+- `BI` → linked to `BIS`;
+- `BIN` → linked to `BINI`.
+
+This avoids pretending that the modern English teaching forms are themselves
+the Classical Latin dictionary headwords.
+
+### CAPIT / CIPIT vs CAP / CIP / CEPT
+
+A second CAP-like family is now explicitly separated:
+
+- `CAP / CIP / CAPT / CEPT` ← Latin `capio` "take";
+- `CAPIT / CIPIT` ← Latin `caput, capitis` "head".
+
+Lewis & Short directly supports `capitis` and
+`praeceps, praecipitis < prae-caput`, grounding CAPIT/CIPIT.
+
+The indexed ECDICT candidate `cap2` previously lost its numeric discriminator
+during normalization and falsely matched CAP < capio. The coverage audit now
+allows candidate-specific review decisions to override raw surface-form matches,
+and a regression assertion guarantees CAP2 cannot satisfy itself from the
+CAP/take authority family.
+
+### Coverage after the batch
+
+- authority: **81 morphemes / 93 sources**
+- transmission: **29 mappings / 56 sources**
+- ECDICT raw coverage: **69 covered / 30 partial / 426 missing**
+- workflow: **69 complete / 9 closed / 2 deferred / 445 actionable**
+- candidate decisions: **16 closed / 3 deferred**
+- actionable bands: **P0 0 / P1 37 / P2 408**
+
+The next P1 queue begins with:
+
+- CIS / CID / CIDE
+- CLAUS
+- AB / ABS
+- MOV / MOT / MOB
+- SED / SID / SESS
+- AC-
+- MIS-
+- MAN / MANI / MANU / MAIN
+- GRAD / GRADE
+- VENI / VENE
+
