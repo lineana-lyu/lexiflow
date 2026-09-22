@@ -84,7 +84,24 @@ const hydr=transmission.getByTeachingForm("HYDR");
 assert(hydr?.authorityId==="grc-hydro","HYDR must map to Greek HYDRO authority");
 assert(authority.findByTeachingForm("HYDR").length===0,"HYDR must remain outside Ancient Greek authority");
 
-for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro","tx-voke","tx-vise","tx-phone","tx-phony","tx-phono","tx-clos","tx-hydr"]){
+const enPrefix=transmission.getByTeachingForm("EN");
+assert(enPrefix?.authorityId==="lat-in-locative","EN must map to locative Latin IN authority");
+const emPrefix=transmission.getByTeachingForm("EM");
+assert(emPrefix?.authorityId==="lat-in-locative","EM must map to locative Latin IN authority");
+
+const biPrefix=transmission.getByTeachingForm("BI");
+assert(biPrefix?.authorityId==="lat-bis","BI must map to Latin BIS authority");
+const binPrefix=transmission.getByTeachingForm("BIN");
+assert(binPrefix?.authorityId==="lat-bini","BIN must map to Latin BINI authority");
+
+const jet=transmission.getByTeachingForm("JET");
+assert(jet?.authorityId==="lat-ject","JET must map to the Latin JECT throw family");
+assert(authority.findByTeachingForm("JET").length===0,"JET must remain outside Latin source authority");
+
+const cours=transmission.getByTeachingForm("COURS");
+assert(cours?.authorityId==="lat-curr","COURS must map to Latin CURR/CURS authority");
+
+for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro","tx-voke","tx-vise","tx-phone","tx-phony","tx-phono","tx-clos","tx-hydr","tx-en","tx-em","tx-bi","tx-bin","tx-jet","tx-cours"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
   assert(evidence?.sources?.length>=2,`${id} must retain two-source evidence`);
