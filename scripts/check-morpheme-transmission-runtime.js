@@ -62,7 +62,29 @@ const stance=transmission.getByTeachingForm("STANCE");
 assert(stance?.authorityId==="lat-sta","STANCE must map to STA/STAT/STANT authority");
 assert(authority.findByTeachingForm("STANCE").length===0,"STANCE must remain outside Latin authority");
 
-for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro"]){
+const voke=transmission.getByTeachingForm("VOKE");
+assert(voke?.authorityId==="lat-voc","VOKE must map to Latin VOC authority");
+
+const vise=transmission.getByTeachingForm("VISE");
+assert(vise?.authorityId==="lat-vid","VISE must map to Latin VID/VIS authority");
+
+const phone=transmission.getByTeachingForm("PHONE");
+assert(phone?.authorityId==="grc-phon","PHONE must map to Greek PHON authority");
+
+const phony=transmission.getByTeachingForm("PHONY");
+assert(phony?.authorityId==="grc-phon","PHONY must map to Greek PHON authority");
+
+const phono=transmission.getByTeachingForm("PHONO");
+assert(phono?.authorityId==="grc-phon","PHONO must map to Greek PHON authority");
+
+const clos=transmission.getByTeachingForm("CLOS");
+assert(clos?.authorityId==="lat-clud","CLOS must map to Latin CLUD/CLUS authority");
+
+const hydr=transmission.getByTeachingForm("HYDR");
+assert(hydr?.authorityId==="grc-hydro","HYDR must map to Greek HYDRO authority");
+assert(authority.findByTeachingForm("HYDR").length===0,"HYDR must remain outside Ancient Greek authority");
+
+for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro","tx-voke","tx-vise","tx-phone","tx-phony","tx-phono","tx-clos","tx-hydr"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
   assert(evidence?.sources?.length>=2,`${id} must retain two-source evidence`);
