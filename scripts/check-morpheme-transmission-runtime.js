@@ -46,6 +46,14 @@ assert(late?.authorityId==="lat-fer","LATE must map to FER/LAT authority");
 const spectro=transmission.getByTeachingForm("SPECTRO");
 assert(spectro?.authorityId==="lat-spect","SPECTRO must map to SPEC/SPIC/SPECT authority");
 
+const ceive=transmission.getByTeachingForm("CEIVE");
+assert(ceive?.authorityId==="lat-cap","CEIVE must map to CAP/CIP/CEPT authority");
+assert(authority.findByTeachingForm("CEIVE").length===0,"CEIVE must remain outside Latin authority");
+
+const ceit=transmission.getByTeachingForm("CEIT");
+assert(ceit?.authorityId==="lat-cap","CEIT must map to CAP/CIP/CEPT authority");
+assert(authority.findByTeachingForm("CEIT").length===0,"CEIT must remain outside Latin authority");
+
 for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
