@@ -432,6 +432,45 @@ function auditCoverage(candidates, authority, transmission, decisions, collision
     "CID2 must be resolved through the collision registry"
   );
 
+
+  // Regression: SED is also a real homograph. The separative prefix
+  // SE-/SED- "apart" must not satisfy the sedeo "sit" root candidate.
+  const sedSitRow = ecdictRows.find(row => row.id === "ecdict:sed, sid, sess");
+  const legacySedRow = legacyRows.find(row => row.id === "legacy:sed");
+  assert(sedSitRow && legacySedRow, "SED collision regression rows are required");
+
+  const sedSitMatch = sedSitRow.authorityMatches.find(item => item.form === "SED");
+  const legacySedMatch = legacySedRow.authorityMatches.find(item => item.form === "SED");
+  assert(
+    sedSitMatch?.ids?.length === 1 && sedSitMatch.ids[0] === "lat-sed-sit",
+    "SED/SID/SESS candidate must resolve SED only to sedeo authority"
+  );
+  assert(
+    legacySedMatch?.ids?.length === 1 && legacySedMatch.ids[0] === "lat-sed-sit",
+    "Legacy SED candidate must resolve SED only to sedeo authority"
+  );
+  assert(
+    !sedSitRow.authorityMatches.some(item => item.form === "SED" && item.ids.includes("lat-se")),
+    "SED sit candidate must not be satisfied by separative SE-/SED- authority"
+  );
+  assert(
+    sedSitRow.collisionResolvedForms.some(item => item.form === "SED" && item.collisionId === "collision-sed-separative-sit"),
+    "SED sit candidate must be resolved through the collision registry"
+  );
+
+  // Regression: MOB remains intentionally unpublished rather than being
+  // promoted merely to complete the MOV/MOT/MOB discovery row.
+  const mobRow = ecdictRows.find(row => row.id === "ecdict:mob, mot, mov");
+  assert(mobRow, "MOV/MOT/MOB regression row is required");
+  assert(
+    mobRow.closedForms.some(item => item.form === "MOB" && item.decisionId === "decision-mob-move"),
+    "MOB must remain closed as an unsupported pedagogical truncation"
+  );
+  assert(
+    !mobRow.authorityMatches.some(item => item.form === "MOB"),
+    "MOB must not be published through raw surface matching"
+  );
+
   return {
     generatedAt: "2026-09-22",
     authorityCount: (authority.morphemes || []).length,
