@@ -236,6 +236,38 @@
       "url": "https://en.wiktionary.org/wiki/deceit",
       "locator": "English deceit / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-cede",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/cede",
+      "locator": "cede (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-ceder",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/c%C3%A9der",
+      "locator": "French céder / Etymology: borrowed from Latin cedere",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-stance",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/stance",
+      "locator": "stance (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-stance",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/stance",
+      "locator": "English stance / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -568,6 +600,54 @@
       "sourceIds": [
         "etym-deceit",
         "wik-deceit"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cede",
+      "authorityId": "lat-ced",
+      "englishTeachingForm": "CEDE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin cedere",
+      "targetForm": "-cede / cede",
+      "pathway": [
+        "Latin cedere",
+        "French céder and/or direct learned borrowing",
+        "English cede / -cede"
+      ],
+      "evidenceWords": [
+        "cede",
+        "precede",
+        "recede",
+        "secede"
+      ],
+      "factSummary": "English CEDE is a later French/English surface form from Latin cedere. Latin authority remains CED/CESS; CEED is tracked separately as another English spelling reflex.",
+      "sourceIds": [
+        "etym-cede",
+        "wik-ceder"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-stance",
+      "authorityId": "lat-sta",
+      "englishTeachingForm": "STANCE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin stans/stantis and Vulgar Latin *stantia",
+      "targetForm": "stance",
+      "pathway": [
+        "Latin stare / stans, stantis",
+        "Vulgar Latin *stantia",
+        "Old French estance / French stance",
+        "English stance"
+      ],
+      "evidenceWords": [
+        "stance"
+      ],
+      "factSummary": "English STANCE is a Romance/English continuation built from the Latin standing family; source-language authority remains STA/STAT/STANT.",
+      "sourceIds": [
+        "etym-stance",
+        "wik-stance"
       ],
       "status": "verified"
     }
