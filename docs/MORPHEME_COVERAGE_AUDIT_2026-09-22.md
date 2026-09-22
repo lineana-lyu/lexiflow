@@ -379,3 +379,89 @@ The next P1 queue begins with:
 - GRAD / GRADE
 - VENI / VENE
 
+## P1 batch — CID homograph split and collision registry
+
+This batch resolves the two high-risk discovery families that share the same
+normalized teaching form `CID` but come from different Latin verbs.
+
+### CID / CIS / CIDE — cut / kill
+
+Source-language authority:
+
+- `CID / CIS` ← Latin `caedo, cecidi, caesum`;
+- Lewis & Short compound `concido, concidi, concisum < caedo` directly
+  attests both `-cid-` and `-cis-`.
+
+Downstream transmission:
+
+- `CIDE` is not inserted into Classical Latin authority;
+- it is modeled as a Romance/English transmission through Latin
+  `-cida / -cidium`, Middle French `-cide`, and English `-cide`;
+- the mapping is independently cross-checked with Etymonline and Wiktionary.
+
+### CAD / CAS / CID — fall
+
+A separate authority family now records:
+
+- `CAD / CAS / CID` ← Latin `cado, cecidi, casum`;
+- Lewis & Short `accido, accidi < cado` directly grounds the fall-family
+  `-cid-` compound form.
+
+This `CID` is not the same family as `CID < caedo`.
+
+### Generic collision architecture
+
+New file:
+
+- `data/morpheme-collisions.json`
+
+The first registered collision is:
+
+- surface form: `CID`;
+- `ecdict:cis, cid1, -cide` → `lat-caed`;
+- `ecdict:cad, cas, cid2` → `lat-cad`;
+- `legacy:cid` → `lat-caed`.
+
+Coverage resolution now follows:
+
+1. candidate-specific decision;
+2. candidate-specific collision binding;
+3. surface matching only as fallback.
+
+This removes the need for per-family patches such as `if CID2 ...` and turns
+the CAP2 lesson into a reusable mechanism.
+
+CI includes regressions proving that:
+
+- cut/kill `CID1` resolves only to `lat-caed`;
+- fall `CID2` resolves only to `lat-cad`;
+- legacy `CID/CIS` resolves only to the cut family;
+- `CIDE` remains outside source-language authority and maps through
+  transmission.
+
+### Coverage after the batch
+
+Learning Engine Check #894 passed the full repository suite with:
+
+- authority: **83 morphemes / 97 sources**;
+- transmission: **30 mappings / 58 sources**;
+- collision registry: **1 surface / 3 candidate bindings**;
+- Legacy raw coverage: **31 covered / 6 partial / 31 missing**;
+- ECDICT raw coverage: **71 covered / 30 partial / 424 missing**;
+- workflow: **71 complete / 9 closed / 2 deferred / 443 actionable**;
+- candidate decisions: **16 closed / 3 deferred**;
+- actionable bands: **P0 0 / P1 35 / P2 408**.
+
+The next P1 queue begins with:
+
+- CLAUS;
+- AB / ABS;
+- MOV / MOT / MOB;
+- SED / SID / SESS;
+- AC-;
+- MIS-;
+- MAN / MANI / MANU / MAIN;
+- GRAD / GRADE;
+- VENI / VENE;
+- BEN / BON.
+
