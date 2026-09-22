@@ -160,6 +160,26 @@
         "lsj-bios",
         "smyth-declension"
       ]
+    },
+    {
+      "id": "decision-eph",
+      "candidateId": "ecdict:epi-, eph-, ep-",
+      "form": "EPH",
+      "disposition": "deferred_needs_evidence",
+      "reason": "EPI- is source-language verified from Ancient Greek ἐπί. EPH- reflects phonological/elision behavior around ἐφ᾽, but LexiFlow will not publish it until an approved Greek grammar source is attached to the exact variant rule.",
+      "relatedAuthorityIds": [
+        "grc-epi"
+      ]
+    },
+    {
+      "id": "decision-ep",
+      "candidateId": "ecdict:epi-, eph-, ep-",
+      "form": "EP",
+      "disposition": "deferred_needs_evidence",
+      "reason": "EPI- is source-language verified from Ancient Greek ἐπί. EP- is a reduced/elided surface form; it remains deferred until the approved grammar layer explicitly documents the contraction/elision environment.",
+      "relatedAuthorityIds": [
+        "grc-epi"
+      ]
     }
   ]
 }
