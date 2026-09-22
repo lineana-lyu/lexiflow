@@ -465,3 +465,73 @@ The next P1 queue begins with:
 - VENI / VENE;
 - BEN / BON.
 
+## P1 batch — CLAUS, AB/ABS, MOV/MOT/MOB, SED/SID/SESS
+
+This batch resolves four more P1 families while preserving the distinction
+between attested source-language forms and pedagogical truncations.
+
+### CLAUS / CLOS / CLUD / CLUS
+
+The existing Latin `claudo` authority family now publishes:
+
+- `CLAUS` — directly grounded by `clausi / clausum`;
+- `CLUD` — the frequent compound form `cludo`;
+- `CLUS` — the `clus-` branch already grounded in Latin compounds.
+
+`CLOS` remains downstream Romance/English transmission through Old French
+`clos / clore`. No new authority family was created merely to satisfy the
+candidate row.
+
+### AB- / ABS-
+
+The existing Latin away-prefix authority now includes `ABS-`.
+
+Lewis & Short directly records `ab, a, abs` and related historical variants,
+so `ABS-` belongs in source-language authority rather than transmission.
+
+### MOV / MOT / MOB
+
+`MOV / MOT` remain grounded in Latin `moveo, movi, motum`.
+
+`MOB` is intentionally `closed_not_publish`. It is a pedagogical truncation
+associated with the later `mobilis/mobile` line, not a separately attested
+source-language root form. LexiFlow does not publish it simply to make the
+candidate appear fully covered.
+
+### SED / SID / SESS
+
+A new Latin authority family now records:
+
+- `SED` ← `sedeo`;
+- `SESS` ← `sessum`;
+- `SID` ← compound forms such as `assideo/adsideo`, explicitly linked by
+  Lewis & Short to `sedeo`.
+
+This creates a genuine normalized-form collision with the existing separative
+prefix:
+
+- `SE-/SED-` = apart;
+- `SED/SID/SESS` = sit / be seated.
+
+The collision registry now contains a second surface, `SED`, and binds both
+the ECDICT and legacy sitting candidates specifically to `lat-sed-sit`.
+Coverage regression tests prove that the separative `lat-se` prefix cannot
+satisfy the sitting-root candidate.
+
+### Coverage after the batch
+
+Learning Engine Check #902 passed the complete repository suite with:
+
+- authority: **84 morphemes / 100 sources**;
+- transmission: **30 mappings / 58 sources**;
+- collision registry: **2 surfaces / 5 candidate bindings**;
+- Legacy raw coverage: **32 covered / 5 partial / 31 missing**;
+- ECDICT raw coverage: **74 covered / 27 partial / 424 missing**;
+- workflow: **74 complete / 10 closed / 2 deferred / 439 actionable**;
+- candidate decisions: **17 closed / 3 deferred**;
+- actionable bands: **P0 0 / P1 31 / P2 408**.
+
+The next P1 queue should be re-read from the generated audit rather than
+continued from the previous static list; the highest remaining families now
+exclude CLAUS, AB/ABS, MOV/MOT/MOB, and SED/SID/SESS.
+
