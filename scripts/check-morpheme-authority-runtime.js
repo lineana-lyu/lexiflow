@@ -225,6 +225,26 @@ assert(!vivFamily?.teachingForms?.includes("VIVI"), "VIVI must remain a non-publ
 const vitaFamily = authority.getById("lat-vita");
 assert(!vitaFamily?.teachingForms?.includes("VIT"), "VIT must remain outside source-language authority");
 
+const facFamilyP1 = authority.getById("lat-fac");
+assert(facFamilyP1?.teachingForms?.includes("FIC"), "FIC must be backed by Latin conficio");
+assert(!facFamilyP1?.teachingForms?.includes("FEC"), "FEC must remain a non-published truncation");
+
+const agFamily = authority.getById("lat-ag");
+assert(agFamily?.teachingForms?.includes("AG"), "AG must be backed by Latin ago");
+assert(agFamily?.teachingForms?.includes("ACT"), "ACT must be backed by Latin actio/actum");
+
+const monFamily = authority.getById("grc-mon");
+assert(monFamily?.sourceLemma === "μόνος", "MON/MONO must resolve to Greek μόνος");
+assert(monFamily?.sourceStem === "μονο-", "MON/MONO must preserve Greek μονο-");
+
+const staFamilyP1 = authority.getById("lat-sta");
+assert(staFamilyP1?.teachingForms?.includes("STANT"), "STANT must be backed by Latin constans/stantis");
+assert(!staFamilyP1?.teachingForms?.includes("STANCE"), "STANCE must remain outside Latin authority");
+
+const stasFamily = authority.getById("grc-stas");
+assert(stasFamily?.sourceLemma === "στάσις", "STAS must resolve to Greek στάσις");
+assert(stasFamily?.sourceStem === "στασ- / στασι-", "STAS must preserve Greek stas-/stasi- source stems");
+
 const pon = authority.getById("lat-pon");
 assert(pon?.teachingForms?.includes("PONE"), "PONE must be backed by Latin ponere");
 assert(!pon?.teachingForms?.includes("POSE"), "POSE must remain outside Latin authority");
