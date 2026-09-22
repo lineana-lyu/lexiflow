@@ -34,6 +34,27 @@
           "transmissionIds": []
         }
       ]
+    },
+    {
+      "id": "collision-sed-separative-sit",
+      "form": "SED",
+      "reason": "SED is surface-identical across the separative Latin prefix SE-/SED- 'apart' and the sedeo 'sit' root family. Current SED-root discovery candidates must resolve to the sit family instead of being marked ambiguous or accidentally satisfied by the prefix authority.",
+      "bindings": [
+        {
+          "candidateId": "ecdict:sed, sid, sess",
+          "authorityIds": [
+            "lat-sed-sit"
+          ],
+          "transmissionIds": []
+        },
+        {
+          "candidateId": "legacy:sed",
+          "authorityIds": [
+            "lat-sed-sit"
+          ],
+          "transmissionIds": []
+        }
+      ]
     }
   ]
 }
