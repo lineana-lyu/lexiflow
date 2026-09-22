@@ -204,6 +204,38 @@
       "url": "https://en.wiktionary.org/wiki/surmise",
       "locator": "English surmise / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-receive",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/receive",
+      "locator": "receive (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-receive-path",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/recevoir",
+      "locator": "Old French recevoir / receivre from Latin recipere",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-deceit",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/deceit",
+      "locator": "deceit (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-deceit",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/deceit",
+      "locator": "English deceit / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -488,6 +520,54 @@
       "sourceIds": [
         "etym-surmise",
         "wik-surmise"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceive",
+      "authorityId": "lat-cap",
+      "englishTeachingForm": "CEIVE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin -cipere compounds of capere",
+      "targetForm": "-ceive",
+      "pathway": [
+        "Latin capere / recipere / decipere",
+        "Old French receivre / decevoir",
+        "Middle English receiven / deceyven",
+        "English -ceive"
+      ],
+      "evidenceWords": [
+        "receive",
+        "deceive",
+        "perceive"
+      ],
+      "factSummary": "English -ceive is a Romance/English reflex of Latin capere compounds in -cipere; Latin authority remains CAP/CAPT/CIP/CEPT.",
+      "sourceIds": [
+        "etym-receive",
+        "wik-receive-path"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceit",
+      "authorityId": "lat-cap",
+      "englishTeachingForm": "CEIT",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin decipere / Old French deceite",
+      "targetForm": "-ceit",
+      "pathway": [
+        "Latin decipere",
+        "Old French deceite/deçoite",
+        "Middle English deceyte",
+        "English deceit"
+      ],
+      "evidenceWords": [
+        "deceit"
+      ],
+      "factSummary": "English -ceit in deceit is a Romance/English reflex from the decipere/deceite branch of the capere family; it is not a Classical Latin source form.",
+      "sourceIds": [
+        "etym-deceit",
+        "wik-deceit"
       ],
       "status": "verified"
     }
