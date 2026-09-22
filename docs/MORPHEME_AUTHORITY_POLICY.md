@@ -66,3 +66,34 @@ This is why a candidate such as `TELE` is intentionally withheld until its
 Ancient Greek source form and compound behavior are documented to the same
 standard.
 
+## Homograph and collision rule
+
+A surface teaching form is not a globally unique morpheme identifier.
+
+When the same normalized form is independently supported by different
+source-language families, LexiFlow must preserve both authorities and resolve
+coverage through explicit candidate-to-family bindings in
+`data/morpheme-collisions.json`.
+
+The resolution order is:
+
+1. candidate-specific workflow decisions;
+2. candidate-specific collision bindings;
+3. raw surface-form matching only when no collision binding exists.
+
+A collision binding may restrict a candidate form to one or more verified
+authority/transmission records, but it cannot create linguistic facts or alter
+authority data.
+
+For example, `CID` is intentionally present in both:
+
+- `CID/CIS < caedo` — cut / strike / kill;
+- `CAD/CAS/CID < cado` — fall / happen.
+
+Therefore publication coverage for `cid1` and `cid2` must be family-aware.
+The existence of either `CID` authority alone must never satisfy the other
+candidate merely because the letters are identical.
+
+This rule generalizes the earlier CAP2 safeguard and prevents indexed
+homographs from becoming false coverage.
+
