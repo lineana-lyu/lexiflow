@@ -684,6 +684,54 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n12804/",
       "locator": "deicio / dejicio, jeci, jectum [jacio]",
       "publicDomain": true
+    },
+    {
+      "id": "ls-verto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n50654/",
+      "locator": "verto (vorto), verti, versum",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-metron",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n67260/",
+      "locator": "μέτρον",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-perimetron",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n81698/",
+      "locator": "περίμετρον",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-metronomoi",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n67261/",
+      "locator": "μετρονόμοι",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -3231,6 +3279,95 @@
         "forms": [
           "ls-proicio",
           "ls-deicio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vert",
+      "kind": "root_family",
+      "teachingForms": [
+        "VERT",
+        "VERS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "verto",
+      "sourceForms": [
+        "verto",
+        "verti",
+        "versum"
+      ],
+      "coreMeaningEn": [
+        "turn",
+        "turn round",
+        "turn about"
+      ],
+      "coreMeaningZh": [
+        "转",
+        "转动",
+        "转向"
+      ],
+      "formRelation": "VERT follows Latin verto/verti; VERS reflects the vers- form in Latin versum. Both are directly source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-verto"
+        ],
+        "meaning": [
+          "ls-verto"
+        ],
+        "forms": [
+          "ls-verto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-metr",
+      "kind": "root_family",
+      "teachingForms": [
+        "METR",
+        "METRO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μέτρον",
+      "sourceForms": [
+        "μέτρον",
+        "μετρ-",
+        "μετρο-"
+      ],
+      "sourceStem": "μετρ- / μετρο-",
+      "coreMeaningEn": [
+        "measure",
+        "that by which anything is measured"
+      ],
+      "coreMeaningZh": [
+        "度量",
+        "测量标准",
+        "尺度"
+      ],
+      "formRelation": "LSJ defines μέτρον as a measure and attests μετρο- in compounds such as μετρονόμοι and περίμετρον. METR/METRO are Latin-letter teaching labels for the attested Greek stem/compound forms. English METER/METRY are not asserted in this source-language layer.",
+      "stemDerivation": {
+        "sourceStem": "μετρ- / μετρο-",
+        "method": "attested noun/compound forms in LSJ: μέτρον, μετρονόμοι, περίμετρον",
+        "sources": [
+          "lsj-metron",
+          "lsj-metronomoi",
+          "lsj-perimetron"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-metron"
+        ],
+        "meaning": [
+          "lsj-metron"
+        ],
+        "forms": [
+          "lsj-metron",
+          "lsj-metronomoi",
+          "lsj-perimetron"
         ],
         "variants": []
       },
