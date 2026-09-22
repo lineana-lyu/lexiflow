@@ -268,6 +268,86 @@
       "url": "https://en.wiktionary.org/wiki/stance",
       "locator": "English stance / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-invoke",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/invoke",
+      "locator": "invoke (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-invoke",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/invoke",
+      "locator": "English invoke / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-revise",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/revise",
+      "locator": "revise (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-revise",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/revise",
+      "locator": "English revise / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-phone-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-phone",
+      "locator": "-phone",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phone-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-phone",
+      "locator": "English -phone / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-euphony",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/euphony",
+      "locator": "euphony (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phony-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-phony",
+      "locator": "English -phony / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-close",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/close",
+      "locator": "close (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-close",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/close",
+      "locator": "English close / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -648,6 +728,124 @@
       "sourceIds": [
         "etym-stance",
         "wik-stance"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-voke",
+      "authorityId": "lat-voc",
+      "englishTeachingForm": "VOKE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin vocare / invocare",
+      "targetForm": "-voke",
+      "pathway": [
+        "Latin vocare / invocare",
+        "Old French invoquer/envoquer",
+        "Middle/Modern English invoke and related -voke forms"
+      ],
+      "evidenceWords": [
+        "invoke",
+        "revoke",
+        "provoke"
+      ],
+      "factSummary": "English -voke in invoke/revoke/provoke is a Romance/English reflex of the Latin vocare family; VOKE is not a Classical Latin source form.",
+      "sourceIds": [
+        "etym-invoke",
+        "wik-invoke"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-vise",
+      "authorityId": "lat-vid",
+      "englishTeachingForm": "VISE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin videre / revisere / revisus",
+      "targetForm": "-vise",
+      "pathway": [
+        "Latin videre / revisere",
+        "Middle French réviser/reviser",
+        "English revise and related -vise forms"
+      ],
+      "evidenceWords": [
+        "revise"
+      ],
+      "factSummary": "English -vise in revise is a French/English reflex of the Latin videre family and is not itself a Classical Latin source form.",
+      "sourceIds": [
+        "etym-revise",
+        "wik-revise"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phone",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONE",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek φωνή",
+      "targetForm": "-phone",
+      "pathway": [
+        "Ancient Greek φωνή",
+        "learned scientific/technical formations",
+        "English -phone"
+      ],
+      "evidenceWords": [
+        "telephone",
+        "homophone",
+        "saxophone"
+      ],
+      "factSummary": "English -phone is a learned combining form from Ancient Greek φωνή 'sound, voice'; it is downstream from the Greek PHON authority record.",
+      "sourceIds": [
+        "etym-phone-suffix",
+        "wik-phone-suffix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phony",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Ancient Greek -φωνία / φωνή",
+      "targetForm": "-phony",
+      "pathway": [
+        "Ancient Greek -φωνία from φωνή",
+        "Latin/French -phonia/-phonie",
+        "English -phony"
+      ],
+      "evidenceWords": [
+        "euphony",
+        "symphony",
+        "cacophony"
+      ],
+      "factSummary": "English -phony is a learned historical suffix ultimately from the Greek φωνή family; it is distinct from the unrelated adjective phony 'fake'.",
+      "sourceIds": [
+        "etym-euphony",
+        "wik-phony-suffix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-clos",
+      "authorityId": "lat-clud",
+      "englishTeachingForm": "CLOS",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin clausus / claudere",
+      "targetForm": "clos-/close",
+      "pathway": [
+        "Latin claudere / clausus",
+        "Old French clos / clore",
+        "Middle English clos/close"
+      ],
+      "evidenceWords": [
+        "close",
+        "enclose",
+        "closure"
+      ],
+      "factSummary": "English clos-/close forms descend through Old French clos/clore from Latin clausus/claudere; CLOS is downstream from the Latin CLUD/CLUS authority family.",
+      "sourceIds": [
+        "etym-close",
+        "wik-close"
       ],
       "status": "verified"
     }
