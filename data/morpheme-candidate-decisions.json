@@ -1,0 +1,57 @@
+{
+  "schema": "lexiflow-morpheme-candidate-decisions-v1",
+  "policy": {
+    "rule": "A candidate disposition controls verification workflow only; it never creates linguistic authority.",
+    "allowed": [
+      "closed_not_publish",
+      "deferred_needs_evidence"
+    ],
+    "closedMeaning": "Reviewed and intentionally not published as an independent learner morpheme.",
+    "deferredMeaning": "Potentially meaningful, but insufficient evidence or product value to publish now."
+  },
+  "decisions": [
+    {
+      "id": "decision-pos",
+      "candidateId": "ecdict:pos, -pose, pon, -pone, -pound",
+      "form": "POS",
+      "disposition": "closed_not_publish",
+      "reason": "Latin pono directly supports PON/PONE/POSIT. POS alone is an arbitrary pedagogical truncation of posui/positum rather than a separately attested source-language morpheme; LexiFlow will teach the evidenced forms instead.",
+      "relatedAuthorityIds": [
+        "lat-pon"
+      ]
+    },
+    {
+      "id": "decision-mitt",
+      "candidateId": "ecdict:mit, mis1, mitt, miss, -mise",
+      "form": "MITT",
+      "disposition": "closed_not_publish",
+      "reason": "Allen & Greenough explicitly analyzes mitt-i-tis with root MIT and consonant doubling in the present stem. MITT is therefore a stem spelling effect, not a separate root.",
+      "relatedAuthorityIds": [
+        "lat-mit"
+      ],
+      "sourceIds": [
+        "ag-present-stem"
+      ]
+    },
+    {
+      "id": "decision-mis",
+      "candidateId": "ecdict:mit, mis1, mitt, miss, -mise",
+      "form": "MIS",
+      "disposition": "closed_not_publish",
+      "reason": "Latin misi is part of the mittere paradigm, but publishing learner-facing MIS would collide with the unrelated English/Germanic mis- prefix. MIT/MISS plus the verified MISE transmission provide a safer teaching model.",
+      "relatedAuthorityIds": [
+        "lat-mit"
+      ]
+    },
+    {
+      "id": "decision-tin",
+      "candidateId": "ecdict:ten, tin, tain",
+      "form": "TIN",
+      "disposition": "deferred_needs_evidence",
+      "reason": "TIN appears in traditional pedagogical groupings around teneo compounds, but LexiFlow requires a separately documented compound-stem/vowel-change rule before publishing it as an independent teaching form. TEN/TENT authority and TAIN transmission are already available.",
+      "relatedAuthorityIds": [
+        "lat-ten"
+      ]
+    }
+  ]
+}
