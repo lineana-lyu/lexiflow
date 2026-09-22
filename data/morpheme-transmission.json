@@ -124,6 +124,70 @@
       "url": "https://en.wiktionary.org/wiki/-graphy",
       "locator": "English -graphy / Etymology",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-pose",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/pose",
+      "locator": "pose (v.1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-pose",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/compose",
+      "locator": "English compose / Etymology (Old French composer from com- + poser, adaptation of Latin componere)",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-compound",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/compound",
+      "locator": "compound (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-compound",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/compound",
+      "locator": "English compound / Etymology 2",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-relate",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/relate",
+      "locator": "relate (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-relate",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/relate",
+      "locator": "English relate / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-spectro",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/spectro-",
+      "locator": "spectro-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-spectro",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/spectro-",
+      "locator": "English spectro- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -290,6 +354,101 @@
       "sourceIds": [
         "etym-graphy",
         "wik-graphy"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-pose",
+      "authorityId": "lat-pon",
+      "englishTeachingForm": "POSE",
+      "mappingType": "historical_analogy_replacement",
+      "sourceForm": "Latin ponere semantic family / Old French poser",
+      "targetForm": "-pose",
+      "pathway": [
+        "Latin ponere semantic model",
+        "Old French poser (from Late Latin pausare, semantically reshaped toward ponere)",
+        "English -pose in compose/propose/impose"
+      ],
+      "evidenceWords": [
+        "compose",
+        "propose",
+        "impose"
+      ],
+      "factSummary": "English -pose in major learned/Romance formations behaves as the 'put/place' element through Old French poser, whose semantics were reshaped under the influence of Latin ponere; it is not a direct Latin source form.",
+      "sourceIds": [
+        "etym-pose",
+        "wik-pose"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-pound",
+      "authorityId": "lat-pon",
+      "englishTeachingForm": "POUND",
+      "mappingType": "romance_english_spelling_reflex",
+      "sourceForm": "Latin componere / Old French compondre",
+      "targetForm": "-pound",
+      "pathway": [
+        "Latin componere",
+        "Old French compondre / componre",
+        "Middle English compounen",
+        "English compound with later unetymological -d"
+      ],
+      "evidenceWords": [
+        "compound"
+      ],
+      "factSummary": "The -pound sequence in compound descends through Old French/Middle English forms from Latin componere; the final -d is a later English/French spelling development.",
+      "sourceIds": [
+        "etym-compound",
+        "wik-compound"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-late",
+      "authorityId": "lat-fer",
+      "englishTeachingForm": "LATE",
+      "mappingType": "historical_stem_reflex",
+      "sourceForm": "Latin latus / relatus, participial family of fero",
+      "targetForm": "-late",
+      "pathway": [
+        "Latin fero with suppletive participle latus",
+        "prefixed participial forms such as relatus/translatus",
+        "French/English learned verbs such as relate/translate",
+        "English -late teaching form"
+      ],
+      "evidenceWords": [
+        "relate",
+        "translate"
+      ],
+      "factSummary": "English -late in words such as relate/translate reflects Latin participial forms in -latus tied to the suppletive participle of fero; LAT is source-language authority, while LATE is downstream.",
+      "sourceIds": [
+        "etym-relate",
+        "wik-relate"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-spectro",
+      "authorityId": "lat-spect",
+      "englishTeachingForm": "SPECTRO",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Latin spectrum / English combining form spectro-",
+      "targetForm": "spectro-",
+      "pathway": [
+        "Latin spectrum from specere/specio family",
+        "scientific combining form spectro- (19th c.)",
+        "English spectro-"
+      ],
+      "evidenceWords": [
+        "spectroscope",
+        "spectrometer",
+        "spectrograph"
+      ],
+      "factSummary": "English spectro- is a modern scientific combining form built from spectrum, ultimately in the Latin specio/specere 'look' family; it is not an Ancient or Classical Latin root form.",
+      "sourceIds": [
+        "etym-spectro",
+        "wik-spectro"
       ],
       "status": "verified"
     }
