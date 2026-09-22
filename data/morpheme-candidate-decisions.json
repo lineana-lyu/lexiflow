@@ -105,6 +105,61 @@
       "sourceIds": [
         "ls-pes"
       ]
+    },
+    {
+      "id": "decision-fec",
+      "candidateId": "ecdict:fac, fic, fec, fact, fect",
+      "form": "FEC",
+      "disposition": "closed_not_publish",
+      "reason": "Latin facio and compounds directly support FAC/FACT/FIC/FECT-related branches, while FEC is only a truncation of forms such as feci and does not add a distinct learner morpheme.",
+      "relatedAuthorityIds": [
+        "lat-fac"
+      ],
+      "sourceIds": [
+        "ls-facio",
+        "ls-conficio"
+      ]
+    },
+    {
+      "id": "decision-ces",
+      "candidateId": "ecdict:ced, ces, -ceed, -cede, -cess",
+      "form": "CES",
+      "disposition": "closed_not_publish",
+      "reason": "Latin cedo directly gives cessi/cessum, so CESS is the evidenced source-language branch. CES is an unnecessary truncation and is not published separately.",
+      "relatedAuthorityIds": [
+        "lat-ced"
+      ],
+      "sourceIds": [
+        "ls-cedo-motion"
+      ]
+    },
+    {
+      "id": "decision-bi-bio",
+      "candidateId": "ecdict:bio, bi, -be",
+      "form": "BI",
+      "disposition": "closed_not_publish",
+      "reason": "Greek βίος supports BIO through βιο-. BI is not needed as an independent life-morpheme and would create ambiguity with unrelated bi- formations.",
+      "relatedAuthorityIds": [
+        "grc-bio"
+      ],
+      "sourceIds": [
+        "lsj-bios",
+        "smyth-declension"
+      ]
+    },
+    {
+      "id": "decision-be-bio",
+      "candidateId": "ecdict:bio, bi, -be",
+      "form": "BE",
+      "disposition": "closed_not_publish",
+      "reason": "Greek βίος supports BIO through the attested/grammatical βιο- stem. BE is not a separately justified Greek morpheme in this family and is intentionally not published.",
+      "relatedAuthorityIds": [
+        "grc-bio"
+      ],
+      "sourceIds": [
+        "lsj-bios",
+        "smyth-declension"
+      ]
     }
   ]
 }
