@@ -68,6 +68,13 @@ async function main(){
       "===Verb===",
       "# To misunderstand.",
     ]),
+    "enamored":page([
+      "==English==",
+      "===Etymology===",
+      "Inherited from Middle English enamoured, ultimately related to Old French.",
+      "===Verb===",
+      "# {{past participle of|en|enamor}}",
+    ]),
     "enamor":page([
       "==English==",
       "===Etymology===",
@@ -267,9 +274,9 @@ async function main(){
     assert.strictEqual(cached.cacheHit,true,"second lookup must hit persistent cache");
     assert.strictEqual(aiCalls,1,"cache hit must avoid repeated AI work");
 
-    const enamored=await service.explain("enamored",{lemma:"enamor",meaningZh:"迷恋的"});
-    assert.strictEqual(enamored.lookupWord,"enamor","surface inflection must follow its canonical lemma");
-    assert(enamored.morphology.components.some(item=>item.form==="amor"),"lemma graph must expose the historical root component");
+    const enamored=await service.explain("enamored",{meaningZh:"迷恋的"});
+    assert.strictEqual(enamored.lookupWord,"enamored","surface lookup remains stable when no app lemma is supplied");
+    assert(enamored.morphology.components.some(item=>item.form==="amor"),"form-of traversal must reach the lexical lemma and expose its historical root component");
     assert(!enamored.learnerExplanationZh.startsWith("证据"),"learner explanation must start from the word, not from audit language");
 
     let noEvidenceAiCalls=0;
