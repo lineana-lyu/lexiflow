@@ -121,3 +121,18 @@ Example:
   the Latin-classified discovery candidate as misclassified.
 
 This keeps the product fact correct without rewriting discovery evidence.
+
+## Runtime role after Etymology Engine V1
+
+The authority registry is now a **safety foundation**, not an exhaustive
+dictionary roadmap.
+
+Production word explanations must start from word-level etymology evidence.
+The registry may support regression checks, provenance review, or future
+fallback behavior, but an unresolved ECDICT candidate is not a product defect
+and does not create a release obligation.
+
+The former P0/P1/P2 candidate-expansion scoring has been removed from maintained
+CI. `scripts/check-morpheme-safety.js` retains only the evidence-boundary and
+homograph regressions that protect product correctness.
+
