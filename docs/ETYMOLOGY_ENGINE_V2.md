@@ -1,5 +1,11 @@
 # LexiFlow Etymology Engine V2
 
+> **Superseded by V3.** The maintained architecture is now
+> `docs/ETYMOLOGY_ENGINE_V3.md`, where graph-owned Required Components replace
+> AI-selected morphology, related-etymon navigation is explicit, Unicode
+> historical forms are supported end to end, and the explanation cache schema
+> is bumped to V3.
+
 ## Why V2 exists
 
 V1 proved the safety boundary: retrieve word-level etymology evidence before AI
