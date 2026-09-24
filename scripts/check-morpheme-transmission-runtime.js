@@ -105,7 +105,19 @@ const cide=transmission.getByTeachingForm("CIDE");
 assert(cide?.authorityId==="lat-caed","CIDE must map to the Latin caedo cut/kill family");
 assert(authority.findByTeachingForm("CIDE").length===0,"CIDE must remain outside Latin source authority");
 
-for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro","tx-voke","tx-vise","tx-phone","tx-phony","tx-phono","tx-clos","tx-hydr","tx-en","tx-em","tx-bi","tx-bin","tx-jet","tx-cours","tx-cide"]){
+const mainForm=transmission.getByTeachingForm("MAIN");
+assert(mainForm?.authorityId==="lat-manus","MAIN must map to Latin MAN/MANI/MANU authority");
+assert(authority.findByTeachingForm("MAIN").length===0,"MAIN must remain outside Latin source authority");
+
+const grade=transmission.getByTeachingForm("GRADE");
+assert(grade?.authorityId==="lat-grad","GRADE must map to Latin GRAD/GRESS authority");
+assert(authority.findByTeachingForm("GRADE").length===0,"GRADE must remain outside Latin source authority");
+
+const vene=transmission.getByTeachingForm("VENE");
+assert(vene?.authorityId==="lat-ven","VENE must map to Latin VEN/VENI/VENT authority");
+assert(authority.findByTeachingForm("VENE").length===0,"VENE must remain outside Latin source authority");
+
+for(const id of ["tx-pre","tx-fect","tx-tain","tx-ceed","tx-meter","tx-metry","tx-graphy","tx-pose","tx-pound","tx-late","tx-spectro","tx-voke","tx-vise","tx-phone","tx-phony","tx-phono","tx-clos","tx-hydr","tx-en","tx-em","tx-bi","tx-bin","tx-jet","tx-cours","tx-cide","tx-main","tx-grade","tx-vene"]){
   const evidence=transmission.evidenceFor(id);
   assert(evidence?.authority?.status==="verified",`${id} must link to verified authority`);
   assert(evidence?.sources?.length>=2,`${id} must retain two-source evidence`);
