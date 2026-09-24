@@ -11,6 +11,8 @@ const expressionQuery = require("./lib/expression-query");
 const lexemeIdentity = require("./lib/lexeme-identity");
 const { trustedChineseCandidates } = require("./lib/chinese-candidate-resolver");
 const kokoroTts = require("./lib/kokoro-tts");
+const { PersistentEtymologyCache } = require("./lib/etymology-cache");
+const { createEtymologyService } = require("./lib/etymology-service");
 
 const HOST = "127.0.0.1";
 const OUTER_PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -313,6 +315,65 @@ async function runInnerAiText(prompt, timeoutMs = 30000) {
 
 if (typeof expressionQuery.setAiRunner === "function") expressionQuery.setAiRunner(runInnerAiText);
 if (typeof exampleEnrichment.setAiRunner === "function") exampleEnrichment.setAiRunner(runInnerAiText);
+
+let etymologyService = null;
+
+async function innerMerriamWebsterEtymology(word) {
+  const response = await requestInnerJson("/api/internal/etymology/merriam-webster", {
+    method:"POST",
+    body:{ word },
+    timeoutMs:12000,
+  });
+  if (response.status < 200 || response.status >= 300 || !response.payload?.ok) {
+    const err = new Error(clean(response.payload?.error || "Merriam-Webster etymology unavailable"));
+    err.code = clean(response.payload?.code) || "ETYMOLOGY_MW_FAILED";
+    throw err;
+  }
+  return response.payload.evidence || null;
+}
+
+function getEtymologyService() {
+  if (etymologyService) return etymologyService;
+  const cache = new PersistentEtymologyCache({
+    filePath:path.join(
+      process.env.LEXIFLOW_DATA_DIR || path.join(process.cwd(), ".lexiflow-data"),
+      "etymology-cache-v1.json"
+    ),
+    maxEntries:400,
+  });
+  etymologyService = createEtymologyService({
+    cache,
+    merriamWebsterProvider:innerMerriamWebsterEtymology,
+    aiRunner:runInnerAiText,
+  });
+  return etymologyService;
+}
+
+async function handleEtymologyExplain(res, body) {
+  let parsed;
+  try {
+    parsed = parseJsonBuffer(body);
+  } catch {
+    writeJson(res, 400, { ok:false, code:"INVALID_JSON", error:"请求格式不正确" });
+    return;
+  }
+
+  try {
+    const result = await getEtymologyService().explain(parsed.word, {
+      meaningZh:clean(parsed.meaningZh),
+      forceRefresh:parsed.forceRefresh === true,
+    });
+    writeJson(res, 200, { ok:true, result });
+  } catch (err) {
+    const code = clean(err?.code) || "ETYMOLOGY_LOOKUP_FAILED";
+    const invalid = code === "ETYMOLOGY_INVALID_WORD";
+    writeJson(res, invalid ? 400 : 503, {
+      ok:false,
+      code,
+      error:invalid ? "请输入一个英文单词" : "词源解释暂时没有准备完成",
+    });
+  }
+}
 
 async function handleEnglishExpression(res, body) {
   let parsed;
@@ -830,6 +891,20 @@ function createProxy() {
 
     if (req.method === "GET" && url.pathname === "/api/status") {
       return forwardStatus(req, res);
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/etymology/explain") {
+      try {
+        const body = await readBody(req, 64 * 1024);
+        return await handleEtymologyExplain(res, body);
+      } catch (err) {
+        console.error("etymology request failed:", err?.message || err);
+        return writeJson(res, 503, {
+          ok:false,
+          code:err?.code || "ETYMOLOGY_LOOKUP_FAILED",
+          error:"词源解释暂时没有准备完成",
+        });
+      }
     }
 
     if (req.method === "POST" && url.pathname === "/api/dictionary/examples") {
