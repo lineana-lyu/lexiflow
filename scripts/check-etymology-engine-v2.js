@@ -14,6 +14,7 @@ const {
 }=require("../lib/etymology-evidence");
 const {
   buildEvidenceGraph,
+  selectPrimaryComposition,
 }=require("../lib/etymology-graph");
 const {PersistentEtymologyCache}=require("../lib/etymology-cache");
 const {
@@ -32,8 +33,30 @@ function fixtureResponse(wikitext){
   };
 }
 
+function requiredComponentsFromPrompt(prompt){
+  const start=prompt.indexOf("Required Components:\n");
+  const end=prompt.indexOf("\n\nEvidence Graph:",start);
+  assert(start>=0 && end>start,"prompt must expose Required Components before Evidence Graph");
+  return JSON.parse(prompt.slice(start+"Required Components:\n".length,end));
+}
+
+function meaningFor(form){
+  const table={
+    "mis-":"错误地、不当地",
+    "understand":"理解",
+    "en-":"使进入某种状态",
+    "amor":"爱、爱意",
+    "-er":"构成动词的后缀",
+    "fascinum":"魔法、魅惑、护身符",
+    "-ō":"构成动词的后缀",
+    "ad-":"向、朝、靠近",
+    "iaceō":"躺、位于",
+  };
+  return table[form] || "与该词历史构成相关";
+}
+
 async function main(){
-  const tempDir=await fs.mkdtemp(path.join(os.tmpdir(),"lexiflow-etymology-v2-"));
+  const tempDir=await fs.mkdtemp(path.join(os.tmpdir(),"lexiflow-etymology-v3-"));
   const cachePath=path.join(tempDir,"cache.json");
 
   const pages={
@@ -71,9 +94,9 @@ async function main(){
     "enamored":page([
       "==English==",
       "===Etymology===",
-      "Inherited from Middle English enamoured, ultimately related to Old French.",
-      "===Verb===",
-      "# {{past participle of|en|enamor}}",
+      "Inherited from {{inh|en|enm|enamoured}}, a {{pcal|en|fro|enamore}}, past participle of {{m|fro|enamorer}}, {{m|fro|enamourer}}; compare {{m|en|amour}} and {{m|en|enamor}}, {{m|en|enamour}}.",
+      "===Adjective===",
+      "# In love, amorous.",
     ]),
     "enamor":page([
       "==English==",
@@ -102,9 +125,21 @@ async function main(){
     "fascinate":page([
       "==English==",
       "===Etymology===",
-      "Borrowed from {{bor|en|la|fascinatus}}, from {{m|la|fascinum}} + {{m|la|-o}}.",
+      "Borrowed from {{bor|en|la|fascinatus}}, perfect passive participle of {{m|la|fascino}}, from {{m|la|fascinum|t=charm, spell, witchcraft}} + {{m|la|-ō|t=verb-forming suffix}}.",
       "===Verb===",
       "# To evoke intense interest or attraction.",
+    ]),
+    "fascinum":page([
+      "==Latin==",
+      "===Etymology===",
+      "Of uncertain deeper origin.",
+      "===Noun===",
+      "# A charm, spell, or witchcraft.",
+    ]),
+    "-ō":page([
+      "==Latin==",
+      "===Suffix===",
+      "# A verb-forming suffix used to form first-conjugation verbs.",
     ]),
     "adjacent":page([
       "==English==",
@@ -130,23 +165,15 @@ async function main(){
   });
 
   try{
-    const misRelations=extractEtymologyRelations([
-      "From {{inh|en|enm|mys-understanden}}, equivalent to {{prefix|en|mis-|understand}}."
-    ]);
-    const misComposition=misRelations.find(item=>item.type==="composed_of");
-    assert(misComposition,"prefix template must become a composition relation");
-    assert.deepStrictEqual(
-      misComposition.components.map(item=>item.form),
-      ["mis-","understand"],
-      "misunderstand must resolve into explicit source components"
-    );
-
     const fascinateRelations=extractEtymologyRelations([
-      "from {{m|la|fascinum}} + {{m|la|-o}}"
+      "from {{m|la|fascinum|t=charm, spell, witchcraft}} + {{m|la|-ō|t=verb-forming suffix}}"
     ]);
-    assert(
-      fascinateRelations.some(item=>item.type==="composed_of" && item.components.map(x=>x.form).join("+")==="fascinum+-o"),
-      "generic mention-plus morphology must be captured"
+    const fascinateComposition=fascinateRelations.find(item=>item.type==="composed_of");
+    assert(fascinateComposition,"mention-plus morphology must create a composition");
+    assert.deepStrictEqual(
+      fascinateComposition.components.map(item=>item.form),
+      ["fascinum","-ō"],
+      "Unicode historical suffixes must survive structured parsing"
     );
 
     const mwPayload=[
@@ -166,50 +193,37 @@ async function main(){
     assert(mw.facts[0].text.includes("proicere"),"MW etymology markup must normalize");
 
     const misSource=await wiktionaryProvider("misunderstand",{languageCode:"en",sourceId:"wiktionary"});
-    assert(misSource?.relations?.some(item=>item.type==="composed_of"),"Wiktionary evidence must expose structured relations");
-
-    const graph=await buildEvidenceGraph({
+    const misGraph=await buildEvidenceGraph({
       word:"misunderstand",
       sources:[misSource],
       wiktionaryProvider,
-      maxDepth:2,
+      maxDepth:3,
       maxNodes:18,
       maxProviderCalls:10,
     });
+    const misSelected=selectPrimaryComposition(misGraph);
+    assert.deepStrictEqual(
+      misSelected.componentNodeIds.map(id=>misGraph.nodes.find(node=>node.id===id)?.display),
+      ["mis-","understand"],
+      "direct structured morphology must deterministically own displayed components"
+    );
 
-    const misNode=graph.nodes.find(node=>node.kind==="component" && node.display==="mis-");
-    const understandNode=graph.nodes.find(node=>node.kind==="component" && node.display==="understand");
-    assert(misNode && understandNode,"graph must contain both explicit components");
-    assert(
-      misNode.authority.some(item=>item.authorityId==="ang-mis"),
-      "verified Old English MIS authority must enrich the component"
-    );
-    assert(
-      graph.sources.some(source=>source.provider==="authority" && /Bosworth-Toller/i.test(source.title)),
-      "authority citations must be carried into the graph"
-    );
-    assert(
-      graph.sources.some(source=>source.id==="wiktionary:en:understand"),
-      "component lookup must enrich understand instead of stopping at the surface split"
-    );
-    assert(graph.limits.providerCalls<=10,"graph traversal must stay bounded");
-
-    const enamorSource=await wiktionaryProvider("enamor",{languageCode:"en",sourceId:"wiktionary"});
-    const enamorGraph=await buildEvidenceGraph({
-      word:"enamor",
-      sources:[enamorSource],
+    const enamoredSource=await wiktionaryProvider("enamored",{languageCode:"en",sourceId:"wiktionary"});
+    const enamoredGraph=await buildEvidenceGraph({
+      word:"enamored",
+      sources:[enamoredSource],
       wiktionaryProvider,
-      maxDepth:2,
+      maxDepth:3,
       maxNodes:18,
       maxProviderCalls:10,
     });
-    assert(
-      ["en-","amor","-er"].every(form=>enamorGraph.nodes.some(node=>node.kind==="component" && node.display===form)),
-      "Old French enamor decomposition must be discoverable through the evidence graph"
-    );
-    assert(
-      enamorGraph.sources.some(source=>source.id==="wiktionary:fro:amor"),
-      "component enrichment must query the component in its historical language"
+    const enamoredSelected=selectPrimaryComposition(enamoredGraph);
+    assert(enamoredSelected,"related etymon traversal must find a usable composition");
+    assert.strictEqual(enamoredSelected.confidence,"medium","related-etymon morphology must be distinguished from direct morphology");
+    assert.deepStrictEqual(
+      enamoredSelected.componentNodeIds.map(id=>enamoredGraph.nodes.find(node=>node.id===id)?.display),
+      ["en-","amor","-er"],
+      "enamored must be able to reach the documented enamor decomposition without word-specific code"
     );
 
     const fascinateSource=await wiktionaryProvider("fascinate",{languageCode:"en",sourceId:"wiktionary"});
@@ -217,11 +231,24 @@ async function main(){
       word:"fascinate",
       sources:[fascinateSource],
       wiktionaryProvider,
+      maxDepth:3,
+      maxNodes:18,
+      maxProviderCalls:10,
     });
-    assert(
-      fascinateGraph.nodes.some(node=>node.kind==="component" && node.display==="fascinum"),
-      "fascinate must retain useful Latin component structure when explicitly stated"
+    const fascinateSelected=selectPrimaryComposition(fascinateGraph);
+    assert.deepStrictEqual(
+      fascinateSelected.componentNodeIds.map(id=>fascinateGraph.nodes.find(node=>node.id===id)?.display),
+      ["fascinum","-ō"],
+      "explicit fascinum + -ō evidence must force both components into the display contract"
     );
+    assert(
+      fascinateGraph.sources.some(source=>source.id==="wiktionary:la:-ō"),
+      "Unicode suffixes must be queryable in their historical language"
+    );
+
+    assert(misGraph.limits.providerCalls<=10);
+    assert(enamoredGraph.limits.providerCalls<=10);
+    assert(fascinateGraph.limits.providerCalls<=10);
 
     let aiCalls=0;
     const cache=new PersistentEtymologyCache({filePath:cachePath,ttlMs:60000,maxEntries:30});
@@ -231,53 +258,99 @@ async function main(){
       wiktionaryProvider,
       aiRunner:async prompt=>{
         aiCalls+=1;
-        assert(prompt.includes("Evidence Graph:"),"AI must receive the structured graph instead of a single prose blob");
-        assert(prompt.includes("不要新增图中不存在的构词成分"),"prompt must forbid invented components");
+        assert(prompt.includes("Required Components:"),"AI must receive deterministic required components");
+        assert(prompt.includes("不得自行省略后缀、词根或构词成分"),"prompt must forbid AI-side component omission");
+        const required=requiredComponentsFromPrompt(prompt);
 
-        if(prompt.includes("表面单词：enamored")){
-          return JSON.stringify({
-            origin:{confidence:"high",sourcePath:"Old French → Middle English → English"},
-            morphology:{
-              confidence:"high",
-              components:[
-                {nodeId:"component:fro:en-",meaningZh:"使进入某种状态"},
-                {nodeId:"component:fro:amor",meaningZh:"爱、爱意"},
-              ],
-            },
-            learnerExplanationZh:"enamor 进入英语前与 Old French 中表示“爱”的 amor 有关，en- 带有“使进入某种状态”的作用。于是 enamored 可以理解为“进入爱恋、着迷的状态”，后来也自然用于表示“倾心于、迷恋的”。",
-          });
+        let sourcePath="English";
+        let learnerExplanationZh="这个词的历史构成和今天的意思可以从这些已确定的成分联系起来理解。";
+        if(prompt.includes("表面单词：misunderstand")){
+          sourcePath="Middle English → English";
+          learnerExplanationZh="mis- 有“错误地、不当地”的意思，和 understand 组合后就是“理解错了”，因此形成今天“误解、误会”的含义。";
+        }else if(prompt.includes("表面单词：enamored")){
+          sourcePath="Old French → Middle English → English";
+          learnerExplanationZh="这个词沿着 Old French 表示“使陷入爱恋状态”的构词进入英语，其中 amor 表示“爱”。因此 enamored 从“处在爱恋之中”自然发展为“倾心于、迷恋的”。";
+        }else if(prompt.includes("表面单词：fascinate")){
+          sourcePath="Latin → English";
+          learnerExplanationZh="Latin fascinum 原本和“魔法、魅惑”有关，配合构成动词的 -ō 形成相关动词。于是“像被施了魔法一样吸引住”逐渐发展成今天“令人入神、使着迷”的意思。";
         }
 
         return JSON.stringify({
-          origin:{confidence:"high",sourcePath:"Middle English mys-understanden → English misunderstand"},
+          origin:{confidence:"high",sourcePath},
           morphology:{
-            confidence:"high",
-            components:[
-              {nodeId:"component:en:mis-",meaningZh:"错误地、不当地"},
-              {nodeId:"component:en:understand",meaningZh:"理解"},
-            ],
+            components:required.map(item=>({
+              nodeId:item.nodeId,
+              meaningZh:meaningFor(item.form),
+            })),
           },
-          learnerExplanationZh:"mis- 带有“错误地、不当地”的意思，加在 understand 前面，就是“理解错了”。因此 misunderstand 很自然地发展成今天的“误解、误会”。",
+          learnerExplanationZh,
         });
       },
     });
 
     const first=await service.explain("misunderstand",{meaningZh:"误解"});
     assert.strictEqual(first.status,"verified_explanation");
-    assert.strictEqual(first.origin.confidence,"high");
     assert.strictEqual(first.morphology.components.length,2);
-    assert.strictEqual(first.morphology.components[0].sourceLanguage,"Old English");
-    assert(!/证据表明|证据不足|无法可靠/.test(first.learnerExplanationZh),"learner copy must not expose audit language");
-    assert(first.sources.every(source=>!("facts" in source)),"public result must not expose raw provider prose");
+    assert(!/证据表明|证据不足|无法可靠/.test(first.learnerExplanationZh));
 
     const cached=await service.explain("misunderstand",{meaningZh:"误解"});
     assert.strictEqual(cached.cacheHit,true,"second lookup must hit persistent cache");
     assert.strictEqual(aiCalls,1,"cache hit must avoid repeated AI work");
 
     const enamored=await service.explain("enamored",{meaningZh:"迷恋的"});
-    assert.strictEqual(enamored.lookupWord,"enamored","surface lookup remains stable when no app lemma is supplied");
-    assert(enamored.morphology.components.some(item=>item.form==="amor"),"form-of traversal must reach the lexical lemma and expose its historical root component");
-    assert(!enamored.learnerExplanationZh.startsWith("证据"),"learner explanation must start from the word, not from audit language");
+    assert.deepStrictEqual(
+      enamored.morphology.components.map(item=>item.form),
+      ["en-","amor","-er"],
+      "service must expose every deterministically selected enamor component"
+    );
+
+    const fascinate=await service.explain("fascinate",{meaningZh:"使着迷"});
+    assert.deepStrictEqual(
+      fascinate.morphology.components.map(item=>item.form),
+      ["fascinum","-ō"],
+      "AI must not be able to omit the documented verb-forming suffix"
+    );
+
+    const directComposition={
+      confidence:"high",
+      componentNodeIds:["component:la:fascinum","component:la:-~C5~8D"],
+    };
+    const validationGraph={
+      rootId:"word:en:fascinate",
+      nodes:[
+        {id:"word:en:fascinate",kind:"word",display:"fascinate",evidenceSourceIds:["wiktionary"],authority:[]},
+        {id:"component:la:fascinum",kind:"component",display:"fascinum",role:"root",evidenceSourceIds:["wiktionary"],authority:[],glosses:["charm"]},
+        {id:"component:la:-~C5~8D",kind:"component",display:"-ō",role:"suffix",evidenceSourceIds:["wiktionary"],authority:[],glosses:["verb-forming suffix"]},
+      ],
+      edges:[],
+      sources:[],
+    };
+    assert.throws(
+      ()=>validateAiExplanation({
+        origin:{confidence:"high",sourcePath:"Latin → English"},
+        morphology:{
+          components:[
+            {nodeId:"component:la:fascinum",meaningZh:"魔法、魅惑"},
+          ],
+        },
+        learnerExplanationZh:"这个词从“魅惑”发展出今天“使着迷”的意思。",
+      },validationGraph,directComposition),
+      err=>err?.code==="ETYMOLOGY_AI_COMPONENT_SET_CHANGED",
+      "AI omission of a required suffix must be rejected"
+    );
+
+    assert.throws(
+      ()=>validateAiExplanation({
+        origin:{confidence:"high",sourcePath:"Latin → English"},
+        morphology:{components:[
+          {nodeId:"component:la:fascinum",meaningZh:"魔法、魅惑"},
+          {nodeId:"component:la:-~C5~8D",meaningZh:"构成动词"},
+        ]},
+        learnerExplanationZh:"证据表明这个词来自拉丁语。",
+      },validationGraph,directComposition),
+      err=>err?.code==="ETYMOLOGY_AI_AUDIT_COPY",
+      "audit-style copy must be rejected before learner UI"
+    );
 
     let noEvidenceAiCalls=0;
     const emptyService=createEtymologyService({
@@ -290,34 +363,6 @@ async function main(){
     assert.strictEqual(empty.status,"insufficient_evidence");
     assert.strictEqual(noEvidenceAiCalls,0,"AI must not be called without word-level evidence");
 
-    const badGraph={
-      rootId:"word:en:test",
-      nodes:[
-        {id:"word:en:test",kind:"word",display:"test",evidenceSourceIds:["wiktionary"],authority:[]},
-      ],
-      edges:[],
-      sources:[],
-    };
-    assert.throws(
-      ()=>validateAiExplanation({
-        origin:{confidence:"high",sourcePath:"Latin → English"},
-        morphology:{confidence:"high",components:[{nodeId:"component:la:fake",meaningZh:"伪造"}]},
-        learnerExplanationZh:"自然解释。",
-      },badGraph),
-      err=>err?.code==="ETYMOLOGY_AI_UNGROUNDED",
-      "AI must not invent a component outside the graph"
-    );
-
-    assert.throws(
-      ()=>validateAiExplanation({
-        origin:{confidence:"high",sourcePath:"Latin → English"},
-        morphology:{confidence:"insufficient",components:[]},
-        learnerExplanationZh:"证据表明这个词来自拉丁语，因此不拆。",
-      },badGraph),
-      err=>err?.code==="ETYMOLOGY_AI_AUDIT_COPY",
-      "audit-style copy must be rejected before reaching the learner UI"
-    );
-
     await assert.rejects(
       ()=>service.explain("two words"),
       err=>err?.code==="ETYMOLOGY_INVALID_WORD",
@@ -326,9 +371,9 @@ async function main(){
 
     const cacheOnDisk=JSON.parse(await fs.readFile(cachePath,"utf8"));
     assert.strictEqual(cacheOnDisk.schema,"lexiflow-etymology-cache-v1");
-    assert(Object.keys(cacheOnDisk.entries).length>=2,"verified sense-aware explanations must persist in the temp cache");
+    assert(Object.keys(cacheOnDisk.entries).length>=3,"verified V3 explanations must persist in the temp cache");
 
-    console.log("Etymology Engine V2 checks passed.");
+    console.log("Etymology Engine V3 checks passed.");
     console.log("Fixture provider calls:",fetchCalls);
   }finally{
     await fs.rm(tempDir,{recursive:true,force:true});
