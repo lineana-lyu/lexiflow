@@ -155,8 +155,9 @@ assert(form?.sourceLemma === "formo", "FORM must resolve to formo");
 assert(form?.sourceForms?.includes("formatum"), "FORM must preserve formatum");
 
 const grad = authority.getById("lat-grad");
-assert(grad?.sourceLemma === "gradior", "GRAD/GRESS must resolve to gradior");
+assert(grad?.sourceLemma === "gradior / gradus", "GRAD/GRESS family must preserve gradior plus gradus evidence");
 assert(grad?.sourceForms?.includes("gressus"), "GRAD/GRESS must preserve gressus");
+assert(grad?.sourceForms?.includes("gradus"), "GRAD degree branch must preserve Latin gradus");
 
 const sta = authority.getById("lat-sta");
 assert(sta?.sourceLemma === "sto", "STA/STAT must resolve to sto");
