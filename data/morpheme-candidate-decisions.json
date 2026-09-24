@@ -250,6 +250,19 @@
       "sourceIds": [
         "ls-moveo"
       ]
+    },
+    {
+      "id": "decision-mis-prefix-origin",
+      "candidateId": "ecdict:mis-",
+      "form": "MIS",
+      "disposition": "closed_not_publish",
+      "reason": "The ECDICT discovery row labels MIS- as Latin, but authoritative Old English evidence shows mis- is a Germanic/Old English prefix denoting defect or imperfection. LexiFlow publishes MIS- from Old English authority and closes this specific Latin-classified discovery candidate so a wrong origin hint cannot be counted as verified coverage.",
+      "relatedAuthorityIds": [
+        "ang-mis"
+      ],
+      "sourceIds": [
+        "bt-mis-prefix"
+      ]
     }
   ]
 }
