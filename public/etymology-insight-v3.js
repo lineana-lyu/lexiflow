@@ -87,7 +87,8 @@
   function content(result){
     if(!result)return `<div class="lexi-etymology-status">暂未取得词源结果。</div>`;
     if(result.status!=="verified_explanation"){
-      return `<div class="lexi-etymology-status">${esc(result.learnerExplanationZh||"暂时没有找到足够可靠的词源信息。")} ${result.status==="evidence_ready_ai_unavailable"?'<button class="lexi-etymology-retry" data-etymology-refresh="1">重试</button>':""}${sourceLinks(result.sources)}</div>`;
+      const retryable=new Set(["provider_unavailable","evidence_ready_ai_unavailable"]).has(result.status);
+      return `<div class="lexi-etymology-status">${esc(result.learnerExplanationZh||"暂时没有找到足够可靠的词源信息。")} ${retryable?'<button class="lexi-etymology-retry" data-etymology-refresh="1">重试</button>':""}${sourceLinks(result.sources)}</div>`;
     }
     const components=Array.isArray(result.morphology?.components)?result.morphology.components:[];
     const sourcePath=clean(result.origin?.sourcePath);
