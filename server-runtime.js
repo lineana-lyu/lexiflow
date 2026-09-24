@@ -334,13 +334,7 @@ async function innerMerriamWebsterEtymology(word) {
 
 function getEtymologyService() {
   if (etymologyService) return etymologyService;
-  const cache = new PersistentEtymologyCache({
-    filePath:path.join(
-      process.env.LEXIFLOW_DATA_DIR || path.join(process.cwd(), ".lexiflow-data"),
-      "etymology-cache-v1.json"
-    ),
-    maxEntries:400,
-  });
+  const cache = new PersistentEtymologyCache({ maxEntries:400 });
   etymologyService = createEtymologyService({
     cache,
     merriamWebsterProvider:innerMerriamWebsterEtymology,
