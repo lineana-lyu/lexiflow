@@ -355,6 +355,7 @@ async function handleEtymologyExplain(res, body) {
   try {
     const result = await getEtymologyService().explain(parsed.word, {
       meaningZh:clean(parsed.meaningZh),
+      lemma:clean(parsed.lemma),
       forceRefresh:parsed.forceRefresh === true,
     });
     writeJson(res, 200, { ok:true, result });
