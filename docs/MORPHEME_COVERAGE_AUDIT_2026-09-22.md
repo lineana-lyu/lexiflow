@@ -535,3 +535,86 @@ The next P1 queue should be re-read from the generated audit rather than
 continued from the previous static list; the highest remaining families now
 exclude CLAUS, AB/ABS, MOV/MOT/MOB, and SED/SID/SESS.
 
+
+
+## P1 batch — AC, MIS, MANUS, GRADE, VENE
+
+This batch resolves five additional P1 families and adds explicit handling for
+incorrect discovery-language hints.
+
+### AC-
+
+`AC-` is now published inside the existing Latin `AD-` prefix family as an
+attested assimilation, backed by the same grammar evidence already used for the
+AD-prefix variant system. It is not modeled as an independent prefix.
+
+### MIS-
+
+ECDICT labels `MIS-` as Latin, but Bosworth-Toller directly attests Old
+English `mis-` (with historical variants `miss-/mist-/misse-`) as a
+Germanic prefix denoting defect or imperfection.
+
+LexiFlow therefore:
+
+- publishes `MIS-` from a new Old English authority record;
+- keeps it separate from Latin `MIT/MISS`;
+- marks the specific Latin-classified ECDICT candidate
+  `closed_not_publish`.
+
+This prevents a wrong origin hint from becoming false verified coverage.
+
+### MAN / MANI / MANU / MAIN
+
+A new Latin `manus` family publishes:
+
+- `MANU` from attested `manu`;
+- `MAN` from compounds such as `manceps < manus-capio`;
+- `MANI` from `manipulus < manus-pleo`.
+
+`MAIN` remains outside Classical Latin authority and is represented through
+Romance/English transmission using the `maintain / maintenance` pathway from
+Latin `manu tenere`.
+
+### GRAD / GRADE
+
+The existing `GRAD/GRESS` family now preserves both:
+
+- Latin `gradior / gressus` for step/walk/go;
+- Latin `gradus` for step/degree.
+
+`GRADE` is modeled as later French/English transmission from Latin
+`gradus`, not as a Classical Latin root form.
+
+### VEN / VENI / VENT / VENE
+
+The existing `venio` authority now publishes `VENI` alongside
+`VEN/VENT`, grounded in `venio/venire`.
+
+`VENE` remains downstream transmission through forms such as Old French
+`convenir` and English `convene`.
+
+### Coverage after the batch
+
+Learning Engine Check #911 passed the complete repository suite with:
+
+- authority: **86 morphemes / 105 sources**;
+- transmission: **33 mappings / 64 sources**;
+- Legacy raw coverage: **33 covered / 5 partial / 30 missing**;
+- ECDICT raw coverage: **78 covered / 27 partial / 420 missing**;
+- workflow: **78 complete / 11 closed / 2 deferred / 434 actionable**;
+- candidate decisions: **18 closed / 3 deferred**;
+- collision registry: **2 surfaces / 5 candidate bindings**;
+- actionable bands: **P0 0 / P1 26 / P2 408**.
+
+The highest remaining P1 queue now begins with:
+
+- BEN / BENE / BON;
+- PEND / PENS;
+- MICRO-;
+- PROB / PROV / PROVE;
+- CIRCU- / CIRCUM-;
+- HYP- / HYPO-;
+- SUPER- / SUPRA- / SUR-;
+- HEM / HEMO / HEMAT / HEMATO / HEMA / EMIA / AEMIA;
+- APO- / APH-;
+- AUT / AUTO.
