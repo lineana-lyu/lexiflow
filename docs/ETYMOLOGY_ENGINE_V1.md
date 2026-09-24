@@ -1,5 +1,11 @@
 # LexiFlow Etymology Engine V1
 
+> **Superseded by V2.** This document records the first evidence-gated
+> implementation. The maintained architecture is now
+> `docs/ETYMOLOGY_ENGINE_V2.md`, which adds structured relation parsing,
+> bounded evidence-graph traversal, component enrichment, lemma recovery, and a
+> separate learner-copy contract.
+
 ## Product goal
 
 LexiFlow does not try to become an exhaustive etymological dictionary.
