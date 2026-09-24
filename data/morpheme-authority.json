@@ -1212,6 +1212,66 @@
       "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n4056/",
       "locator": "assideo / adsideo, sedi, sessum [sedeo]",
       "publicDomain": true
+    },
+    {
+      "id": "bt-mis-prefix",
+      "work": "Bosworth-Toller Anglo-Saxon Dictionary",
+      "authors": "Joseph Bosworth; T. Northcote Toller",
+      "sourceType": "historical_lexicon",
+      "language": "Old English",
+      "publisher": "Oxford University Press historical dictionary; online edition by Charles University",
+      "access": "Bosworth-Toller Anglo-Saxon Dictionary Online",
+      "url": "https://bosworthtoller.com/022928",
+      "locator": "mis-; variants miss-, mist-, misse-; prefix denoting defect or imperfection",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27977/",
+      "locator": "manus, manus; dat./abl. manu; hand",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manceps",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27817/",
+      "locator": "manceps; manus-capio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manipulus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27897/",
+      "locator": "manipulus; manus-pleo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gradus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19801/",
+      "locator": "gradus; step, pace; figurative degree",
+      "publicDomain": true
     }
   ],
   "morphemes": [
@@ -1497,12 +1557,14 @@
       "id": "lat-ad",
       "kind": "prefix",
       "teachingForms": [
-        "AD-"
+        "AD-",
+        "AC-"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "ad",
       "sourceForms": [
-        "ad-"
+        "ad-",
+        "ac-"
       ],
       "coreMeaningEn": [
         "to",
@@ -1530,7 +1592,7 @@
           "condition": "attested assimilation before some t- environments"
         }
       ],
-      "formRelation": "Prefix meaning and assimilated forms are governed by Latin compound phonology, not by English string matching.",
+      "formRelation": "AD- is the base Latin prefix 'to/towards'. AC- is an attested Latin assimilated form before some c-/q- environments; it is published from the existing grammar-backed variant rather than treated as an independent prefix.",
       "claimSources": {
         "lemma": [
           "ag-wordformation"
@@ -1539,7 +1601,8 @@
           "ag-wordformation"
         ],
         "forms": [
-          "ag-wordformation"
+          "ag-wordformation",
+          "ag-phonetic"
         ],
         "variants": [
           "ag-phonetic"
@@ -3322,14 +3385,16 @@
       "kind": "root_family",
       "teachingForms": [
         "VEN",
-        "VENT"
+        "VENT",
+        "VENI"
       ],
       "sourceLanguage": "Latin",
       "sourceLemma": "venio",
       "sourceForms": [
         "venio",
         "veni",
-        "ventum"
+        "ventum",
+        "venire"
       ],
       "coreMeaningEn": [
         "come",
@@ -3339,7 +3404,7 @@
         "来",
         "到来"
       ],
-      "formRelation": "VEN follows the present family of venio; VENT reflects the vent- form in Latin ventum.",
+      "formRelation": "VEN/VENI reflect the present-family form visible in venio/venire; VENT reflects Latin ventum. English VENE is kept outside source-language authority and handled as later Romance/English transmission.",
       "claimSources": {
         "lemma": [
           "ls-venio"
@@ -3475,32 +3540,40 @@
         "GRESS"
       ],
       "sourceLanguage": "Latin",
-      "sourceLemma": "gradior",
+      "sourceLemma": "gradior / gradus",
       "sourceForms": [
         "gradior",
-        "gressus"
+        "gressus",
+        "gradus"
       ],
       "coreMeaningEn": [
         "take steps",
         "step",
         "walk",
-        "go"
+        "go",
+        "degree"
       ],
       "coreMeaningZh": [
         "迈步",
         "行走",
-        "前行"
+        "前行",
+        "步",
+        "程度",
+        "等级"
       ],
-      "formRelation": "GRAD is visible in gradior; GRESS is the attested participial/perfect-family form gressus.",
+      "formRelation": "GRAD is grounded in gradior and the related noun gradus; GRESS is the attested participial/perfect-family form gressus. Latin gradus also supplies the 'step/degree' sense. English GRADE remains a later French/English reflex.",
       "claimSources": {
         "lemma": [
-          "ls-gradior"
+          "ls-gradior",
+          "ls-gradus"
         ],
         "meaning": [
-          "ls-gradior"
+          "ls-gradior",
+          "ls-gradus"
         ],
         "forms": [
-          "ls-gradior"
+          "ls-gradior",
+          "ls-gradus"
         ],
         "variants": []
       },
@@ -4600,6 +4673,88 @@
         "forms": [
           "ls-sedeo",
           "ls-assideo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "ang-mis",
+      "kind": "prefix",
+      "teachingForms": [
+        "MIS-"
+      ],
+      "sourceLanguage": "Old English",
+      "sourceLemma": "mis-",
+      "sourceForms": [
+        "mis-",
+        "miss-",
+        "mist-",
+        "misse-"
+      ],
+      "coreMeaningEn": [
+        "wrongly",
+        "badly",
+        "with defect or imperfection"
+      ],
+      "coreMeaningZh": [
+        "错误地",
+        "不当地",
+        "带有缺陷地"
+      ],
+      "formRelation": "Old English mis- is a Germanic prefix denoting defect or imperfection. It is deliberately kept separate from Latin MIT/MISS and from the invalid ECDICT Latin origin hint for modern English MIS-.",
+      "claimSources": {
+        "lemma": [
+          "bt-mis-prefix"
+        ],
+        "meaning": [
+          "bt-mis-prefix"
+        ],
+        "forms": [
+          "bt-mis-prefix"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-manus",
+      "kind": "root_family",
+      "teachingForms": [
+        "MAN",
+        "MANI",
+        "MANU"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "manus",
+      "sourceForms": [
+        "manus",
+        "manu",
+        "manceps",
+        "manipulus"
+      ],
+      "coreMeaningEn": [
+        "hand"
+      ],
+      "coreMeaningZh": [
+        "手"
+      ],
+      "formRelation": "MANU is directly visible in Latin manu, an inflected form of manus. MAN is grounded by compounds such as manceps < manus-capio, while MANI is grounded by manipulus < manus-pleo. MAIN is excluded from Latin authority and handled as later Romance transmission.",
+      "claimSources": {
+        "lemma": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
+        ],
+        "meaning": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
+        ],
+        "forms": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
         ],
         "variants": []
       },
