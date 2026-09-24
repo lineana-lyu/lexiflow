@@ -26,6 +26,7 @@ const {
 const ecdict = require("./lib/ecdict");
 const lexemeIdentity = require("./lib/lexeme-identity");
 const { rankChineseCandidates } = require("./lib/lookup-candidate-ranker");
+const { extractMerriamWebsterEvidence, normalizeWord: normalizeEtymologyWord } = require("./lib/etymology-evidence");
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.LEXIFLOW_PORT || 4177);
@@ -1784,15 +1785,31 @@ async function resolveChineseSearch(query) {
   };
 }
 
-async function fetchLearnersPayload(word, key, userAgent = "LexiFlow/0.8.3") {
+async function fetchLearnersPayload(word, key, userAgent = "LexiFlow/0.8.3", { timeoutMs = 8000 } = {}) {
   const url = `https://www.dictionaryapi.com/api/v3/references/learners/json/${encodeURIComponent(word)}?key=${encodeURIComponent(key)}`;
-  const response = await fetch(url, { headers: { "Accept":"application/json", "User-Agent":userAgent } });
-  if (!response.ok) {
-    const err = new Error(`Merriam-Webster 请求失败：HTTP ${response.status}`);
-    err.code = "DICTIONARY_HTTP_ERROR";
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), Math.max(1000, Number(timeoutMs) || 8000));
+  try {
+    const response = await fetch(url, {
+      headers: { "Accept":"application/json", "User-Agent":userAgent },
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      const err = new Error(`Merriam-Webster 请求失败：HTTP ${response.status}`);
+      err.code = "DICTIONARY_HTTP_ERROR";
+      throw err;
+    }
+    return await response.json();
+  } catch (err) {
+    if (err?.name === "AbortError") {
+      const timeout = new Error("Merriam-Webster 请求超时");
+      timeout.code = "DICTIONARY_TIMEOUT";
+      throw timeout;
+    }
     throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  return response.json();
 }
 
 function exactPronunciationFromPayload(payload, word) {
@@ -2709,6 +2726,34 @@ const server = http.createServer(async (req, res) => {
           : friendlyError(err, "dictionary");
         return sendJson(res, err.code === "DICTIONARY_KEY_MISSING" ? 400 : 502, {
           ok: false, code: friendly.code, error: friendly.message, userError: friendly
+        });
+      }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/internal/etymology/merriam-webster") {
+      const body = await readJsonBody(req, 32 * 1024);
+      let word;
+      try {
+        word = normalizeEtymologyWord(body.word);
+      } catch (err) {
+        return sendJson(res, 400, { ok:false, code:err.code || "ETYMOLOGY_INVALID_WORD", error:"请输入一个英文单词" });
+      }
+
+      const settings = await loadSettings();
+      const key = String(settings.merriamWebsterLearnersKey || "").trim();
+      if (!key) {
+        return sendJson(res, 200, { ok:true, configured:false, evidence:null });
+      }
+
+      try {
+        const payload = await fetchLearnersPayload(word, key, "LexiFlow/0.8.7-etymology", { timeoutMs:8000 });
+        const evidence = extractMerriamWebsterEvidence(payload, word);
+        return sendJson(res, 200, { ok:true, configured:true, evidence });
+      } catch (err) {
+        return sendJson(res, 502, {
+          ok:false,
+          code:err?.code || "ETYMOLOGY_MW_FAILED",
+          error:"Merriam-Webster 词源证据暂时不可用",
         });
       }
     }

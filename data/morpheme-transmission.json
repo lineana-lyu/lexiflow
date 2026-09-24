@@ -1,0 +1,1320 @@
+{
+  "schema": "lexiflow-morpheme-transmission-v1",
+  "scope": "historical-english-mapping",
+  "policy": {
+    "rule": "A downstream English teaching form may be published only when it is linked to an existing source-language authority morpheme and independently supported by at least two English etymology references.",
+    "minIndependentEvidence": 2,
+    "noAuthorityMutation": true,
+    "excludes": [
+      "whole-word teaching story",
+      "semantic bridge",
+      "AI-invented spelling change",
+      "runtime string matching"
+    ]
+  },
+  "sources": [
+    {
+      "id": "etym-pre-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/pre-",
+      "locator": "pre-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-pre",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/pre-",
+      "locator": "English pre- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-perfect-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/perfect",
+      "locator": "perfect (adj.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-perfect",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/perfect",
+      "locator": "English perfect / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-retain-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/retain",
+      "locator": "retain (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-retain",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/retain",
+      "locator": "English retain / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-proceed-etymonline",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/proceed",
+      "locator": "proceed (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-proceed",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/proceed",
+      "locator": "English proceed / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-meter",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/meter",
+      "locator": "meter (n.3), measuring-device combining element",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-meter",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-meter",
+      "locator": "English -meter / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-metry",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-metry",
+      "locator": "-metry",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-metry",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-metry",
+      "locator": "English -metry / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-graphy",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-graphy",
+      "locator": "-graphy",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-graphy",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-graphy",
+      "locator": "English -graphy / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-pose",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/pose",
+      "locator": "pose (v.1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-pose",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/compose",
+      "locator": "English compose / Etymology (Old French composer from com- + poser, adaptation of Latin componere)",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-compound",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/compound",
+      "locator": "compound (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-compound",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/compound",
+      "locator": "English compound / Etymology 2",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-relate",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/relate",
+      "locator": "relate (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-relate",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/relate",
+      "locator": "English relate / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-spectro",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/spectro-",
+      "locator": "spectro-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-spectro",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/spectro-",
+      "locator": "English spectro- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-surmise",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/surmise",
+      "locator": "surmise (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-surmise",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/surmise",
+      "locator": "English surmise / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-receive",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/receive",
+      "locator": "receive (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-receive-path",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/recevoir",
+      "locator": "Old French recevoir / receivre from Latin recipere",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-deceit",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/deceit",
+      "locator": "deceit (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-deceit",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/deceit",
+      "locator": "English deceit / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-cede",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/cede",
+      "locator": "cede (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-ceder",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/c%C3%A9der",
+      "locator": "French céder / Etymology: borrowed from Latin cedere",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-stance",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/stance",
+      "locator": "stance (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-stance",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/stance",
+      "locator": "English stance / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-invoke",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/invoke",
+      "locator": "invoke (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-invoke",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/invoke",
+      "locator": "English invoke / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-revise",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/revise",
+      "locator": "revise (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-revise",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/revise",
+      "locator": "English revise / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-phone-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-phone",
+      "locator": "-phone",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phone-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-phone",
+      "locator": "English -phone / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-euphony",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/euphony",
+      "locator": "euphony (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phony-suffix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-phony",
+      "locator": "English -phony / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-close",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/close",
+      "locator": "close (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-close",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/close",
+      "locator": "English close / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-phono",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/phono-",
+      "locator": "phono-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-phono",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/phono-",
+      "locator": "English phono- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-hydro",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/hydro-",
+      "locator": "hydro-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-hydro",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/hydro",
+      "locator": "English hydro / Etymology; surface analysis hydr- + -o-",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-en-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/en-",
+      "locator": "en- (1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-en-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/en-",
+      "locator": "English en- / Etymology; alternative form em-",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-bi-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/bi-",
+      "locator": "bi-",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-bi-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/bi-",
+      "locator": "English bi- / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "wik-bin-prefix",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/bin-",
+      "locator": "English bin-; alternative form of bi-",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-binary",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/binary",
+      "locator": "binary (adj.) from Latin bini",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "etym-jet",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/jet",
+      "locator": "jet (v.1 / n.1)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-jet",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/jet",
+      "locator": "English jet / Etymology 1",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-course",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/course",
+      "locator": "course (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-course",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/course",
+      "locator": "English course / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-cide",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/-cide",
+      "locator": "-cide",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-cide",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/-cide",
+      "locator": "English -cide / Etymology 1 and Etymology 2",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-maintain",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/maintain",
+      "locator": "maintain (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-maintain",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/maintain",
+      "locator": "English maintain / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-grade",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/grade",
+      "locator": "grade (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-grade",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/grade",
+      "locator": "English grade / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-convene",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/convene",
+      "locator": "convene (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-convene",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/convene",
+      "locator": "English convene / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    }
+  ],
+  "mappings": [
+    {
+      "id": "tx-pre",
+      "authorityId": "lat-prae",
+      "englishTeachingForm": "PRE-",
+      "mappingType": "historical_reflex",
+      "sourceForm": "prae-",
+      "targetForm": "pre-",
+      "pathway": [
+        "Latin prae-",
+        "Medieval Latin / Old French pre-",
+        "English pre-"
+      ],
+      "evidenceWords": [
+        "pre-",
+        "predate"
+      ],
+      "factSummary": "English pre- is a reduced/historical reflex of Latin prae-, retaining the core 'before' relation.",
+      "sourceIds": [
+        "etym-pre-etymonline",
+        "wik-pre"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-fect",
+      "authorityId": "lat-fac",
+      "englishTeachingForm": "FECT",
+      "mappingType": "historical_stem_reflex",
+      "sourceForm": "fact-/fic- family of facere/perficere",
+      "targetForm": "fect",
+      "pathway": [
+        "Latin facere",
+        "Latin perficere / perfectus",
+        "Old French parfit / Latin-restored perfect",
+        "English -fect teaching form"
+      ],
+      "evidenceWords": [
+        "perfect",
+        "perfection"
+      ],
+      "factSummary": "The English teaching form FECT is supported through the historical perficere/perfectus branch of the facere family; it is not asserted as a standalone Latin lemma.",
+      "sourceIds": [
+        "etym-perfect-etymonline",
+        "wik-perfect"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-tain",
+      "authorityId": "lat-ten",
+      "englishTeachingForm": "TAIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "tenere / retinere",
+      "targetForm": "tain",
+      "pathway": [
+        "Latin tenere / retinere",
+        "Old French retenir",
+        "Middle English retain",
+        "English -tain teaching form"
+      ],
+      "evidenceWords": [
+        "retain"
+      ],
+      "factSummary": "English TAIN is supported by the Romance-to-English development visible in retain from Latin tenere/retinere; it is not a Latin source form.",
+      "sourceIds": [
+        "etym-retain-etymonline",
+        "wik-retain"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceed",
+      "authorityId": "lat-ced",
+      "englishTeachingForm": "CEED",
+      "mappingType": "romance_english_spelling_reflex",
+      "sourceForm": "cedere / procedere",
+      "targetForm": "ceed",
+      "pathway": [
+        "Latin cedere / procedere",
+        "Old French proceder",
+        "Middle English proceden",
+        "English proceed"
+      ],
+      "evidenceWords": [
+        "proceed"
+      ],
+      "factSummary": "English CEED is a later spelling reflex represented by proceed from Latin cedere/procedere; Latin authority remains CED/CESS.",
+      "sourceIds": [
+        "etym-proceed-etymonline",
+        "wik-proceed"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-meter",
+      "authorityId": "grc-metr",
+      "englishTeachingForm": "METER",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Greek μέτρον / French -mètre",
+      "targetForm": "-meter",
+      "pathway": [
+        "Ancient Greek μέτρον",
+        "French -mètre / learned combining use",
+        "English -meter"
+      ],
+      "evidenceWords": [
+        "hydrometer",
+        "thermometer",
+        "voltmeter"
+      ],
+      "factSummary": "English -meter as a measuring-device combining element is a learned borrowing ultimately from Greek μέτρον 'measure'; it is downstream from the Greek authority form, not an Ancient Greek teaching form itself.",
+      "sourceIds": [
+        "etym-meter",
+        "wik-meter"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-metry",
+      "authorityId": "grc-metr",
+      "englishTeachingForm": "METRY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Greek -μετρία / μέτρον",
+      "targetForm": "-metry",
+      "pathway": [
+        "Ancient Greek -μετρία from μέτρον",
+        "Latin -metria",
+        "Old French -metrie",
+        "English -metry"
+      ],
+      "evidenceWords": [
+        "geometry",
+        "anthropometry",
+        "optometry"
+      ],
+      "factSummary": "English -metry is a historical suffix meaning measuring/measurement, transmitted through Greek -μετρία, Latin -metria and Old French -metrie.",
+      "sourceIds": [
+        "etym-metry",
+        "wik-metry"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-graphy",
+      "authorityId": "grc-graph",
+      "englishTeachingForm": "GRAPHY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Greek -γραφία / γραφή / γράφω family",
+      "targetForm": "-graphy",
+      "pathway": [
+        "Ancient Greek -γραφία / γραφή",
+        "French or German -graphie",
+        "English -graphy"
+      ],
+      "evidenceWords": [
+        "geography",
+        "biography",
+        "photography"
+      ],
+      "factSummary": "English -graphy is a historical noun-forming element from Greek writing/drawing forms in the γράφω family, transmitted through Continental -graphie forms.",
+      "sourceIds": [
+        "etym-graphy",
+        "wik-graphy"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-pose",
+      "authorityId": "lat-pon",
+      "englishTeachingForm": "POSE",
+      "mappingType": "historical_analogy_replacement",
+      "sourceForm": "Latin ponere semantic family / Old French poser",
+      "targetForm": "-pose",
+      "pathway": [
+        "Latin ponere semantic model",
+        "Old French poser (from Late Latin pausare, semantically reshaped toward ponere)",
+        "English -pose in compose/propose/impose"
+      ],
+      "evidenceWords": [
+        "compose",
+        "propose",
+        "impose"
+      ],
+      "factSummary": "English -pose in major learned/Romance formations behaves as the 'put/place' element through Old French poser, whose semantics were reshaped under the influence of Latin ponere; it is not a direct Latin source form.",
+      "sourceIds": [
+        "etym-pose",
+        "wik-pose"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-pound",
+      "authorityId": "lat-pon",
+      "englishTeachingForm": "POUND",
+      "mappingType": "romance_english_spelling_reflex",
+      "sourceForm": "Latin componere / Old French compondre",
+      "targetForm": "-pound",
+      "pathway": [
+        "Latin componere",
+        "Old French compondre / componre",
+        "Middle English compounen",
+        "English compound with later unetymological -d"
+      ],
+      "evidenceWords": [
+        "compound"
+      ],
+      "factSummary": "The -pound sequence in compound descends through Old French/Middle English forms from Latin componere; the final -d is a later English/French spelling development.",
+      "sourceIds": [
+        "etym-compound",
+        "wik-compound"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-late",
+      "authorityId": "lat-fer",
+      "englishTeachingForm": "LATE",
+      "mappingType": "historical_stem_reflex",
+      "sourceForm": "Latin latus / relatus, participial family of fero",
+      "targetForm": "-late",
+      "pathway": [
+        "Latin fero with suppletive participle latus",
+        "prefixed participial forms such as relatus/translatus",
+        "French/English learned verbs such as relate/translate",
+        "English -late teaching form"
+      ],
+      "evidenceWords": [
+        "relate",
+        "translate"
+      ],
+      "factSummary": "English -late in words such as relate/translate reflects Latin participial forms in -latus tied to the suppletive participle of fero; LAT is source-language authority, while LATE is downstream.",
+      "sourceIds": [
+        "etym-relate",
+        "wik-relate"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-spectro",
+      "authorityId": "lat-spect",
+      "englishTeachingForm": "SPECTRO",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Latin spectrum / English combining form spectro-",
+      "targetForm": "spectro-",
+      "pathway": [
+        "Latin spectrum from specere/specio family",
+        "scientific combining form spectro- (19th c.)",
+        "English spectro-"
+      ],
+      "evidenceWords": [
+        "spectroscope",
+        "spectrometer",
+        "spectrograph"
+      ],
+      "factSummary": "English spectro- is a modern scientific combining form built from spectrum, ultimately in the Latin specio/specere 'look' family; it is not an Ancient or Classical Latin root form.",
+      "sourceIds": [
+        "etym-spectro",
+        "wik-spectro"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-mise",
+      "authorityId": "lat-mit",
+      "englishTeachingForm": "MISE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "French mettre / surmis(e), ultimately Latin mittere",
+      "targetForm": "-mise",
+      "pathway": [
+        "Latin mittere",
+        "Old French metre/mettre",
+        "Old French surmis/surmise",
+        "English surmise"
+      ],
+      "evidenceWords": [
+        "surmise"
+      ],
+      "factSummary": "English -mise in surmise is a Romance reflex through French mettre from Latin mittere. It is a downstream form and not a Classical Latin root form.",
+      "sourceIds": [
+        "etym-surmise",
+        "wik-surmise"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceive",
+      "authorityId": "lat-cap",
+      "englishTeachingForm": "CEIVE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin -cipere compounds of capere",
+      "targetForm": "-ceive",
+      "pathway": [
+        "Latin capere / recipere / decipere",
+        "Old French receivre / decevoir",
+        "Middle English receiven / deceyven",
+        "English -ceive"
+      ],
+      "evidenceWords": [
+        "receive",
+        "deceive",
+        "perceive"
+      ],
+      "factSummary": "English -ceive is a Romance/English reflex of Latin capere compounds in -cipere; Latin authority remains CAP/CAPT/CIP/CEPT.",
+      "sourceIds": [
+        "etym-receive",
+        "wik-receive-path"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-ceit",
+      "authorityId": "lat-cap",
+      "englishTeachingForm": "CEIT",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin decipere / Old French deceite",
+      "targetForm": "-ceit",
+      "pathway": [
+        "Latin decipere",
+        "Old French deceite/deçoite",
+        "Middle English deceyte",
+        "English deceit"
+      ],
+      "evidenceWords": [
+        "deceit"
+      ],
+      "factSummary": "English -ceit in deceit is a Romance/English reflex from the decipere/deceite branch of the capere family; it is not a Classical Latin source form.",
+      "sourceIds": [
+        "etym-deceit",
+        "wik-deceit"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cede",
+      "authorityId": "lat-ced",
+      "englishTeachingForm": "CEDE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin cedere",
+      "targetForm": "-cede / cede",
+      "pathway": [
+        "Latin cedere",
+        "French céder and/or direct learned borrowing",
+        "English cede / -cede"
+      ],
+      "evidenceWords": [
+        "cede",
+        "precede",
+        "recede",
+        "secede"
+      ],
+      "factSummary": "English CEDE is a later French/English surface form from Latin cedere. Latin authority remains CED/CESS; CEED is tracked separately as another English spelling reflex.",
+      "sourceIds": [
+        "etym-cede",
+        "wik-ceder"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-stance",
+      "authorityId": "lat-sta",
+      "englishTeachingForm": "STANCE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin stans/stantis and Vulgar Latin *stantia",
+      "targetForm": "stance",
+      "pathway": [
+        "Latin stare / stans, stantis",
+        "Vulgar Latin *stantia",
+        "Old French estance / French stance",
+        "English stance"
+      ],
+      "evidenceWords": [
+        "stance"
+      ],
+      "factSummary": "English STANCE is a Romance/English continuation built from the Latin standing family; source-language authority remains STA/STAT/STANT.",
+      "sourceIds": [
+        "etym-stance",
+        "wik-stance"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-voke",
+      "authorityId": "lat-voc",
+      "englishTeachingForm": "VOKE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin vocare / invocare",
+      "targetForm": "-voke",
+      "pathway": [
+        "Latin vocare / invocare",
+        "Old French invoquer/envoquer",
+        "Middle/Modern English invoke and related -voke forms"
+      ],
+      "evidenceWords": [
+        "invoke",
+        "revoke",
+        "provoke"
+      ],
+      "factSummary": "English -voke in invoke/revoke/provoke is a Romance/English reflex of the Latin vocare family; VOKE is not a Classical Latin source form.",
+      "sourceIds": [
+        "etym-invoke",
+        "wik-invoke"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-vise",
+      "authorityId": "lat-vid",
+      "englishTeachingForm": "VISE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin videre / revisere / revisus",
+      "targetForm": "-vise",
+      "pathway": [
+        "Latin videre / revisere",
+        "Middle French réviser/reviser",
+        "English revise and related -vise forms"
+      ],
+      "evidenceWords": [
+        "revise"
+      ],
+      "factSummary": "English -vise in revise is a French/English reflex of the Latin videre family and is not itself a Classical Latin source form.",
+      "sourceIds": [
+        "etym-revise",
+        "wik-revise"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phone",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONE",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek φωνή",
+      "targetForm": "-phone",
+      "pathway": [
+        "Ancient Greek φωνή",
+        "learned scientific/technical formations",
+        "English -phone"
+      ],
+      "evidenceWords": [
+        "telephone",
+        "homophone",
+        "saxophone"
+      ],
+      "factSummary": "English -phone is a learned combining form from Ancient Greek φωνή 'sound, voice'; it is downstream from the Greek PHON authority record.",
+      "sourceIds": [
+        "etym-phone-suffix",
+        "wik-phone-suffix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phony",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONY",
+      "mappingType": "learned_borrowing_suffix",
+      "sourceForm": "Ancient Greek -φωνία / φωνή",
+      "targetForm": "-phony",
+      "pathway": [
+        "Ancient Greek -φωνία from φωνή",
+        "Latin/French -phonia/-phonie",
+        "English -phony"
+      ],
+      "evidenceWords": [
+        "euphony",
+        "symphony",
+        "cacophony"
+      ],
+      "factSummary": "English -phony is a learned historical suffix ultimately from the Greek φωνή family; it is distinct from the unrelated adjective phony 'fake'.",
+      "sourceIds": [
+        "etym-euphony",
+        "wik-phony-suffix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-clos",
+      "authorityId": "lat-clud",
+      "englishTeachingForm": "CLOS",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin clausus / claudere",
+      "targetForm": "clos-/close",
+      "pathway": [
+        "Latin claudere / clausus",
+        "Old French clos / clore",
+        "Middle English clos/close"
+      ],
+      "evidenceWords": [
+        "close",
+        "enclose",
+        "closure"
+      ],
+      "factSummary": "English clos-/close forms descend through Old French clos/clore from Latin clausus/claudere; CLOS is downstream from the Latin CLUD/CLUS authority family.",
+      "sourceIds": [
+        "etym-close",
+        "wik-close"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-phono",
+      "authorityId": "grc-phon",
+      "englishTeachingForm": "PHONO",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek φωνή / learned phōno-",
+      "targetForm": "phono-",
+      "pathway": [
+        "Ancient Greek φωνή",
+        "learned Greek-derived combining form phōno-",
+        "English phono-"
+      ],
+      "evidenceWords": [
+        "phonograph",
+        "phonology",
+        "phonogram"
+      ],
+      "factSummary": "English phono- is a learned combining form from the Greek φωνή family and is modeled downstream from the PHON authority record.",
+      "sourceIds": [
+        "etym-phono",
+        "wik-phono"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-hydr",
+      "authorityId": "grc-hydro",
+      "englishTeachingForm": "HYDR",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Ancient Greek ὕδωρ / ὑδρο-",
+      "targetForm": "hydr-",
+      "pathway": [
+        "Ancient Greek ὕδωρ with compound ὑδρο-",
+        "learned scientific hydro-/hydr- combining use",
+        "English hydr- before vowels or suffixal formations"
+      ],
+      "evidenceWords": [
+        "hydrate",
+        "hydrogen",
+        "hydric"
+      ],
+      "factSummary": "English hydr- is the reduced learned combining variant of hydro- in scientific formations; HYDRO remains the source-language-backed Greek compound form.",
+      "sourceIds": [
+        "etym-hydro",
+        "wik-hydro"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-en",
+      "authorityId": "lat-in-locative",
+      "englishTeachingForm": "EN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin in-",
+      "targetForm": "en-",
+      "pathway": [
+        "Latin in-",
+        "Old French en-",
+        "Middle English en-",
+        "English en-"
+      ],
+      "evidenceWords": [
+        "enclose",
+        "enrich",
+        "enthrone"
+      ],
+      "factSummary": "English en- is largely a French/Middle English reflex of Latin in- in the sense 'in/into/on' and related verb-forming uses.",
+      "sourceIds": [
+        "etym-en-prefix",
+        "wik-en-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-em",
+      "authorityId": "lat-in-locative",
+      "englishTeachingForm": "EM",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin in- via Old French en-/em-",
+      "targetForm": "em-",
+      "pathway": [
+        "Latin in-",
+        "Old French en-/em-",
+        "Middle English em-",
+        "English em-"
+      ],
+      "evidenceWords": [
+        "embark",
+        "embed",
+        "empower"
+      ],
+      "factSummary": "English em- is the assimilated/orthographic partner of en- in French-derived formations, ultimately linked to Latin in-.",
+      "sourceIds": [
+        "etym-en-prefix",
+        "wik-en-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-bi",
+      "authorityId": "lat-bis",
+      "englishTeachingForm": "BI",
+      "mappingType": "learned_borrowing_combining_form",
+      "sourceForm": "Latin bis / bi- tradition",
+      "targetForm": "bi-",
+      "pathway": [
+        "Latin bis 'twice' / learned bi-",
+        "English learned combining form bi-"
+      ],
+      "evidenceWords": [
+        "biannual",
+        "bicycle",
+        "bifocal"
+      ],
+      "factSummary": "English bi- is a learned combining form meaning two/twice/double, historically tied to the Latin two-family represented here by bis.",
+      "sourceIds": [
+        "etym-bi-prefix",
+        "wik-bi-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-bin",
+      "authorityId": "lat-bini",
+      "englishTeachingForm": "BIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin bini / French bin- development",
+      "targetForm": "bin-",
+      "pathway": [
+        "Latin bini 'two each'",
+        "French/learned bin- development",
+        "English bin- before some vowels"
+      ],
+      "evidenceWords": [
+        "binary",
+        "binaural",
+        "binocular"
+      ],
+      "factSummary": "English bin- is a later variant associated with the Latin bini/bis family and is not stored as a separate Classical Latin prefix.",
+      "sourceIds": [
+        "etym-binary",
+        "wik-bin-prefix"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-jet",
+      "authorityId": "lat-ject",
+      "englishTeachingForm": "JET",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin iacio / iactare",
+      "targetForm": "jet",
+      "pathway": [
+        "Latin iacio / iactare",
+        "Late Latin iectare",
+        "Old French/French jeter / jet",
+        "English jet"
+      ],
+      "evidenceWords": [
+        "jet",
+        "jetty"
+      ],
+      "factSummary": "English JET descends through French throwing/casting forms ultimately tied to the Latin iacio family; it is not a Classical Latin root form.",
+      "sourceIds": [
+        "etym-jet",
+        "wik-jet"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cours",
+      "authorityId": "lat-curr",
+      "englishTeachingForm": "COURS",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin cursus / currere",
+      "targetForm": "cours-/course",
+      "pathway": [
+        "Latin currere / cursus",
+        "Old French cors/course",
+        "Middle English course",
+        "English course"
+      ],
+      "evidenceWords": [
+        "course",
+        "recourse",
+        "discourse"
+      ],
+      "factSummary": "English cours-/course forms descend through Old French from Latin cursus, the participial/noun family of currere.",
+      "sourceIds": [
+        "etym-course",
+        "wik-course"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-cide",
+      "authorityId": "lat-caed",
+      "englishTeachingForm": "CIDE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin -cida / -cidium < caedo",
+      "targetForm": "-cide",
+      "pathway": [
+        "Latin caedo 'cut/kill'",
+        "Latin -cida 'killer/cutter' and -cidium 'killing'",
+        "Middle French -cide",
+        "English -cide"
+      ],
+      "evidenceWords": [
+        "homicide",
+        "fratricide",
+        "insecticide"
+      ],
+      "factSummary": "English -cide is a later French/English form descending from Latin -cida/-cidium, themselves built on the caedo 'cut/kill' family. It therefore belongs downstream from CID/CIS authority rather than being published as a Classical Latin root form.",
+      "sourceIds": [
+        "etym-cide",
+        "wik-cide"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-main",
+      "authorityId": "lat-manus",
+      "englishTeachingForm": "MAIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin manus / manu",
+      "targetForm": "main-",
+      "pathway": [
+        "Latin manus / manu 'hand'",
+        "Old French main and maintenir < Latin manu tenere",
+        "Middle English maintenen",
+        "English maintain / maintenance"
+      ],
+      "evidenceWords": [
+        "maintain",
+        "maintenance"
+      ],
+      "factSummary": "English MAIN in the maintain/maintenance family reflects the Romance development of Latin manus/manu 'hand'; it is not published as a Classical Latin root form.",
+      "sourceIds": [
+        "etym-maintain",
+        "wik-maintain"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-grade",
+      "authorityId": "lat-grad",
+      "englishTeachingForm": "GRADE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin gradus",
+      "targetForm": "grade",
+      "pathway": [
+        "Latin gradus 'step, degree'",
+        "French grade 'degree/rank'",
+        "English grade"
+      ],
+      "evidenceWords": [
+        "grade",
+        "degrade",
+        "centigrade"
+      ],
+      "factSummary": "English GRADE is a French/English reflex of Latin gradus 'step, degree', related to the GRAD/GRESS family but not itself a Classical Latin root form.",
+      "sourceIds": [
+        "etym-grade",
+        "wik-grade"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-vene",
+      "authorityId": "lat-ven",
+      "englishTeachingForm": "VENE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin venire / convenire",
+      "targetForm": "-vene",
+      "pathway": [
+        "Latin venire 'come' / convenire 'come together'",
+        "Old French convenir",
+        "Middle English convene",
+        "English -vene"
+      ],
+      "evidenceWords": [
+        "convene",
+        "intervene"
+      ],
+      "factSummary": "English -vene is a Romance/English reflex of the Latin venire family, visible through forms such as convene; source-language authority remains VEN/VENI/VENT.",
+      "sourceIds": [
+        "etym-convene",
+        "wik-convene"
+      ],
+      "status": "verified"
+    }
+  ]
+}

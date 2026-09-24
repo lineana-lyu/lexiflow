@@ -679,6 +679,7 @@
         <div class="result-meta">${r.cacheHit?`<span class="pill green">⚡ 快速结果</span>`:""}</div>
       </div>
       ${wordFamilyMarkup(wordFamily)}
+      <div data-etymology-host="lookup" data-etymology-word="${escapeHtml(r.word)}" data-etymology-lemma="${escapeHtml(r.lexeme?.lemma||r.word)}" data-etymology-meaning="${escapeHtml(primarySense?.meaningZh||"")}"></div>
       ${primarySense&&!String(primarySense.meaningZh||"").trim()?`<div class="feedback warn"><h4>中文释义暂缺</h4><ul><li>当前词条没有可用中文释义，可以重新查询或手动补充。</li></ul></div>`:""}
       ${r.translationNeedsReview?`<div class="feedback warn"><h4>建议检查中文释义</h4><ul><li>当前释义置信度较低，保存前建议快速确认或手动编辑。</li></ul></div>`:""}
       ${targetExampleMismatch?`<div class="feedback warn lookup-consistency-warning"><h4>结果需要重新确认</h4><ul><li>例句没有使用当前目标词“${escapeHtml(r.word)}”，为避免把不一致内容保存进单词库，当前不能保存。</li></ul></div>`:""}
@@ -956,7 +957,7 @@
         `正在学习：${escapeHtml(card.word)} · ${escapeHtml(formatPhonetic(card.phonetic))}`,
         `<button class="btn" data-route="home">退出会话</button>`
       )
-      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card study-card-focus">${renderStage(card)}</div></div></div>`
+      + `<div class="study-progress-wrap">${renderStageRail(card)}</div><div class="study-shell study-shell-single"><div class="study-depth-shell"><span class="study-stack-layer study-stack-layer-far" aria-hidden="true"></span><span class="study-stack-layer study-stack-layer-near" aria-hidden="true"></span><div class="card study-card study-card-focus">${renderStage(card)}</div></div><div data-etymology-host="study" data-etymology-word="${escapeHtml(card.word)}" data-etymology-lemma="${escapeHtml(card.lexeme?.lemma||card.word)}" data-etymology-meaning="${escapeHtml(card.meaningZh||"")}"></div></div>`
     );
   }
 
