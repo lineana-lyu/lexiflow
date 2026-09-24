@@ -12,6 +12,7 @@ const ALLOWED_WORKS = new Set([
   "Allen and Greenough's New Latin Grammar for Schools and Colleges",
   "Liddell-Scott-Jones Greek-English Lexicon",
   "A Greek Grammar for Colleges",
+  "Bosworth-Toller Anglo-Saxon Dictionary",
 ]);
 
 const ALLOWED_HOSTS = new Set([
@@ -20,6 +21,7 @@ const ALLOWED_HOSTS = new Set([
   "perseus.tufts.edu",
   "grammars.alpheios.net",
   "dcc.dickinson.edu",
+  "bosworthtoller.com",
 ]);
 
 function clean(v){ return String(v ?? "").trim(); }
