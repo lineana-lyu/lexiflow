@@ -10,6 +10,9 @@ const {
 }=require("../lib/wiktionary-structure");
 const {
   extractMerriamWebsterEvidence,
+  decodeRevisionSource,
+  decodeParseSource,
+  fetchWiktionaryPageSource,
   fetchWiktionaryEvidence,
 }=require("../lib/etymology-evidence");
 const {
@@ -26,10 +29,33 @@ function page(sections){
   return sections.join("\n");
 }
 
-function fixtureResponse(wikitext){
+function queryFixtureResponse(wikitext,{missing=false}={}){
   return {
     ok:true,
-    async json(){ return {parse:{wikitext}}; },
+    async json(){
+      return {
+        query:{
+          pages:[
+            missing
+              ? {title:"missing",missing:true}
+              : {title:"fixture",revisions:[{slots:{main:{content:wikitext}}}]},
+          ],
+        },
+      };
+    },
+  };
+}
+
+function parseFixtureResponse(wikitext,{legacyShape=false}={}){
+  return {
+    ok:true,
+    async json(){
+      return {
+        parse:{
+          wikitext:legacyShape ? {"*":wikitext} : wikitext,
+        },
+      };
+    },
   };
 }
 
@@ -155,8 +181,12 @@ async function main(){
   const fakeFetch=async url=>{
     fetchCalls+=1;
     const parsed=new URL(url);
-    const word=parsed.searchParams.get("page");
-    return fixtureResponse(pages[word] || "");
+    const action=parsed.searchParams.get("action");
+    const word=parsed.searchParams.get("titles") || parsed.searchParams.get("page");
+    const source=pages[word] || "";
+    return action==="query"
+      ? queryFixtureResponse(source,{missing:!source})
+      : parseFixtureResponse(source);
   };
 
   const wiktionaryProvider=(word,options={})=>fetchWiktionaryEvidence(word,{
@@ -166,6 +196,37 @@ async function main(){
   });
 
   try{
+    const decodedQuery=decodeRevisionSource({
+      query:{pages:[{revisions:[{slots:{main:{content:pages.adjacent}}}]}]},
+    });
+    assert.strictEqual(decodedQuery.state,"source","query/revisions response must decode to source text");
+
+    const decodedLegacyParse=decodeParseSource({
+      parse:{wikitext:{"*":pages.adjacent}},
+    });
+    assert.strictEqual(decodedLegacyParse.state,"source","legacy parse.wikitext[*] responses must remain compatible");
+
+    let fallbackCalls=0;
+    const fallbackFetch=async url=>{
+      fallbackCalls+=1;
+      const parsed=new URL(url);
+      return parsed.searchParams.get("action")==="query"
+        ? {ok:true,async json(){return {query:{unexpected:true}};}}
+        : parseFixtureResponse(pages.adjacent,{legacyShape:true});
+    };
+    const fallbackSource=await fetchWiktionaryPageSource("adjacent",{
+      fetchImpl:fallbackFetch,
+      timeoutMs:1000,
+    });
+    assert.strictEqual(fallbackSource.strategy,"parse-wikitext","invalid primary response must fall back to parse transport");
+    assert.strictEqual(fallbackCalls,2,"transport fallback must stop after the first valid source");
+
+    const missingSource=await fetchWiktionaryEvidence("missingword",{
+      fetchImpl:fakeFetch,
+      timeoutMs:1000,
+    });
+    assert.strictEqual(missingSource,null,"a confirmed missing page is not a provider outage");
+
     const fascinateRelations=extractEtymologyRelations([
       "from {{m|la|fascinum|t=charm, spell, witchcraft}} + {{m|la|-ō|t=verb-forming suffix}}"
     ]);
@@ -351,6 +412,25 @@ async function main(){
       },validationGraph,directComposition),
       err=>err?.code==="ETYMOLOGY_AI_AUDIT_COPY",
       "audit-style copy must be rejected before learner UI"
+    );
+
+    let providerFailureAiCalls=0;
+    const unavailableService=createEtymologyService({
+      cache:new PersistentEtymologyCache({filePath:path.join(tempDir,"provider-down.json")}),
+      merriamWebsterProvider:async()=>null,
+      wiktionaryProvider:async()=>{
+        const err=new Error("provider down");
+        err.code="ETYMOLOGY_WIKTIONARY_UNAVAILABLE";
+        throw err;
+      },
+      aiRunner:async()=>{providerFailureAiCalls+=1;return "{}";},
+    });
+    const unavailable=await unavailableService.explain("adjacent");
+    assert.strictEqual(unavailable.status,"provider_unavailable","provider outages must not masquerade as missing etymology");
+    assert.strictEqual(providerFailureAiCalls,0,"AI must not run when all etymology evidence providers are unavailable/empty");
+    assert(
+      unavailable.providerStates.some(item=>item.provider==="wiktionary" && item.status==="failed"),
+      "provider outage diagnostics must remain auditable"
     );
 
     let noEvidenceAiCalls=0;
