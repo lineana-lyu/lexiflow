@@ -471,6 +471,65 @@ function auditCoverage(candidates, authority, transmission, decisions, collision
     "MOB must not be published through raw surface matching"
   );
 
+
+  // Regression: discovery origin hints are not authority. ECDICT labels MIS-
+  // as Latin, but the published authority is Old English/Germanic. The
+  // misclassified candidate must be explicitly closed before surface matching.
+  const misPrefixRow = ecdictRows.find(row => row.id === "ecdict:mis-");
+  assert(misPrefixRow, "MIS- origin regression row is required");
+  assert(
+    misPrefixRow.closedForms.some(item => item.form === "MIS" && item.decisionId === "decision-mis-prefix-origin"),
+    "Misclassified Latin MIS- candidate must be closed by candidate-specific provenance review"
+  );
+  assert(
+    !misPrefixRow.authorityMatches.some(item => item.form === "MIS"),
+    "Wrong-origin MIS- discovery candidate must not count Old English MIS- as Latin coverage"
+  );
+
+  const acRow = ecdictRows.find(row => row.id === "ecdict:ac-");
+  assert(acRow?.coverageState === "covered", "AC- must be covered by grammar-backed Latin AD- assimilation");
+  assert(
+    acRow.authorityMatches.some(item => item.form === "AC" && item.ids.includes("lat-ad")),
+    "AC- must resolve to the Latin AD- authority family"
+  );
+
+  const manusRow = ecdictRows.find(row => row.id === "ecdict:man, mani, manu, main");
+  assert(manusRow?.coverageState === "covered", "MAN/MANI/MANU/MAIN candidate must be fully resolved");
+  for (const form of ["MAN","MANI","MANU"]) {
+    assert(
+      manusRow.authorityMatches.some(item => item.form === form && item.ids.includes("lat-manus")),
+      `${form} must resolve to Latin manus authority`
+    );
+  }
+  assert(
+    manusRow.transmissionMatches.some(item => item.form === "MAIN" && item.ids.includes("tx-main")),
+    "MAIN must resolve through Romance/English transmission"
+  );
+
+  const gradeRow = ecdictRows.find(row => row.id === "ecdict:grad, -grade");
+  assert(gradeRow?.coverageState === "covered", "GRAD/GRADE candidate must be fully resolved");
+  assert(
+    gradeRow.authorityMatches.some(item => item.form === "GRAD" && item.ids.includes("lat-grad")),
+    "GRAD must remain source-language authority"
+  );
+  assert(
+    gradeRow.transmissionMatches.some(item => item.form === "GRADE" && item.ids.includes("tx-grade")),
+    "GRADE must resolve through French/English transmission"
+  );
+
+  const venRow = ecdictRows.find(row => row.id === "ecdict:veni, vent, ven, -vene");
+  assert(venRow?.coverageState === "covered", "VENI/VENT/VEN/VENE candidate must be fully resolved");
+  for (const form of ["VENI","VENT","VEN"]) {
+    assert(
+      venRow.authorityMatches.some(item => item.form === form && item.ids.includes("lat-ven")),
+      `${form} must resolve to Latin venio authority`
+    );
+  }
+  assert(
+    venRow.transmissionMatches.some(item => item.form === "VENE" && item.ids.includes("tx-vene")),
+    "VENE must resolve through Romance/English transmission"
+  );
+
   return {
     generatedAt: "2026-09-22",
     authorityCount: (authority.morphemes || []).length,
