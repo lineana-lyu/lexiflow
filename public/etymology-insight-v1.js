@@ -14,7 +14,7 @@
       .replace(/"/g,"&quot;")
       .replace(/'/g,"&#39;");
   }
-  function keyFor(word,meaningZh){ return `${clean(word).toLowerCase()}|${clean(meaningZh)}`; }
+  function keyFor(word,lemma,meaningZh){ return [clean(word).toLowerCase(),clean(lemma).toLowerCase(),clean(meaningZh)].join("|"); }
   function singleWord(word){ return /^[a-z][a-z'-]{0,63}$/i.test(clean(word)); }
 
   function injectStyle(){
@@ -40,8 +40,8 @@
     document.head.appendChild(style);
   }
 
-  async function request(word,meaningZh,{forceRefresh=false}={}){
-    const key=keyFor(word,meaningZh);
+  async function request(word,lemma,meaningZh,{forceRefresh=false}={}){
+    const key=keyFor(word,lemma,meaningZh);
     if(!forceRefresh&&resultCache.has(key))return resultCache.get(key);
     if(!forceRefresh&&requestCache.has(key))return requestCache.get(key);
 
@@ -50,7 +50,7 @@
     const task=fetch("/api/etymology/explain",{
       method:"POST",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({word,meaningZh,forceRefresh}),
+      body:JSON.stringify({word,lemma,meaningZh,forceRefresh}),
       signal:controller.signal,
     }).then(async response=>{
       const payload=await response.json().catch(()=>({}));
@@ -70,7 +70,16 @@
   }
 
   function sourceLinks(sources){
-    const list=Array.isArray(sources)?sources.filter(item=>item?.title&&item?.url):[];
+    const seen=new Set();
+    const list=(Array.isArray(sources)?sources:[])
+      .filter(item=>item?.title&&item?.url)
+      .filter(item=>{
+        const key=`${item.title}|${item.url}`;
+        if(seen.has(key))return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0,6);
     if(!list.length)return "";
     return `<div class="lexi-etymology-sources"><span>来源</span>${list.map(item=>`<a href="${esc(item.url)}" target="_blank" rel="noreferrer">${esc(item.title)}</a>`).join("")}</div>`;
   }
@@ -78,14 +87,18 @@
   function content(result){
     if(!result)return `<div class="lexi-etymology-status">暂未取得词源结果。</div>`;
     if(result.status!=="verified_explanation"){
-      return `<div class="lexi-etymology-status">${esc(result.explanationZh||"暂时没有足够可靠的词源证据。")} ${result.status==="evidence_ready_ai_unavailable"?'<button class="lexi-etymology-retry" data-etymology-refresh="1">重试</button>':""}${sourceLinks(result.sources)}</div>`;
+      return `<div class="lexi-etymology-status">${esc(result.learnerExplanationZh||"暂时没有找到足够可靠的词源信息。")} ${result.status==="evidence_ready_ai_unavailable"?'<button class="lexi-etymology-retry" data-etymology-refresh="1">重试</button>':""}${sourceLinks(result.sources)}</div>`;
     }
-    const components=Array.isArray(result.components)?result.components:[];
+    const components=Array.isArray(result.morphology?.components)?result.morphology.components:[];
+    const sourcePath=clean(result.origin?.sourcePath);
+    const lemmaNote=result.lookupWord&&result.lookupWord!==result.word
+      ? `<small>按原形 ${esc(result.lookupWord)} 追溯</small>`
+      : `<small>从单词来源继续追到构词成分</small>`;
     return `<div class="lexi-etymology-body">
-      <div class="lexi-etymology-head"><div><strong>词源拆解</strong><small>先查词级来源，再解释构词；不按拼写猜词根</small></div><span class="pill green">${result.cacheHit?"已缓存":"已验证"}</span></div>
-      ${result.sourcePath?`<div class="lexi-etymology-path">${esc(result.sourcePath)}</div>`:""}
-      ${components.length?`<div class="lexi-etymology-components">${components.map(item=>`<div class="lexi-etymology-component"><b>${esc(item.form)}</b><span>${esc(item.meaningZh)} · ${esc(item.sourceLanguage)} ${item.sourceForm?`· ${esc(item.sourceForm)}`:""}</span></div>`).join("")}</div>`:""}
-      <div class="lexi-etymology-explain">${esc(result.explanationZh)}</div>
+      <div class="lexi-etymology-head"><div><strong>词源与构词</strong>${lemmaNote}</div><span class="pill green">${result.cacheHit?"已缓存":"来源已核对"}</span></div>
+      ${sourcePath?`<div class="lexi-etymology-path">${esc(sourcePath)}</div>`:""}
+      ${components.length?`<div class="lexi-etymology-components">${components.map(item=>`<div class="lexi-etymology-component"><b>${esc(item.form)}</b><span>${esc(item.meaningZh)}${item.sourceLanguage?` · ${esc(item.sourceLanguage)}`:""}${item.sourceForm?` · ${esc(item.sourceForm)}`:""}</span></div>`).join("")}</div>`:""}
+      <div class="lexi-etymology-explain">${esc(result.learnerExplanationZh)}</div>
       ${sourceLinks(result.sources)}
     </div>`;
   }
@@ -101,16 +114,17 @@
 
   async function hydrate(host,{forceRefresh=false}={}){
     const word=clean(host.dataset.etymologyWord);
+    const lemma=clean(host.dataset.etymologyLemma)||word;
     const meaningZh=clean(host.dataset.etymologyMeaning);
     if(!singleWord(word)){host.hidden=true;return;}
     host.hidden=false;
-    const key=keyFor(word,meaningZh);
+    const key=keyFor(word,lemma,meaningZh);
     if(!forceRefresh&&host.dataset.etymologyLoadedKey===key)return;
     host.dataset.etymologyLoadedKey=key;
     host.innerHTML=`<div class="lexi-etymology"><div class="lexi-etymology-status">正在整理“${esc(word)}”的词源证据…</div></div>`;
     try{
-      const result=await request(word,meaningZh,{forceRefresh});
-      if(keyFor(host.dataset.etymologyWord,host.dataset.etymologyMeaning)!==key)return;
+      const result=await request(word,lemma,meaningZh,{forceRefresh});
+      if(keyFor(host.dataset.etymologyWord,host.dataset.etymologyLemma||host.dataset.etymologyWord,host.dataset.etymologyMeaning)!==key)return;
       renderHost(host,result);
     }catch(err){
       if(err?.name==="AbortError"){
@@ -136,7 +150,7 @@
     if(!retry)return;
     const host=retry.closest("[data-etymology-host]");
     if(!host)return;
-    const key=keyFor(host.dataset.etymologyWord,host.dataset.etymologyMeaning);
+    const key=keyFor(host.dataset.etymologyWord,host.dataset.etymologyLemma||host.dataset.etymologyWord,host.dataset.etymologyMeaning);
     resultCache.delete(key);
     requestCache.delete(key);
     delete host.dataset.etymologyLoadedKey;
