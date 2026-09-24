@@ -27,7 +27,9 @@ This layer does **not** own:
 For Latin morphemes, prefer Lewis & Short for lexical facts and Allen &
 Greenough for historical morphology / phonology. For Greek morphemes, use LSJ
 for lexical facts and a standard historical Greek grammar such as Smyth for
-morphological rules.
+morphological rules. For Old English/Germanic morphemes, use the
+Bosworth-Toller Anglo-Saxon Dictionary when a directly attested Old English
+form is required.
 
 Modern-English word etymology is a separate layer. A modern English word must
 not be declared a member of a morpheme family solely because its spelling looks
@@ -97,3 +99,25 @@ candidate merely because the letters are identical.
 This rule generalizes the earlier CAP2 safeguard and prevents indexed
 homographs from becoming false coverage.
 
+
+
+## Candidate origin-hint rule
+
+Discovery metadata is not authority.
+
+If a candidate's origin hint conflicts with verified source-language evidence,
+LexiFlow must not silently count the candidate as covered merely because the
+surface spelling matches a published morpheme.
+
+The candidate must receive a candidate-specific review disposition, while the
+correct source-language authority may still be published independently.
+
+Example:
+
+- ECDICT candidate `MIS-` is labeled Latin;
+- Bosworth-Toller directly attests Old English `mis-` as a Germanic prefix
+  denoting defect or imperfection;
+- LexiFlow therefore publishes `MIS-` from Old English authority and closes
+  the Latin-classified discovery candidate as misclassified.
+
+This keeps the product fact correct without rewriting discovery evidence.
