@@ -343,6 +343,31 @@ assert(
   "CID must remain an explicit two-family homograph in authority"
 );
 
+const adPrefix = authority.getById("lat-ad");
+assert(adPrefix?.teachingForms?.includes("AC-"), "AC- must be published as the grammar-backed Latin AD- assimilation");
+assert(adPrefix?.sourceForms?.includes("ac-"), "AC- must remain tied to an attested Latin source form");
+
+const misPrefix = authority.getById("ang-mis");
+assert(misPrefix?.sourceLanguage === "Old English", "MIS- must resolve to Old English/Germanic authority, not Latin");
+assert(misPrefix?.teachingForms?.includes("MIS-"), "MIS- must be available to learner-facing lookup");
+assert(authority.findByTeachingForm("MIS-")[0]?.id === "ang-mis", "MIS- lookup must resolve to Old English authority");
+
+const manusFamily = authority.getById("lat-manus");
+assert(manusFamily?.sourceLemma === "manus", "MAN/MANI/MANU must resolve to Latin manus");
+for (const form of ["MAN","MANI","MANU"]) {
+  assert(manusFamily?.teachingForms?.includes(form), `${form} must be source-language grounded in the manus family`);
+}
+assert(!manusFamily?.teachingForms?.includes("MAIN"), "MAIN must remain outside Latin source authority");
+
+const gradFamily = authority.getById("lat-grad");
+assert(gradFamily?.sourceLemma === "gradior / gradus", "GRAD/GRESS authority must preserve both gradior and gradus evidence");
+assert(gradFamily?.sourceForms?.includes("gradus"), "Latin gradus must support the step/degree branch");
+assert(!gradFamily?.teachingForms?.includes("GRADE"), "English GRADE must remain outside Latin source authority");
+
+const venFamily = authority.getById("lat-ven");
+assert(venFamily?.teachingForms?.includes("VENI"), "VENI must be grounded in Latin venio/venire");
+assert(!venFamily?.teachingForms?.includes("VENE"), "English VENE must remain outside Latin source authority");
+
 for (const item of [
   authority.getById("lat-bene"),
   authority.getById("lat-tract"),
