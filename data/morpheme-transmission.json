@@ -476,6 +476,54 @@
       "url": "https://en.wiktionary.org/wiki/-cide",
       "locator": "English -cide / Etymology 1 and Etymology 2",
       "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-maintain",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/maintain",
+      "locator": "maintain (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-maintain",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/maintain",
+      "locator": "English maintain / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-grade",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/grade",
+      "locator": "grade (n.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-grade",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/grade",
+      "locator": "English grade / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
+    },
+    {
+      "id": "etym-convene",
+      "sourceType": "english_etymology_reference",
+      "work": "Online Etymology Dictionary",
+      "url": "https://www.etymonline.com/word/convene",
+      "locator": "convene (v.)",
+      "license": "Reference-only factual verification; no source prose copied"
+    },
+    {
+      "id": "wik-convene",
+      "sourceType": "english_etymology_reference",
+      "work": "Wiktionary",
+      "url": "https://en.wiktionary.org/wiki/convene",
+      "locator": "English convene / Etymology",
+      "license": "CC BY-SA 4.0 / GFDL"
     }
   ],
   "mappings": [
@@ -1193,6 +1241,78 @@
       "sourceIds": [
         "etym-cide",
         "wik-cide"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-main",
+      "authorityId": "lat-manus",
+      "englishTeachingForm": "MAIN",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin manus / manu",
+      "targetForm": "main-",
+      "pathway": [
+        "Latin manus / manu 'hand'",
+        "Old French main and maintenir < Latin manu tenere",
+        "Middle English maintenen",
+        "English maintain / maintenance"
+      ],
+      "evidenceWords": [
+        "maintain",
+        "maintenance"
+      ],
+      "factSummary": "English MAIN in the maintain/maintenance family reflects the Romance development of Latin manus/manu 'hand'; it is not published as a Classical Latin root form.",
+      "sourceIds": [
+        "etym-maintain",
+        "wik-maintain"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-grade",
+      "authorityId": "lat-grad",
+      "englishTeachingForm": "GRADE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin gradus",
+      "targetForm": "grade",
+      "pathway": [
+        "Latin gradus 'step, degree'",
+        "French grade 'degree/rank'",
+        "English grade"
+      ],
+      "evidenceWords": [
+        "grade",
+        "degrade",
+        "centigrade"
+      ],
+      "factSummary": "English GRADE is a French/English reflex of Latin gradus 'step, degree', related to the GRAD/GRESS family but not itself a Classical Latin root form.",
+      "sourceIds": [
+        "etym-grade",
+        "wik-grade"
+      ],
+      "status": "verified"
+    },
+    {
+      "id": "tx-vene",
+      "authorityId": "lat-ven",
+      "englishTeachingForm": "VENE",
+      "mappingType": "romance_reflex",
+      "sourceForm": "Latin venire / convenire",
+      "targetForm": "-vene",
+      "pathway": [
+        "Latin venire 'come' / convenire 'come together'",
+        "Old French convenir",
+        "Middle English convene",
+        "English -vene"
+      ],
+      "evidenceWords": [
+        "convene",
+        "intervene"
+      ],
+      "factSummary": "English -vene is a Romance/English reflex of the Latin venire family, visible through forms such as convene; source-language authority remains VEN/VENI/VENT.",
+      "sourceIds": [
+        "etym-convene",
+        "wik-convene"
       ],
       "status": "verified"
     }
