@@ -34,10 +34,11 @@ function fixtureResponse(wikitext){
 }
 
 function requiredComponentsFromPrompt(prompt){
-  const start=prompt.indexOf("Required Components:\n");
-  const end=prompt.indexOf("\n\nEvidence Graph:",start);
+  const marker="Required Components:\n";
+  const start=prompt.indexOf(marker);
+  const end=prompt.indexOf("\nEvidence Graph:",start);
   assert(start>=0 && end>start,"prompt must expose Required Components before Evidence Graph");
-  return JSON.parse(prompt.slice(start+"Required Components:\n".length,end));
+  return JSON.parse(prompt.slice(start+marker.length,end));
 }
 
 function meaningFor(form){
