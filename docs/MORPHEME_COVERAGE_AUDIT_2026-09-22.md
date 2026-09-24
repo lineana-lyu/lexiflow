@@ -1,5 +1,11 @@
 # Morpheme Coverage Audit — 2026-09-22
 
+> **Historical audit only.** This document records the pre-Etymology-Engine
+> verification work completed on 2026-09-22. Its P0/P1/P2 queues are no longer
+> the product roadmap or a release gate. Maintained CI now uses
+> `scripts/check-morpheme-safety.js`; runtime word explanations start from
+> word-level etymology evidence as defined in `docs/ETYMOLOGY_ENGINE_V1.md`.
+
 ## Executive result
 
 The first P0 verification pass is complete.
