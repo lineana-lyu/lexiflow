@@ -124,3 +124,39 @@ If the source only supports a whole-word history, LexiFlow may still explain
 the semantic history without inventing a decomposition.
 
 This keeps the product learner-friendly without sacrificing provenance.
+
+## Provider transport resilience
+
+Wiktionary source retrieval is not coupled to one MediaWiki response shape.
+
+The maintained provider uses an ordered transport strategy:
+
+1. MediaWiki `action=query + prop=revisions + rvslots=main`;
+2. MediaWiki `action=parse + prop=wikitext` fallback.
+
+Decoders accept both current scalar source fields and legacy `{"*": ...}`
+content shapes. A structurally invalid response falls through to the next
+transport instead of being mistaken for an empty etymology.
+
+A confirmed missing page remains an ordinary empty result; transport/HTTP/
+timeout failures are classified separately as provider outages.
+
+The request User-Agent identifies LexiFlow and its public repository.
+
+## Provider state contract
+
+No-evidence and no-provider are different product states.
+
+- `insufficient_evidence`: providers responded successfully, but reliable
+  etymology evidence was not found;
+- `provider_unavailable`: one or more required retrieval providers failed and
+  no usable evidence remained.
+
+`provider_unavailable` is retryable in the UI. Provider names/status/error
+codes remain in the response for diagnostics, without exposing credentials or
+raw provider payloads.
+
+The contract suite verifies transport fallback, legacy MediaWiki response
+compatibility, missing-page handling, provider outage classification, and that
+AI is not invoked when evidence retrieval has failed.
+
