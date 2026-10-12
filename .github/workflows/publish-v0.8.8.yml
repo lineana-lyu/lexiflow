@@ -1,0 +1,92 @@
+name: Publish LexiFlow v0.8.8 Windows test release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/publish-v0.8.8.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: lexiflow-v0.8.8-publication
+  cancel-in-progress: false
+
+jobs:
+  windows-release:
+    if: github.repository == 'lineana-lyu/lexiflow' && github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Validate repository
+        run: npm run check
+
+      - name: Prepare bundled dictionaries
+        run: npm run prepare:dictionary
+
+      - name: Validate production lexicon
+        run: node --experimental-sqlite scripts/check-production-lexicon-v5.js
+
+      - name: Build Windows installer and portable executable
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:win
+
+      - name: Verify the actual packaged Kokoro dependency graph
+        run: node scripts/check-packaged-kokoro-runtime.js
+
+      - name: Validate release filenames and generate checksums
+        shell: pwsh
+        run: |
+          $package = Get-Content 'package.json' -Raw | ConvertFrom-Json
+          if ($package.version -ne '0.8.8') { throw 'Source package version does not match v0.8.8' }
+          $files = @(Get-ChildItem -Path 'dist' -Filter '*.exe' -File)
+          if ($files.Count -ne 2) { throw "Expected exactly one installer and one portable exe, got $($files.Count)" }
+          foreach ($file in $files) {
+            if ($file.Name -notmatch '0\.8\.8') { throw "Incorrect version in binary filename: $($file.Name)" }
+          }
+          $lines = $files | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash -Algorithm SHA256 -Path $_.FullName).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          }
+          $lines | Set-Content -Path 'dist/SHA256SUMS.txt' -Encoding utf8
+
+      - name: Create public prerelease with stable asset URLs
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $existing = gh release view 'v0.8.8' --json tagName 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            throw 'v0.8.8 release already exists; refusing silent overwrite'
+          }
+          $files = @(Get-ChildItem -Path 'dist' -Filter '*.exe' -File | Sort-Object Name | ForEach-Object { $_.FullName })
+          $files += (Resolve-Path 'dist/SHA256SUMS.txt').Path
+          gh release create 'v0.8.8' @files --target "$env:GITHUB_SHA" --title 'LexiFlow v0.8.8 — Windows speech hotfix (testing)' --notes-file '.github/RELEASE_NOTES_v0.8.8.md' --prerelease
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub public release creation failed' }
+
+      - name: Verify published asset count
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $release = gh release view 'v0.8.8' --json assets,isPrerelease | ConvertFrom-Json
+          if (-not $release.isPrerelease) { throw 'Unverified hotfix must remain prerelease' }
+          $exeCount = @($release.assets | Where-Object { $_.name.EndsWith('.exe') }).Count
+          if ($exeCount -ne 2) { throw "Public release must contain two Windows exes, found $exeCount" }
