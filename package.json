@@ -1,6 +1,6 @@
 {
   "name": "lexiflow",
-  "version": "0.8.7",
+  "version": "0.8.8",
   "description": "LexiFlow 本地优先英语单词学习桌面应用",
   "productName": "LexiFlow",
   "main": "electron-main.js",
@@ -92,8 +92,7 @@
       "uninstallerIcon": "build/icon.ico"
     },
     "asarUnpack": [
-      "node_modules/onnxruntime-node/**/*",
-      "node_modules/wordnet/db/**/*",
+      "node_modules/**/*",
       "lib/kokoro-worker.js"
     ]
   },
