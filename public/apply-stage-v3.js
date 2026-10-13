@@ -333,7 +333,7 @@
     const answerUsable=Boolean(suggestion&&!/[\u3400-\u9fff]/.test(suggestion)&&usesTarget(suggestion,card.word));
     const changedAnswer=answerUsable&&suggestion!==norm(s.text);
     const fixErrors=Boolean(blockers.length&&(blockers.every(issue=>actionForIssue(issue,actions))||changedAnswer));
-    const fixWarnings=Boolean(optional.length&&!blockers.length&&(optional.every(issue=>actionForIssue(issue,actions))||answerUsable));
+    const fixWarnings=Boolean(optional.length&&!blockers.length&&(optional.every(issue=>actionForIssue(issue,actions))||changedAnswer));
     const title=blockers.length?`发现 ${blockers.length} 处必须修改`:translations.length?`有 ${translations.length} 处中文待翻译`:optional.length?`表达可以使用 · 有 ${optional.length} 条提醒`:s.approved?"表达可以使用":String(fb.title||"检查完成");
     const panelTone=blockers.length?"warn":optional.length?"suggest":"good";
     return `<div class="lexi-apply-v3-feedback ${panelTone} ai-feedback-panel ${panelTone}">
