@@ -111,6 +111,7 @@ assert(applyStage.includes("function coalesceIssues(text,issues=[])")&&applyStag
 assert(applyStage.includes("filter(issue=>issue.blocking).slice(0,3)")&&applyStage.includes("blockingIssues(merged).slice(0,3)")&&applyStage.includes("3-required.length"),"all three review slots must be available to blocking errors so the checker does not reveal hidden required fixes in later rounds");
 assert(applyStage.includes("lexi-apply-v3-translations")&&applyStage.includes("陌生单词 · 中文 → 英文"),"Chinese spans must be displayed as contextual translations");
 assert(applyStage.includes("<b>原因：</b>")&&applyStage.includes("<b>修改答案：</b>")&&!applyStage.includes("怎么改"),"each diagnostic must show a reason and concrete answer without how-to copy");
+assert(applyStage.includes("answer:norm(item?.answer||item?.replacement)"),"normalizing displayed diagnostics again must preserve their concrete correction");
 assert(applyStage.includes("data-apply-stage-v3=\"fix-errors\"")&&applyStage.includes("data-apply-stage-v3=\"fix-warnings\"")&&applyStage.includes("data-apply-stage-v3=\"adopt\""),"feedback must offer grouped red/yellow fixes and full-answer adoption");
 assert(applyStage.includes("function batchSentence(")&&applyStage.includes("sorted[index-1].end>action.start"),"batch edits must reject overlapping verified actions");
 assert(applyStage.includes("void submit(next)")&&applyStage.includes("void submit(suggestion)"),"batch edits and adopted answers must be rechecked before completion");
