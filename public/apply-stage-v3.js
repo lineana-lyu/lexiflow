@@ -109,7 +109,7 @@
     const style=document.createElement("style");style.id="lexi-apply-stage-v3-style";
     style.textContent=`
       .lexi-apply-stage-v3{min-height:500px;padding:4px;display:grid;gap:18px}.lexi-apply-v3-head{text-align:center;display:grid;gap:6px}.lexi-apply-v3-word{display:flex;align-items:center;justify-content:center;gap:9px}.lexi-apply-v3-word strong{font-size:40px;line-height:1.1}.lexi-apply-v3-word button{border:0;background:transparent;cursor:pointer;font-size:19px}.lexi-apply-v3-meta{font-size:13px;color:var(--muted)}.lexi-apply-v3-meaning{font-size:17px;font-weight:750}.lexi-apply-v3-prompt{width:min(700px,100%);margin:0 auto;padding:13px 15px;border-radius:15px;background:rgba(120,140,132,.05);display:flex;align-items:center;justify-content:space-between;gap:14px}.lexi-apply-v3-prompt div{display:grid;gap:3px}.lexi-apply-v3-prompt small{color:var(--muted)}.lexi-apply-v3-composer{width:min(700px,100%);margin:0 auto}.lexi-apply-v3-composer textarea{min-height:125px;font-size:16px;line-height:1.7}.lexi-apply-v3-composer-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:9px}.lexi-apply-v3-composer-bottom span{font-size:11px;color:var(--muted)}.lexi-apply-v3-warning{width:min(700px,100%);margin:0 auto;padding:10px 12px;border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.lexi-apply-v3-feedback{width:min(700px,100%);margin:0 auto;border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px;background:var(--surface)}.lexi-apply-v3-feedback.good{background:rgba(78,128,103,.045)}.lexi-apply-v3-feedback.error{background:rgba(174,86,67,.045);border-color:rgba(174,86,67,.16)}.lexi-apply-v3-error-message{margin:0;color:var(--muted);font-size:13px;line-height:1.65}.lexi-apply-v3-error-code{font-size:11px;color:var(--muted)}.lexi-apply-v3-feedback-head{display:flex;justify-content:space-between;gap:12px}.lexi-apply-v3-feedback-head div{display:grid;gap:2px}.lexi-apply-v3-feedback-head small{color:var(--muted)}.lexi-apply-v3-suggestion{font-size:16px;line-height:1.7;padding:12px;border-radius:13px;background:rgba(120,140,132,.05)}.lexi-apply-v3-changes{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:rgba(91,118,105,.045);border:1px solid rgba(91,118,105,.09)}.lexi-apply-v3-changes>strong{font-size:12px;color:var(--muted);letter-spacing:.02em}.lexi-apply-v3-change{display:grid;gap:3px}.lexi-apply-v3-change-line{font-size:13px;font-weight:700;color:var(--text)}.lexi-apply-v3-change p{margin:0;font-size:12px;line-height:1.55;color:var(--muted)}.lexi-apply-v3-diagnostic{display:grid;gap:7px;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.72);border:1px solid rgba(139,109,72,.10)}.lexi-apply-v3-diagnostic>small{color:var(--muted);font-size:11px}.lexi-apply-v3-diagnostic-line{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-review-composer{padding:18px 20px;border:1px solid var(--line);border-radius:18px;background:#fff;min-height:125px;display:grid;align-content:space-between;gap:18px}.lexi-apply-v3-review-label{font-size:11px;color:var(--muted)}.lexi-apply-v3-review-sentence{font-size:16px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere}.lexi-apply-v3-inline-issue{appearance:none;border:0;padding:1px 3px;margin:0;color:var(--text);font:inherit;line-height:inherit;border-radius:5px;cursor:pointer}.lexi-apply-v3-inline-issue.blocking{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13);animation:lexi-apply-issue-in .28s ease both}.lexi-apply-v3-inline-issue.blocking:hover{background:rgba(201,73,73,.18);box-shadow:inset 0 0 0 1px rgba(201,73,73,.22)}.lexi-apply-v3-inline-issue.optional{background:rgba(210,159,54,.14);box-shadow:inset 0 0 0 1px rgba(210,159,54,.16)}.lexi-apply-v3-inline-issue.optional:hover{background:rgba(210,159,54,.20)}.lexi-apply-v3-inline-fixed{padding:1px 3px;border-radius:5px;background:rgba(70,139,94,.12);color:#39734d;box-shadow:inset 0 0 0 1px rgba(70,139,94,.10)}.lexi-apply-v3-issues{display:grid;gap:8px}.lexi-apply-v3-issue{display:grid;gap:6px;padding:10px 12px;border-radius:12px;border:1px solid rgba(139,109,72,.10);transition:border-color .18s ease,box-shadow .18s ease}.lexi-apply-v3-issue.blocking{background:rgba(201,73,73,.045);border-color:rgba(201,73,73,.13)}.lexi-apply-v3-issue.optional{background:rgba(210,159,54,.055);border-color:rgba(210,159,54,.16)}.lexi-apply-v3-issue.active{box-shadow:0 0 0 3px rgba(110,122,114,.07)}.lexi-apply-v3-issue strong{font-size:12.5px;color:var(--text)}.lexi-apply-v3-issue p,.lexi-apply-v3-issue small{margin:0;line-height:1.55}.lexi-apply-v3-issue p{font-size:12.5px;color:var(--muted)}.lexi-apply-v3-issue small{font-size:11.5px;color:#7c887f}.lexi-apply-v3-severity{font-size:10.5px;font-weight:750;letter-spacing:.03em}.lexi-apply-v3-issue.blocking .lexi-apply-v3-severity{color:#a84f4f}.lexi-apply-v3-issue.optional .lexi-apply-v3-severity{color:#9a7527}.lexi-apply-v3-issue-fix{justify-self:start;margin-top:2px}.lexi-apply-v3-complete-label{font-size:11px;color:var(--muted);margin-bottom:-5px}@keyframes lexi-apply-issue-in{0%{background:rgba(201,73,73,0);box-shadow:inset 0 0 0 1px rgba(201,73,73,0)}100%{background:rgba(201,73,73,.12);box-shadow:inset 0 0 0 1px rgba(201,73,73,.13)}}.lexi-apply-v3-tips{display:grid;gap:6px;color:var(--muted);font-size:13px}.lexi-apply-v3-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.lexi-apply-stage-v3 .lexi-apply-actions-v3{width:min(700px,100%);margin:0 auto!important}.lexi-apply-v3-undo{width:min(700px,100%);margin:0 auto;text-align:left}@media(max-width:700px){.lexi-apply-v3-prompt{align-items:flex-start;flex-direction:column}.lexi-apply-v3-composer-bottom{align-items:stretch;flex-direction:column}.lexi-apply-v3-composer-bottom .btn{width:100%}.lexi-apply-v3-actions .btn{flex:1}}
-    `;document.head.appendChild(style);
+    `;style.textContent += `.lexi-apply-v3-translations,.lexi-apply-v3-answer{display:grid;gap:8px;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:rgba(91,118,105,.045)}.lexi-apply-v3-translations>strong,.lexi-apply-v3-answer>strong{font-size:12px;color:var(--muted)}.lexi-apply-v3-translation{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap;font-size:13px}.lexi-apply-v3-translation b{color:var(--text)}.lexi-apply-v3-answer .lexi-apply-v3-suggestion{background:var(--surface);overflow-wrap:anywhere}`;document.head.appendChild(style);
   }
 
   function feedbackChanges(fb){
@@ -460,50 +460,35 @@
     setTimeout(()=>card.classList.remove("active"),1200);
   }
 
-  function applyIssueFix(index){
-    const card=currentCard();if(!card)return;const s=session(card);
-    const issues=feedbackIssues(s.feedback),changes=feedbackChanges(s.feedback),actions=feedbackActions(s.feedback),issue=issues[Number(index)];
-    if(!issue)return;
-    const action=actionForIssue(issue,actions),range=actionRange(s.text,action),replacement=String(action?.replacement??"");
-    if(!action||!replacement||!range||!hasSurfaceEdit(action.before,replacement))return;
-    if(s.text&&!s.originalText)s.originalText=s.text;
-
-    // Diagnostics and code actions are separate. The highlighted diagnostic can
-    // be broader than the verified edit, but the click applies only the
-    // independently planned and validated action range.
-    const next=s.text.slice(0,range.start)+replacement+s.text.slice(range.end);
-    const unresolved=issues.filter((_,itemIndex)=>itemIndex!==Number(index));
-    const rebased=rebaseIssuesAfterEdit(s.text,unresolved,range,replacement.length);
-    const surviving=survivingIssues(next,rebased);
-    const remainingBlocking=blockingIssues(surviving);
-    const remainingOptional=optionalIssues(surviving);
-    const remainingActions=rebaseActionsAfterEdit(s.text,actions,range,replacement.length,issue.id);
-    const keyword=norm(s.feedback?.keyword||card.word)||card.word;
-    const keywordOk=usesTarget(next,keyword)||usesTarget(next,card.word);
-    const english=!/[\u3400-\u9fff]/.test(next);
-    const approved=Boolean(english&&keywordOk&&remainingBlocking.length===0);
-    const remainingChanges=changes.filter(change=>spanRange(next,change.from));
-
-    s.pendingIssues=remainingBlocking;
-    s.text=next;
-    s.approved=approved;
-    s.suggestionApproved=Boolean(!approved&&s.suggestionApproved);
-    s.checkError=null;
-    s.editing=false;
-    s.lastFix={start:range.start,end:range.start+replacement.length,from:action.before,to:replacement,at:Date.now()};
-    s.feedback={
-      ...(s.feedback||{}),
-      approved,
-      level:approved?"good":"warn",
-      issues:[...remainingBlocking,...remainingOptional],
-      actions:remainingActions,
-      changes:remainingChanges,
-      tips:[],
-      suggestion:approved?"":norm(s.feedback?.suggestion),
-    };
-    render();
+  function batchSentence(text,issues,actions){
+    const edits=issues.map(issue=>actionForIssue(issue,actions));
+    if(edits.some(action=>!action))return null;
+    const sorted=edits.slice().sort((a,b)=>a.start-b.start);
+    for(let index=0;index<sorted.length;index+=1){
+      const action=sorted[index];
+      if(!actionRange(text,action)||!hasSurfaceEdit(action.before,action.replacement))return null;
+      if(index>0&&sorted[index-1].end>action.start)return null;
+    }
+    return sorted.reverse().reduce((sentence,action)=>sentence.slice(0,action.start)+action.replacement+sentence.slice(action.end),text);
   }
 
+  function applyBatchFix(kind){
+    const card=currentCard();if(!card)return;const s=session(card);
+    if(s.submitting||!s.feedback)return;
+    const issues=feedbackIssues(s.feedback),blockers=blockingIssues(issues);
+    if(kind==="warnings"&&blockers.length)return;
+    const selected=kind==="errors"?blockers:optionalIssues(issues);
+    if(!selected.length)return;
+    const actions=feedbackActions(s.feedback);
+    const verified=batchSentence(s.text,selected,actions);
+    const fullAnswer=norm(s.feedback.suggestion);
+    const fallback=fullAnswer&&!/[\u3400-\u9fff]/.test(fullAnswer)&&usesTarget(fullAnswer,card.word)?fullAnswer:null;
+    const next=verified||fallback;
+    if(!next||next===s.text)return;
+    if(s.text&&!s.originalText)s.originalText=s.text;
+    s.text=next;s.approved=false;s.feedback=null;s.suggestionApproved=false;s.editing=false;s.lastFix=null;s.pendingIssues=[];
+    void submit(next);
+  }
   function adopt(){
     const card=currentCard();if(!card)return;const s=session(card);const suggestion=norm(s.feedback?.suggestion);
     if(!suggestion||!s.suggestionApproved||/[\u3400-\u9fff]/.test(suggestion)||suggestion===norm(s.text))return;
@@ -556,7 +541,8 @@
     if(action==="speak-word"&&card)void speak(card);
     if(action==="submit"||action==="retry")void submit();
     if(action==="adopt")adopt();
-    if(action==="fix-issue")applyIssueFix(button.dataset.issueIndex);
+    if(action==="fix-errors")applyBatchFix("errors");
+    if(action==="fix-warnings")applyBatchFix("warnings");
     if(action==="focus-issue")focusIssue(button.dataset.issueIndex);
     if(action==="edit")editSentence();
     if(action==="restore")restore();
