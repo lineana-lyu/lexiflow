@@ -2197,7 +2197,7 @@ async function sentenceFeedback(body) {
     tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(normalizeFeedbackCopy) : [],
     translations: normalizeSentenceTranslations(sentence, parsed.translations),
     issues: Array.isArray(parsed.issues)
-      ? parsed.issues.slice(0, 3).map(item => ({
+      ? parsed.issues.filter(item => !/[\u3400-\u9fff]/.test(String(item?.span || ""))).slice(0, 3).map(item => ({
           span: String(item?.span || "").trim().slice(0, 100),
           start: Number.isInteger(item?.start) ? item.start : null,
           end: Number.isInteger(item?.end) ? item.end : null,
