@@ -29,4 +29,14 @@ const diagnostics = normalizeSentenceDiagnostics({
 });
 assert.equal(diagnostics.some(item => item.span === "宣布"), false, "Chinese belongs to translations, not errors");
 assert.equal(diagnostics.some(item => item.span === "tommorow"), true);
+const layered = normalizeSentenceDiagnostics({
+  sentence: "She go to an important meeting.",
+  issues: [
+    { span: "go", start: 4, end: 6, reason: "subject-verb disagreement", replacement: "goes", category: "grammar", severity: "error" },
+    { span: "important", start: 13, end: 22, reason: "a more precise word would help", replacement: "critical", category: "meaning", severity: "warning" },
+  ],
+});
+assert.equal(layered.filter(item => item.blocking).length, 1);
+assert.equal(layered.filter(item => !item.blocking && item.severity === "warning").length, 1);
+
 console.log("Mixed-language sentence feedback checks passed.");
