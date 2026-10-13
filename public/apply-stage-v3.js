@@ -331,7 +331,8 @@
     const issues=feedbackIssues(fb),actions=feedbackActions(fb),translations=feedbackTranslations(fb);
     const blockers=blockingIssues(issues),optional=optionalIssues(issues);
     const answerUsable=Boolean(suggestion&&!/[\u3400-\u9fff]/.test(suggestion)&&usesTarget(suggestion,card.word));
-    const fixErrors=Boolean(blockers.length&&(blockers.every(issue=>actionForIssue(issue,actions))||answerUsable));
+    const changedAnswer=answerUsable&&suggestion!==norm(s.text);
+    const fixErrors=Boolean(blockers.length&&(blockers.every(issue=>actionForIssue(issue,actions))||changedAnswer));
     const fixWarnings=Boolean(optional.length&&!blockers.length&&(optional.every(issue=>actionForIssue(issue,actions))||answerUsable));
     const title=blockers.length?`发现 ${blockers.length} 处必须修改`:translations.length?`有 ${translations.length} 处中文待翻译`:optional.length?`表达可以使用 · 有 ${optional.length} 条提醒`:s.approved?"表达可以使用":String(fb.title||"检查完成");
     const panelTone=blockers.length?"warn":optional.length?"suggest":"good";
@@ -344,7 +345,7 @@
       <div class="lexi-apply-v3-actions">
         ${blockers.length?`<button class="btn" type="button" data-apply-stage-v3="fix-errors" ${fixErrors?"":"disabled"}>一键修改错误</button>`:""}
         ${optional.length?`<button class="btn" type="button" data-apply-stage-v3="fix-warnings" ${fixWarnings?"":"disabled title=\"请先处理必须修改的问题并重新检查\""}>一键修改警告</button>`:""}
-        <button class="btn" type="button" data-apply-stage-v3="adopt" ${answerUsable&&suggestion!==norm(s.text)?"":"disabled"}>应用答案</button>
+        <button class="btn" type="button" data-apply-stage-v3="adopt" ${changedAnswer?"":"disabled"}>应用答案</button>
         ${s.approved?`<button class="btn primary" type="button" data-action="pass-apply" ${s.promptLoading?"disabled title=\"正在保存新的练习话题\"":""}>${s.promptLoading?"正在保存当前阶段…":optional.length?"保留原句 · 明天首次复习":"确认这句话 · 明天首次复习"}</button>`:""}
         <button class="text-action" type="button" data-apply-stage-v3="edit">自己继续修改</button>
       </div>
