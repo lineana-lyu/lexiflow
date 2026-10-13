@@ -242,7 +242,7 @@
         ...primary,
         reason:feedbackCopy(primary.reason||secondary.reason),
         hint:feedbackCopy(primary.hint||secondary.hint),
-        replacement:norm(primary.replacement||secondary.replacement),
+        answer:norm(primary.answer||secondary.answer||primary.replacement||secondary.replacement),
         blocking:Boolean(current.blocking||candidate.blocking),
         severity:(current.blocking||candidate.blocking)?"error":(primary.severity==="warning"||secondary.severity==="warning"?"warning":"suggestion"),
       };
