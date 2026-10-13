@@ -5,6 +5,8 @@ const path = require("path");
 const os = require("os");
 const { spawn, exec } = require("child_process");
 const {
+  classifySentenceLanguage,
+  normalizeSentenceTranslations,
   normalizeFeedbackCopy,
   detectEnglishMechanics,
   normalizeSentenceDiagnostics,
@@ -47,7 +49,7 @@ const LOOKUP_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const LOOKUP_CACHE_SCHEMA = "v5-lexeme-identity";
 const DEFAULT_CODEX_MODEL = "gpt-5.6-luna";
 const DEFAULT_CODEX_REASONING_EFFORT = "medium";
-const SENTENCE_FEEDBACK_SCHEMA = "v12-diagnostic-code-actions";
+const SENTENCE_FEEDBACK_SCHEMA = "v13-contextual-translations-and-answers";
 let lookupCache = null;
 const sentenceFeedbackStore = new PersistentSentenceFeedbackStore({
   filePath: SENTENCE_FEEDBACK_CACHE_FILE,
@@ -2167,7 +2169,7 @@ async function sentenceFeedback(body) {
   const sentence = String(body.sentence || "").trim();
   if (!word || !sentence) throw new Error("INVALID_INPUT");
 
-  const inputLanguage = /[\u3400-\u9fff]/.test(sentence) ? "zh" : "en";
+  const inputLanguage = classifySentenceLanguage(sentence);
   const settings = await loadSettings();
   const cacheKey = stableFeedbackKey({
     schema: SENTENCE_FEEDBACK_SCHEMA,
@@ -2188,13 +2190,14 @@ async function sentenceFeedback(body) {
   });
   const parsed = extractJson(result.stdout);
   const feedback = {
-    inputLanguage: parsed.inputLanguage === "zh" ? "zh" : inputLanguage,
+    inputLanguage,
     approved: parsed.approved !== false,
     level: parsed.level === "good" ? "good" : "warn",
     title: normalizeFeedbackCopy(parsed.title || "审核完成"),
     tips: Array.isArray(parsed.tips) ? parsed.tips.slice(0, 2).map(normalizeFeedbackCopy) : [],
+    translations: normalizeSentenceTranslations(sentence, parsed.translations),
     issues: Array.isArray(parsed.issues)
-      ? parsed.issues.slice(0, 3).map(item => ({
+      ? parsed.issues.filter(item => !/[\u3400-\u9fff]/.test(String(item?.span || ""))).slice(0, 3).map(item => ({
           span: String(item?.span || "").trim().slice(0, 100),
           start: Number.isInteger(item?.start) ? item.start : null,
           end: Number.isInteger(item?.end) ? item.end : null,
@@ -2221,6 +2224,19 @@ async function sentenceFeedback(body) {
     provider: result.transport === "app-server" ? "codex-app-server" : "codex-exec-fallback",
     cacheHit: false,
   };
+
+  if (!feedback.suggestion || /[\u3400-\u9fff]/.test(feedback.suggestion)) {
+    throw Object.assign(new Error("AI did not return a complete English answer"), { code: "INVALID_RESPONSE" });
+  }
+  if (inputLanguage !== "en") {
+    const chineseRuns = [...sentence.matchAll(/[\u3400-\u9fff]+/g)];
+    const missingTranslation = chineseRuns.some(match => !feedback.translations.some(item =>
+      item.start <= match.index && item.end >= match.index + match[0].length
+    ));
+    if (missingTranslation) {
+      throw Object.assign(new Error("AI did not translate every Chinese span"), { code: "INVALID_RESPONSE" });
+    }
+  }
 
   const mechanicsIssues = feedback.inputLanguage === "en"
     ? detectEnglishMechanics(sentence)
@@ -2297,10 +2313,7 @@ async function sentenceFeedback(body) {
     const hasBlockingIssue = feedback.issues.some(item => item.blocking === true);
     feedback.approved = !hasBlockingIssue;
     feedback.level = hasBlockingIssue ? "warn" : "good";
-  }
-
-  if (!feedback.suggestion) feedback.changes = [];
-  if (feedback.inputLanguage === "zh" && !feedback.suggestion) {
+  } else {
     feedback.approved = false;
     feedback.level = "warn";
   }

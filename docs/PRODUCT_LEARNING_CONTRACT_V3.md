@@ -88,7 +88,7 @@ Its exercises may include both directions:
 - English -> Chinese meaning;
 - Chinese meaning -> English.
 
-Additional reinforcement may occur inside the stage when the first recall is weak.
+Additional reinforcement may occur inside the stage when the first recall is weak. In Chinese-to-English recall, the learner may explicitly choose “忘记”. This records an unsuccessful recall, reveals the correct answer, and continues to reinforcement without forcing a guess.
 
 These directions and rounds are exercise/session state only. Persisted product stage remains `memorize`.
 
@@ -124,6 +124,10 @@ AI may:
 - check grammar and naturalness;
 - propose a correction or more natural version;
 - provide or refresh an optional practice topic.
+
+For Chinese or mixed-language input, AI provides contextual Chinese-to-English translations in the unfamiliar-words area. Chinese fragments are not marked as English errors. AI presents a complete English answer after checking.
+
+Blocking English errors are marked red; nonblocking English issues are marked yellow. Each reported issue includes its reason and a concrete correction. The learner can apply all blocking errors or all warnings with separate one-click actions, or apply the complete answer. Applied text is checked again before completion; no AI action silently completes Apply.
 
 AI must not silently replace the learner's sentence or complete Apply on the learner's behalf.
 
