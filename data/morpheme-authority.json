@@ -1,0 +1,4764 @@
+{
+  "schema": "lexiflow-morpheme-authority-v1",
+  "scope": "morpheme-facts-only",
+  "policy": {
+    "publishStatus": "verified",
+    "rule": "A morpheme may be published only when its source-language lemma/form and core meaning are supported by an authoritative lexicon or grammar.",
+    "excludes": [
+      "whole-word teaching story",
+      "whole-word semantic bridge",
+      "culture/history anecdote",
+      "AI-invented etymology",
+      "runtime string-prefix inference"
+    ]
+  },
+  "sources": [
+    {
+      "id": "ls-bene",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5168/",
+      "locator": "bene",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-traho",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48709/",
+      "locator": "traho",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-duco",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n14847/",
+      "locator": "duco",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-scribo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43092/",
+      "locator": "scribo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-mitto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n29328/",
+      "locator": "mitto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-capio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6614/",
+      "locator": "capio",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-wordformation",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); digital edition",
+      "access": "Alpheios grammar edition",
+      "url": "https://grammars.alpheios.net/allen-greenough/wordformation.htm",
+      "locator": "§267, prepositions compounded with verbs/adjectives",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-phonetic",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/phonetic-changes",
+      "locator": "§§15–16, phonetic changes and prefix assimilation",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-supine",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/formation-supine",
+      "locator": "§178, formation of the supine stem",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-prae",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37331/",
+      "locator": "prae",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-finis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18202/",
+      "locator": "finis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pendeo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pendeo",
+      "locator": "pendeo",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-autos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n17907/",
+      "locator": "αὐτός",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-syn",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n99002/",
+      "locator": "σύν",
+      "publicDomain": true
+    },
+    {
+      "id": "smyth-word-formation",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=3",
+      "locator": "§§822–828, especially roots/stems and compound λογο-γράφο-ς; root γραφ",
+      "publicDomain": true
+    },
+    {
+      "id": "smyth-stems",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=2:chapter=10",
+      "locator": "§§191–193, stems and roots; λογο- as stem of λόγος",
+      "publicDomain": true
+    },
+    {
+      "id": "smyth-declension",
+      "work": "A Greek Grammar for Colleges",
+      "authors": "Herbert Weir Smyth",
+      "sourceType": "historical_grammar",
+      "language": "Ancient Greek",
+      "publisher": "American Book Company (1920)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0007:part=2:chapter=11",
+      "locator": "§204, second declension = O-declension, stems in ο",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-grapho",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n22825/",
+      "locator": "γράφω",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-logos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n63772/",
+      "locator": "λόγος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-bios",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n19972/",
+      "locator": "βίος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-ge",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%CE%B3%E1%BF%86/",
+      "locator": "γῆ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-geographo",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n22050/",
+      "locator": "γεωγραφέω",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-phone",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%CF%86%CF%89%CE%BD%CE%AE/",
+      "locator": "φωνή",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-aphonos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n18610/",
+      "locator": "ἄφωνος (from φωνή)",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-dia",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n24517/",
+      "locator": "διά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-meta",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n66572/",
+      "locator": "μετά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-para",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n77763/",
+      "locator": "παρά",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-peri",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n81017/",
+      "locator": "περί",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-pro",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n86405/",
+      "locator": "πρό",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hyper",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n107183/",
+      "locator": "ὑπέρ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hypo",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n108092/",
+      "locator": "ὑπό",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-dictio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n13820/",
+      "locator": "dictio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-facio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n17516/",
+      "locator": "facio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-fero",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n17964/",
+      "locator": "fero",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-rumpo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n42012/",
+      "locator": "rumpo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sentio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43681/",
+      "locator": "sentio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-spectio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n44933/",
+      "locator": "spectio / specio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-struo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n45638/",
+      "locator": "struo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-moveo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=moveo",
+      "locator": "moveo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pono",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=pono",
+      "locator": "pono",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-porto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=porto",
+      "locator": "porto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-teneo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=teneo",
+      "locator": "teneo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-venio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=venio",
+      "locator": "venio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-voco",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=voco",
+      "locator": "voco",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-video",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=video",
+      "locator": "video",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-formo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n18596/",
+      "locator": "formo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gradior",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19798/",
+      "locator": "gradior",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n45457/",
+      "locator": "sto",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-cedo-motion",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n7275/",
+      "locator": "cedo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-claudo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n8535/",
+      "locator": "claudo / cludo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-curro",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n12030/",
+      "locator": "curro",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gigno",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19570/",
+      "locator": "gigno",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vivo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51238/",
+      "locator": "vivo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vita",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51147/",
+      "locator": "vita",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-proicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n38690/",
+      "locator": "proicio / projicio, jeci, jectum [jacio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-deicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n12804/",
+      "locator": "deicio / dejicio, jeci, jectum [jacio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-verto",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n50654/",
+      "locator": "verto (vorto), verti, versum",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-metron",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n67260/",
+      "locator": "μέτρον",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-perimetron",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n81698/",
+      "locator": "περίμετρον",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-metronomoi",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n67261/",
+      "locator": "μετρονόμοι",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-specio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n44917/",
+      "locator": "specio (spicio), spexi",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-inspicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n23931/",
+      "locator": "inspicio, spexi, spectum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-latus-fero",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n26049/",
+      "locator": "latus, participle of fero",
+      "publicDomain": true
+    },
+    {
+      "id": "ag-present-stem",
+      "work": "Allen and Greenough's New Latin Grammar for Schools and Colleges",
+      "authors": "J. B. Greenough; G. L. Kittredge; A. A. Howard; B. L. D'Ooge",
+      "sourceType": "historical_grammar",
+      "language": "Latin",
+      "publisher": "Ginn & Company (1903); DCC digital edition",
+      "access": "Dickinson College Commentaries",
+      "url": "https://dcc.dickinson.edu/grammar/latin/present-stem",
+      "locator": "§176 d, Note 2: mitt-i-tis (MIT), consonant doubling before stem vowel",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-genus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19477/",
+      "locator": "genus, generis; root GEN",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-dicio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n13801/",
+      "locator": "dicio; root dic-; cf. dico",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-praedico",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37518/",
+      "locator": "praedico, dixi, dictum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-recipio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n40577/",
+      "locator": "recipio, cepi, ceptum [capio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-accipio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n363/",
+      "locator": "accipio, cepi, ceptum [capio]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-pes",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n35756/",
+      "locator": "pes, pedis; foot",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vivus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51239/",
+      "locator": "vivus; adj. vivo; alive/living",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-vitalis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n51150/",
+      "locator": "vitalis; adj. vita; of/belonging to life",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-conficio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n10108/",
+      "locator": "conficio, feci, fectum; facio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-actio",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n613/",
+      "locator": "actio; f. ago; doing, performing, acting",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-adigo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n798/",
+      "locator": "adigo, egi, actum; ago",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-monos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n68641/",
+      "locator": "μόνος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-monogenes",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n68501/",
+      "locator": "μονογενής",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-constans",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n10613/",
+      "locator": "constans, antis; participle/adjective from consto",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-stasis",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n96270/",
+      "locator": "στάσις",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-stasimos",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n96265/",
+      "locator": "στάσιμος; from στάσις",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-trans",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48739/",
+      "locator": "trans; composition alternation trans / tra",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-tres",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n48969/",
+      "locator": "tres / tria",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-tribus-tri",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n49003/",
+      "locator": "tribus; etymological note f. tri-, root in tres",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-rego",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n40913/",
+      "locator": "rego, rexi, rectum",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hydor",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n106502/",
+      "locator": "ὕδωρ",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-hydrophoros",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionaries.v1:lsj-n106477/",
+      "locator": "ὑδροφόρος",
+      "publicDomain": true
+    },
+    {
+      "id": "lsj-epi-headword",
+      "work": "Liddell-Scott-Jones Greek-English Lexicon",
+      "authors": "Henry George Liddell; Robert Scott; Henry Stuart Jones",
+      "sourceType": "historical_lexicon",
+      "language": "Ancient Greek",
+      "publisher": "Oxford University Press; public-domain historical edition",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/headword/%E1%BC%90%CF%80%CE%AF/",
+      "locator": "ἐπί",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-corrigo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n11292/",
+      "locator": "corrigo (conr-), rexi, rectum; v. a. rego",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-iaceo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Perseus Digital Library",
+      "url": "https://www.perseus.tufts.edu/hopper/text?doc=Perseus:text:1999.04.0059:entry=iaceo",
+      "locator": "iaceo / jaceo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-bis",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5395/",
+      "locator": "bis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-bini",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5362/",
+      "locator": "bini",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-caput",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6724/",
+      "locator": "caput, capitis",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-praeceps",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n37380/",
+      "locator": "praeceps, cipitis; prae-caput",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-caedo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n6011/",
+      "locator": "caedo, cecidi, caesum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-concido-caedo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n9810/",
+      "locator": "con-cido, cidi, cisum [caedo]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-cado",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n5980/",
+      "locator": "cado, cecidi, casum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-accido-cado",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n357/",
+      "locator": "ac-cido, cidi [cado]",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-ab-prefix",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n4/",
+      "locator": "ab, a, abs; forms include aps/abs/as-",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-sedeo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n43305/",
+      "locator": "sedeo, sedi, sessum",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-assideo",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n4056/",
+      "locator": "assideo / adsideo, sedi, sessum [sedeo]",
+      "publicDomain": true
+    },
+    {
+      "id": "bt-mis-prefix",
+      "work": "Bosworth-Toller Anglo-Saxon Dictionary",
+      "authors": "Joseph Bosworth; T. Northcote Toller",
+      "sourceType": "historical_lexicon",
+      "language": "Old English",
+      "publisher": "Oxford University Press historical dictionary; online edition by Charles University",
+      "access": "Bosworth-Toller Anglo-Saxon Dictionary Online",
+      "url": "https://bosworthtoller.com/022928",
+      "locator": "mis-; variants miss-, mist-, misse-; prefix denoting defect or imperfection",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27977/",
+      "locator": "manus, manus; dat./abl. manu; hand",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manceps",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27817/",
+      "locator": "manceps; manus-capio",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-manipulus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n27897/",
+      "locator": "manipulus; manus-pleo",
+      "publicDomain": true
+    },
+    {
+      "id": "ls-gradus",
+      "work": "Lewis & Short, A Latin Dictionary",
+      "authors": "Charlton T. Lewis; Charles Short",
+      "sourceType": "historical_lexicon",
+      "language": "Latin",
+      "publisher": "Oxford, Clarendon Press (1879)",
+      "access": "Scaife ATLAS / Perseus Digital Library",
+      "url": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn:cite2:scaife-viewer:dictionary-entries.atlas_v1:lat.ls.perseus-eng2-n19801/",
+      "locator": "gradus; step, pace; figurative degree",
+      "publicDomain": true
+    }
+  ],
+  "morphemes": [
+    {
+      "id": "lat-bene",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BENE"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bene",
+      "sourceForms": [
+        "bene"
+      ],
+      "coreMeaningEn": [
+        "well"
+      ],
+      "coreMeaningZh": [
+        "好地",
+        "良好地"
+      ],
+      "formRelation": "direct",
+      "claimSources": {
+        "lemma": [
+          "ls-bene"
+        ],
+        "meaning": [
+          "ls-bene"
+        ],
+        "forms": [
+          "ls-bene"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-tract",
+      "kind": "root_family",
+      "teachingForms": [
+        "TRAH",
+        "TRACT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "traho",
+      "sourceForms": [
+        "traho",
+        "traxi",
+        "tractum"
+      ],
+      "coreMeaningEn": [
+        "draw",
+        "drag",
+        "haul"
+      ],
+      "coreMeaningZh": [
+        "拉",
+        "拖",
+        "牵引"
+      ],
+      "formRelation": "TRACT reflects the tract- form seen in Latin tractum; not a standalone Latin lemma.",
+      "claimSources": {
+        "lemma": [
+          "ls-traho"
+        ],
+        "meaning": [
+          "ls-traho"
+        ],
+        "forms": [
+          "ls-traho",
+          "ag-phonetic"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-duc",
+      "kind": "root_family",
+      "teachingForms": [
+        "DUC",
+        "DUCT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "duco",
+      "sourceForms": [
+        "duco",
+        "duxi",
+        "ductum"
+      ],
+      "coreMeaningEn": [
+        "lead",
+        "conduct",
+        "bring forward"
+      ],
+      "coreMeaningZh": [
+        "带领",
+        "引导",
+        "带来"
+      ],
+      "formRelation": "DUC follows the verbal base; DUCT reflects the duct- form seen in Latin ductum.",
+      "claimSources": {
+        "lemma": [
+          "ls-duco"
+        ],
+        "meaning": [
+          "ls-duco"
+        ],
+        "forms": [
+          "ls-duco"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-scrib",
+      "kind": "root_family",
+      "teachingForms": [
+        "SCRIB",
+        "SCRIPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "scribo",
+      "sourceForms": [
+        "scribo",
+        "scripsi",
+        "scriptum"
+      ],
+      "coreMeaningEn": [
+        "write",
+        "inscribe"
+      ],
+      "coreMeaningZh": [
+        "写",
+        "书写",
+        "刻写"
+      ],
+      "formRelation": "SCRIPT reflects the script- form; Allen & Greenough documents the phonetic development scriptus from an earlier scrib-tus sequence.",
+      "claimSources": {
+        "lemma": [
+          "ls-scribo"
+        ],
+        "meaning": [
+          "ls-scribo"
+        ],
+        "forms": [
+          "ls-scribo",
+          "ag-phonetic"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-mit",
+      "kind": "root_family",
+      "teachingForms": [
+        "MIT",
+        "MISS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "mitto",
+      "sourceForms": [
+        "mitto",
+        "misi",
+        "missum"
+      ],
+      "coreMeaningEn": [
+        "send",
+        "let go",
+        "send off"
+      ],
+      "coreMeaningZh": [
+        "发送",
+        "放出",
+        "送出"
+      ],
+      "formRelation": "MIT is the root-level teaching form; MISS reflects Latin missum. Allen & Greenough §176 explicitly analyzes mitt-i-tis as root MIT with consonant doubling in the present stem, so MITT is not published as a separate morpheme.",
+      "claimSources": {
+        "lemma": [
+          "ls-mitto"
+        ],
+        "meaning": [
+          "ls-mitto"
+        ],
+        "forms": [
+          "ls-mitto",
+          "ag-present-stem"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-cap",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAP",
+        "CAPT",
+        "CIP",
+        "CEPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "capio",
+      "sourceForms": [
+        "capio",
+        "cepi",
+        "captum",
+        "recipio",
+        "recepi",
+        "receptum",
+        "accipio",
+        "accepi",
+        "acceptum"
+      ],
+      "coreMeaningEn": [
+        "take",
+        "seize",
+        "grasp"
+      ],
+      "coreMeaningZh": [
+        "拿",
+        "抓住",
+        "取得"
+      ],
+      "formRelation": "CAP/CAPT are directly grounded in capio/captum. Latin compounds recipio and accipio, explicitly marked from capio, directly attest the -cip- present-stem and -cept- participial forms. CEIVE/CEIT remain later Romance/English transmission forms.",
+      "claimSources": {
+        "lemma": [
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
+        ],
+        "meaning": [
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
+        ],
+        "forms": [
+          "ls-capio",
+          "ls-recipio",
+          "ls-accipio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-prae",
+      "kind": "prefix",
+      "teachingForms": [
+        "PRAE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "prae",
+      "sourceForms": [
+        "prae"
+      ],
+      "coreMeaningEn": [
+        "before",
+        "in front"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前"
+      ],
+      "formRelation": "PRAE- is the attested Latin form from prae. English PRE- is a downstream historical reflex and is intentionally not asserted by the source-language authority layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-prae"
+        ],
+        "meaning": [
+          "ls-prae"
+        ],
+        "forms": [
+          "ls-prae"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ad",
+      "kind": "prefix",
+      "teachingForms": [
+        "AD-",
+        "AC-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ad",
+      "sourceForms": [
+        "ad-",
+        "ac-"
+      ],
+      "coreMeaningEn": [
+        "to",
+        "towards"
+      ],
+      "coreMeaningZh": [
+        "向",
+        "朝向"
+      ],
+      "variants": [
+        {
+          "form": "ac-",
+          "condition": "attested assimilation before some c- environments"
+        },
+        {
+          "form": "ag-",
+          "condition": "attested assimilation before some g- environments"
+        },
+        {
+          "form": "ap-",
+          "condition": "attested assimilation before some p- environments"
+        },
+        {
+          "form": "at-",
+          "condition": "attested assimilation before some t- environments"
+        }
+      ],
+      "formRelation": "AD- is the base Latin prefix 'to/towards'. AC- is an attested Latin assimilated form before some c-/q- environments; it is published from the existing grammar-backed variant rather than treated as an independent prefix.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation",
+          "ag-phonetic"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-con",
+      "kind": "prefix",
+      "teachingForms": [
+        "CON-",
+        "COM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cum / con-",
+      "sourceForms": [
+        "con-",
+        "com-"
+      ],
+      "coreMeaningEn": [
+        "together",
+        "with"
+      ],
+      "coreMeaningZh": [
+        "共同",
+        "一起"
+      ],
+      "variants": [
+        {
+          "form": "com-",
+          "condition": "before labial consonants in many compounds"
+        },
+        {
+          "form": "coll-",
+          "condition": "attested before l in some compounds"
+        },
+        {
+          "form": "corr-",
+          "condition": "attested before r in some compounds"
+        }
+      ],
+      "formRelation": "Variant selection is phonological and historically variable.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-in-locative",
+      "kind": "prefix",
+      "teachingForms": [
+        "IN-",
+        "IM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "in",
+      "sourceForms": [
+        "in-"
+      ],
+      "coreMeaningEn": [
+        "in",
+        "on",
+        "against"
+      ],
+      "coreMeaningZh": [
+        "在内",
+        "进入",
+        "向着"
+      ],
+      "variants": [
+        {
+          "form": "im-",
+          "condition": "n commonly changes to m before b and m; comparable assimilation also occurs before labials"
+        }
+      ],
+      "formRelation": "This is the prepositional in- family and must not be conflated with negative in-.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-in-negative",
+      "kind": "prefix",
+      "teachingForms": [
+        "IN-",
+        "IM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "in-",
+      "sourceForms": [
+        "in-"
+      ],
+      "coreMeaningEn": [
+        "not"
+      ],
+      "coreMeaningZh": [
+        "不",
+        "非"
+      ],
+      "variants": [
+        {
+          "form": "im-",
+          "condition": "negative in- appears as im- in forms such as impurus / imbellis"
+        }
+      ],
+      "formRelation": "Negative in- is a separate morpheme from prepositional in- and is stored under a different authority id.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-wordformation",
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-inter",
+      "kind": "prefix",
+      "teachingForms": [
+        "INTER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "inter",
+      "sourceForms": [
+        "inter-"
+      ],
+      "coreMeaningEn": [
+        "between"
+      ],
+      "coreMeaningZh": [
+        "在……之间"
+      ],
+      "formRelation": "Direct prepositional prefix.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sub",
+      "kind": "prefix",
+      "teachingForms": [
+        "SUB-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sub",
+      "sourceForms": [
+        "sub-"
+      ],
+      "coreMeaningEn": [
+        "under",
+        "up from under"
+      ],
+      "coreMeaningZh": [
+        "在下",
+        "从下方"
+      ],
+      "variants": [
+        {
+          "form": "surr-",
+          "condition": "attested for subr- in some compounds"
+        },
+        {
+          "form": "summ-",
+          "condition": "attested for subm- in some compounds"
+        }
+      ],
+      "formRelation": "Assimilation is historical and environment-dependent.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ex",
+      "kind": "prefix",
+      "teachingForms": [
+        "EX-",
+        "E-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ex / e",
+      "sourceForms": [
+        "ex-",
+        "e-"
+      ],
+      "coreMeaningEn": [
+        "out"
+      ],
+      "coreMeaningZh": [
+        "向外",
+        "出"
+      ],
+      "variants": [
+        {
+          "form": "ef-",
+          "condition": "attested before f; ecf- also occurs"
+        }
+      ],
+      "formRelation": "Variant behavior follows Latin phonology.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": [
+          "ag-phonetic"
+        ]
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-de",
+      "kind": "prefix",
+      "teachingForms": [
+        "DE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "de",
+      "sourceForms": [
+        "de-"
+      ],
+      "coreMeaningEn": [
+        "down",
+        "utterly"
+      ],
+      "coreMeaningZh": [
+        "向下",
+        "彻底"
+      ],
+      "formRelation": "Allen & Greenough lists de- in compounds with the adverbial values down / utterly.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ob",
+      "kind": "prefix",
+      "teachingForms": [
+        "OB-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ob",
+      "sourceForms": [
+        "ob-"
+      ],
+      "coreMeaningEn": [
+        "towards",
+        "to meet"
+      ],
+      "coreMeaningZh": [
+        "朝向",
+        "迎向"
+      ],
+      "variants": [],
+      "formRelation": "Assimilation may occur in compounds, but no learner-facing variant is published here until each form is explicitly represented and tested.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fin",
+      "kind": "root_family",
+      "teachingForms": [
+        "FIN"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "finis",
+      "sourceForms": [
+        "finis"
+      ],
+      "coreMeaningEn": [
+        "boundary",
+        "limit",
+        "end"
+      ],
+      "coreMeaningZh": [
+        "边界",
+        "界限",
+        "终点"
+      ],
+      "formRelation": "FIN is the pedagogical form tied to Latin finis; downstream English-word membership must be verified separately.",
+      "claimSources": {
+        "lemma": [
+          "ls-finis"
+        ],
+        "meaning": [
+          "ls-finis"
+        ],
+        "forms": [
+          "ls-finis"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-pend",
+      "kind": "root_family",
+      "teachingForms": [
+        "PEND"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pendeo",
+      "sourceForms": [
+        "pendeo",
+        "pependi"
+      ],
+      "coreMeaningEn": [
+        "hang",
+        "hang down",
+        "be suspended"
+      ],
+      "coreMeaningZh": [
+        "悬挂",
+        "垂下",
+        "悬着"
+      ],
+      "formRelation": "PEND is tied to the Latin pendeo family; downstream English-word membership is a separate claim.",
+      "claimSources": {
+        "lemma": [
+          "ls-pendeo"
+        ],
+        "meaning": [
+          "ls-pendeo"
+        ],
+        "forms": [
+          "ls-pendeo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ante",
+      "kind": "prefix",
+      "teachingForms": [
+        "ANTE-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ante",
+      "sourceForms": [
+        "ante-"
+      ],
+      "coreMeaningEn": [
+        "before"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前"
+      ],
+      "formRelation": "Allen & Greenough lists ante- as a verbal prefix retaining the adverbial sense BEFORE.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-circum",
+      "kind": "prefix",
+      "teachingForms": [
+        "CIRCUM-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "circum",
+      "sourceForms": [
+        "circum-"
+      ],
+      "coreMeaningEn": [
+        "around"
+      ],
+      "coreMeaningZh": [
+        "环绕",
+        "在……周围"
+      ],
+      "formRelation": "Allen & Greenough lists circum- with the adverbial sense AROUND.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-super",
+      "kind": "prefix",
+      "teachingForms": [
+        "SUPER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "super",
+      "sourceForms": [
+        "super-"
+      ],
+      "coreMeaningEn": [
+        "upon",
+        "over and above"
+      ],
+      "coreMeaningZh": [
+        "在上",
+        "超过",
+        "在……之上"
+      ],
+      "formRelation": "Allen & Greenough lists super- with the senses UPON / OVER AND ABOVE.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-dis",
+      "kind": "prefix",
+      "teachingForms": [
+        "DIS-",
+        "DI-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "dis-",
+      "sourceForms": [
+        "dis-",
+        "di-"
+      ],
+      "coreMeaningEn": [
+        "asunder",
+        "apart"
+      ],
+      "coreMeaningZh": [
+        "分开",
+        "离散"
+      ],
+      "formRelation": "Allen & Greenough treats dis-/di- as an inseparable particle with the senses ASUNDER / APART.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-re",
+      "kind": "prefix",
+      "teachingForms": [
+        "RE-",
+        "RED-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "re- / red-",
+      "sourceForms": [
+        "re-",
+        "red-"
+      ],
+      "coreMeaningEn": [
+        "back",
+        "again"
+      ],
+      "coreMeaningZh": [
+        "向后",
+        "回来",
+        "再次"
+      ],
+      "formRelation": "Allen & Greenough lists red-/re- as an inseparable particle with the senses BACK / AGAIN.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-se",
+      "kind": "prefix",
+      "teachingForms": [
+        "SE-",
+        "SED-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "se- / sed-",
+      "sourceForms": [
+        "se-",
+        "sed-"
+      ],
+      "coreMeaningEn": [
+        "apart"
+      ],
+      "coreMeaningZh": [
+        "分开",
+        "离开"
+      ],
+      "formRelation": "Allen & Greenough lists sed-/se- as an inseparable particle with the sense APART.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-auto",
+      "kind": "prefix",
+      "teachingForms": [
+        "AUTO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "αὐτός",
+      "sourceForms": [
+        "αὐτός",
+        "αὐτο-"
+      ],
+      "coreMeaningEn": [
+        "self",
+        "the same",
+        "of or by oneself"
+      ],
+      "coreMeaningZh": [
+        "自身",
+        "自己",
+        "同一"
+      ],
+      "formRelation": "LSJ explicitly records αὐτός in compound use with the value self-/of or by oneself.",
+      "claimSources": {
+        "lemma": [
+          "lsj-autos"
+        ],
+        "meaning": [
+          "lsj-autos"
+        ],
+        "forms": [
+          "lsj-autos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-syn",
+      "kind": "prefix",
+      "teachingForms": [
+        "SYN-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "σύν",
+      "sourceForms": [
+        "σύν",
+        "συν-"
+      ],
+      "coreMeaningEn": [
+        "with",
+        "along with",
+        "together"
+      ],
+      "coreMeaningZh": [
+        "与……一起",
+        "共同",
+        "一起"
+      ],
+      "formRelation": "LSJ explicitly describes σύν in composition as with / along with / together and as marking union or connection.",
+      "claimSources": {
+        "lemma": [
+          "lsj-syn"
+        ],
+        "meaning": [
+          "lsj-syn"
+        ],
+        "forms": [
+          "lsj-syn"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-graph",
+      "kind": "root_family",
+      "teachingForms": [
+        "GRAPH"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "γράφω",
+      "sourceForms": [
+        "γράφω",
+        "γραφ-"
+      ],
+      "sourceStem": "γραφ-",
+      "coreMeaningEn": [
+        "write",
+        "draw",
+        "scratch/inscribe"
+      ],
+      "coreMeaningZh": [
+        "写",
+        "画",
+        "刻写"
+      ],
+      "formRelation": "Smyth explicitly identifies root γραφ and gives λογο-γράφο-ς as a compound; GRAPH is the conventional Latin-letter teaching transliteration of γραφ-.",
+      "stemDerivation": {
+        "sourceStem": "γραφ-",
+        "method": "explicit root in Smyth; compound evidence in λογο-γράφο-ς",
+        "sources": [
+          "smyth-word-formation"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-grapho"
+        ],
+        "meaning": [
+          "lsj-grapho"
+        ],
+        "forms": [
+          "lsj-grapho",
+          "smyth-word-formation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-log",
+      "kind": "root_family",
+      "teachingForms": [
+        "LOG",
+        "LOGO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "λόγος",
+      "sourceForms": [
+        "λόγος",
+        "λογο-"
+      ],
+      "sourceStem": "λογο-",
+      "coreMeaningEn": [
+        "word",
+        "speech",
+        "account",
+        "reason"
+      ],
+      "coreMeaningZh": [
+        "词",
+        "言语",
+        "陈述",
+        "道理"
+      ],
+      "formRelation": "Smyth explicitly gives λογο- as the stem of λόγος and λογο-γράφο-ς as a compound; LOG/LOGO represent that attested stem family.",
+      "stemDerivation": {
+        "sourceStem": "λογο-",
+        "method": "explicit noun stem in Smyth and compound λογο-γράφο-ς",
+        "sources": [
+          "smyth-stems",
+          "smyth-word-formation"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-logos"
+        ],
+        "meaning": [
+          "lsj-logos"
+        ],
+        "forms": [
+          "lsj-logos",
+          "smyth-stems",
+          "smyth-word-formation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-bio",
+      "kind": "root_family",
+      "teachingForms": [
+        "BIO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "βίος",
+      "sourceForms": [
+        "βίος",
+        "βιο-"
+      ],
+      "sourceStem": "βιο-",
+      "coreMeaningEn": [
+        "life",
+        "manner of living"
+      ],
+      "coreMeaningZh": [
+        "生命",
+        "生活",
+        "生活方式"
+      ],
+      "formRelation": "βίος is a second-declension noun; Smyth defines the second declension as O-stems, supporting βιο- as the source stem. BIO is the Latin-letter teaching transliteration of βιο-.",
+      "stemDerivation": {
+        "sourceStem": "βιο-",
+        "method": "second-declension O-stem rule applied to attested βίος",
+        "sources": [
+          "smyth-declension"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-bios"
+        ],
+        "meaning": [
+          "lsj-bios"
+        ],
+        "forms": [
+          "lsj-bios",
+          "smyth-declension"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-geo",
+      "kind": "root_family",
+      "teachingForms": [
+        "GEO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "γῆ",
+      "sourceForms": [
+        "γῆ",
+        "γεω-"
+      ],
+      "sourceStem": "γεω-",
+      "coreMeaningEn": [
+        "earth",
+        "land"
+      ],
+      "coreMeaningZh": [
+        "地",
+        "土地",
+        "大地"
+      ],
+      "formRelation": "LSJ attests γεω- in γεωγραφέω 'describe the earth's surface'; GEO is therefore tied to an attested Greek compound form, not inferred from English spelling.",
+      "stemDerivation": {
+        "sourceStem": "γεω-",
+        "method": "attested compound form γεω- in LSJ γεωγραφέω",
+        "sources": [
+          "lsj-geographo"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-ge"
+        ],
+        "meaning": [
+          "lsj-ge",
+          "lsj-geographo"
+        ],
+        "forms": [
+          "lsj-geographo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-phon",
+      "kind": "root_family",
+      "teachingForms": [
+        "PHON"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "φωνή",
+      "sourceForms": [
+        "φωνή",
+        "φων-"
+      ],
+      "sourceStem": "φων-",
+      "coreMeaningEn": [
+        "sound",
+        "voice"
+      ],
+      "coreMeaningZh": [
+        "声音",
+        "嗓音",
+        "语音"
+      ],
+      "formRelation": "LSJ identifies ἄφωνος as formed from φωνή, directly exposing φων- in composition. PHON is the Latin-letter teaching transliteration of that attested compound stem.",
+      "stemDerivation": {
+        "sourceStem": "φων-",
+        "method": "attested compound form in LSJ ἄφωνος (from φωνή)",
+        "sources": [
+          "lsj-aphonos"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-phone"
+        ],
+        "meaning": [
+          "lsj-phone"
+        ],
+        "forms": [
+          "lsj-phone",
+          "lsj-aphonos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ab",
+      "kind": "prefix",
+      "teachingForms": [
+        "A-",
+        "AB-",
+        "ABS-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "a / ab",
+      "sourceForms": [
+        "a-",
+        "ab-",
+        "abs-"
+      ],
+      "coreMeaningEn": [
+        "away"
+      ],
+      "coreMeaningZh": [
+        "离开",
+        "向外离去"
+      ],
+      "formRelation": "Latin AB-/A- and strengthened ABS- are source-language forms. Allen & Greenough gives the away-prefix family, while Lewis & Short directly records ab, a, abs and related historical variants; ABS is therefore not an English-only spelling invention.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation",
+          "ls-ab-prefix"
+        ],
+        "meaning": [
+          "ag-wordformation",
+          "ls-ab-prefix"
+        ],
+        "forms": [
+          "ag-wordformation",
+          "ls-ab-prefix"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-amb",
+      "kind": "prefix",
+      "teachingForms": [
+        "AMB-",
+        "AM-",
+        "AN-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "amb-",
+      "sourceForms": [
+        "amb-",
+        "am-",
+        "an-"
+      ],
+      "coreMeaningEn": [
+        "around"
+      ],
+      "coreMeaningZh": [
+        "环绕",
+        "周围"
+      ],
+      "formRelation": "Allen & Greenough §267 lists amb- with am-/an- variants and the sense AROUND.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-por",
+      "kind": "prefix",
+      "teachingForms": [
+        "POR-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "por-",
+      "sourceForms": [
+        "por-"
+      ],
+      "coreMeaningEn": [
+        "forward"
+      ],
+      "coreMeaningZh": [
+        "向前"
+      ],
+      "formRelation": "Allen & Greenough §267 lists por- as an inseparable particle with the sense FORWARD.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-per-intensive",
+      "kind": "prefix",
+      "teachingForms": [
+        "PER-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "per-",
+      "sourceForms": [
+        "per-"
+      ],
+      "coreMeaningEn": [
+        "very",
+        "intensively"
+      ],
+      "coreMeaningZh": [
+        "非常",
+        "加强程度"
+      ],
+      "formRelation": "Allen & Greenough §267d explicitly treats per- as an adverbial intensive prefix meaning VERY. This record does not cover prepositional per 'through'.",
+      "claimSources": {
+        "lemma": [
+          "ag-wordformation"
+        ],
+        "meaning": [
+          "ag-wordformation"
+        ],
+        "forms": [
+          "ag-wordformation"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-dia",
+      "kind": "prefix",
+      "teachingForms": [
+        "DIA-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "διά",
+      "sourceForms": [
+        "διά",
+        "δια-"
+      ],
+      "coreMeaningEn": [
+        "through",
+        "because of"
+      ],
+      "coreMeaningZh": [
+        "穿过",
+        "通过",
+        "由于"
+      ],
+      "formRelation": "LSJ gives the radical sense THROUGH and attests διά as a productive prepositional element; DIA- is its Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-dia"
+        ],
+        "meaning": [
+          "lsj-dia"
+        ],
+        "forms": [
+          "lsj-dia"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-meta",
+      "kind": "prefix",
+      "teachingForms": [
+        "META-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μετά",
+      "sourceForms": [
+        "μετά",
+        "μετα-"
+      ],
+      "coreMeaningEn": [
+        "with",
+        "among",
+        "after"
+      ],
+      "coreMeaningZh": [
+        "与……一起",
+        "在……之中",
+        "在……之后"
+      ],
+      "formRelation": "LSJ attests μετά with genitive/dative senses around WITH/AMONG and accusative AFTER. Downstream English senses such as 'meta-' = self-referential are not owned by this authority record.",
+      "claimSources": {
+        "lemma": [
+          "lsj-meta"
+        ],
+        "meaning": [
+          "lsj-meta"
+        ],
+        "forms": [
+          "lsj-meta"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-para",
+      "kind": "prefix",
+      "teachingForms": [
+        "PARA-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "παρά",
+      "sourceForms": [
+        "παρά",
+        "παρα-"
+      ],
+      "coreMeaningEn": [
+        "beside",
+        "alongside",
+        "past",
+        "beyond"
+      ],
+      "coreMeaningZh": [
+        "在旁",
+        "沿着",
+        "越过",
+        "偏离"
+      ],
+      "formRelation": "LSJ explicitly describes παρά in compounds with beside/alongside, past, and beyond/amiss relations.",
+      "claimSources": {
+        "lemma": [
+          "lsj-para"
+        ],
+        "meaning": [
+          "lsj-para"
+        ],
+        "forms": [
+          "lsj-para"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-peri",
+      "kind": "prefix",
+      "teachingForms": [
+        "PERI-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "περί",
+      "sourceForms": [
+        "περί",
+        "περι-"
+      ],
+      "coreMeaningEn": [
+        "around",
+        "round about"
+      ],
+      "coreMeaningZh": [
+        "围绕",
+        "在……周围"
+      ],
+      "formRelation": "LSJ gives περί the core spatial sense AROUND / ROUND ABOUT; PERI- is the Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-peri"
+        ],
+        "meaning": [
+          "lsj-peri"
+        ],
+        "forms": [
+          "lsj-peri"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-pro",
+      "kind": "prefix",
+      "teachingForms": [
+        "PRO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "πρό",
+      "sourceForms": [
+        "πρό",
+        "προ-"
+      ],
+      "coreMeaningEn": [
+        "before",
+        "in front of",
+        "forward"
+      ],
+      "coreMeaningZh": [
+        "在前",
+        "在……之前",
+        "向前"
+      ],
+      "formRelation": "LSJ explicitly treats πρό in compounds with BEFORE/FORWARDS and related senses. This Greek PRO- record is distinct from Latin pro-.",
+      "claimSources": {
+        "lemma": [
+          "lsj-pro"
+        ],
+        "meaning": [
+          "lsj-pro"
+        ],
+        "forms": [
+          "lsj-pro"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hyper",
+      "kind": "prefix",
+      "teachingForms": [
+        "HYPER-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὑπέρ",
+      "sourceForms": [
+        "ὑπέρ",
+        "ὑπερ-"
+      ],
+      "coreMeaningEn": [
+        "over",
+        "above",
+        "beyond"
+      ],
+      "coreMeaningZh": [
+        "在上",
+        "超过",
+        "越过"
+      ],
+      "formRelation": "LSJ explicitly states that ὑπέρ signifies OVER/ABOVE and documents compound uses including excess beyond measure.",
+      "claimSources": {
+        "lemma": [
+          "lsj-hyper"
+        ],
+        "meaning": [
+          "lsj-hyper"
+        ],
+        "forms": [
+          "lsj-hyper"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hypo",
+      "kind": "prefix",
+      "teachingForms": [
+        "HYPO-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὑπό",
+      "sourceForms": [
+        "ὑπό",
+        "ὑπο-"
+      ],
+      "coreMeaningEn": [
+        "under",
+        "from under"
+      ],
+      "coreMeaningZh": [
+        "在下",
+        "从下方"
+      ],
+      "formRelation": "LSJ gives ὑπό the core spatial senses UNDER / FROM UNDER; HYPO- is the Latin-letter teaching form.",
+      "claimSources": {
+        "lemma": [
+          "lsj-hypo"
+        ],
+        "meaning": [
+          "lsj-hypo"
+        ],
+        "forms": [
+          "lsj-hypo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-dict",
+      "kind": "root_family",
+      "teachingForms": [
+        "DIC",
+        "DICT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "dico",
+      "sourceForms": [
+        "dic-",
+        "dictio",
+        "praedico",
+        "praedixi",
+        "praedictum"
+      ],
+      "coreMeaningEn": [
+        "say",
+        "speak",
+        "utter",
+        "declare"
+      ],
+      "coreMeaningZh": [
+        "说",
+        "表达",
+        "说出",
+        "宣告"
+      ],
+      "formRelation": "Lewis & Short explicitly identifies root dic- and derives dictio from dico; compounds such as praedico preserve the dico family and show the dictum/-(d)ict- participial branch. DIC/DICT are source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-dicio",
+          "ls-dictio",
+          "ls-praedico"
+        ],
+        "meaning": [
+          "ls-dictio",
+          "ls-praedico"
+        ],
+        "forms": [
+          "ls-dicio",
+          "ls-dictio",
+          "ls-praedico"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fac",
+      "kind": "root_family",
+      "teachingForms": [
+        "FAC",
+        "FACT",
+        "FIC"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "facio",
+      "sourceForms": [
+        "facio",
+        "feci",
+        "factum",
+        "conficio",
+        "fectum"
+      ],
+      "coreMeaningEn": [
+        "make",
+        "do",
+        "cause"
+      ],
+      "coreMeaningZh": [
+        "做",
+        "制造",
+        "使成为"
+      ],
+      "formRelation": "FAC/FACT are directly grounded in facio/factum. Latin compounds such as conficio directly attest the -fic- present-stem branch and fectum; FIC is therefore source-language grounded. FECT remains a downstream English teaching mapping, while FEC is not published as a separate morpheme.",
+      "claimSources": {
+        "lemma": [
+          "ls-facio",
+          "ls-conficio"
+        ],
+        "meaning": [
+          "ls-facio",
+          "ls-conficio"
+        ],
+        "forms": [
+          "ls-facio",
+          "ls-conficio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-fer",
+      "kind": "root_family",
+      "teachingForms": [
+        "FER",
+        "LAT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "fero",
+      "sourceForms": [
+        "fero",
+        "tuli",
+        "latum",
+        "ferre"
+      ],
+      "coreMeaningEn": [
+        "bear",
+        "carry",
+        "bring"
+      ],
+      "coreMeaningZh": [
+        "携带",
+        "承载",
+        "带来"
+      ],
+      "formRelation": "FER follows the present/infinite family of Latin fero/ferre. LAT reflects the suppletive participial form latus/latum, explicitly linked by Lewis & Short to fero. LATE remains a downstream English teaching form.",
+      "claimSources": {
+        "lemma": [
+          "ls-fero",
+          "ls-latus-fero"
+        ],
+        "meaning": [
+          "ls-fero"
+        ],
+        "forms": [
+          "ls-fero",
+          "ls-latus-fero"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-mov",
+      "kind": "root_family",
+      "teachingForms": [
+        "MOV",
+        "MOT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "moveo",
+      "sourceForms": [
+        "moveo",
+        "movi",
+        "motum"
+      ],
+      "coreMeaningEn": [
+        "move",
+        "set in motion"
+      ],
+      "coreMeaningZh": [
+        "移动",
+        "使运动"
+      ],
+      "formRelation": "MOV follows the moveo/movi family; MOT reflects the mot- form in Latin motum.",
+      "claimSources": {
+        "lemma": [
+          "ls-moveo"
+        ],
+        "meaning": [
+          "ls-moveo"
+        ],
+        "forms": [
+          "ls-moveo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-pon",
+      "kind": "root_family",
+      "teachingForms": [
+        "PON",
+        "POSIT",
+        "PONE"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pono",
+      "sourceForms": [
+        "pono",
+        "posui",
+        "positum",
+        "ponere"
+      ],
+      "coreMeaningEn": [
+        "put",
+        "place",
+        "set"
+      ],
+      "coreMeaningZh": [
+        "放",
+        "安置",
+        "设置"
+      ],
+      "formRelation": "PON follows Latin pono; PONE is directly grounded in the infinitive ponere; POSIT reflects the posit- form in Latin positum. POS/POSE/POUND are not source-language aliases and require separate disposition or transmission evidence.",
+      "claimSources": {
+        "lemma": [
+          "ls-pono"
+        ],
+        "meaning": [
+          "ls-pono"
+        ],
+        "forms": [
+          "ls-pono"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-port",
+      "kind": "root_family",
+      "teachingForms": [
+        "PORT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "porto",
+      "sourceForms": [
+        "porto",
+        "portare"
+      ],
+      "coreMeaningEn": [
+        "carry",
+        "bear",
+        "convey"
+      ],
+      "coreMeaningZh": [
+        "携带",
+        "搬运",
+        "运送"
+      ],
+      "formRelation": "PORT is directly tied to the Latin porto/portare family.",
+      "claimSources": {
+        "lemma": [
+          "ls-porto"
+        ],
+        "meaning": [
+          "ls-porto"
+        ],
+        "forms": [
+          "ls-porto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-rupt",
+      "kind": "root_family",
+      "teachingForms": [
+        "RUPT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "rumpo",
+      "sourceForms": [
+        "rumpo",
+        "rupi",
+        "ruptum"
+      ],
+      "coreMeaningEn": [
+        "break",
+        "burst",
+        "tear",
+        "rend"
+      ],
+      "coreMeaningZh": [
+        "打破",
+        "爆裂",
+        "撕裂",
+        "断开"
+      ],
+      "formRelation": "RUPT reflects the rupt- form in attested Latin ruptum; Lewis & Short explicitly gives the root rup and the break/burst/tear sense family.",
+      "claimSources": {
+        "lemma": [
+          "ls-rumpo"
+        ],
+        "meaning": [
+          "ls-rumpo"
+        ],
+        "forms": [
+          "ls-rumpo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sent",
+      "kind": "root_family",
+      "teachingForms": [
+        "SENT",
+        "SENS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sentio",
+      "sourceForms": [
+        "sentio",
+        "sensi",
+        "sensum"
+      ],
+      "coreMeaningEn": [
+        "feel",
+        "perceive",
+        "discern by the senses"
+      ],
+      "coreMeaningZh": [
+        "感受",
+        "察觉",
+        "感知"
+      ],
+      "formRelation": "SENT follows the present family of sentio; SENS reflects the sens- form visible in sensi/sensum.",
+      "claimSources": {
+        "lemma": [
+          "ls-sentio"
+        ],
+        "meaning": [
+          "ls-sentio"
+        ],
+        "forms": [
+          "ls-sentio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-spect",
+      "kind": "root_family",
+      "teachingForms": [
+        "SPEC",
+        "SPIC",
+        "SPECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "specio / spicio",
+      "sourceForms": [
+        "specio",
+        "spicio",
+        "spexi",
+        "spectum"
+      ],
+      "coreMeaningEn": [
+        "look",
+        "look at",
+        "behold",
+        "inspect"
+      ],
+      "coreMeaningZh": [
+        "看",
+        "观看",
+        "观察",
+        "审视"
+      ],
+      "formRelation": "Lewis & Short directly records specio with the variant spicio; Latin compounds such as inspicio preserve the spic- form and record spexi, spectum. SPEC/SPIC/SPECT are therefore source-language grounded. SPECTRO remains outside this authority record pending later derivational evidence.",
+      "claimSources": {
+        "lemma": [
+          "ls-specio"
+        ],
+        "meaning": [
+          "ls-specio",
+          "ls-inspicio"
+        ],
+        "forms": [
+          "ls-specio",
+          "ls-inspicio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-struct",
+      "kind": "root_family",
+      "teachingForms": [
+        "STRUCT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "struo",
+      "sourceForms": [
+        "struo",
+        "struxi",
+        "structum"
+      ],
+      "coreMeaningEn": [
+        "place together",
+        "pile up",
+        "arrange",
+        "build"
+      ],
+      "coreMeaningZh": [
+        "堆放",
+        "排列",
+        "组织",
+        "建造"
+      ],
+      "formRelation": "STRUCT reflects the struct- form in Latin structum; Lewis & Short gives struo with the meanings place upon one another, pile up, arrange, build.",
+      "claimSources": {
+        "lemma": [
+          "ls-struo"
+        ],
+        "meaning": [
+          "ls-struo"
+        ],
+        "forms": [
+          "ls-struo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ten",
+      "kind": "root_family",
+      "teachingForms": [
+        "TEN",
+        "TENT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "teneo",
+      "sourceForms": [
+        "teneo",
+        "tenui",
+        "tentum"
+      ],
+      "coreMeaningEn": [
+        "hold",
+        "keep",
+        "retain"
+      ],
+      "coreMeaningZh": [
+        "握住",
+        "保持",
+        "留住"
+      ],
+      "formRelation": "TEN follows the present family of teneo; TENT reflects the tent- form in Latin tentum. English TAIN is a later historical reflex and is not asserted here.",
+      "claimSources": {
+        "lemma": [
+          "ls-teneo"
+        ],
+        "meaning": [
+          "ls-teneo"
+        ],
+        "forms": [
+          "ls-teneo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ven",
+      "kind": "root_family",
+      "teachingForms": [
+        "VEN",
+        "VENT",
+        "VENI"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "venio",
+      "sourceForms": [
+        "venio",
+        "veni",
+        "ventum",
+        "venire"
+      ],
+      "coreMeaningEn": [
+        "come",
+        "arrive"
+      ],
+      "coreMeaningZh": [
+        "来",
+        "到来"
+      ],
+      "formRelation": "VEN/VENI reflect the present-family form visible in venio/venire; VENT reflects Latin ventum. English VENE is kept outside source-language authority and handled as later Romance/English transmission.",
+      "claimSources": {
+        "lemma": [
+          "ls-venio"
+        ],
+        "meaning": [
+          "ls-venio"
+        ],
+        "forms": [
+          "ls-venio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-voc",
+      "kind": "root_family",
+      "teachingForms": [
+        "VOC"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "voco",
+      "sourceForms": [
+        "voco",
+        "vocare"
+      ],
+      "coreMeaningEn": [
+        "call",
+        "summon",
+        "name"
+      ],
+      "coreMeaningZh": [
+        "呼叫",
+        "召唤",
+        "命名"
+      ],
+      "formRelation": "VOC is directly tied to the Latin voco/vocare family. English VOK spellings are not source-language forms and are excluded.",
+      "claimSources": {
+        "lemma": [
+          "ls-voco"
+        ],
+        "meaning": [
+          "ls-voco"
+        ],
+        "forms": [
+          "ls-voco"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vid",
+      "kind": "root_family",
+      "teachingForms": [
+        "VID",
+        "VIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "video",
+      "sourceForms": [
+        "video",
+        "vidi",
+        "visum"
+      ],
+      "coreMeaningEn": [
+        "see",
+        "perceive"
+      ],
+      "coreMeaningZh": [
+        "看见",
+        "观察",
+        "察觉"
+      ],
+      "formRelation": "VID follows the video/vidi family; VIS reflects the vis- form in Latin visum.",
+      "claimSources": {
+        "lemma": [
+          "ls-video"
+        ],
+        "meaning": [
+          "ls-video"
+        ],
+        "forms": [
+          "ls-video"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-form",
+      "kind": "root_family",
+      "teachingForms": [
+        "FORM"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "formo",
+      "sourceForms": [
+        "formo",
+        "formavi",
+        "formatum"
+      ],
+      "coreMeaningEn": [
+        "shape",
+        "fashion",
+        "form"
+      ],
+      "coreMeaningZh": [
+        "塑造",
+        "使成形",
+        "形成"
+      ],
+      "formRelation": "FORM is directly preserved in Latin formo/formare. Lewis & Short defines formo as to shape, fashion, form.",
+      "claimSources": {
+        "lemma": [
+          "ls-formo"
+        ],
+        "meaning": [
+          "ls-formo"
+        ],
+        "forms": [
+          "ls-formo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-grad",
+      "kind": "root_family",
+      "teachingForms": [
+        "GRAD",
+        "GRESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "gradior / gradus",
+      "sourceForms": [
+        "gradior",
+        "gressus",
+        "gradus"
+      ],
+      "coreMeaningEn": [
+        "take steps",
+        "step",
+        "walk",
+        "go",
+        "degree"
+      ],
+      "coreMeaningZh": [
+        "迈步",
+        "行走",
+        "前行",
+        "步",
+        "程度",
+        "等级"
+      ],
+      "formRelation": "GRAD is grounded in gradior and the related noun gradus; GRESS is the attested participial/perfect-family form gressus. Latin gradus also supplies the 'step/degree' sense. English GRADE remains a later French/English reflex.",
+      "claimSources": {
+        "lemma": [
+          "ls-gradior",
+          "ls-gradus"
+        ],
+        "meaning": [
+          "ls-gradior",
+          "ls-gradus"
+        ],
+        "forms": [
+          "ls-gradior",
+          "ls-gradus"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sta",
+      "kind": "root_family",
+      "teachingForms": [
+        "STA",
+        "STAT",
+        "STANT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sto",
+      "sourceForms": [
+        "sto",
+        "steti",
+        "statum",
+        "constans",
+        "constantis",
+        "stant-"
+      ],
+      "coreMeaningEn": [
+        "stand",
+        "stand still",
+        "remain standing"
+      ],
+      "coreMeaningZh": [
+        "站立",
+        "站住",
+        "保持位置"
+      ],
+      "formRelation": "Lewis & Short explicitly identifies root sta- under sto; STAT reflects statum, while STANT is directly visible in the participial/adjectival branch constans, -antis. STANCE is downstream Romance/English and is not a Latin source form.",
+      "claimSources": {
+        "lemma": [
+          "ls-sto"
+        ],
+        "meaning": [
+          "ls-sto",
+          "ls-constans"
+        ],
+        "forms": [
+          "ls-sto",
+          "ls-constans"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ced",
+      "kind": "root_family",
+      "teachingForms": [
+        "CED",
+        "CESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cedo",
+      "sourceForms": [
+        "cedo",
+        "cessi",
+        "cessum"
+      ],
+      "coreMeaningEn": [
+        "go",
+        "move",
+        "walk",
+        "withdraw"
+      ],
+      "coreMeaningZh": [
+        "走",
+        "移动",
+        "退开"
+      ],
+      "formRelation": "CED is visible in cedo; CESS reflects the cess- forms cessi/cessum. English CEED is intentionally excluded from this Latin authority layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-cedo-motion"
+        ],
+        "meaning": [
+          "ls-cedo-motion"
+        ],
+        "forms": [
+          "ls-cedo-motion"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-clud",
+      "kind": "root_family",
+      "teachingForms": [
+        "CLUD",
+        "CLUS",
+        "CLAUS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "claudo",
+      "sourceForms": [
+        "claudo",
+        "cludo",
+        "clausi",
+        "clausum"
+      ],
+      "coreMeaningEn": [
+        "shut",
+        "close",
+        "shut up"
+      ],
+      "coreMeaningZh": [
+        "关闭",
+        "封闭",
+        "关住"
+      ],
+      "formRelation": "Lewis & Short records claudo (with frequent compound cludo) and the perfect/supine family clausi/clausum. CLAUS, CLUD, and CLUS are therefore all source-language grounded; CLOS remains a later Romance/English transmission form.",
+      "claimSources": {
+        "lemma": [
+          "ls-claudo"
+        ],
+        "meaning": [
+          "ls-claudo"
+        ],
+        "forms": [
+          "ls-claudo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-curr",
+      "kind": "root_family",
+      "teachingForms": [
+        "CURR",
+        "CURS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "curro",
+      "sourceForms": [
+        "curro",
+        "cucurri",
+        "cursum"
+      ],
+      "coreMeaningEn": [
+        "run",
+        "move quickly",
+        "hasten"
+      ],
+      "coreMeaningZh": [
+        "跑",
+        "快速移动",
+        "疾行"
+      ],
+      "formRelation": "CURR is visible in curro; CURS reflects the curs- form in Latin cursum.",
+      "claimSources": {
+        "lemma": [
+          "ls-curro"
+        ],
+        "meaning": [
+          "ls-curro"
+        ],
+        "forms": [
+          "ls-curro"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-gen",
+      "kind": "root_family",
+      "teachingForms": [
+        "GEN",
+        "GENER"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "gigno",
+      "sourceForms": [
+        "gigno",
+        "genui",
+        "genitum",
+        "gen-",
+        "genus",
+        "generis",
+        "gener-"
+      ],
+      "coreMeaningEn": [
+        "beget",
+        "bear",
+        "bring forth",
+        "produce"
+      ],
+      "coreMeaningZh": [
+        "生育",
+        "产生",
+        "生出",
+        "生成"
+      ],
+      "formRelation": "Lewis & Short explicitly marks root GEN under both gigno and genus; the oblique stem gener- is directly visible in Latin generis. GEN/GENER are therefore source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-gigno",
+          "ls-genus"
+        ],
+        "meaning": [
+          "ls-gigno",
+          "ls-genus"
+        ],
+        "forms": [
+          "ls-gigno",
+          "ls-genus"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-viv",
+      "kind": "root_family",
+      "teachingForms": [
+        "VIV"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "vivo",
+      "sourceForms": [
+        "vivo",
+        "vixi",
+        "victum",
+        "vivus"
+      ],
+      "coreMeaningEn": [
+        "live",
+        "be alive",
+        "have life"
+      ],
+      "coreMeaningZh": [
+        "活着",
+        "生存",
+        "有生命"
+      ],
+      "formRelation": "VIV is directly grounded in Latin vivo and the related adjective vivus. VIVI is an inflected/sequence form rather than a separately published morpheme; VIT belongs to the vita/vitalis path and is not collapsed into VIV.",
+      "claimSources": {
+        "lemma": [
+          "ls-vivo"
+        ],
+        "meaning": [
+          "ls-vivo",
+          "ls-vivus"
+        ],
+        "forms": [
+          "ls-vivo",
+          "ls-vivus"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vita",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "VITA"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "vita",
+      "sourceForms": [
+        "vita",
+        "vitalis"
+      ],
+      "coreMeaningEn": [
+        "life"
+      ],
+      "coreMeaningZh": [
+        "生命",
+        "生活"
+      ],
+      "formRelation": "VITA is the attested Latin noun vita 'life'; Latin vitalis is explicitly derived from vita. The learner truncation VIT is not published as a source-language morpheme.",
+      "claimSources": {
+        "lemma": [
+          "ls-vita"
+        ],
+        "meaning": [
+          "ls-vita",
+          "ls-vitalis"
+        ],
+        "forms": [
+          "ls-vita",
+          "ls-vitalis"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ject",
+      "kind": "root_family",
+      "teachingForms": [
+        "JECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "jacio / iacio",
+      "sourceForms": [
+        "jacio",
+        "iacio",
+        "jeci",
+        "jectum"
+      ],
+      "coreMeaningEn": [
+        "throw",
+        "cast",
+        "hurl"
+      ],
+      "coreMeaningZh": [
+        "投",
+        "掷",
+        "抛"
+      ],
+      "formRelation": "Lewis & Short compound entries for proicio/projicio and deicio/dejicio directly record jeci, jectum and identify jacio as the source verb. JECT is therefore an attested Latin compound-stem form, not an English-only teaching invention.",
+      "claimSources": {
+        "lemma": [
+          "ls-proicio",
+          "ls-deicio"
+        ],
+        "meaning": [
+          "ls-proicio",
+          "ls-deicio"
+        ],
+        "forms": [
+          "ls-proicio",
+          "ls-deicio"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-vert",
+      "kind": "root_family",
+      "teachingForms": [
+        "VERT",
+        "VERS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "verto",
+      "sourceForms": [
+        "verto",
+        "verti",
+        "versum"
+      ],
+      "coreMeaningEn": [
+        "turn",
+        "turn round",
+        "turn about"
+      ],
+      "coreMeaningZh": [
+        "转",
+        "转动",
+        "转向"
+      ],
+      "formRelation": "VERT follows Latin verto/verti; VERS reflects the vers- form in Latin versum. Both are directly source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-verto"
+        ],
+        "meaning": [
+          "ls-verto"
+        ],
+        "forms": [
+          "ls-verto"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-metr",
+      "kind": "root_family",
+      "teachingForms": [
+        "METR",
+        "METRO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μέτρον",
+      "sourceForms": [
+        "μέτρον",
+        "μετρ-",
+        "μετρο-"
+      ],
+      "sourceStem": "μετρ- / μετρο-",
+      "coreMeaningEn": [
+        "measure",
+        "that by which anything is measured"
+      ],
+      "coreMeaningZh": [
+        "度量",
+        "测量标准",
+        "尺度"
+      ],
+      "formRelation": "LSJ defines μέτρον as a measure and attests μετρο- in compounds such as μετρονόμοι and περίμετρον. METR/METRO are Latin-letter teaching labels for the attested Greek stem/compound forms. English METER/METRY are not asserted in this source-language layer.",
+      "stemDerivation": {
+        "sourceStem": "μετρ- / μετρο-",
+        "method": "attested noun/compound forms in LSJ: μέτρον, μετρονόμοι, περίμετρον",
+        "sources": [
+          "lsj-metron",
+          "lsj-metronomoi",
+          "lsj-perimetron"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-metron"
+        ],
+        "meaning": [
+          "lsj-metron"
+        ],
+        "forms": [
+          "lsj-metron",
+          "lsj-metronomoi",
+          "lsj-perimetron"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ped",
+      "kind": "root_family",
+      "teachingForms": [
+        "PED"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "pes",
+      "sourceForms": [
+        "pes",
+        "pedis",
+        "ped-"
+      ],
+      "coreMeaningEn": [
+        "foot"
+      ],
+      "coreMeaningZh": [
+        "脚",
+        "足"
+      ],
+      "formRelation": "Lewis & Short gives Latin pes, genitive pedis, 'foot'. PED is the source-language stem visible in pedis. PEDI/PEDE are not published as independent Latin morphemes.",
+      "claimSources": {
+        "lemma": [
+          "ls-pes"
+        ],
+        "meaning": [
+          "ls-pes"
+        ],
+        "forms": [
+          "ls-pes"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-ag",
+      "kind": "root_family",
+      "teachingForms": [
+        "AG",
+        "ACT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "ago",
+      "sourceForms": [
+        "ago",
+        "ag-",
+        "egi",
+        "actum",
+        "actio"
+      ],
+      "coreMeaningEn": [
+        "do",
+        "act",
+        "perform",
+        "drive"
+      ],
+      "coreMeaningZh": [
+        "做",
+        "行动",
+        "执行",
+        "推动"
+      ],
+      "formRelation": "Lewis & Short defines actio as derived from ago and as doing/performing/acting; compounds such as adigo directly preserve the ago family with egi, actum. AG/ACT are therefore source-language grounded.",
+      "claimSources": {
+        "lemma": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "meaning": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "forms": [
+          "ls-actio",
+          "ls-adigo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-mon",
+      "kind": "root_family",
+      "teachingForms": [
+        "MON",
+        "MONO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "μόνος",
+      "sourceForms": [
+        "μόνος",
+        "μονο-"
+      ],
+      "sourceStem": "μονο-",
+      "coreMeaningEn": [
+        "alone",
+        "single",
+        "only"
+      ],
+      "coreMeaningZh": [
+        "单独",
+        "单一",
+        "唯一"
+      ],
+      "formRelation": "LSJ defines μόνος as alone/single and directly attests μονο- in compounds such as μονογενής. MON/MONO are Latin-letter teaching labels for that verified Greek family.",
+      "stemDerivation": {
+        "sourceStem": "μονο-",
+        "method": "attested compound form in LSJ μονογενής and related mono- compounds",
+        "sources": [
+          "lsj-monos",
+          "lsj-monogenes"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-monos"
+        ],
+        "meaning": [
+          "lsj-monos",
+          "lsj-monogenes"
+        ],
+        "forms": [
+          "lsj-monos",
+          "lsj-monogenes"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-stas",
+      "kind": "root_family",
+      "teachingForms": [
+        "STAS"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "στάσις",
+      "sourceForms": [
+        "στάσις",
+        "στασ-",
+        "στασι-"
+      ],
+      "sourceStem": "στασ- / στασι-",
+      "coreMeaningEn": [
+        "standing",
+        "position",
+        "placing",
+        "setting"
+      ],
+      "coreMeaningZh": [
+        "站立",
+        "位置",
+        "安置",
+        "设立"
+      ],
+      "formRelation": "LSJ defines στάσις as standing/posture and directly derives στάσιμος from στάσις, exposing the stas-/stasi- stem family. STAS is kept separate from Latin STA/STAT/STANT.",
+      "stemDerivation": {
+        "sourceStem": "στασ- / στασι-",
+        "method": "attested noun στάσις plus derivative στάσιμος in LSJ",
+        "sources": [
+          "lsj-stasis",
+          "lsj-stasimos"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-stasis"
+        ],
+        "meaning": [
+          "lsj-stasis",
+          "lsj-stasimos"
+        ],
+        "forms": [
+          "lsj-stasis",
+          "lsj-stasimos"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-trans",
+      "kind": "prefix",
+      "teachingForms": [
+        "TRANS-",
+        "TRA-"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "trans",
+      "sourceForms": [
+        "trans-",
+        "tra-"
+      ],
+      "coreMeaningEn": [
+        "across",
+        "over",
+        "beyond",
+        "through"
+      ],
+      "coreMeaningZh": [
+        "横跨",
+        "越过",
+        "在另一边",
+        "穿过"
+      ],
+      "formRelation": "Lewis & Short directly records trans as a Latin preposition and compound prefix, and states that in some phonological environments the compound spelling varies between trans- and tra-.",
+      "claimSources": {
+        "lemma": [
+          "ls-trans"
+        ],
+        "meaning": [
+          "ls-trans"
+        ],
+        "forms": [
+          "ls-trans"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-tri",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "TRI"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "tres / tria",
+      "sourceForms": [
+        "tres",
+        "tria",
+        "tri-"
+      ],
+      "coreMeaningEn": [
+        "three"
+      ],
+      "coreMeaningZh": [
+        "三",
+        "三个"
+      ],
+      "formRelation": "Lewis & Short gives Latin tres/tria 'three' and explicitly notes tri- in the etymological formation of tribus. TRI is therefore source-language grounded rather than inferred from English compounds.",
+      "claimSources": {
+        "lemma": [
+          "ls-tres",
+          "ls-tribus-tri"
+        ],
+        "meaning": [
+          "ls-tres"
+        ],
+        "forms": [
+          "ls-tres",
+          "ls-tribus-tri"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-reg",
+      "kind": "root_family",
+      "teachingForms": [
+        "REG",
+        "RIG",
+        "RECT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "rego",
+      "sourceForms": [
+        "rego",
+        "rexi",
+        "rectum",
+        "corrigo"
+      ],
+      "coreMeaningEn": [
+        "guide",
+        "direct",
+        "keep straight"
+      ],
+      "coreMeaningZh": [
+        "引导",
+        "指挥",
+        "使保持正直方向"
+      ],
+      "formRelation": "REG follows Latin rego; RECT reflects rectum; Lewis & Short directly records corrigo as a compound of rego, grounding the -rig- compound form. REG/RIG/RECT therefore stay in the source-language authority layer.",
+      "claimSources": {
+        "lemma": [
+          "ls-rego",
+          "ls-corrigo"
+        ],
+        "meaning": [
+          "ls-rego",
+          "ls-corrigo"
+        ],
+        "forms": [
+          "ls-rego",
+          "ls-corrigo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-hydro",
+      "kind": "root_family",
+      "teachingForms": [
+        "HYDRO"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ὕδωρ",
+      "sourceForms": [
+        "ὕδωρ",
+        "ὑδρο-"
+      ],
+      "sourceStem": "ὑδρο-",
+      "coreMeaningEn": [
+        "water"
+      ],
+      "coreMeaningZh": [
+        "水"
+      ],
+      "formRelation": "LSJ defines ὕδωρ as water and directly attests the compound form ὑδρο- in ὑδροφόρος 'carrying water'. HYDRO is the Latin-letter teaching label for that attested Greek compound form. HYDR remains outside the authority layer pending a separate derivational analysis.",
+      "stemDerivation": {
+        "sourceStem": "ὑδρο-",
+        "method": "attested compound form ὑδρο- in LSJ ὑδροφόρος",
+        "sources": [
+          "lsj-hydrophoros"
+        ]
+      },
+      "claimSources": {
+        "lemma": [
+          "lsj-hydor"
+        ],
+        "meaning": [
+          "lsj-hydor"
+        ],
+        "forms": [
+          "lsj-hydor",
+          "lsj-hydrophoros"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "grc-epi",
+      "kind": "prefix",
+      "teachingForms": [
+        "EPI-"
+      ],
+      "sourceLanguage": "Ancient Greek",
+      "sourceLemma": "ἐπί",
+      "sourceForms": [
+        "ἐπί",
+        "ἐπι-"
+      ],
+      "coreMeaningEn": [
+        "on",
+        "upon",
+        "over",
+        "against"
+      ],
+      "coreMeaningZh": [
+        "在……上",
+        "在……之上",
+        "覆盖",
+        "朝向"
+      ],
+      "formRelation": "Ancient Greek ἐπί functions as a preposition and compound prefix; LexiFlow publishes only the conservative EPI- teaching form here. EPH-/EP- remain deferred until their elision/euphony rules are represented by an approved grammar source.",
+      "claimSources": {
+        "lemma": [
+          "lsj-epi-headword"
+        ],
+        "meaning": [
+          "lsj-epi-headword"
+        ],
+        "forms": [
+          "lsj-epi-headword"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-jac-lie",
+      "kind": "root_family",
+      "teachingForms": [
+        "JAC"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "iaceo / jaceo",
+      "sourceForms": [
+        "iaceo",
+        "jaceo",
+        "iacere",
+        "jacere"
+      ],
+      "coreMeaningEn": [
+        "lie",
+        "be situated",
+        "rest"
+      ],
+      "coreMeaningZh": [
+        "躺",
+        "位于",
+        "处于"
+      ],
+      "formRelation": "JAC is kept separate from JECT. Latin iaceo/jaceo is the stative 'lie/be situated' family seen in adjacent-type formations, whereas JECT belongs to iacio 'throw'. The discovery candidate conflates these related but semantically distinct Latin families.",
+      "claimSources": {
+        "lemma": [
+          "ls-iaceo"
+        ],
+        "meaning": [
+          "ls-iaceo"
+        ],
+        "forms": [
+          "ls-iaceo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-bis",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bis",
+      "sourceForms": [
+        "bis"
+      ],
+      "coreMeaningEn": [
+        "twice",
+        "two times",
+        "double"
+      ],
+      "coreMeaningZh": [
+        "两次",
+        "双重"
+      ],
+      "formRelation": "BIS is the attested Latin numeral adverb meaning twice. English BI- is modeled downstream rather than being inserted as a Classical Latin teaching form without a direct source-language entry.",
+      "claimSources": {
+        "lemma": [
+          "ls-bis"
+        ],
+        "meaning": [
+          "ls-bis"
+        ],
+        "forms": [
+          "ls-bis"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-bini",
+      "kind": "root_or_combining_form",
+      "teachingForms": [
+        "BINI"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "bini",
+      "sourceForms": [
+        "bini",
+        "bina",
+        "binum"
+      ],
+      "coreMeaningEn": [
+        "two by two",
+        "two each",
+        "two at a time"
+      ],
+      "coreMeaningZh": [
+        "两个一组",
+        "每次两个",
+        "各两个"
+      ],
+      "formRelation": "BINI is the attested Latin distributive numeral. English BIN- is treated as a later learned/Romance variant rather than as an independent Classical Latin prefix.",
+      "claimSources": {
+        "lemma": [
+          "ls-bini"
+        ],
+        "meaning": [
+          "ls-bini"
+        ],
+        "forms": [
+          "ls-bini"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-caput",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAPIT",
+        "CIPIT"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "caput",
+      "sourceForms": [
+        "caput",
+        "capitis",
+        "praeceps",
+        "praecipitis"
+      ],
+      "coreMeaningEn": [
+        "head"
+      ],
+      "coreMeaningZh": [
+        "头",
+        "头部"
+      ],
+      "formRelation": "CAPIT is directly visible in the genitive capitis. Latin praeceps has genitive praecipitis and Lewis & Short explicitly analyzes it as prae-caput, directly grounding the compound CIPIT form. This head-family is distinct from CAP/CIP/CEPT < capio 'take'.",
+      "claimSources": {
+        "lemma": [
+          "ls-caput",
+          "ls-praeceps"
+        ],
+        "meaning": [
+          "ls-caput",
+          "ls-praeceps"
+        ],
+        "forms": [
+          "ls-caput",
+          "ls-praeceps"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-caed",
+      "kind": "root_family",
+      "teachingForms": [
+        "CID",
+        "CIS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "caedo",
+      "sourceForms": [
+        "caedo",
+        "cecidi",
+        "caesum",
+        "concido",
+        "concidi",
+        "concisum"
+      ],
+      "coreMeaningEn": [
+        "cut",
+        "hew",
+        "strike",
+        "kill"
+      ],
+      "coreMeaningZh": [
+        "切",
+        "砍",
+        "击打",
+        "杀"
+      ],
+      "formRelation": "CID/CIS are grounded in Latin caedo and its compounds. Lewis & Short records con-cido, cidi, cisum as a caedo compound, directly attesting the -cid- and -cis- branches. English CIDE is kept out of source-language authority and handled as later French/English transmission.",
+      "claimSources": {
+        "lemma": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "meaning": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "forms": [
+          "ls-caedo",
+          "ls-concido-caedo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-cad",
+      "kind": "root_family",
+      "teachingForms": [
+        "CAD",
+        "CAS",
+        "CID"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "cado",
+      "sourceForms": [
+        "cado",
+        "cecidi",
+        "casum",
+        "accido",
+        "accidi"
+      ],
+      "coreMeaningEn": [
+        "fall",
+        "fall down",
+        "drop",
+        "happen"
+      ],
+      "coreMeaningZh": [
+        "落下",
+        "跌倒",
+        "下降",
+        "发生"
+      ],
+      "formRelation": "CAD and CAS are directly visible in cado/casum. The separate fall-family CID is directly attested by compounds such as accido, cidi < cado. This CID is a homograph of CID < caedo 'cut/kill' and must be resolved by family identity rather than surface spelling.",
+      "claimSources": {
+        "lemma": [
+          "ls-cado",
+          "ls-accido-cado"
+        ],
+        "meaning": [
+          "ls-cado",
+          "ls-accido-cado"
+        ],
+        "forms": [
+          "ls-cado",
+          "ls-accido-cado"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-sed-sit",
+      "kind": "root_family",
+      "teachingForms": [
+        "SED",
+        "SID",
+        "SESS"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "sedeo",
+      "sourceForms": [
+        "sedeo",
+        "sedi",
+        "sessum",
+        "assideo",
+        "adsideo",
+        "assedi",
+        "assessum"
+      ],
+      "coreMeaningEn": [
+        "sit",
+        "be seated",
+        "remain seated",
+        "settle"
+      ],
+      "coreMeaningZh": [
+        "坐",
+        "就座",
+        "坐着",
+        "安坐"
+      ],
+      "formRelation": "SED and SESS are directly grounded in sedeo/sessum. Compound forms such as assideo/adsideo, explicitly marked by Lewis & Short as compounds of sedeo, ground the SID branch. This sit-family SED is distinct from the unrelated separative prefix SE-/SED- 'apart'.",
+      "claimSources": {
+        "lemma": [
+          "ls-sedeo",
+          "ls-assideo"
+        ],
+        "meaning": [
+          "ls-sedeo",
+          "ls-assideo"
+        ],
+        "forms": [
+          "ls-sedeo",
+          "ls-assideo"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "ang-mis",
+      "kind": "prefix",
+      "teachingForms": [
+        "MIS-"
+      ],
+      "sourceLanguage": "Old English",
+      "sourceLemma": "mis-",
+      "sourceForms": [
+        "mis-",
+        "miss-",
+        "mist-",
+        "misse-"
+      ],
+      "coreMeaningEn": [
+        "wrongly",
+        "badly",
+        "with defect or imperfection"
+      ],
+      "coreMeaningZh": [
+        "错误地",
+        "不当地",
+        "带有缺陷地"
+      ],
+      "formRelation": "Old English mis- is a Germanic prefix denoting defect or imperfection. It is deliberately kept separate from Latin MIT/MISS and from the invalid ECDICT Latin origin hint for modern English MIS-.",
+      "claimSources": {
+        "lemma": [
+          "bt-mis-prefix"
+        ],
+        "meaning": [
+          "bt-mis-prefix"
+        ],
+        "forms": [
+          "bt-mis-prefix"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    },
+    {
+      "id": "lat-manus",
+      "kind": "root_family",
+      "teachingForms": [
+        "MAN",
+        "MANI",
+        "MANU"
+      ],
+      "sourceLanguage": "Latin",
+      "sourceLemma": "manus",
+      "sourceForms": [
+        "manus",
+        "manu",
+        "manceps",
+        "manipulus"
+      ],
+      "coreMeaningEn": [
+        "hand"
+      ],
+      "coreMeaningZh": [
+        "手"
+      ],
+      "formRelation": "MANU is directly visible in Latin manu, an inflected form of manus. MAN is grounded by compounds such as manceps < manus-capio, while MANI is grounded by manipulus < manus-pleo. MAIN is excluded from Latin authority and handled as later Romance transmission.",
+      "claimSources": {
+        "lemma": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
+        ],
+        "meaning": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
+        ],
+        "forms": [
+          "ls-manus",
+          "ls-manceps",
+          "ls-manipulus"
+        ],
+        "variants": []
+      },
+      "status": "verified"
+    }
+  ]
+}

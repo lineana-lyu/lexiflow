@@ -1,0 +1,60 @@
+{
+  "schema": "lexiflow-morpheme-collisions-v1",
+  "policy": {
+    "rule": "Surface-identical candidate forms must be resolved by candidate-specific family bindings before publication coverage is granted.",
+    "candidateBindingPrecedence": true,
+    "surfaceMatchFallback": "Allowed only when no collision binding exists for that candidate/form.",
+    "noAuthorityMutation": true
+  },
+  "collisions": [
+    {
+      "id": "collision-cid-caedo-cado",
+      "form": "CID",
+      "reason": "CID is a genuine homograph across two Latin families: compounds of caedo 'cut/kill' and compounds of cado 'fall'. Coverage must preserve candidate family identity instead of accepting every published CID surface match.",
+      "bindings": [
+        {
+          "candidateId": "ecdict:cis, cid1, -cide",
+          "authorityIds": [
+            "lat-caed"
+          ],
+          "transmissionIds": []
+        },
+        {
+          "candidateId": "ecdict:cad, cas, cid2",
+          "authorityIds": [
+            "lat-cad"
+          ],
+          "transmissionIds": []
+        },
+        {
+          "candidateId": "legacy:cid",
+          "authorityIds": [
+            "lat-caed"
+          ],
+          "transmissionIds": []
+        }
+      ]
+    },
+    {
+      "id": "collision-sed-separative-sit",
+      "form": "SED",
+      "reason": "SED is surface-identical across the separative Latin prefix SE-/SED- 'apart' and the sedeo 'sit' root family. Current SED-root discovery candidates must resolve to the sit family instead of being marked ambiguous or accidentally satisfied by the prefix authority.",
+      "bindings": [
+        {
+          "candidateId": "ecdict:sed, sid, sess",
+          "authorityIds": [
+            "lat-sed-sit"
+          ],
+          "transmissionIds": []
+        },
+        {
+          "candidateId": "legacy:sed",
+          "authorityIds": [
+            "lat-sed-sit"
+          ],
+          "transmissionIds": []
+        }
+      ]
+    }
+  ]
+}
