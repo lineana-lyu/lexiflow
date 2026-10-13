@@ -135,7 +135,7 @@
       end:Number.isInteger(item?.end)?item.end:null,
       reason:feedbackCopy(item?.reason),
       hint:feedbackCopy(item?.hint),
-      answer:norm(item?.replacement),
+      answer:norm(item?.answer||item?.replacement),
       category:norm(item?.category).toLowerCase(),
       severity,
       blocking:item?.blocking===true||severity==="error",
