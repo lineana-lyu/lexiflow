@@ -30,18 +30,18 @@ try {
   Write-Host "Release commit: $Commit"
   Write-Host "Node: $Node | npm: $Npm | OS: $([Environment]::OSVersion.VersionString)"
   $Phase = 'npm ci'
-  & npm.cmd ci
+  & npm.cmd ci 2>&1 | Tee-Object -FilePath (Join-Path $Out 'dependency-install.txt')
   if ($LASTEXITCODE -ne 0) { throw "npm ci failed: $LASTEXITCODE" }
   $Phase = 'npm run check'
-  & npm.cmd run check
+  & npm.cmd run check 2>&1 | Tee-Object -FilePath (Join-Path $Out 'automated-checks.txt')
   if ($LASTEXITCODE -ne 0) { throw "npm run check failed: $LASTEXITCODE" }
   $Phase = 'prepare:dictionary'
-  & npm.cmd run prepare:dictionary
+  & npm.cmd run prepare:dictionary 2>&1 | Tee-Object -FilePath (Join-Path $Out 'dictionary-preparation.txt')
   if ($LASTEXITCODE -ne 0) { throw "prepare:dictionary failed: $LASTEXITCODE" }
   $Phase = 'benchmark-core-lexicon'
   for ($i = 1; $i -le 3; $i++) {
     Write-Host "=== Benchmark run $i of 3 ==="
-    & node scripts/benchmark-core-lexicon.js
+    & node scripts/benchmark-core-lexicon.js 2>&1 | Tee-Object -FilePath (Join-Path $Out "benchmark-run-$i.txt")
     if ($LASTEXITCODE -ne 0) { throw "Benchmark run $i failed: $LASTEXITCODE" }
   }
   $Manifest = Join-Path $Out 'environment-and-source.txt'
